@@ -40,7 +40,7 @@ description {It use the same input as Tracker Browser.
 Class create IDE::CallingCoverBrowser -superclass ::IDE::Browser
 @ ::IDE::CallingCoverBrowser idemeta component IDEDebug
 IDE::CallingCoverBrowser instproc getTitle {} {
-  return "Method Coverage Analyse Browser"
+    return "Method Coverage Analyse Browser"
 }
 IDE::CallingCoverBrowser instproc specificInit {} {
     my instvar win

@@ -25,7 +25,7 @@ superclasse de :
     IDE::ProcsGroup
     IDE::TclProcsDescription
 
-Ne possède que les trois méthodes de gestion la variable "comment"
+Ne possède que les trois méthodes de gestion de la variable "comment"
 Un commentaire vide est équivalent à une absence de commentaire
 
     if {[my hasComment]} ...
@@ -66,6 +66,9 @@ méthodes de l'objet "IDE::Component", catégorie "api", appelées dans de nombr
 
 Cette dernière méthode crée une instance de "IDE::Component" s'il n'en existe pas une de même nom.
 Dans ce cas, la version de l'instance est positionnée à 0.1
+
+
+
 
   ##############################
   # Sous-Classe IDE::ProcGroup #
@@ -131,11 +134,59 @@ Variables de l'instance
 Méthodes des instances
 
     set comment [my getMethodComment Instance $method_name]
-    set comment [my getMethodComment Class $method_name]
+    set comment [my getMethodComment Class    $method_name]
     if {[my hasMethodComment Instance $method_name]} ...
-    if {[my hasMethodComment Class $method_name]} ...
-    my getMethodComment Instance $method_name $comment
-    my getMethodComment Class $method_name $comment
+    if {[my hasMethodComment Class    $method_name]} ...
+    my setMethodComment Instance $method_name $comment
+    my setMethodComment Class    $method_name $comment
+
+Chaine d'appel de setMethodComment
+
+    IDE::CommentsContainer objectMethodSetComment $object [oneOf Class Instance] $method_name $comment
+        Instance_of_xotcl::Object setMethodComment [oneOf Class Instance] $method_name $comment        
+
+    IDE::CommentsContainer importObjectMethodMeta [oneOf Class Instance] "@ _object_ ... _method_ ... _content_"
+        IDE::CommentsContainer importMeta "[otherThan Component tclproc tclgroup] [oneOf proc instprog] _method_ ... _content_"
+            IDE::CommentsContainer parseAndCleanMeta
+                IDEStarter startIDE...
+
+                IDE::Component loadPackage $package
+                    instance_of_IDE::CompView fillMenuStruct $ms 
+
+                    instance_of_IDE::CompView loadPackage
+                
+                IDE::Component importCompsFromFile $file
+                    instance_of_IDE::CompView importFromSource 
+                        instance_of_IDE::CompView fillMenuStruct $ms 
+
+                instance_of_IDE::CompView refreshFromInterpreter
+                    instance_of_IDE::CompView fillMenuStruct $ms 
+
+    instance_of_IDE::MethodView editSaveComment $comment
+        instance_of_IDE::CompView editSave $comment
+            instance_of_IDE::ClassDefinition actionCreate
+                instance_of_IDE::ClassDefinition specificInit
+                    instance_of_IDE::Browser init $window $args
+                instance_of_IDE::TclGroupDefinition specificInit
+                    instance_of_IDE::Browser init $window $args
+
+	    instance_of_ClassView newObjectWizard
+                instance_of_IDE::ClassView fillMenuStruct $ms
+                    instance_of_IDE::GUICommands init $args
+
+	    instance_of_MethodEdit saveForce
+                instance_of_IDE::SyntaxErrorView forceSaving
+                    instance_of_IDE::SyntaxErrorView specificInit
+                        instance_of_IDE::Browser init $window $args
+
+	    instance_of_MethodEdit saveSource
+                instance_of_IDE::MethodEdit saveValue $value
+		    instance_of_IDE::MethodEdit save
+
+        instance_of_IDE::MethodEdit saveValue $value
+
+    instance_of_IDE::CodeController editSaveComment $comment
+
 
   ##########################
   # Object IDE::IntroProxy #
@@ -145,9 +196,9 @@ Méthodes des instances
   # Objet IDE::SystemConfigMap #
   ##############################
 
+  ##################################
+  # Classe IDE::Component::Tracker #
+  ##################################
 
 
-
-
-Classe IDE::Component::Tracker
 

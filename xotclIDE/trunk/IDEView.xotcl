@@ -505,13 +505,13 @@ IDE::ClassView instproc buttonDoublePush {} {
     }
 }
 IDE::ClassView instproc buttonPush {} {
-   my instvar win selectedIndex listItems
-   set currsel [lindex [$win.listbox curselection] 0]
-   if {$currsel!="" && $currsel!=$selectedIndex} {
+    my instvar win selectedIndex listItems
+    set currsel [lindex [$win.listbox curselection] 0]
+    if {$currsel ne "" && $currsel != $selectedIndex} {
         set selectedIndex $currsel
         my selectItem [string trimleft [lindex $listItems $currsel]]
-   }
-   focus [my getFocusWin]
+    }
+    focus [my getFocusWin]
 }
 IDE::ClassView instproc canModifyComponent {} {
    my instvar cobj
@@ -1109,7 +1109,7 @@ IDE::CompView instproc init args {
 }
 IDE::CompView instproc loadFromSource {} {
     set source [IDE::Dialog getOpenFile {{{Tcl Files} *.tcl} {{Xotcl Files} *.xotcl} {{All files} *}}]
-    if {$source!=""} {
+    if {$source ne ""} {
         IDE::Component loadCompFromFile $source
     }
 }
@@ -1121,11 +1121,11 @@ IDE::CompView instproc loadPackage {} {
             lappend packages $p
         }
     }
-    IDE::IDialogListEntry [self]::dialog -message {Warnig: experimental. Load xotcl package or any tcl package aviable for your system by package require} -list [lsort $packages]
-    if {[[self]::dialog prompt]=="ok"} {
-       set ret [[self]::dialog getvalue]
-       IDE::Component loadPackage $ret
-       IDE::System signalComponentsChanged
+    IDE::IDialogListEntry [self]::dialog -message {Warning: experimental. It loads xotcl package or any tcl package available for your system by "package require ..."} -list [lsort $packages]
+    if {[[self]::dialog prompt] eq "ok"} {
+        set ret [[self]::dialog getvalue]
+        IDE::Component loadPackage $ret
+        IDE::System signalComponentsChanged
     }
     [self]::dialog destroy
 }
@@ -1921,7 +1921,7 @@ description {The parent object must understand the messages
 [my info parent] setVarValue $value [self]
 [my info parent] setStatusBarText $message}
 }
-Class create IDE::VarsView -superclass {::IDE::ListView ::IDE::GUICommands} -parameter {{label {Object Vars}}}
+Class create IDE::VarsView -superclass {::IDE::ListView ::IDE::GUICommands} -parameter {{label {Object Vars}} {lock_on {}}}
 @ ::IDE::VarsView idemeta categories {initialize user-actions}
 @ ::IDE::VarsView idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {inspectAsObjectsList inspectAsObject unsetVariable}}
 @ ::IDE::VarsView idemeta component IDEView
@@ -1941,11 +1941,11 @@ IDE::VarsView instproc addToWriteTrace actual {
     IDE::VarsTracker addTrace ${vobject}::${actual} write
 }
 IDE::VarsView instproc editSave value {
-   my instvar vvariable vtype vobject
-   if {$vtype=="array"} {
-      my varAction array set $vvariable $value
-   } else {
-      my varAction set $vvariable $value
+    my instvar vvariable vtype vobject
+    if {$vtype eq "array"} {
+       my varAction array set $vvariable $value
+    } else {
+       my varAction set $vvariable $value
    }
 }
 IDE::VarsView instproc fillMenuStruct ms {
@@ -1968,15 +1968,15 @@ IDE::VarsView instproc getMenuStruct {} {
 }
 IDE::VarsView instproc inspectArray actual {
     my instvar vobject vtype
-    if {$vtype!="array"} {
-       IDE::Dialog error "You must select an array"
-       return
+    if {$vtype ne "array"} {
+        IDE::Dialog error "You must select an array"
+        return
     }
     IDE::ArrayBrowser inspectArray $vobject $actual
 }
 IDE::VarsView instproc inspectAsObject actual {
     my instvar vobject vtype
-    if {$vtype=="array"} return
+    if {$vtype eq "array"} return
     set value [my varAction set $actual]
     if {![Object isobject $value]} {
         IDE::Dialog message "$value is not an Object"
@@ -1986,7 +1986,7 @@ IDE::VarsView instproc inspectAsObject actual {
 }
 IDE::VarsView instproc inspectAsObjectsList actual {
     my instvar vobject vtype
-    if {$vtype=="array"} {
+    if {$vtype eq "array"} {
        set value {}
        for {set sid [my varAction array startsearch $actual]} {[my varAction array anymore $actual $sid]} {} {lappend value [my varAction set ${actual}([my varAction array nextelement $actual $sid])]}
        my varAction array donesearch $actual $sid
@@ -1999,17 +1999,17 @@ IDE::VarsView instproc inspectAsObjectsList actual {
             lappend objects $obj
         }
     }
-    if {[llength $objects]>0} {
+    if {[llength $objects] > 0} {
        IDE::ObjectBrowser browseObjectsList $objects
     } else {
        IDE::Dialog message "There are no objects in the list"
     }
 }
 IDE::VarsView instproc isNotSelectionArray {} {
-    expr {[my set vtype]!="array"}
+    expr {[my set vtype] ne "array"}
 }
 IDE::VarsView instproc isSelectionArray {} {
-    expr {[my set vtype]=="array"}
+    expr {[my set vtype] eq "array"}
 }
 IDE::VarsView instproc refresh {} {
     my instvar vobject
@@ -2018,7 +2018,7 @@ IDE::VarsView instproc refresh {} {
 }
 IDE::VarsView instproc searchReferences actual {
     my instvar vobject vtype
-    if {[$vobject info class]=="::Object"} {
+    if {[$vobject info class] eq "::Object"} {
        set sclass $vobject
     } else {
        set sclass [$vobject info class]
@@ -2026,26 +2026,37 @@ IDE::VarsView instproc searchReferences actual {
     IDE::MethodBrowser searchTextClass $actual $sclass
 }
 IDE::VarsView instproc selectFor object {
-    my instvar vobject
+    my instvar win vobject selectedIndex listItems lock_on
     set vobject $object
     my setList [$object info vars]
-    my selectItem {}
+    if {[my has_lock]} {
+        my selectItem $lock_on
+        set idx [lsearch -exact $listItems $lock_on]
+        puts stderr "idx = $idx $win.listbox"
+        if {$idx >= 0} {
+            $win.listbox selection set $idx
+        }
+        return 1
+    } else {
+        my selectItem {}
+        return 0
+    }
 }
 IDE::VarsView instproc selectItem var {
     my instvar vobject vtype vvariable
-    if {$var==""} return
+    if {$var eq ""} return
     set message "variable $var"
     set vvariable $var
     if {[my varAction array exists $var]} {
-      set value [my varAction array get $var]
-      set message "array $var"
-      set vtype array
+        set value [my varAction array get $var]
+        set message "array $var"
+        set vtype array
     } elseif {[my varAction info exists $var]} {
-      set value [my varAction set $var]
-      set vtype string
+        set value [my varAction set $var]
+        set vtype string
     } else {
-      set value UNKNOWN
-      set vtype UNKNOWN
+        set value UNKNOWN
+        set vtype UNKNOWN
     }
     [my info parent] setVarValue $value [self]
     [my info parent] setStatusBarText $message
@@ -2698,16 +2709,16 @@ Class create IDE::MethodCategoryView -superclass {::IDE::ListView ::IDE::GUIComm
 @ ::IDE::MethodCategoryView idemeta categoriesMethods {{newCategory deleteCategory renameCategory} {fillMenuStruct getMenuStruct init}}
 @ ::IDE::MethodCategoryView idemeta component IDEView
 IDE::MethodCategoryView instproc changeViewType vtype {
-    my instvar vclass vobjtype viewtype
-    if {$vobjtype=="Tcl Procs"} return
-    set viewtype $vtype
-    my selectFor $vclass $vobjtype
+     my instvar vclass vobjtype viewtype
+     if {$vobjtype eq "Tcl Procs"} return
+     set viewtype $vtype
+     my selectFor $vclass $vobjtype
 }
 IDE::MethodCategoryView instproc deleteCategory actual {
     my instvar viewtype vclass
-    if {$viewtype=="Instance"} {
+    if {$viewtype eq "Instance"} {
         $vclass deleteCategory $actual
-    } elseif {$viewtype=="Class"} {
+    } elseif {$viewtype eq "Class"} {
         $vclass deleteCategoryB $actual
     }
     my removeItem $actual
@@ -2737,19 +2748,19 @@ IDE::MethodCategoryView instproc init args {
     set selectAllByDefault 1
 }
 IDE::MethodCategoryView instproc isValidContext {} {
-    expr {[my exists vclass] && [my set vclass]!=""}
+    return [expr {[my exists vclass] && [my set vclass] ne ""}]
 }
 IDE::MethodCategoryView instproc newCategory {} {
     my instvar viewtype vclass
     set newname [IDE::IDialogEntry getValue {enter new category name. Consider you can create and assign method to new category in one step. Menu Method->move to category}]
-    if {$newname==""} return
+    if {$newname eq ""} return
     if {[ide::lcontain [my getList] $newname]} {
          IDE::Dialog message "Category $newname already exists!"
          return
     }
-    if {$viewtype=="Instance"} {
+    if {$viewtype eq "Instance"} {
         $vclass addCategory $newname
-    } elseif {$viewtype=="Class"} {
+    } elseif {$viewtype eq "Class"} {
         $vclass addCategoryB $newname
     }
     my addItem $newname
@@ -2757,10 +2768,10 @@ IDE::MethodCategoryView instproc newCategory {} {
 IDE::MethodCategoryView instproc renameCategory actual {
     my instvar viewtype vclass
     set newname [::IDE::IDialogEntry getValue {type the new name} $actual]
-    if {$newname=="" || $newname==$actual} return
-    if {$viewtype=="Instance"} {
+    if {$newname eq "" || $newname eq $actual} return
+    if {$viewtype eq "Instance"} {
         $vclass renameCategory $actual $newname
-    } elseif {$viewtype=="Class"} {
+    } elseif {$viewtype eq "Class"} {
         $vclass renameCategoryB $actual $newname
     }
     my renameItem $actual $newname
@@ -2768,29 +2779,29 @@ IDE::MethodCategoryView instproc renameCategory actual {
 IDE::MethodCategoryView instproc selectFor {class objtype} {
     my instvar vclass win vobjtype viewtype selectAllByDefault
     set vclass $class
-    if {$class==""} {
+    if {$class eq ""} {
         my resetList
         [my info parent]::methodview selectFor {} {} $viewtype
         return
     }
-    if {$objtype=="Tcl Procs"} {
+    if {$objtype eq "Tcl Procs"} {
 	my resetList
         [my info parent]::methodview selectFor $class {} $objtype
         set vobjtype $objtype
         return
     }
-    if {$vobjtype!=$objtype} {
-        if {$objtype=="Objects"} {
-                  [self]::stateButton setStates {Class}
+    if {$vobjtype ne $objtype} {
+        if {$objtype eq "Objects"} {
+            [self]::stateButton setStates {Class}
         } else {
-                  [self]::stateButton setStates {Instance Class}
+            [self]::stateButton setStates {Instance Class}
         }
         set viewtype [[self]::stateButton state]
         set vobjtype $objtype
     }
-    if {$viewtype=="Instance"} {
+    if {$viewtype eq "Instance"} {
         my setList [IDE::IntroProxy getCategoriesForClass $class]
-    } elseif {$viewtype=="Class"} {
+    } elseif {$viewtype eq "Class"} {
         my setList [IDE::IntroProxy getCategoriesForObject $class]
     }
     if {$selectAllByDefault} {
@@ -2851,8 +2862,8 @@ IDE::MethodEdit instproc save {} {
 IDE::MethodEdit instproc saveForce {} {
     if {![my exists oldtext]} return
     set newtext [my getText]
-    if {[my set oldtext]!=$newtext} {
-       # !!! no handlung of comments
+    if {[my set oldtext] ne $newtext} {
+       # !!! no handling of comments
        [my set controler] editSave $newtext
     }
 }
@@ -2860,13 +2871,10 @@ IDE::MethodEdit instproc saveSource value {
    [my set controler] editSave $value
 }
 IDE::MethodEdit instproc saveValue value {
-    my instvar controler vtype
-    if {$vtype eq "Source"} {
-        my saveSource $value 
-    } elseif {$vtype eq "Comment"} {
-        $controler editSaveComment $value
-    } else {
-        error {unknown view type}
+    switch [my set vtype] {
+        "Source" {my saveSource $value}
+        "Comment" {[my set controler] editSaveComment $value}
+        default {error {unknown view type}}
     }
 }
 IDE::MethodEdit instproc setBodyTextControler {tvclass tvtype tmethod controler} {
@@ -3139,7 +3147,6 @@ IDE::MethodView instproc editSaveComment comment {
    set vtype [lindex $actItem 1]
    set method [lindex $actItem 2]
    $vclass setMethodComment $vtype $method $comment
-   
 }
 IDE::MethodView instproc fillMenuStruct ms {
     $ms enablementHandler [self]
@@ -3602,9 +3609,9 @@ Class create IDE::ObjectBrowser -superclass {::IDE::Browser ::IDE::GUICommands} 
 @ ::IDE::ObjectBrowser idemeta categoriesMethods {{setViewList save setViewObject} {getMenuStruct fillMenuStruct specificInit} {browseClass trackObject printFilters printString printSelf browseMixins inspectParent destroyActual}}
 @ ::IDE::ObjectBrowser idemeta component IDEView
 IDE::ObjectBrowser instproc browseClass args {
-  my instvar vobject
-  if {[$vobject info class]!="::xotcl::Object"} {
-      IDE::HeritageBrowser newBrowser [$vobject info class]
+    my instvar vobject
+    if {[$vobject info class] ne "::xotcl::Object"} {
+        IDE::HeritageBrowser newBrowser [$vobject info class]
   }
 }
 IDE::ObjectBrowser instproc browseMixins {} {
@@ -3613,54 +3620,54 @@ IDE::ObjectBrowser instproc browseMixins {} {
     set listchooser [IDE::IDialogListOrderChooser new -volatile -message "Mixin Classes for $vobject" -listout [$vobject info mixin] -listin [IDE::IntroProxy getClasses]]
     
     set ret [$listchooser prompt]
-    if {$ret!="cancel"} {
+    if {$ret ne "cancel"} {
         $vobject mixin [$listchooser set listout]
     }
 }
 IDE::ObjectBrowser instproc destroyActual {} {
     my instvar vobject type
-    if {[IDE::Dialog yesNo "Do you want to destroy $vobject?"]!="yes"} {  
+    if {[IDE::Dialog yesNo "Do you want to destroy $vobject?"] ne "yes"} {  
         return
     }
     $vobject destroy
-    if {$type=="list"} { 
+    if {$type eq "list"} { 
         [self]::objectsview removeItem $vobject
     } else { 
         my destroy
     }
 }
 IDE::ObjectBrowser instproc fillMenuStruct ms {
-   $ms enablementHandler [self]
-   $ms addCommand Destoy [list [self] destroyActual]
-   $ms addCommand {Track Object} [list [self] trackObject]
-   $ms addCommand {Browse Class} [list [self] browseClass]
-   $ms addCommand {Browse Mixins} [list [self] browseMixins]
-   $ms addCommand {Print Self} [list [self] printSelf]
-   $ms addCommand {Print printString} [list [self] printString]
-   $ms addCommand {Print Filters} [list [self] printFilters]
+    $ms enablementHandler [self]
+    $ms addCommand Destroy [list [self] destroyActual]
+    $ms addCommand {Track Object} [list [self] trackObject]
+    $ms addCommand {Browse Class} [list [self] browseClass]
+    $ms addCommand {Browse Mixins} [list [self] browseMixins]
+    $ms addCommand {Print Self} [list [self] printSelf]
+    $ms addCommand {Print printString} [list [self] printString]
+    $ms addCommand {Print Filters} [list [self] printFilters]
 }
 IDE::ObjectBrowser instproc getMenuStruct {} {
-  return [IDE::MenuStruct [self]::ms Object 0]
+    return [IDE::MenuStruct [self]::ms Object 0]
 }
 IDE::ObjectBrowser instproc getTitle {} {
     return "Object Inspector"
 }
 IDE::ObjectBrowser instproc inspectParent {} {
     my instvar vobject
-    if {[set parent [$vobject info parent]]!="::" && [Object isobject $parent]} {
+    if {[set parent [$vobject info parent]] ne "::" && [Object isobject $parent]} {
         my setViewObject $parent
     } else {
         IDE::Dialog message "$vobject has no parent"
     }
 }
 IDE::ObjectBrowser instproc printFilters {} {
-   [self]::methodedit setTextControler [[my set vobject] info filter] [self]
+    [self]::methodedit setTextControler [[my set vobject] info filter] [self]
 }
 IDE::ObjectBrowser instproc printSelf {} {
-   [self]::methodedit setTextControler [my set vobject] [self]
+    [self]::methodedit setTextControler [my set vobject] [self]
 }
 IDE::ObjectBrowser instproc printString {} {
-   [self]::methodedit setTextControler [[my set vobject] printString] [self]
+    [self]::methodedit setTextControler [[my set vobject] printString] [self]
 }
 IDE::ObjectBrowser instproc save {} {
 }
@@ -3668,36 +3675,37 @@ IDE::ObjectBrowser instproc setVarValue {value controller} {
     [self]::methodedit setTextControler $value $controller
 }
 IDE::ObjectBrowser instproc setViewList list {
-     [self]::objectsview setList $list
+    [self]::objectsview setList $list
 }
 IDE::ObjectBrowser instproc setViewObject object {
-     my instvar vobject
-     set vobject $object
-     [self]::methodedit set context $object
-     my setTitleAddition "$object ([$object info class])"
-     [self]::varsview selectFor $object
-     [self]::subobjectsview selectFor $object
-     [self]::methodview selectFor $object
+    my instvar vobject
+    set vobject $object
+    [self]::methodedit set context $object
+    my setTitleAddition "$object ([$object info class])"
+    set locked [[self]::varsview selectFor $object]
+    [self]::subobjectsview selectFor $object
+    [self]::methodview selectFor $object
+    return $locked
 }
 IDE::ObjectBrowser instproc specificInit {} {
     my instvar win type
-
     if {[IDE::System isTkNotOlderThan84]} {
         panedwindow $win.panedwindow -orient vertical
         panedwindow $win.upperarea -orient horizontal
 
         IDE::TclModeEdit [self]::methodedit $win.methodedit -height 16 -width 65
-        if {$type!="browse"} {
+        if {$type ne "browse"} {
             IDE::ObjectsView [self]::objectsview $win.upperarea.objectsview
             set col 1
         } else {
             set col 0
         }
+puts stderr "self = [self]"
         IDE::VarsView [self]::varsview $win.upperarea.varsview
         IDE::SubObjectsView [self]::subobjectsview $win.upperarea.subobjectsview
         IDE::ObjectMethodView [self]::methodview $win.upperarea.methodview
 
-        if { $col } {
+        if {$col} {
             $win.upperarea add $win.upperarea.objectsview -width 200
         }
         $win.upperarea add $win.upperarea.varsview $win.upperarea.subobjectsview $win.upperarea.methodview -width 200
@@ -3709,7 +3717,7 @@ IDE::ObjectBrowser instproc specificInit {} {
 
     } else {
         IDE::TclModeEdit [self]::methodedit $win.methodedit -height 16 -width 65
-        if {$type!="single"} {
+        if {$type ne "single"} {
             IDE::ObjectsView [self]::objectsview $win.objectsview
             set col 1
         } else {
@@ -3725,7 +3733,7 @@ IDE::ObjectBrowser instproc specificInit {} {
         grid $win.methodview -row 0 -column [expr {$col+2}] -sticky news
         grid $win.methodedit -row 1 -column $col  -columnspan 3 -sticky news
 
-        if {$type!="single"} {
+        if {$type ne "single"} {
             grid $win.objectsview -row 0 -column 0 -rowspan 2 -sticky news
         }
 
@@ -3734,7 +3742,7 @@ IDE::ObjectBrowser instproc specificInit {} {
         grid columnconfigure $win [expr {$col+2}] -weight 1
         grid rowconfigure $win 1 -weight 1 
     }
-    if {$::xotcl::version>=1.3} {
+    if {$::xotcl::version >= 1.3} {
         [self]::methodedit mixin add IDE::ContextEval
     } else {
         [self]::methodedit mixinappend IDE::ContextEval
@@ -3744,7 +3752,7 @@ IDE::ObjectBrowser instproc specificInit {} {
     my initStatusBar 2 [expr {3+$col}]
 }
 IDE::ObjectBrowser instproc trackObject {} {
-   [my set vobject] trackOn
+    [my set vobject] trackOn
 }
 IDE::ObjectBrowser proc browseAllInstances class {
     if {![Object isobject $class] || ![$class istype Class]} {
@@ -3971,10 +3979,10 @@ Class create IDE::ObjectsView -superclass {::IDE::ListView ::IDE::GUICommands} -
 @ ::IDE::ObjectsView idemeta component IDEView
 IDE::ObjectsView instproc selectItem object {
     my instvar type
-    if {$type=="list"} {
+    if {$type eq "list"} {
         if {[Object isobject $object]} {
-            [my info parent] setViewObject $object
-            if {[Object isobject [my info parent]::methodedit]} {
+            set locked [[my info parent] setViewObject $object]
+            if {!$locked && [Object isobject [my info parent]::methodedit]} {
                 [my info parent]::methodedit setTextControler [$object printString] [self]
             }
         } else {
@@ -4290,7 +4298,7 @@ Class create IDE::SpawnMethodEdit -superclass ::IDE::Browser
 IDE::SpawnMethodEdit instproc createSystemMenu {} {
     next
     my instvar win
-    if {[winfo toplevel $win]=="."} {
+    if {[winfo toplevel $win] eq "."} {
         set twin {}
     } else {
         set twin $win
@@ -4302,7 +4310,7 @@ IDE::SpawnMethodEdit instproc getTitle {} {
 }
 IDE::SpawnMethodEdit instproc invoke {} {
     set text [[self]::methodedit getText]
-    if { [lindex $text 0] == "proc" } {
+    if { [lindex $text 0] eq "proc" } {
         IDE::System invokeTclProc [lindex $text 1]
     } else {
         set type [lindex $text 0]
@@ -4347,17 +4355,17 @@ IDE::SubObjectsView instproc getMenuStruct {} {
 }
 IDE::SubObjectsView instproc inspectObject {} {
     set actual [my selectionAsObject]
-    if {$actual==""} return
+    if {$actual eq ""} return
     $actual inspect
 }
 IDE::SubObjectsView instproc inspectObjectInThis {} {
     set actual [my selectionAsObject]
-    if {$actual==""} return
+    if {$actual eq ""} return
     [my info parent] setViewObject $actual
 }
 IDE::SubObjectsView instproc isValidParent {} {
     my instvar vobject
-    expr {[set parent [$vobject info parent]]!="::" && [Object isobject $parent]}
+    expr {[set parent [$vobject info parent]] ne "::" && [Object isobject $parent]}
 }
 IDE::SubObjectsView instproc refresh {} {
     my instvar vobject
@@ -4372,7 +4380,7 @@ IDE::SubObjectsView instproc selectFor object {
 }
 IDE::SubObjectsView instproc selectItem object {
     set object [my selectionAsObject]
-    if {$object==""} return
+    if {$object eq ""} return
     if {[Object isobject [my info parent]::methodedit]} {
         [my info parent]::methodedit setTextControler [$object printString] [self]
     }
@@ -4380,7 +4388,7 @@ IDE::SubObjectsView instproc selectItem object {
 IDE::SubObjectsView instproc selectionAsObject {} {
    my instvar objlist
    set index [my selectedIndex]
-   if {$index==""} return
+   if {$index eq ""} return
    return [lindex $objlist $index]
 }
 IDE::SubObjectsView instproc setList list {
@@ -5038,8 +5046,8 @@ IDE::System proc getVersion {} {
     return 0.72
 }
 IDE::System proc getXotclPackages {} {
- # I dont know any method to request the available xotcl packages
- return [split {xotcl::awo::htmlPlace
+    # I dont know any method to request the available xotcl packages
+    return [split {xotcl::awo::htmlPlace
 xotcl::awo::secureHtmlPlace
 xotcl::awo::userMgt
 xotcl::awo::webAgent

@@ -364,32 +364,32 @@ IDE::GUICommands instproc getMenuStruct {} {
 IDE::GUICommands instproc init args {
     my instvar win atHead
     set ms [my getMenuStruct]
-    if {$ms!=""} { [self] fillMenuStruct $ms }
-    if {$ms!="" && ![$ms isEmpty]} {
-        if {[winfo toplevel $win]=="."} {
-                set mainmenu .mb
+    if {$ms ne ""} {[self] fillMenuStruct $ms}
+    if {$ms ne "" && ![$ms isEmpty]} {
+        if {[winfo toplevel $win] eq "."} {
+            set mainmenu .mb
         } else {
-                set mainmenu [winfo toplevel $win].mb
+            set mainmenu [winfo toplevel $win].mb
         }
         set menuwin $mainmenu.[Object autoname menu]
         $ms createTkMenu $menuwin [winfo toplevel $win]
         if {$atHead} {
-          if {[$ms set underline]!=""} {
-             $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
-          } else {
-             $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin
-          }
+            if {[$ms set underline] ne ""} {
+                $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
+            } else {
+                $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin
+            }
         } else {
-          if {[$ms set underline]!=""} {
-             $mainmenu add cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
-          } else {
-             $mainmenu add cascade -label [$ms set name] -menu $menuwin
-          }
+            if {[$ms set underline] ne ""} {
+                $mainmenu add cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
+            } else {
+                $mainmenu add cascade -label [$ms set name] -menu $menuwin
+            }
         }
         # The menu struct is needed to compute enablement
         # $ms destroy
         set pwin [my popMenuWindow]
-        if {$pwin!="" && [$ms hasPopdownMenu]} {
+        if {$pwin ne "" && [$ms hasPopdownMenu]} {
             $ms buildPopDownMenu $win.popdown [winfo toplevel $win]
             bind $pwin <ButtonPress-3> [list $ms showPopMenu $win.popdown %X %Y]
         }
@@ -1024,9 +1024,9 @@ IDE::FontChooser proc getFont {{font {}}} {
 
                               ##########
 
-Class create IDE::ListView -parameter {{multiselect 0} label {height 10} width}
-@ ::IDE::ListView idemeta categories {service test-service}
-@ ::IDE::ListView idemeta categoriesMethods {{selectedItem setSelectedItem reorderSelected unselect renameItem removeItemAt addItemAt setList addItem markItem removeItem} isValidSelection}
+Class create IDE::ListView -parameter {{multiselect 0} label {height 10} width lock_on}
+@ ::IDE::ListView idemeta categories {service test-service locker}
+@ ::IDE::ListView idemeta categoriesMethods {{selectedItem setSelectedItem reorderSelected unselect renameItem removeItemAt addItemAt setList addItem markItem removeItem} isValidSelection {unlock lock_here has_lock}}
 @ ::IDE::ListView idemeta component IDEBaseGUI
 IDE::ListView instproc addItem item {
     # add Item and sort
@@ -1056,15 +1056,17 @@ IDE::ListView instproc addSelection {first last} {
 }
 IDE::ListView instproc buttonDoublePush {} {
     my instvar win selectedIndex listItems
+    if {[my has_lock]} {my unlock}
     set currsel [lindex [$win.listbox curselection] 0]
-    if {$currsel!=""} {
+    if {$currsel ne ""} {
          my selectItem [lindex $listItems $currsel]
     }
 }
 IDE::ListView instproc buttonPush {} {
     my instvar win selectedIndex listItems
+    if {[my has_lock]} {my unlock}
     set currsel [lindex [$win.listbox curselection] 0]
-    if {$currsel!="" && $currsel!=$selectedIndex} {
+    if {$currsel ne "" && $currsel ne $selectedIndex} {
         set selectedIndex $currsel
         my selectItem [lindex $listItems $currsel]
     }
@@ -1102,26 +1104,39 @@ IDE::ListView instproc getFocusWin {} {
 IDE::ListView instproc getList {} {
     my set listItems
 }
+IDE::ListView instproc has_lock {} {
+    return [expr {[info exist [self]::lock] && [set [self]::lock]}]
+}
 IDE::ListView instproc init window {
-    my instvar win selectedIndex multiselect label height
+    my instvar win selectedIndex multiselect label height lock_on
+    
+    # for [self]::lock_on
+    my requireNamespace
+   
     set win $window
     my set listItems {}
-    ::frame $win
+    frame $win
     if {$multiselect} {
         set selmode extended
     } else {
         set selmode browse
     }
+    frame $win.lablo
+    pack $win.lablo -fill x
     if {[info exists label]} {
-        ::label $win.label -text $label
-        pack $win.label -anchor w
+        label $win.label -text $label
+        pack $win.label -anchor w -in $win.lablo -side left
     }
-    ::scrollbar $win.scroll -command "$win.listbox yview" -takefocus 0
+    if {[info exists lock_on]} {
+        checkbutton $win.lock -text lock -variable [self]::lock -command "[self] lock_here"
+        pack $win.lock -anchor e -in $win.lablo -side right
+    }
+    scrollbar $win.scroll -command "$win.listbox yview" -takefocus 0
     set bgcolor [IDEPreferences getParameter listcolor]
-    if  {$bgcolor ne ""} {
-        ::listbox $win.listbox -yscroll "$win.scroll set"  -exportselection no -selectmode $selmode -height $height -font listboxfont -background $bgcolor
+    if {$bgcolor ne ""} {
+        listbox $win.listbox -yscroll "$win.scroll set"  -exportselection no -selectmode $selmode -height $height -font listboxfont -background $bgcolor
     } else {
-        ::listbox $win.listbox -yscroll "$win.scroll set"  -exportselection no -selectmode $selmode -height $height -font listboxfont
+        listbox $win.listbox -yscroll "$win.scroll set"  -exportselection no -selectmode $selmode -height $height -font listboxfont
     }
     if {[my exists width]} {
         $win.listbox configure -width [my width]
@@ -1145,6 +1160,13 @@ IDE::ListView instproc keyEvent key {
         my setSelectedIndex $sindex
     }
 }
+IDE::ListView instproc lock_here {} {
+    my instvar selectedIndex listItems
+    if {[my has_lock]} {
+        my set lock_on [lindex $listItems $selectedIndex]
+        puts stderr "lock on [my set lock_on]"
+    }
+}
 IDE::ListView instproc markItem item {
     [self] instvar win listItems
     if {[set cur [lsearch -exact $listItems $item]]>=0} {
@@ -1162,17 +1184,17 @@ IDE::ListView instproc popMenuWindow {} {
     return [my set win].listbox
 }
 IDE::ListView instproc removeItem item {
-    if {[set cur [lsearch -exact [my set listItems] $item]]>=0} {
+    if {[set cur [lsearch -exact [my set listItems] $item]] >= 0} {
         my removeItemAt $cur
     }
 }
 IDE::ListView instproc removeItemAt pos {
     # remove Item at position 0 - end
     my instvar win listItems selectedIndex
-    if {$pos==$selectedIndex} {
+    if {$pos eq $selectedIndex} {
         set selectedIndex -1
     }
-    if {$pos<$selectedIndex} {
+    if {$pos < $selectedIndex} {
         incr selectedIndex -1
     }
     set listItems [lreplace $listItems $pos $pos]
@@ -1328,6 +1350,12 @@ IDE::ListView instproc setSelectedItem {item {notify 1}} {
         if {$notify==1} {
            my selectItem $item
         }
+    }
+}
+IDE::ListView instproc unlock {} {
+    if {[info exists [self]::lock]} {
+        set [self]::lock 0
+        my set lock_on {}
     }
 }
 IDE::ListView instproc unselect {} {
