@@ -1,5 +1,5 @@
 # automatically generated from XOTclIDE
-package provide xomti_tcllib_md5 1.2.0
+package provide xomti_tcllib_md5 1.2
 @ Object Tcllib_md5pure {
 ##################################################
 #

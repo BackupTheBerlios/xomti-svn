@@ -1,5 +1,5 @@
 # automatically generated from XOTclIDE
-package provide xomti_critcl 99991231.2
+package provide xomti_critcl 0.3
 
 @ tclproc ::loadvfs idemeta struct xomti_critcl default
 proc ::loadvfs dir {
