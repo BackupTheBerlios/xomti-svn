@@ -14,6 +14,8 @@ IDEStarter startIDEFromDB}
 }
 package provide IDEStart 0.71
 
+                    ########## Classes and Objects ##########
+
 @ Object IDEPreferences {
 description {Hanlde preferences of xotcl
 
@@ -25,8 +27,8 @@ connection for version system.
 The prefereces can by set by installation tool}
 }
 Object IDEPreferences
-@ ::IDEPreferences idemeta categoriesMethodsProcs {{prefFileName setDefaultPreferences} {windowsRegKey windowsSavePrefs windowsLoadPrefs windowsRegistryKey} getDBLoginParameters}
 @ ::IDEPreferences idemeta categoriesProcs {constans windows db-prefs}
+@ ::IDEPreferences idemeta categoriesMethodsProcs {{prefFileName setDefaultPreferences} {windowsRegKey windowsSavePrefs windowsLoadPrefs windowsRegistryKey} getDBLoginParameters}
 @ ::IDEPreferences idemeta component IDEStart
 IDEPreferences proc getDBLoginParameters args {
    my getParameter connection
@@ -125,6 +127,8 @@ IDEPreferences proc windowsSavePrefs {} {
     }
 }
 
+                              ##########
+
 @ Object IDEStarter {
 description {This object handle starting xotclide from differents context
 It read also the line arguments that can influence starting process or
@@ -142,8 +146,8 @@ Followin Starting options are possibly.
 Test von Umlauten äöüß}
 }
 Object IDEStarter
-@ ::IDEStarter idemeta categoriesMethodsProcs {{coreComponents argumentsDescription} {loadObject loadComponent} {startIDEFromDB startIDEWithDB startIDEOnly startLoader startConfId startIDEFromApp} {initProcWrappersStruct isDevelopingMode} {establishDBConnection getConnectionObject initializeAfterLoad loadIDECoreFromDB startUpIDE closeWaitDialog setWaitDialog} {loadPreferences parseCommandLineArgs showHelpAndExit} {dumpCompId dumpConfId getComponentBody getComponentsForConfigmapId getConfigMapBodyDeep getObjectBody getSubconfigsForId}}
 @ ::IDEStarter idemeta categoriesProcs {constans loading-vc start-up private starting-intern arguments-prefs dumping}
+@ ::IDEStarter idemeta categoriesMethodsProcs {{coreComponents argumentsDescription} {loadObject loadComponent} {startIDEFromDB startIDEWithDB startIDEOnly startLoader startConfId startIDEFromApp} {initProcWrappersStruct isDevelopingMode} {establishDBConnection getConnectionObject initializeAfterLoad loadIDECoreFromDB startUpIDE closeWaitDialog setWaitDialog} {loadPreferences parseCommandLineArgs showHelpAndExit} {dumpCompId dumpConfId getComponentBody getComponentsForConfigmapId getConfigMapBodyDeep getObjectBody getSubconfigsForId}}
 @ ::IDEStarter idemeta component IDEStart
 IDEStarter proc argumentsDescription {} {
     return {
@@ -661,5 +665,8 @@ IDEStarter proc tkMessage text {
     if {$fwin!={}} { set parent [winfo toplevel $fwin] }
     return [tk_messageBox -title {Message} -message $text -icon warning -type ok -parent $parent]
 }
+
+                    ########## initializations ##########
+
 IDEStarter initializeAfterLoad
 

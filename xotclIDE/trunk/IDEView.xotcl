@@ -14,6 +14,8 @@ package provide IDEView 0.72
 package require IDECore
 package require IDEBaseGUI
 
+                    ########## Classes and Objects ##########
+
 Class IDE::AbstractClassView -superclass ::IDE::HListView
 @ ::IDE::AbstractClassView idemeta component IDEView
 IDE::AbstractClassView instproc browseHeritage actual {
@@ -88,9 +90,11 @@ IDE::AbstractClassView instproc trackClass actual {
     }
 }
 
+                              ##########
+
 Class IDE::ArrayBrowser -superclass {::IDE::Browser ::IDE::GUICommands} -parameter {vobject varray {atHead 1}}
-@ ::IDE::ArrayBrowser idemeta categories {initialize private actions}
 @ ::IDE::ArrayBrowser idemeta categoriesMethods {{getTitle getMenuStruct fillMenuStruct specificInit} dispatchWithKey {inspectAsObject removeKey addKey editSave initContents selectKey inspectAsObjectList}}
+@ ::IDE::ArrayBrowser idemeta categories {initialize private actions}
 @ ::IDE::ArrayBrowser idemeta component IDEView
 IDE::ArrayBrowser instproc addKey {} {
    my instvar varray
@@ -202,9 +206,11 @@ IDE::ArrayBrowser proc inspectGlobalArray array {
    return $br
 }
 
+                              ##########
+
 Class IDE::ClassDefinition -superclass ::IDE::Browser -parameter {{superclassList {}} classView {mode create} {parameter {}} className}
-@ ::IDE::ClassDefinition idemeta categories {initialize list_manipulation private}
 @ ::IDE::ClassDefinition idemeta categoriesMethods {{getTitle createSystemMenu setClassesList specificInit} {upListElem downListElem delFromList addToList} getParameter}
+@ ::IDE::ClassDefinition idemeta categories {initialize list_manipulation private}
 @ ::IDE::ClassDefinition idemeta component IDEView
 IDE::ClassDefinition instproc actionCreate {} {
    my instvar classView mode className
@@ -421,6 +427,8 @@ IDE::ClassDefinition proc unknown args {
     error "unknown method on [self] $args"
 }
 
+                              ##########
+
 @ Class IDE::ClassSelector {
 description {A dialog for selecting classes
 interafec is
@@ -475,6 +483,8 @@ IDE::ClassSelector proc getUnregisteredClass {} {
     return $result
 }
 
+                              ##########
+
 @ Class IDE::ClassView {
 description {Warning 
 
@@ -484,8 +494,8 @@ IDE::ProcsGroup
 a wrapper for structure tcl procs in groups}
 }
 Class IDE::ClassView -superclass {::IDE::AbstractClassView ::IDE::GUICommands ::IDE::FocusPerKey} -parameter {{label Classes/Objects}}
-@ ::IDE::ClassView idemeta categories {private class_actions service user_actions initialize}
 @ ::IDE::ClassView idemeta categoriesMethods {{refreshView changeViewType setViewType dispatchWithSelectedNoGroup setEditText selectFor selectItem} {classTemplate copyClass classWizard deleteClass} getActualComponentObject {renameTclProcsGroup newTclProcsGroup createTclProcsGroup moveToComp} {getMenuStruct init fillMenuStruct}}
+@ ::IDE::ClassView idemeta categories {private class_actions service user_actions initialize}
 @ ::IDE::ClassView idemeta component IDEView
 IDE::ClassView instproc buttonDoublePush {} {
     my instvar win selectedIndex listItems
@@ -824,6 +834,8 @@ IDE::ClassView instproc setViewType type {
     my changeViewType $type
 }
 
+                              ##########
+
 @ Class IDE::CodeController {
 description {This class is designed as mixin for IDE::TclModeEdit it can accept the
 code from the edit directly.}
@@ -899,6 +911,8 @@ IDE::CodeController instproc syntaxCheck {text editor} {
         return 1
     }
 }
+
+                              ##########
 
 @ Class IDE::CompBrowser {
 description {Build the main work tool for an XOTclIDE programmer
@@ -1015,9 +1029,11 @@ IDE::CompBrowser proc newBrowser {} {
     return [my new [Object autoname .compbrowser]]
 }
 
+                              ##########
+
 Class IDE::CompView -superclass {::IDE::ListView ::IDE::GUICommands ::IDE::FocusPerKey} -parameter {{label {Components Alt-1}}}
-@ ::IDE::CompView idemeta categories {system_actions initialize user_actions}
 @ ::IDE::CompView idemeta categoriesMethods {{setAutoPath refreshFromInterpreter runPkgMkIndex} {getMenuStruct init fillMenuStruct} {createNewComponent saveAsSource importFromSource renameComponent loadFromSource registerClass unloadComponent newComponent registerTclProcs searchClass setVersion loadPackage}}
+@ ::IDE::CompView idemeta categories {system_actions initialize user_actions}
 @ ::IDE::CompView idemeta component IDEView
 IDE::CompView instproc changeWorkingDir {} {
     set newdir [IDE::Dialog getDir [pwd]]
@@ -1232,6 +1248,8 @@ IDE::CompView instproc unloadComponent actual {
    IDE::System signalComponentsChanged
 }
 
+                              ##########
+
 Class IDE::ComponentSaveWizard -superclass ::IDE::Browser
 @ ::IDE::ComponentSaveWizard idemeta component IDEView
 IDE::ComponentSaveWizard instproc actionSave {} {
@@ -1348,9 +1366,11 @@ IDE::ComponentSaveWizard proc newBrowser {} {
     return [my new [Object autoname .cswbrowser]]
 }
 
+                              ##########
+
 Class IDE::ConfigurationBrowser -superclass {::IDE::Browser ::IDE::GUICommands} -parameter {{atHead 1}}
-@ ::IDE::ConfigurationBrowser idemeta categories {initialization list-manipulation private user-action}
 @ ::IDE::ConfigurationBrowser idemeta categoriesMethods {{getMenuStruct setComponentList destroy fillMenuStruct specificInit} {downListElem upListElem selectCompVersion selectComponent delFromList addToList} {updateCompList changeViewType} {initCompList saveAsFile loadFromFile initFromSystem loadComponents}}
+@ ::IDE::ConfigurationBrowser idemeta categories {initialization list-manipulation private user-action}
 @ ::IDE::ConfigurationBrowser idemeta component IDEView
 IDE::ConfigurationBrowser instproc addElemToList item {
    [self]::confapp addItemAtTail $item
@@ -1567,6 +1587,8 @@ IDE::ConfigurationBrowser proc showBrowser {} {
     }
 }
 
+                              ##########
+
 @ Class IDE::ContextEval {
 description {This class is used for mixins to overwrite the string
 evalution from selected text.
@@ -1581,6 +1603,8 @@ Class IDE::ContextEval
 IDE::ContextEval instproc evalString string {
     [my set context] eval $string
 }
+
+                              ##########
 
 Class IDE::Deployer -superclass ::IDE::Browser
 @ ::IDE::Deployer idemeta component IDEView
@@ -1808,6 +1832,8 @@ IDE::Deployer proc newBrowser {} {
     }
 }
 
+                              ##########
+
 Class IDE::EditorTranscript -superclass ::IDE::Editor
 @ ::IDE::EditorTranscript idemeta component IDEView
 IDE::EditorTranscript instproc fileIn {} {
@@ -1853,6 +1879,8 @@ IDE::EditorTranscript instproc fillMenuStruct ms {
     $ms addMenuItem [::IDE::MenuCommand new -childof $ms -name Find/Replace -command [list IDE::FindReplace bindToView [self]] -popdownMenu 1 -accelerator Alt-f]
 }
 
+                              ##########
+
 Class IDE::GlobalVarsInspector -superclass ::IDE::Browser
 @ ::IDE::GlobalVarsInspector idemeta component IDEView
 IDE::GlobalVarsInspector instproc getTitle {} {
@@ -1885,6 +1913,8 @@ IDE::GlobalVarsInspector proc startBrowser {} {
    my new [Object autoname .importview]
 }
 
+                              ##########
+
 @ Class IDE::VarsView {
 description {The parent object must understand the messages
 
@@ -1892,8 +1922,8 @@ description {The parent object must understand the messages
 [my info parent] setStatusBarText $message}
 }
 Class IDE::VarsView -superclass {::IDE::ListView ::IDE::GUICommands} -parameter {{label {Object Vars}}}
-@ ::IDE::VarsView idemeta categories {initialize user-actions}
 @ ::IDE::VarsView idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {inspectAsObjectsList inspectAsObject unsetVariable}}
+@ ::IDE::VarsView idemeta categories {initialize user-actions}
 @ ::IDE::VarsView idemeta component IDEView
 IDE::VarsView instproc addToReadTrace actual {
     my instvar vobject vtype
@@ -2028,6 +2058,8 @@ IDE::VarsView instproc varAction args {
     [my set vobject] eval $args
 }
 
+                              ##########
+
 Class IDE::GlobalVarsView -superclass ::IDE::VarsView -parameter {{label {Global Vars}}}
 @ ::IDE::GlobalVarsView idemeta component IDEView
 IDE::GlobalVarsView instproc addToReadTrace actual {
@@ -2101,6 +2133,8 @@ IDE::GlobalVarsView instproc selectFor object {
 IDE::GlobalVarsView instproc varAction args {
     namespace eval :: $args
 }
+
+                              ##########
 
 Class IDE::HeritageBrowser -superclass ::IDE::Browser -parameter {{vtype heritage}}
 @ ::IDE::HeritageBrowser idemeta component IDEView
@@ -2185,9 +2219,11 @@ IDE::HeritageBrowser proc newBrowserSubclass {{tclass {}}} {
     return $newinst
 }
 
+                              ##########
+
 Class IDE::HeritageClassView -superclass {::IDE::AbstractClassView ::IDE::GUICommands ::IDE::FocusPerKey} -parameter {{label Classes} {vtype heritage}}
-@ ::IDE::HeritageClassView idemeta categories user_actions
 @ ::IDE::HeritageClassView idemeta categoriesMethods refresh
+@ ::IDE::HeritageClassView idemeta categories user_actions
 @ ::IDE::HeritageClassView idemeta component IDEView
 IDE::HeritageClassView instproc editSave skript {
   IDE::Dialog message {View can not be used for saving}
@@ -2224,6 +2260,8 @@ IDE::HeritageClassView instproc selectItem tclass {
         [my info parent]::methodedit setTextControler [IDE::IntroProxy getObjDef $class] [self]
     }
 }
+
+                              ##########
 
 Class IDE::ImportMethodView -superclass ::IDE::Browser -parameter component
 @ ::IDE::ImportMethodView idemeta component IDEView
@@ -2284,6 +2322,8 @@ IDE::ImportMethodView proc startBrowserForComponent component {
    my new [Object autoname .importview] -component $component
 }
 
+                              ##########
+
 @ Class IDE::MethodBrowser {
 description {Method Prowser implements View for all tcl/xotcl Methods
 It is used as result view for several method based search function.
@@ -2291,8 +2331,8 @@ It is used as result view for several method based search function.
 The search functions are implemented as class methods}
 }
 Class IDE::MethodBrowser -superclass ::IDE::Browser
-@ ::IDE::MethodBrowser idemeta categoriesMethodsProcs {{emptySearchResult unknown newBrowserList newBrowser} searchImplementorsDialog {searchImplementorsClass searchImplementorsComponent searchImplementorsAll searchSendersAll searchTextAll searchTextComponent searchTextClass} {searchObsoleteCall searchAndConvertObsoleteSelfCall obsoleteMatchList}}
 @ ::IDE::MethodBrowser idemeta categoriesProcs {private actions api obsolete}
+@ ::IDE::MethodBrowser idemeta categoriesMethodsProcs {{emptySearchResult unknown newBrowserList newBrowser} searchImplementorsDialog {searchImplementorsClass searchImplementorsComponent searchImplementorsAll searchSendersAll searchTextAll searchTextComponent searchTextClass} {searchObsoleteCall searchAndConvertObsoleteSelfCall obsoleteMatchList}}
 @ ::IDE::MethodBrowser idemeta component IDEView
 IDE::MethodBrowser instproc colorizeSearchString {} {
     my instvar regexpr_string
@@ -2651,9 +2691,11 @@ IDE::MethodBrowser proc unknown args {
     error "unknown method on [self] $args"
 }
 
+                              ##########
+
 Class IDE::MethodCategoryView -superclass {::IDE::ListView ::IDE::GUICommands ::IDE::FocusPerKey} -parameter {{label Categories}}
-@ ::IDE::MethodCategoryView idemeta categories {user_actions initialize}
 @ ::IDE::MethodCategoryView idemeta categoriesMethods {{newCategory deleteCategory renameCategory} {fillMenuStruct getMenuStruct init}}
+@ ::IDE::MethodCategoryView idemeta categories {user_actions initialize}
 @ ::IDE::MethodCategoryView idemeta component IDEView
 IDE::MethodCategoryView instproc changeViewType vtype {
     my instvar vclass vobjtype viewtype
@@ -2764,6 +2806,8 @@ IDE::MethodCategoryView instproc selectItem cat {
     }
 }
 
+                              ##########
+
 Class IDE::MethodEdit -superclass ::IDE::Editor
 @ ::IDE::MethodEdit idemeta component IDEView
 IDE::MethodEdit instproc changeViewType type {
@@ -2863,6 +2907,8 @@ IDE::MethodEdit instproc setTextTypeControler {text type contr} {
     my setTypedText $text $type
 }
 
+                              ##########
+
 Class IDE::MethodListView -superclass {::IDE::ListView ::IDE::GUICommands}
 @ ::IDE::MethodListView idemeta component IDEView
 IDE::MethodListView instproc browseHeritage actual {
@@ -2933,6 +2979,8 @@ IDE::MethodListView instproc selectItem item {
     [my info parent] colorizeSearchString
 }
 
+                              ##########
+
 Class IDE::MethodSelector
 @ ::IDE::MethodSelector idemeta component IDEView
 IDE::MethodSelector proc getMethod {} {
@@ -2972,9 +3020,11 @@ IDE::MethodSelector proc getMethodsForPattern patern {
     return $mlist
 }
 
+                              ##########
+
 Class IDE::MethodView -superclass {::IDE::ListView ::IDE::GUICommands ::IDE::FocusPerKey} -parameter {{label Methods}}
-@ ::IDE::MethodView idemeta categories {interface initialize user_actions special_actions handle-editing private search selectionstate}
 @ ::IDE::MethodView idemeta categoriesMethods {{handleScript editSave selectFor selectItem} {getMenuStruct fillMenuStruct init} {closeAllSpawned moveToCategory backMethod forwardMethod deleteMethod invokeProcs convertProcToMethod newMethodTemplate newInitializeAfterLoad newOverwriteMethodTemplate} {spawnMethodUnderCursor viewMethodUnderCursor insertMethodToEdit spawnMethod selectionToMethod} {editSaveComment refreshActual checkItem syntaxCheck getEditText selectHItem selectHItemRefresh refreshView} getComponentInContext {searchImplementors searchText searchSenders} {isValidContext isSelectionProc isSelectionTclProc}}
+@ ::IDE::MethodView idemeta categories {interface initialize user_actions special_actions handle-editing private search selectionstate}
 @ ::IDE::MethodView idemeta component IDEView
 IDE::MethodView instproc backMethod {} {
     my instvar history historyIndex
@@ -3546,9 +3596,11 @@ IDE::MethodView instproc viewMethodUnderCursor {} {
     }
 }
 
+                              ##########
+
 Class IDE::ObjectBrowser -superclass {::IDE::Browser ::IDE::GUICommands} -parameter {{type single} {atHead 1}}
-@ ::IDE::ObjectBrowser idemeta categories {private initialize actions}
 @ ::IDE::ObjectBrowser idemeta categoriesMethods {{setViewList save setViewObject} {getMenuStruct fillMenuStruct specificInit} {browseClass trackObject printFilters printString printSelf browseMixins inspectParent destroyActual}}
+@ ::IDE::ObjectBrowser idemeta categories {private initialize actions}
 @ ::IDE::ObjectBrowser idemeta component IDEView
 IDE::ObjectBrowser instproc browseClass args {
   my instvar vobject
@@ -3758,6 +3810,8 @@ IDE::ObjectBrowser proc newBrowser object {
     return $newinst
 }
 
+                              ##########
+
 Class IDE::ObjectMethodView -superclass ::IDE::MethodView
 @ ::IDE::ObjectMethodView idemeta component IDEView
 IDE::ObjectMethodView instproc changeVisibility {} {
@@ -3912,6 +3966,8 @@ IDE::ObjectMethodView instproc selectItem method {
     [my info parent]::methodedit setBodyTextControler [string trimleft $class :] $type $method [self]
 }
 
+                              ##########
+
 Class IDE::ObjectsView -superclass {::IDE::ListView ::IDE::GUICommands} -parameter {{type list}}
 @ ::IDE::ObjectsView idemeta component IDEView
 IDE::ObjectsView instproc selectItem object {
@@ -3928,6 +3984,8 @@ IDE::ObjectsView instproc selectItem object {
         }
     }
 }
+
+                              ##########
 
 Class IDE::PreferencesView -superclass {::IDE::Browser ::IDE::GUICommands} -parameter {{atHead 1}}
 @ ::IDE::PreferencesView idemeta component IDEView
@@ -4113,6 +4171,8 @@ IDE::PreferencesView proc newBrowser {} {
     }
 }
 
+                              ##########
+
 Class IDE::ProcToMethodWizzard -superclass ::IDE::Browser -parameter procedures
 @ ::IDE::ProcToMethodWizzard idemeta component IDEView
 IDE::ProcToMethodWizzard instproc actionConvert {} {
@@ -4177,6 +4237,8 @@ IDE::ProcToMethodWizzard proc convertProcedures procs {
      my new [Object autoname .procconverter] [list -procedures $procs]
 }
 
+                              ##########
+
 Class IDE::ProtBrowser -superclass ::IDE::Browser
 @ ::IDE::ProtBrowser idemeta component IDEView
 IDE::ProtBrowser instproc append text {
@@ -4195,6 +4257,8 @@ IDE::ProtBrowser instproc specificInit {} {
 IDE::ProtBrowser proc newBrowser {} {
     return [my new [Object autoname .protbrowser]]
 }
+
+                              ##########
 
 Class IDE::ResultBrowser -superclass ::IDE::Browser -parameter result
 @ ::IDE::ResultBrowser idemeta component IDEView
@@ -4219,6 +4283,8 @@ IDE::ResultBrowser instproc specificInit {} {
 IDE::ResultBrowser proc newBrowser result {
     return [my new [Object autoname .result] [list -result $result]]
 }
+
+                              ##########
 
 Class IDE::SpawnMethodEdit -superclass ::IDE::Browser
 @ ::IDE::SpawnMethodEdit idemeta component IDEView
@@ -4263,6 +4329,8 @@ IDE::SpawnMethodEdit instproc specificInit {} {
     IDE::TclModeEdit [self]::methodedit $win.methodedit
     pack $win.methodedit -fill both -expand yes
 }
+
+                              ##########
 
 Class IDE::SubObjectsView -superclass {::IDE::HListView ::IDE::GUICommands} -parameter {{label Subobjects}}
 @ ::IDE::SubObjectsView idemeta component IDEView
@@ -4329,6 +4397,8 @@ IDE::SubObjectsView instproc setList list {
     next $translist
 }
 
+                              ##########
+
 Class IDE::SyntaxCheckMethodList -superclass {::IDE::NListView ::IDE::GUICommands}
 @ ::IDE::SyntaxCheckMethodList idemeta component IDEView
 IDE::SyntaxCheckMethodList instproc browseHeritage actual {
@@ -4369,9 +4439,11 @@ IDE::SyntaxCheckMethodList instproc searchSenders actual {
      IDE::MethodBrowser searchSendersAll $method
 }
 
+                              ##########
+
 Class IDE::SyntaxChecker -superclass {::IDE::Browser ::IDE::GUICommands} -parameter {{atHead 1}}
-@ ::IDE::SyntaxChecker idemeta categories {initialize viewing}
 @ ::IDE::SyntaxChecker idemeta categoriesMethods {{getTitle getMenuStruct fillMenuStruct specificInit} {selectError selectMethod}}
+@ ::IDE::SyntaxChecker idemeta categories {initialize viewing}
 @ ::IDE::SyntaxChecker idemeta component IDEView
 IDE::SyntaxChecker instproc checkComponents {} {
     my instvar errorsArr
@@ -4603,6 +4675,8 @@ IDE::SyntaxChecker proc newBrowser {} {
     return [my new [Object autoname .syntax]]
 }
 
+                              ##########
+
 Class IDE::SyntaxErrorView -superclass ::IDE::Browser -parameter {errors editor controler}
 @ ::IDE::SyntaxErrorView idemeta component IDEView
 IDE::SyntaxErrorView instproc createSystemMenu {} {
@@ -4661,6 +4735,8 @@ IDE::SyntaxErrorView instproc specificInit {} {
     focus $win
     next
 }
+
+                              ##########
 
 Class IDE::TclGroupDefinition -superclass ::IDE::Browser -parameter {classView {mode define}}
 @ ::IDE::TclGroupDefinition idemeta component IDEView
@@ -4731,6 +4807,8 @@ IDE::TclGroupDefinition proc unknown args {
     error "unknown method on [self] $args"
 }
 
+                              ##########
+
 Class IDE::Transcript -superclass ::IDE::Browser
 @ ::IDE::Transcript idemeta component IDEView
 IDE::Transcript instproc destroy {} {
@@ -4776,6 +4854,8 @@ IDE::Transcript proc warning string {
      }
 }
 
+                              ##########
+
 @ Object IDE::PlugInsManager {
 description {# PlugIns List Format
 
@@ -4819,6 +4899,8 @@ IDE::PlugInsManager proc readPlugInsList {{file {}}} {
     close $fh
 }
 
+                              ##########
+
 @ Object IDE::System {
 description {This object held the system generic methods as
 1. quering envirorments parameters (directory, user)
@@ -4828,8 +4910,8 @@ description {This object held the system generic methods as
 }
 }
 Object IDE::System
-@ ::IDE::System idemeta categoriesMethodsProcs {{signalComponentsChanged versionAllCoreComponents showFreshMethods inspectString loadExtras exitIDEGUI} {getUserId getSystemDir getCoreComponentsAll getXotclPackages getExtraComponents getCoreComponents getMenuStruct getVersion} {handleResult tryBrowseAsObjectList createInstance invokeProc invokeTclProc invokeInstproc invokeProcWithArg} {evalString evalInspectString substituteString browseString invokeTclProcWithArg} {showBusyWhile isDatabase} {initDatabase initDatabaseNoConnect initializeAfterLoad}}
 @ ::IDE::System idemeta categoriesProcs {actions system-constans invoke-action eval-action service initializing}
+@ ::IDE::System idemeta categoriesMethodsProcs {{signalComponentsChanged versionAllCoreComponents showFreshMethods inspectString loadExtras exitIDEGUI} {getUserId getSystemDir getCoreComponentsAll getXotclPackages getExtraComponents getCoreComponents getMenuStruct getVersion} {handleResult tryBrowseAsObjectList createInstance invokeProc invokeTclProc invokeInstproc invokeProcWithArg} {evalString evalInspectString substituteString browseString invokeTclProcWithArg} {showBusyWhile isDatabase} {initDatabase initDatabaseNoConnect initializeAfterLoad}}
 @ ::IDE::System idemeta component IDEView
 IDE::System proc browseString string {
     if {[Object isclass $string]} {
@@ -5291,5 +5373,8 @@ IDE::System proc versionAllCoreComponents {{versionInfo {}}} {
         }
    }
 }
+
+                    ########## initializations ##########
+
 IDE::System initializeAfterLoad
 

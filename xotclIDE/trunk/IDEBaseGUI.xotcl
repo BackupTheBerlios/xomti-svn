@@ -9,6 +9,8 @@ This component contains the base GUI Elements needed in IDEXotclIDE
 package provide IDEBaseGUI 0.71
 package require IDECore
 
+                    ########## Classes and Objects ##########
+
 @ Class IDE::Browser {
 description {This is the base class for all IDE Browser
 
@@ -17,8 +19,8 @@ It can buid the system menu and status info bar.
 Please overwrite method specificInit for your own GUI.}
 }
 Class IDE::Browser
-@ ::IDE::Browser idemeta categories initialize
 @ ::IDE::Browser idemeta categoriesMethods {{specificInit buildTopLevel init initStatusBar}}
+@ ::IDE::Browser idemeta categories initialize
 @ ::IDE::Browser idemeta component IDEBaseGUI
 IDE::Browser instproc buildTopLevel {} {
     my instvar win
@@ -103,6 +105,8 @@ description {Overwrite this method to build your own GUI}
 IDE::Browser instproc specificInit {} {
     # shoul be overwritten
 }
+
+                              ##########
 
 @ Class IDE::DialogHelper {
 description {Handle waiting for GUI events by using vwait command
@@ -200,6 +204,8 @@ IDE::DialogHelper instproc suspendUntilSignal {} {
 IDE::DialogHelper proc create args {
   error "Class [self] is abstract"
 }
+
+                              ##########
 
 @ Class IDE::Dialog {
 description {Class methods are fasade to tk_message}
@@ -336,6 +342,8 @@ IDE::Dialog proc yesNo message {
     return [tk_messageBox -title {Choose} -message $message -icon question -type yesno -parent $parent]
 }
 
+                              ##########
+
 @ Class IDE::GUICommands {
 description {A Class that can build menues to toplevel.
 Await window in win instance
@@ -407,12 +415,14 @@ IDE::GUICommands instproc upsMessage text {
      }
 }
 
+                              ##########
+
 @ Class IDE::Text {
 description {Fasade for tk widget text}
 }
 Class IDE::Text -parameter {{height 24} {width 80}}
-@ ::IDE::Text idemeta categories {service search-tag initialize}
 @ ::IDE::Text idemeta categoriesMethods {{makeEmpty getSelection getText colorizeRange removeColorize viewPos tagRange setText appendToCursor} {colorizeTextAll tagRegExprTextAll colorizeRegExprTextAll colorizeRegExprText colorizeText tagRegExprText} {initTags init}}
+@ ::IDE::Text idemeta categories {service search-tag initialize}
 @ ::IDE::Text idemeta component IDEBaseGUI
 IDE::Text instproc appendToCursor text {
   [my getTextWindow] insert insert $text
@@ -580,9 +590,11 @@ IDE::Text proc setColor color {
     }
 }
 
+                              ##########
+
 Class IDE::Editor -superclass {::IDE::Text ::IDE::GUICommands} -parameter {{height 24} {width 80}}
-@ ::IDE::Editor idemeta categories {initialize user-action selection-action private service}
 @ ::IDE::Editor idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {fileAppend fileIn fileOut} {browseSelection evalInspectSelection evalSelection evalDisplaySelection evalSubstituteSelection} getWordUnderCursor setTypedText}
+@ ::IDE::Editor idemeta categories {initialize user-action selection-action private service}
 @ ::IDE::Editor idemeta component IDEBaseGUI
 IDE::Editor instproc appendToCursorAndSelect text {
     set sIndex [[my getTextWindow] index insert]
@@ -722,6 +734,8 @@ IDE::Editor proc initializeAfterLoad {} {
   event add <<Paste>> <Control-v>
 }
 
+                              ##########
+
 @ Class IDE::EditorPopDown {
 description {This class can be used with all classes derived from IDE::Editor
 it provide popdown menues that can be used for code completion future}
@@ -790,6 +804,8 @@ IDE::EditorPopDown instproc selectDropDown {} {
     my hidePopdown
 }
 
+                              ##########
+
 @ Class IDE::EventHandlerMix {
 description {This class privede simple event handler.
 There are two methodes.
@@ -845,6 +861,8 @@ IDE::EventHandlerMix instproc signalEvent {eventName {addParameter {}}} {
     }
 }
 
+                              ##########
+
 @ Class IDE::FindReplaceDestroyHelper {
 description {This class is using for mixin with IDE::Text for
 recognize destroying of based window. In this case (destroy)
@@ -855,6 +873,8 @@ Class IDE::FindReplaceDestroyHelper
 IDE::FindReplaceDestroyHelper instproc destroy {} {
      IDE::FindReplace destroySignalFromView [my info parent]
 }
+
+                              ##########
 
 @ Class IDE::FocusPerKey {
 description {To used only whith GUI Klasses as Subklass by Multiheritage
@@ -885,6 +905,8 @@ IDE::FocusPerKey instproc init args {
       bind [my getFocusWin] <<PrevWindow>> "focus $prevFocus; break"
    }
 }
+
+                              ##########
 
 Class IDE::FontChooser -superclass ::IDE::Dialog -parameter {{font {}} {type okcancel} {title {Font Chooser}}}
 @ ::IDE::FontChooser idemeta component IDEBaseGUI
@@ -1000,9 +1022,11 @@ IDE::FontChooser proc getFont {{font {}}} {
   return $ret
 }
 
+                              ##########
+
 Class IDE::ListView -parameter {{multiselect 0} label {height 10} width}
-@ ::IDE::ListView idemeta categories {service test-service}
 @ ::IDE::ListView idemeta categoriesMethods {{selectedItem setSelectedItem reorderSelected unselect renameItem removeItemAt addItemAt setList addItem markItem removeItem} isValidSelection}
+@ ::IDE::ListView idemeta categories {service test-service}
 @ ::IDE::ListView idemeta component IDEBaseGUI
 IDE::ListView instproc addItem item {
     # add Item and sort
@@ -1321,6 +1345,8 @@ IDE::ListView proc setColor color {
     }
 }
 
+                              ##########
+
 @ Class IDE::HListView {
 description {Simple Hierarch List Browser.}
 }
@@ -1367,6 +1393,8 @@ IDE::HListView instproc setList list {
     eval $win.listbox insert 0 $listItems
 }
 
+                              ##########
+
 Class IDE::IDialogEntry -superclass ::IDE::Dialog -parameter {entry {type okcancel} {width 20}}
 @ ::IDE::IDialogEntry idemeta component IDEBaseGUI
 IDE::IDialogEntry instproc init {} {
@@ -1405,6 +1433,8 @@ IDE::IDialogEntry proc getValueWithCancel {mes {text {}}} {
   }
   return $ret
 }
+
+                              ##########
 
 Class IDE::IDialogList -superclass ::IDE::Dialog -parameter {list {selectedItem {}} {type okcancel}}
 @ ::IDE::IDialogList idemeta component IDEBaseGUI
@@ -1484,6 +1514,8 @@ IDE::IDialogList proc getListItem {message list {default {}}} {
     return $result
 }
 
+                              ##########
+
 Class IDE::IDialogListChooser -superclass ::IDE::Dialog -parameter {listin listout {type okcancel}}
 @ ::IDE::IDialogListChooser idemeta component IDEBaseGUI
 IDE::IDialogListChooser instproc addToList {} {
@@ -1550,6 +1582,8 @@ IDE::IDialogListChooser instproc postOk {} {
     next
 }
 
+                              ##########
+
 Class IDE::IDialogListEntry -superclass ::IDE::Dialog -parameter {entry list {type okcancel} {selectedItem {}}}
 @ ::IDE::IDialogListEntry idemeta component IDEBaseGUI
 IDE::IDialogListEntry instproc getvalue {} {
@@ -1597,6 +1631,8 @@ IDE::IDialogListEntry instproc postOk {} {
     next
 }
 
+                              ##########
+
 Class IDE::IDialogListOrderChooser -superclass ::IDE::IDialogListChooser -parameter {listin listout {type okcancel}}
 @ ::IDE::IDialogListOrderChooser idemeta component IDEBaseGUI
 IDE::IDialogListOrderChooser instproc addToList {} {
@@ -1631,6 +1667,8 @@ IDE::IDialogListOrderChooser instproc upItem {} {
    [self]::listout reorderSelected -1 
 }
 
+                              ##########
+
 @ Class IDE::IDialogWithCheck {
 description {Prompter with additional check box
 addiational paramer -checktext -check}
@@ -1645,6 +1683,8 @@ IDE::IDialogWithCheck instproc init {} {
     pack $win.check -fill both -expand yes -before $win.buttons -padx 10 -pady 5
     wm deiconify $win
 }
+
+                              ##########
 
 @ Class IDE::MenuItem {
 description {This is the abstract root class for buildung menu stucture.
@@ -1680,6 +1720,8 @@ IDE::MenuItem instproc migrateTkMenu {} {
     puts $add
 }
 
+                              ##########
+
 Class IDE::MenuCheckbox -superclass ::IDE::MenuItem -parameter {name {command {}} {variable {}} {accelerator {}} {underline {}}}
 @ ::IDE::MenuCheckbox idemeta component IDEBaseGUI
 IDE::MenuCheckbox instproc createItemTkMenu {win tl_win} {
@@ -1703,6 +1745,8 @@ IDE::MenuCheckbox instproc createItemTkMenu {win tl_win} {
     }
 }
 
+                              ##########
+
 Class IDE::MenuCommand -superclass ::IDE::MenuItem -parameter {{accelerator {}} {underline {}} name command}
 @ ::IDE::MenuCommand idemeta component IDEBaseGUI
 IDE::MenuCommand instproc createItemTkMenu {win tl_win} {
@@ -1721,6 +1765,8 @@ IDE::MenuCommand instproc createItemTkMenu {win tl_win} {
     }
     eval $win add command  -label [list $name] -command [list $command] $par
 }
+
+                              ##########
 
 Class IDE::MenuRadiobutton -superclass ::IDE::MenuItem -parameter {name command {value {}} {variable {}} {accelerator {}} {underline {}}}
 @ ::IDE::MenuRadiobutton idemeta component IDEBaseGUI
@@ -1745,11 +1791,15 @@ IDE::MenuRadiobutton instproc createItemTkMenu {win tl_win} {
     }
 }
 
+                              ##########
+
 Class IDE::MenuSeparator -superclass ::IDE::MenuItem
 @ ::IDE::MenuSeparator idemeta component IDEBaseGUI
 IDE::MenuSeparator instproc createItemTkMenu {win tl_win} {
    $win add separator
 }
+
+                              ##########
 
 @ Class IDE::MenuStruct {
 description {This Class represent normall und popdown menus.
@@ -1764,8 +1814,8 @@ Only the all of specified method return true the menu item is enabled
 See also IDE::MenuItem}
 }
 Class IDE::MenuStruct -superclass ::IDE::MenuItem -parameter enablementHandler
-@ ::IDE::MenuStruct idemeta categories {shortcuts obsolete-migration}
 @ ::IDE::MenuStruct idemeta categoriesMethods {{addSeparator addCascadeMenu addRadioButton addCheckButton addMenuItem addCommand} migrateTkMenu}
+@ ::IDE::MenuStruct idemeta categories {shortcuts obsolete-migration}
 @ ::IDE::MenuStruct idemeta component IDEBaseGUI
 IDE::MenuStruct instproc addCascadeMenu menu {
    my addMenuItem $menu
@@ -1939,6 +1989,8 @@ IDE::MenuStruct instproc showPopMenu {win x y} {
     tk_popup $win $x $y
 }
 
+                              ##########
+
 Class IDE::NListView -superclass ::IDE::ListView -parameter {notify notifyProc doubleNotifyProc}
 @ ::IDE::NListView idemeta component IDEBaseGUI
 IDE::NListView instproc buttonDoublePush {} {
@@ -1962,6 +2014,8 @@ IDE::NListView instproc selectItem item {
        }
     }
 }
+
+                              ##########
 
 Class IDE::ProtocolText -superclass ::IDE::Editor
 @ ::IDE::ProtocolText idemeta component IDEBaseGUI
@@ -2042,6 +2096,8 @@ IDE::ProtocolText instproc init win {
    set itemLines {}
 }
 
+                              ##########
+
 Class IDE::StateButton -parameter {state states command}
 @ ::IDE::StateButton idemeta component IDEBaseGUI
 IDE::StateButton instproc changeState {} {
@@ -2091,6 +2147,8 @@ IDE::StateButton instproc setStates newStates {
      }
 }
 
+                              ##########
+
 Class IDE::StateButtonActivity -superclass ::IDE::StateButton
 @ ::IDE::StateButtonActivity idemeta component IDEBaseGUI
 IDE::StateButtonActivity instproc init window {
@@ -2106,6 +2164,8 @@ IDE::StateButtonActivity instproc setActivity bool {
         $win configure -bg $unactiveColor
      }
 }
+
+                              ##########
 
 Object IDE::FindReplace
 @ ::IDE::FindReplace idemeta component IDEBaseGUI
@@ -2347,5 +2407,8 @@ IDE::FindReplace proc showWindow {} {
   wm deiconify $win
   focus $win.main.find
 }
+
+                    ########## initializations ##########
+
 IDE::Editor initializeAfterLoad
 
