@@ -13,6 +13,17 @@ namespace eval ::ide {}
 @ tclgroup ide idemeta comment IDECore {The are some extented list functions based
 on Smalltalk container protocol}
 
+@ tclproc ::ide::lcollect idemeta struct IDECore ide
+proc ::ide::lcollect {var_ref list eval_action} {
+    upvar $var_ref var
+    set ret {}
+    foreach a $list {
+        set var $a
+        lappend ret [uplevel $eval_action]
+    }
+    return $ret
+}
+
 @ tclproc ide::addToValueForKey idemeta struct IDECore ide
 proc ide::addToValueForKey {arr_ref key value} {
     upvar $arr_ref arr
@@ -64,14 +75,20 @@ proc ide::lappendIfNone {list_ref elem} {
 }
 
 @ tclproc ide::lcollect idemeta struct IDECore ide
+@ tclproc ide::lcollect idemeta comment {A "foreach" collection list of results
+    ide::lcollect v $list {script...}
+is equivalent to
+    set result [list]
+    foreach v $list {lappend result [script...]}
+and returns $result }
 proc ide::lcollect {var_ref list eval_action} {
-	upvar $var_ref var
-        set ret {}
-        foreach a $list {
-            set var $a
-            lappend ret [uplevel $eval_action]
-	}
-        return $ret
+    upvar $var_ref var
+    set ret {}
+    foreach a $list {
+        set var $a
+        lappend ret [uplevel $eval_action]
+    }
+    return $ret
 }
 
 @ tclproc ide::lcontain idemeta struct IDECore ide
@@ -157,11 +174,11 @@ Class create IDE::CommentHandler
 @ ::IDE::CommentHandler idemeta component IDECore
 IDE::CommentHandler instproc getComment {} {
     if {[my exists comment]} {
-       my set comment
+       return [my set comment]
     }
 }
 IDE::CommentHandler instproc hasComment {} {
-    return [expr {[my exists comment] && [my set comment]!=""}]
+    return [expr {[my exists comment] && [my set comment] != ""}]
 }
 IDE::CommentHandler instproc setComment text {
     my set comment $text
@@ -214,20 +231,20 @@ IDE::Component instproc addRequiredCompList comps {
     }
 }
 IDE::Component instproc asScript {{nometa 0} {norequire 0}} {
-    my instvar requiredComp version
+    my instvar version
     set script {}
     set initscript {}
     set defList [my getObjectDefineList]
     append script "# automatically generated from XOTclIDE\n"
-    if {$requiredComp!=""} {
-        append script "# script require component [list $requiredComp]\n"
+    if {[my getRequiredFrom]!=""} {
+        append script "# script require component [list [my getRequiredFrom]]\n"
     }
     if {!$nometa} {
         append script [my getCommentBody]
     }
     if {!$norequire} {
         append script "package provide [my getName] [my getVersionNumber]\n"
-        foreach reqComp $requiredComp {
+        foreach reqComp [my getRequiredFrom] {
               append script "package require $reqComp\n"
         }
     }
@@ -437,6 +454,7 @@ child classes.}
 IDE::Component instproc getObjectDefineList {} {
     set defList [list]
     foreach class [concat [lsort [my getClasses]] [lsort [my getObjects]]] {
+        # side effect on "requiredComp" variable
         set res [my rekBuildDefList $class $defList]
         if {[llength $res]>0} {
             set defList [concat $defList $res]
@@ -490,7 +508,6 @@ IDE::Component instproc getRequiredFrom {} {
     my set requiredComp
 }
 IDE::Component instproc getRequiredFromDeep {} {
-    my instvar requiredComp
     set reqlist [my getRequiredFrom]
     set oreqlist [list]
     foreach req $reqlist {
@@ -556,17 +573,17 @@ IDE::Component instproc isPersistent {} {
      return 0
 }
 IDE::Component instproc rekBuildDefList {object objectList} {
-    # return the list of classes and objects of this component required
+    # Returns the list of classes and objects required by this component
     # to define class (or object) plus class 
-    # classList contains already definined classes
-    my instvar requiredComp
+    # classList contains already defined classes
+    # Has side effect on "requiredComp" variable
     if {$object=="" || $object=="::Object" || $object=="::" || $object=="xotcl"} return
     if {[::ide::lcontain $objectList $object]} {
         return
     }
     set capp [$object getComponentName]
     if {$capp!=[my getName]} {
-        if {![ide::lcontain $requiredComp $capp] && $capp!="core" && $capp!="default"} {
+        if {![ide::lcontain [my getRequiredFrom] $capp] && $capp!="core" && $capp!="default"} {
             my addRequiredCompList $capp
         }
         return
@@ -649,22 +666,22 @@ IDE::Component proc getAllComponents {} {
     }
     return $compObjs
 }
-IDE::Component proc getCompObjectForName component {
-    if {[my exists components($component)]} {
-        return [my set components($component)]
+IDE::Component proc getCompObjectForName name_of_component {
+    if {[my exists components($name_of_component)]} {
+        return [my set components($name_of_component)]
     } else {
-        set appObj [IDE::Component new -name $component]
-        my set components($component) $appObj
-        if {[catch { set version [package present $component] }]} {
+        set appObj [IDE::Component new -name $name_of_component]
+        my set components($name_of_component) $appObj
+        if {[catch { set version [package present $name_of_component] }]} {
             set version 0.1
         }
         $appObj set version $version
         return $appObj
     }
 }
-IDE::Component proc getCompObjectForNameIfExist component {
-    if {[my exists components($component)]} {
-        return [my set components($component)]
+IDE::Component proc getCompObjectForNameIfExist name_of_component {
+    if {[my exists components($name_of_component)]} {
+        return [my set components($name_of_component)]
     } 
     return {}
 }
@@ -1289,15 +1306,15 @@ IDE::CommentsContainer proc getGroupForMethod method {
 }
 IDE::CommentsContainer proc getObjectContainer object {    
     if {[my exists objectHash($object)]} {
-         return [my set objectHash($object)]
+        return [my set objectHash($object)]
     }
     return
 }
 IDE::CommentsContainer proc getObjectContainerWithCreate object {    
     set c [my getObjectContainer $object]
-    if {$c==""} {
-       set c [IDE::ObjectCommentsContainer new -childof [self] -objectName $object]
-       my set objectHash($object) $c
+    if {$c == ""} {
+        set c [IDE::ObjectCommentsContainer new -childof [self] -objectName $object]
+        my set objectHash($object) $c
     }
     return $c
 }
