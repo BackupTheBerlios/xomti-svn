@@ -77,7 +77,7 @@ PrsElement instproc extractList {} {
 }
 PrsElement instproc getParser {} {
     set i [self]
-    while {[Object isobject $i] && [$i info class]!="::TclParser"} {
+    while {[Object isobject $i] && [$i info class] ne "::TclParser"} {
 	set i [$i info parent]
     }
     return $i
@@ -149,7 +149,7 @@ PrsContext instproc addError {text elem} {
     my lappend errors [list [$elem begin] [$elem end] $text]
 }
 PrsContext instproc addVariableFrom prsObject {
-    if {[$prsObject info class]=="::PrsLiteral" || [$prsObject info class]=="::PrsQuoted"} {
+    if {[$prsObject info class] eq "::PrsLiteral" || [$prsObject info class] eq "::PrsQuoted"} {
         set name [$prsObject prsString]
         # if it is array extract key name
         regexp {(.+)\(.*\)} $name _ name
@@ -159,12 +159,12 @@ PrsContext instproc addVariableFrom prsObject {
     }
 }
 PrsContext instproc addVariableFromList prsObject {
-    if {[$prsObject info class]=="::PrsLiteral"} {
+    if {[$prsObject info class] eq "::PrsLiteral"} {
         set name [$prsObject prsString]
         if {![my checkVariable $name]} {
             my lappend variables $name
         }
-    } elseif {[$prsObject info class]=="::PrsNoSubst"} {
+    } elseif {[$prsObject info class] eq "::PrsNoSubst"} {
         set name [$prsObject prsString]
         if {[info complete $name]} {
             foreach var $name {
@@ -175,30 +175,30 @@ PrsContext instproc addVariableFromList prsObject {
 }
 PrsContext instproc checkCommand {command notifier} {
     set first [lindex [$command list] 0]
-    if {[$first info class]=="::PrsLiteral"} {
+    if {[$first info class] eq "::PrsLiteral"} {
         set name [$first prsString]
         
-        if {$name=="my"} {
+        if {$name eq "my"} {
             my checkObjectSelfCall $command $notifier
         } elseif {[Object isobject $name]} {
             my checkDirectObjectCall $name $command $notifier
-        } elseif {[info commands $name]!=""} {
+        } elseif {[info commands $name] ne ""} {
             # by ovewritten commands check first as commands
             # because probably the syntax will be not changed
             my checkTclCommand $name $command $notifier
-        } elseif {[info procs $name]!=""} {
+        } elseif {[info procs $name] ne ""} {
             my checkProcArgsCount $command $name $notifier
         } elseif {[my set isTclproc] && 
-                  [set base [namespace qualifiers [my set name]]]!="" && 
-                  [info procs [set oname [namespace eval $base [list namespace which -command $name]]]]!=""} {
+                  [set base [namespace qualifiers [my set name]]] ne "" && 
+                  [info procs [set oname [namespace eval $base [list namespace which -command $name]]]] ne ""} {
             my checkProcArgsCount $command $oname $notifier
         } else {
 	    $notifier addError "unknown proc $name" $command
         }
-    } elseif {[$first info class]=="::PrsCommandSubst" &&
-              [$first prsString]=="self"} {
+    } elseif {[$first info class] eq "::PrsCommandSubst" &&
+              [$first prsString] eq "self"} {
         my checkObjectSelfCall $command $notifier
-    } elseif {[$first info class]=="::PrsVariable"} {
+    } elseif {[$first info class] eq "::PrsVariable"} {
         my checkObjectCall $command $notifier
     }
     return 1
@@ -218,10 +218,10 @@ PrsContext instproc checkObjectCall {command notifier} {
 }
 PrsContext instproc checkObjectMethodArgsCount {object type method command notifier} {
     set argList [$object info ${type}args $method]
-    if {[llength $argList]==1 && $argList=="args"} return
+    if {[llength $argList] == 1 && $argList eq "args"} return
     set commandCount [expr {[$command argsCount]-1}]
     set min [lsearch -exact $argList args]
-    if {$min!=-1} {
+    if {$min != -1} {
 	set max -1
     } else {
 	set max [llength $argList]
@@ -235,54 +235,54 @@ PrsContext instproc checkObjectMethodArgsCount {object type method command notif
 	    incr x
 	}
     }
-    if {$commandCount<$min || ($max!=-1 && $commandCount>$max)} {
+    if {$commandCount < $min || ($max != -1 && $commandCount > $max)} {
 	$notifier addError "await ($min,$max) arguments" $command
     }
 }
 PrsContext instproc checkObjectSelfCall {command notifier} {
     my instvar object isInstproc
-    if {[$command argsCount]==0} {
+    if {[$command argsCount] == 0} {
         $notifier addError "my call without arguments" $command
         return
     }
     set method [lindex [$command list] 1]
-    if {[$method info class]!="::PrsLiteral"} return
+    if {[$method info class] ne "::PrsLiteral"} return
     set mname [$method prsString]
-    if {$mname=="instvar"} {
-        for {set x 1} {$x<=[$command argsCount]} {incr x} {
+    if {$mname eq "instvar"} {
+        for {set x 1} {$x <= [$command argsCount]} {incr x} {
             my addVariableFrom [$command getElem $x]
         }
         return
     }
-    if {[lsearch -exact {abstract append array autoname check class cleanup configure copy destroy eval exists filter filterappend filterguard filtersearch getExitHandler getGuardedScope incr info instvar invar isclass ismetaclass isobject istype lappend mixin mixinappend move parametercmd proc procsearch requireNamespace set setExitHandler trace unset vwait} $mname]!=-1} return
+    if {[lsearch -exact {abstract append array autoname check class cleanup configure copy destroy eval exists filter filterappend filterguard filtersearch getExitHandler getGuardedScope incr info instvar invar isclass ismetaclass isobject istype lappend mixin mixinappend move parametercmd proc procsearch requireNamespace set setExitHandler trace unset vwait} $mname] != -1} return
     # handle class calls
-    if {!$isInstproc && $object!="proc" && [$object isclass]} {
-        if {[lsearch {alloc create info instdestroy instfilter instfilterappend instfilterguard instinvar instmixin instmixinappend instparametercmd instproc insttclcmd new newChild newChildOf parameter parameterclass recreate superclass} $mname]!=-1} return
+    if {!$isInstproc && $object ne "proc" && [$object isclass]} {
+        if {[lsearch {alloc create info instdestroy instfilter instfilterappend instfilterguard instinvar instmixin instmixinappend instparametercmd instproc insttclcmd new newChild newChildOf parameter parameterclass recreate superclass} $mname] != -1} return
     }
     set count [expr {[$command argsCount]-1}]
     if {!$isInstproc} {
-        if {[$object info procs $mname]!=""} {
+        if {[$object info procs $mname] ne ""} {
             my checkObjectMethodArgsCount $object {} $mname $command $notifier
             return
         }
         set oclass [$object info class]
         foreach class [concat $oclass [$oclass info heritage]] {
-            if {[$class info instprocs $mname]!=""} {
+            if {[$class info instprocs $mname] ne ""} {
                 my checkObjectMethodArgsCount $class inst $mname $command $notifier
                 return
             }
         }
     } else {
         foreach class [concat $object [$object info heritage]] {
-            if {[$class info instprocs $mname]!=""} {
+            if {[$class info instprocs $mname] ne ""} {
                 my checkObjectMethodArgsCount $class inst $mname $command $notifier
                 return
             }
         }
         foreach hclass [concat $object [$object info heritage]] {
             foreach par [$hclass info parameter] {
-                if {[lindex $par 0]==$mname} {
-                    if {$count>1} {
+                if {[lindex $par 0] eq $mname} {
+                    if {$count > 1} {
                         $notifier addError "parameter await 0 or 1 argument" $command
                     }
                     return
@@ -299,9 +299,9 @@ PrsContext instproc checkObjectSelfCall {command notifier} {
 PrsContext instproc checkProcArgsCount {command procName notifier} {
     set commandCount [$command argsCount]
     set argList [info args $procName]
-    if {[llength $argList]==1 && $argList=="args"} return
+    if {[llength $argList] == 1 && $argList eq "args"} return
     set min [lsearch -exact $argList args]
-    if {$min!=-1} {
+    if {$min != -1} {
 	set max -1
     } else {
 	set max [llength $argList]
@@ -311,17 +311,17 @@ PrsContext instproc checkProcArgsCount {command procName notifier} {
 	    if {[info default $procName $arg var]} {
                 set min $x
                 break
-	    }
-	    incr x
+            }
+            incr x
 	}
     }
-    if {$commandCount<$min || ($max!=-1 && $commandCount>$max)} {
-	$notifier addError "await ($min,$max) arguments" $command
+    if {$commandCount < $min || ($max != -1 && $commandCount > $max)} {
+        $notifier addError "await ($min,$max) arguments" $command
     }
 }
 PrsContext instproc checkTclCommand {name command notifier} {
     set desc [[self class] getCommandDescription $name]
-    if {$desc==""} {
+    if {$desc eq ""} {
         #puts "unknown proc $name"
         return 0
     }
@@ -332,16 +332,16 @@ PrsContext instproc checkTclCommand {name command notifier} {
         $notifier addError "false argument count $count ($min,$max)" $command
         return 0
     }
-    if {[lsearch -exact [[self class] set subcommands] $name]>=0} {
+    if {[lsearch -exact [[self class] set subcommands] $name] >= 0} {
         set subcommand [$command getElem 1]
-        if {[$subcommand info class]=="::PrsLiteral"} {
+        if {[$subcommand info class] eq "::PrsLiteral"} {
             set subname [$subcommand prsString]
             if {[[self class] exists command_${name}($subname)]} {
                 set desc [[self class] set command_${name}($subname)]
                 set min [lindex $desc 0]
                 set max [lindex $desc 1]
                 set count [expr {$count-1}]
-                if {$count<$min || ($max!=-1 && $count>$max)} {
+                if {$count < $min || ($max != -1 && $count > $max)} {
                     $notifier addError "false argument count $count ($min,$max) for $subname" $command
                     return 0
                 }
@@ -351,16 +351,16 @@ PrsContext instproc checkTclCommand {name command notifier} {
             }
         }
     }
-    if {[my info methods check_$name]!=""} {
+    if {[my info methods check_$name] ne ""} {
         my check_$name $count $command $notifier
     }
     return 1
 }
 PrsContext instproc checkVariable variable {
-    return [expr {[lsearch -exact [my variables] $variable]>=0 || [info exists $variable]}]
+    return [expr {[lsearch -exact [my variables] $variable] >= 0 || [info exists $variable]}]
 }
 PrsContext instproc checkVariableFrom {prsObject notifier} {
-    if {[$prsObject info class]=="::PrsLiteral"} {
+    if {[$prsObject info class] eq "::PrsLiteral"} {
         set name [$prsObject prsString]
         if {![my checkVariable $name]} {
             $notifier addError "unknown variable $name" $prsObject
@@ -376,7 +376,7 @@ PrsContext instproc check_array {count command notifier} {
     }
 }
 PrsContext instproc check_catch {count command notifier} {
-    if {$count==2} {
+    if {$count = =2} {
         my addVariableFrom [$command getElem 2]
     }
     [$command getElem 1] evalContents
@@ -395,21 +395,21 @@ PrsContext instproc check_foreach {count command notifier} {
     [$command getElem $x] evalContents 
 }
 PrsContext instproc check_gets {count command notifier} {
-    if {$count==2} {
+    if {$count == 2} {
         my addVariableFrom [$command getElem 2]
     }
 }
 PrsContext instproc check_global {count command notifier} {
-    for {set x 1} {$x<=$count} {incr x} {
+    for {set x 1} {$x <= $count} {incr x} {
         my addVariableFrom [$command getElem $x]
     }
 }
 PrsContext instproc check_if {count command notifier} {
     [$command getElem 1] substituteContents
     # !!! no exactly syntax check
-    for {set x 2} {$x<=$count} {incr x} {
+    for {set x 2} {$x <= $count} {incr x} {
         set elem [$command getElem $x]
-        if {[$elem info class]=="::PrsLiteral"} {
+        if {[$elem info class] eq "::PrsLiteral"} {
             set name [$elem prsString]
             if {[lsearch -exact {then else elseif} $name]!=-1} {
                 if { [$notifier info class ::PrsSyntaxHighlight] } {
@@ -442,7 +442,7 @@ PrsContext instproc check_regexp {count command notifier} {
     # ignore switches / options 
     for {set x 1} {$x<$count} {incr x} {
         set elem [$command getElem $x]
-        if {[$elem info class]!="PrsLiteral" || [$elem prsString]=="--"} {
+        if {[$elem info class] ne "PrsLiteral" || [$elem prsString] eq "--"} {
             break
         }
     }
@@ -452,7 +452,7 @@ PrsContext instproc check_regexp {count command notifier} {
     }
 }
 PrsContext instproc check_set {count command notifier} {
-    if {$count==2} {
+    if {$count == 2} {
         my addVariableFrom [$command getElem 1]
     } else {
         my checkVariableFrom [$command getElem 1] $notifier
@@ -460,13 +460,13 @@ PrsContext instproc check_set {count command notifier} {
 }
 PrsContext instproc check_switch {count command notifier} {
     set last [$command getElem end]
-    if {[$last info class]!="::PrsNoSubst"} return
+    if {[$last info class] ne "::PrsNoSubst"} return
     $last extractList
-    if {[llength [$last list]]%2!=0} {
+    if {[llength [$last list]]%2 != 0} {
         my addError "expect odd elements in the list" $last
     }
     foreach {pattern script} [$last list] {
-        if {$script!=""} {$script evalContents}
+        if {$script  ne ""} {$script evalContents}
     }
 }
 PrsContext instproc check_try {count command notifier} {
@@ -484,13 +484,13 @@ PrsContext instproc check_try {count command notifier} {
     [$command getElem 3] evalContents
 }
 PrsContext instproc check_unset {count command notifier} {
-    for {set x 1} {$x<=$count} {incr x} {
+    for {set x 1} {$x <= $count} {incr x} {
         my checkVariableFrom [$command getElem $x]  $notifier
     }
 }
 PrsContext instproc check_upvar {count command notifier} {
     set mark 1
-    for {set x $count} {$x>1} {incr x -1} {
+    for {set x $count} {$x > 1} {incr x -1} {
         if {$mark} {
             my addVariableFrom [$command getElem $x]
             set mark 0
@@ -505,7 +505,7 @@ PrsContext instproc check_while {count command notifier} {
     [$command getElem 2] evalContents
 }
 PrsContext instproc hasErrors {} {
-    expr {[my exists errors] && [llength [my set errors]]>0}
+    expr {[my exists errors] && [llength [my set errors]] > 0}
 }
 @ PrsContext instproc parse {} {
 description {This Method parse a text and build a parse tree
@@ -521,7 +521,7 @@ PrsContext instproc parse script {
     set count [llength $script]
     set object [lindex $script 0]
     set hasNonPosArgs 0
-    if {$object=="proc"} {
+    if {$object eq "proc"} {
         my set isTclproc 1
         my set isInstproc 0
         set shift 1
@@ -532,9 +532,9 @@ PrsContext instproc parse script {
             return 0
         }
         set methodtype [lindex $script 1]
-        if {$methodtype=="instproc"} {
+        if {$methodtype eq "instproc"} {
             my set isInstproc 1
-        } elseif {$methodtype=="proc"} {
+        } elseif {$methodtype eq "proc"} {
             my set isInstproc 0
         } else {
             my lappend errors [list 0 0 "Await instproc or proc after object/class name"]
@@ -592,7 +592,7 @@ PrsContext instproc parse script {
 }
 PrsContext instproc parseAndCheck script {
     # do not check if script contain magic string "no syntax check"
-    if {[string first "no syntax check" $script]>=0} return
+    if {[string first "no syntax check" $script] >= 0} return
     my parseAndVisit $script
 }
 PrsContext instproc parseAndVisit script {
@@ -911,27 +911,25 @@ ReadStringStream instproc addPos add {
     my incr pos $add
 }
 ReadStringStream instproc atEnd {} {
-    expr {[my pos]>[my lastpos]}
+    return [expr {[my pos] > [my lastpos]}]
 }
 ReadStringStream instproc copyFromTo {from to} {
-    string range [my string] $from $to
+    return [string range [my string] $from $to]
 }
 ReadStringStream instproc getChar {} {
-    my instvar pos string
     #[self] halt
-    string index $string $pos
+    return [string index [my string] [my pos]]
 }
 ReadStringStream instproc init {} {
     my pos 0
-    my lastpos [expr {[my length]-1}]
+    my lastpos [expr {[my length] - 1}]
 }
 ReadStringStream instproc length {} {
     string length [my string]
 }
 ReadStringStream instproc nextChar {} {
-    my instvar pos string
-    set ret [string index $string $pos]
-    incr pos
+    set ret [string index [my string] [my set pos]]
+    my incr pos
     return $ret
 }
 
