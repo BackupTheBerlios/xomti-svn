@@ -1,0 +1,32 @@
+package require xomti 0.1
+
+Class create Xomti_Type_size_t
+
+Xomti_Type_size_t instproc init {i} {
+    # to be rewrited
+    if {$i < 0} {
+	error "negative index"
+    }
+    my set c_value $i
+    
+}
+
+Xomti_Type_size_t instproc get_value {} {
+    return [my set c_value]
+} 
+
+Xomti_Type_size_t instproc assume_less_than {i message} {
+    if {[my get_value] >= $i} {
+	error $message
+    }
+}
+
+Xomti_Type_size_t instproc *= {i} {
+    my set c_value [expr {[my get_value] * $i}]
+}
+
+Xomti_Type_size_t instproc += {i} {
+    my set c_value [expr {[my get_value] + $i}]
+}
+
+package provide xomti_types 0.1
