@@ -69,7 +69,8 @@ Format de la base de données SQLite, observée avec dgSQLite.kit
         componentid : index identifiant le composant Component.componentid
         deforder    : index d'ordre d'apparition de l'objet dans le composant
 
-        * Extension de la table "Object", cette table construit des listes qui servent à faire apparaître dans un composant les superclasses avant les sous-classes, etc.
+        * Extension de la table "Object", cette table construit des listes
+          qui ordonnent dans un composant les superclasses avant les sous-classes, etc.
 
 
     Method
@@ -86,7 +87,7 @@ Format de la base de données SQLite, observée avec dgSQLite.kit
         objectname  : nom de l'objet/classe
         type        : Class/Instance/tclproc
         name        : nom de la méthode
-        body        :
+        body        : script Tcl ou XOTcl complet, ex. "clacla instproc toto {a b} {...}"
 
         basedon     : ?? souvent NA
 
@@ -104,3 +105,6 @@ Tables vides :
     Configmap
     ConfigmapChildren
     ConfigmapComponent
+
+################################################
+
