@@ -357,3 +357,120 @@ tclMain.c:Tcl_Main
       tclExecute.c:TclCompEvalObj
         L'objet chaine est converti en byteCode:
         tclCompile.c:SetByteCodeFromAny
+
+
+########################
+# break's intéressants #
+########################
+
+TclSetByteCodeFromAny après Tcl_GetStringFromObj
+TclExecuteByteCode au niveau du "switch(*pc)"
+TclCompEvalObj
+
+###########################
+# Affichage du bytecode : #
+###########################
+
+-DTCL_COMPILE_DEBUG
+
+set tcl_traceCompile 2
+
+set a [proc {} b {puts $b}]
+$a 22
+
+proc c {va vb} {$va $vb}
+c $a 22
+
+set d [proc {} {va vb} {$va $vb}]
+$d $a 22
+$d puts 33
+
+
+##################################################
+
+Fonctions appelant tclExecute.c:TclExecuteByteCode :
+
+  tclExecute.c:Tcl_ExprObj
+
+  tclExecute.c:TclCompEvalObj
+    tclBasic.c:Tcl_EvalObjEx
+    tclExecute.c:TclExecuteByteCode
+    tclProc.c:TclObjInterpProc
+
+#################################################
+
+xotcl-1.3.3
+
+"o toto" pour la seconde fois
+
+  Tcl_RecordAndEvalObj "o toto", refCount vaut 1 et le type est string
+    Tcl_EvalObjEx
+      TclCompEvalObj
+        TclExecuteByteCode
+          - INST_PUSH1 "o" type "cmdName"
+          - INST_PUSH1 "toto" sans type
+          - INST_INVOKE_STK1
+          Tcl_GetCommandFromObj
+             ... bien du type "cmdName"
+          TclEvalObjInternal
+            Tcl_GetCommandFromObj (encore !)
+            XOTclObjDispatch
+              ObjDispatch
+                DoDispatch
+                  SearchCMethod
+                    SearchPLMethod
+                      ComputeOrder
+                      FindMethod
+                        Tcl_FindHashEntry
+                        Tcl_GetHashValue
+                  .h:Tcl_Command_objProc
+                  .h:Tcl_Command_objClientData
+                  DoCallProcCheck
+                  TclIsProc
+                 callProcCheck
+
+                 TclObjInterpProc
+
+
+
+TclCompEvalObj
+TclExecuteByteCode
+
+
+
+
+TclEvalObjvInternal
+  XOTclObjDispatch
+    ObjDispatch
+      DoDispatch
+        ...
+        DoCallProcCheck
+          callProcCheck
+            XOTclCCreateMethod
+              createMethod
+                ... tout le boulot
+
+createMethod 
+
+
+
+
+
+
+XOTcl:
+
+XOTclObject : Le champ cmdName est un objet Tcl de type "XOTclObject"
+
+DoDispatch:
+  callMethod
+  XOTclCallMethodWithArg
+  DoDispatch
+  ObjDispatch
+  XOTclCNewMethod
+
+
+DoDispatch:
+
+Soit o un objet. Si j'appelle "o toto", objc vaut 2
+Dans l'argument ClientData, on récupère un XOTclObject dans lequel on récupère un objet "XOTclObject"
+Le nom de la méthode est 

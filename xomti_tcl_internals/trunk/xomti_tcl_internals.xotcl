@@ -1,0 +1,76 @@
+# 2005-03-11 (FP)
+
+package require xomti 0.1
+package require xomti_critcl 0.3
+
+Class create Xomti_Tcl_Internals
+
+Xomti_Critcl_builder create Xomti_Tcl_Internals::builder
+Xomti_Tcl_Internals::builder option_set keepsrc 1
+Xomti_Tcl_Internals::builder option_set lines 0
+
+# Xomti_Tcl_Internals::builder cproc Xomti_Tcl_Internals::newParse {} 
+
+Xomti_Tcl_Internals::builder ccode {#include <tcl.h>
+
+static void FreeTclParseInternalRep(Tcl_Obj *objPtr);
+static void DupTclParseInternalRep(Tcl_Obj *srcPtr, Tcl_Obj *copyPtr);
+static void UpdateStringOfTclParse(Tcl_Obj *objPtr);
+static int  TclParseTypeFromAny(Tcl_Interp *interp, Tcl_Obj *objPtr);
+
+Tcl_ObjType tclTclParseType = {
+     "tcl parse",
+     FreeTclParseInternalRep,
+     DupTclParseInternalRep,
+     NULL,
+     TclParseTypeFromAny
+};
+
+static void FreeTclParseInternalRep(Tcl_Obj *objPtr) {
+    Tcl_FreeParse((Tcl_Parse *)objPtr->internalRep.otherValuePtr;
+}
+static void DupTclParseInternalRep(Tcl_Obj *srcPtr, Tcl_Obj *copyPtr) {
+    register (Tcl_Parse *) psrc = (Tcl_Parse *) (srcPtr->internalRep.otherValuePtr);
+    register (Tcl_Parse *) pcopy = (Tcl_Parse *) ckalloc(sizeof(Tcl_Parse);
+    if (psrc->tokenPtr != parsePtr->staticTokens) {
+not finished
+    }
+    copyPtr->typePtr = srcPtr->typePtr;
+}
+static void UpdateStringOfTclParse(Tcl_Obj *objPtr) {objPtr->bytes = ckalloc(12); memcpy(objPtr->bytes, "a tcl parse", 12); objPtr->length = 11;}
+static int  TclParseTypeFromAny(Tcl_Interp *interp, Tcl_Obj *objPtr) {Tcl_SetResult(interp, "cannot convert to \"tcl parse\"", NULL); return TCL_ERROR;}
+
+
+} ;# end of ccode
+
+Xomti_Tcl_Internals::builder cinit {Tcl_RegisterObjType(&tclTclParseType);}
+
+Xomti_Tcl_Internals::builder ccommand Xomti_Tcl_Internals::get_type {data interp objc objv} {
+    Tcl_ObjType *t;
+    if (objc != 2) {
+	/* Si ne n'est pas le cas, on renvoit un message d'erreur contenant 1 (le premier)
+	   argument de la liste de commande "argv" - donc le nom de la commande -,
+	   suivi de "nombre"
+	*/
+	Tcl_WrongNumArgs(interp, 1, objv, "something");
+	return TCL_ERROR;
+    }
+    t = objv[1]->typePtr;
+    if (t != NULL) { 
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(t->name, -1));
+    } else {
+	Tcl_SetObjResult(interp, Tcl_NewStringObj("without type", -1));
+    }
+
+    /* et ne pas oublier de retourner "TCL_OK" */
+    return TCL_OK;
+}
+
+
+
+set tcl_prefix [Xomti_Critcl get_prefix tcl]
+Xomti_Tcl_Internals::builder cheaders -I$tcl_prefix/generic
+
+Xomti_Tcl_Internals::builder cbuild
+package provide xomti_tcl_internals 0.1
+

@@ -1,0 +1,63 @@
+2005-03-10 (FP)
+
+Objectif réécriture d'un genre de xotcl en quasi pur Tcl, pas moins rapide
+et surtout capable de manipuler des objets anonymes.
+
+proc addition_double {a b} {
+    
+}
+
+
+
+
+1er patch Tcl
+
+set a [proc {} {...les arguments...} {...les commandes...}]
+
+Un Object, c'est au moins
+  - un tag d'appartenance à une classe.
+  - une liste de données internes (paramètres de la classe). Utiliser une liste permet de travailler avec une grande efficacité
+et en plus
+  - un dictionnaire de variables internes supplémentaires 
+  - un dictionnaire de méthodes propres à l'objet
+  - une liste de mixins
+  - une liste de filtres
+
+Une Class, c'est en plus
+  - une dictionnaire qui permet de lier le nom d'un paramètre et sa position dans chaque liste d'instance
+  - un namespace particulier qui contient les méthodes d'instances
+
+#################
+# code morphing #
+#################
+
+Class create Xomti_Type_size_t -parameter {length word_size data}
+Class create Xomti_Blas_vector
+Class create Xomti_Blas_vector_double
+
+Xomti_Blas_vector instproc compute_byte_index i {
+    set index [Xomti_Type_size_t create -anonymous $i]
+    $index assume_less_than [my get length] "Out of bounds"
+    $index *= [my get word_size]
+    $index += [my get data] 
+    return $index
+}
+
+Xomti_Blas_vector_double instproc c_get_at i {
+    return [Xomti_Memory read_double [my compute_byte_index $i]]
+    # détruit l'index
+}
+
+Le code correspond à une réécriture, dans le namespace "::xopt::procs"
+
+proc Xomti_Blas_vector::compute_byte_index xbv i {
+    set index [Xomti_Type_size_t::create -anonymous $i]
+    [Xomti_Type_size_t::assume_less_than $index [lindex $xbv 0]  "Out of bounds"
+    Xomti_Type_size_t::*= $index [lindex $xbv 1]
+    Xomti_Type_size_t::+= $index [lindex $xbv 2]
+    return $index
+}
+
+proc Xomti_Blas_vector_double::c_get_at xbvd i {
+    return [Xomti_Memory::read_double [Xomti_Blas_vector::compute_byte_index $xbvd $i]]
+}

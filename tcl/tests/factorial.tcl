@@ -1,5 +1,5 @@
 memory validate off
-
+history keep 0
 
 proc f1 {n} {
     set r $n
@@ -97,7 +97,6 @@ proc v3 {vv} {
     return $l
 }
 
-
 time {v1} 100
 time {v2 v} 100
 time {v3 $vv} 100
@@ -119,5 +118,4 @@ time {v3b $vv} 1
 time {v1b} 10000
 time {v2b v} 10000
 time {v3b $vv} 10000
-
 
