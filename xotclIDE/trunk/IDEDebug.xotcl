@@ -34,7 +34,7 @@ proc idevarstrack::invokeDebugger {name1 name2 op} {
 description {It use the same input as Tracker Browser.
 }
 }
-Class IDE::CallingCoverBrowser -superclass ::IDE::Browser 
+Class IDE::CallingCoverBrowser -superclass ::IDE::Browser
 @ ::IDE::CallingCoverBrowser idemeta component IDEDebug
 IDE::CallingCoverBrowser instproc getTitle {} {
   return "Method Coverage Analyse Browser"
@@ -65,7 +65,7 @@ IDE::CallingCoverBrowser proc newBrowser {} {
     return [my new [Object autoname .browser]]
 }
 
-Class IDE::CoverClassView -superclass ::IDE::ClassView 
+Class IDE::CoverClassView -superclass ::IDE::ClassView
 @ ::IDE::CoverClassView idemeta component IDEDebug
 IDE::CoverClassView instproc addClass {} {
     set class [IDE::ClassSelector getClass]
@@ -136,7 +136,7 @@ IDE::CoverClassView instproc selectFor dummy {
     my refreshBaseView
 }
 
-Class IDE::CoverMethodView -superclass ::IDE::MethodView 
+Class IDE::CoverMethodView -superclass ::IDE::MethodView
 @ ::IDE::CoverMethodView idemeta component IDEDebug
 IDE::CoverMethodView instproc changeViewType type {
     my set cvtype $type
@@ -194,7 +194,7 @@ IDE::CoverMethodView instproc selectFor {class categories type} {
     my selectItem {}
 }
 
-Class IDE::StackMethodListView -superclass ::IDE::MethodListView 
+Class IDE::StackMethodListView -superclass ::IDE::MethodListView
 @ ::IDE::StackMethodListView idemeta component IDEDebug
 IDE::StackMethodListView instproc buttonDoublePush {} {
     next
@@ -262,7 +262,7 @@ IDE::StackMethodListView instproc selectItem item {
    ${browser}::methodedit colorizeText $invoke
 }
 
-Class IDE::DebugMethodListView -superclass ::IDE::StackMethodListView 
+Class IDE::DebugMethodListView -superclass ::IDE::StackMethodListView
 @ ::IDE::DebugMethodListView idemeta component IDEDebug
 IDE::DebugMethodListView instproc getMenuStruct {} {
    # nothing
@@ -289,7 +289,7 @@ IDE::DebugMethodListView instproc selectItem item {
     $browser displayIndex $index
 }
 
-Class IDE::DebugSubObjectsView -superclass ::IDE::SubObjectsView 
+Class IDE::DebugSubObjectsView -superclass ::IDE::SubObjectsView
 @ ::IDE::DebugSubObjectsView idemeta component IDEDebug
 IDE::DebugSubObjectsView instproc fillMenuStruct ms {
     $ms addCommand {Inspect called Object} [list [self] inspectCalledObject]
@@ -312,9 +312,9 @@ by resume the debugging loop will be exited an the normall program flow
 will be continued
 }
 }
-Class IDE::Debugger -superclass {::IDE::Browser ::IDE::GUICommands}  -parameter {{atHead 1}}
-@ ::IDE::Debugger idemeta categoriesMethods {{editSave destroy} {evalLevel inspectLevelVar inspectLevel inspectCalledObject showArguments} {evalAtLevel displayIndex} specificInit}
+Class IDE::Debugger -superclass {::IDE::Browser ::IDE::GUICommands} -parameter {{atHead 1}}
 @ ::IDE::Debugger idemeta categories {actions actions-results actions-trigger initialize}
+@ ::IDE::Debugger idemeta categoriesMethods {{editSave destroy} {evalLevel inspectLevelVar inspectLevel inspectCalledObject showArguments} {evalAtLevel displayIndex} specificInit}
 @ ::IDE::Debugger idemeta component IDEDebug
 IDE::Debugger instproc destroy {} {
      my instvar win
@@ -506,7 +506,7 @@ IDE::Debugger proc startDebugging {{addInfo {}}} {
     }
 }
 
-Class IDE::DebuggerMethodEdit -superclass ::IDE::MethodEdit 
+Class IDE::DebuggerMethodEdit -superclass ::IDE::MethodEdit
 @ ::IDE::DebuggerMethodEdit idemeta component IDEDebug
 IDE::DebuggerMethodEdit instproc evalDisplaySelection {} {
     my set action print
@@ -548,7 +548,7 @@ IDE::DebuggerMethodEdit instproc setEvaluationRet string {
     }
 }
 
-Class IDE::ErrorStack -superclass ::IDE::Browser 
+Class IDE::ErrorStack -superclass ::IDE::Browser
 @ ::IDE::ErrorStack idemeta component IDEDebug
 IDE::ErrorStack instproc editSave value {
    return
@@ -673,7 +673,7 @@ IDE::ErrorStack proc newBrowser errorInfo {
     return $inst
 }
 
-Class IDE::TrackedMethodList -superclass {::IDE::ListView ::IDE::GUICommands} 
+Class IDE::TrackedMethodList -superclass {::IDE::ListView ::IDE::GUICommands}
 @ ::IDE::TrackedMethodList idemeta component IDEDebug
 IDE::TrackedMethodList instproc browseSelected item {
     set first [lindex [split $item] 0]
@@ -709,7 +709,7 @@ IDE::TrackedMethodList instproc updateList {} {
 description {Trackerbrowser can show all calls to speciefie object or class
 it work with object IDE::MethodTracker}
 }
-Class IDE::TrackerBrowser -superclass ::IDE::Browser 
+Class IDE::TrackerBrowser -superclass ::IDE::Browser
 @ ::IDE::TrackerBrowser idemeta component IDEDebug
 IDE::TrackerBrowser instproc getTitle {} {
     return "Method Call Tracker"
@@ -776,7 +776,7 @@ IDE::TrackerBrowser proc removeFromTrackList item {
     }
 }
 
-Class IDE::VariableTraceList -superclass {::IDE::ListView ::IDE::GUICommands} 
+Class IDE::VariableTraceList -superclass {::IDE::ListView ::IDE::GUICommands}
 @ ::IDE::VariableTraceList idemeta component IDEDebug
 IDE::VariableTraceList instproc dispatchParentWithSelected procName {
     set actual [my selectedItemFirst]
@@ -809,9 +809,9 @@ IDE::VariableTraceList instproc varsTracker {} {
     my info parent
 }
 
-Class IDE::VarsTracker -superclass ::IDE::Browser 
-@ ::IDE::VarsTracker idemeta categoriesMethods {{getTitle specificInit initVarList} hasAnyWatch {removeAllTraces removeAllWatches removeReadTrace removeWatch removeWriteTrace removeWatchOn removeVariable}}
+Class IDE::VarsTracker -superclass ::IDE::Browser
 @ ::IDE::VarsTracker idemeta categories {init-release testing action-remove}
+@ ::IDE::VarsTracker idemeta categoriesMethods {{getTitle specificInit initVarList} hasAnyWatch {removeAllTraces removeAllWatches removeReadTrace removeWatch removeWriteTrace removeWatchOn removeVariable}}
 @ ::IDE::VarsTracker idemeta component IDEDebug
 IDE::VarsTracker instproc addVariable {var options changedoption} {
     my instvar varList
@@ -1002,8 +1002,8 @@ It handle adding and deleting tracking by settings filters and
 redirect the calls to IDE::TrackerBrowser.}
 }
 Object IDE::MethodTracker
-@ ::IDE::MethodTracker idemeta categoriesMethodsProcs {{unregisterClassForTracking unregisterObjectForTracking registerClassForTracking registerObjectForTracking getTrackingList} {methodExit methodEntry}}
 @ ::IDE::MethodTracker idemeta categoriesProcs {api filter-dispatch}
+@ ::IDE::MethodTracker idemeta categoriesMethodsProcs {{unregisterClassForTracking unregisterObjectForTracking registerClassForTracking registerObjectForTracking getTrackingList} {methodExit methodEntry}}
 @ ::IDE::MethodTracker idemeta component IDEDebug
 IDE::MethodTracker proc getTrackingList {} {
     my instvar trackedArr
