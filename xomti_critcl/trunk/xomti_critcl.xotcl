@@ -812,7 +812,7 @@ Class create Xomti_Crixotcl_proc -superclass ::Xomti_Crixotcl_code_and_digest
 Xomti_Crixotcl_proc instproc define_proc {name args} {
 
     set ns [namespace qualifiers $name]
-    if {$ns == "::"} {
+    if {$ns eq "::" || $ns eq ""} {
         set ns ""
     } else {
         set ns ${ns}::
