@@ -28,7 +28,6 @@ Tcl_ObjType tclRefObjType = {
 static void FreeRefObjInternalRep(Tcl_Obj *objPtr) {
     Tcl_Obj *referencedPtr = (Tcl_Obj *) objPtr->internalRep.otherValuePtr;
     Tcl_DecrRefCount(referencedPtr);
-    fprintf(stderr, "bye\n");
 }
 
 static void DupRefObjInternalRep(Tcl_Obj *srcPtr, Tcl_Obj *copyPtr) {
