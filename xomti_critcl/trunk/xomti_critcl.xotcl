@@ -1,0 +1,1277 @@
+# automatically generated from XOTclIDE
+package provide xomti_critcl 99991231.2
+
+@ tclproc ::loadvfs idemeta struct xomti_critcl default
+proc ::loadvfs dir {
+  load {} vfs
+  source [file join $dir vfsUtils.tcl]
+  source [file join $dir vfslib.tcl]
+}
+Class Xomti_Crixotcl_builder
+@ ::Xomti_Crixotcl_builder idemeta categories {public private_cbuild info private}
+@ ::Xomti_Crixotcl_builder idemeta categoriesMethods {{cproc ccommand check cheaders cdata tk clibraries ccode cinit cdefines} {cbuild cbuild_emit_code setup_tk_stubs cbuild_compile code_ext_get code_init_get} {get_cache_dir get_compile_string get_hdrdir get_platform get_sharedlibext} {init emulate_file_normalize file_normalize}}
+@ ::Xomti_Crixotcl_builder idemeta component xomti_critcl
+Xomti_Crixotcl_builder instproc cbuild {{load 1} {prefix {}} {silent {}}} {
+
+    # set procs [my info children [self]::procs]
+    set procs [my set proc_obj_list]
+    puts stderr $procs
+    
+    set digest_string "[self]"
+    foreach p $procs {
+        append digest_string [$p digest_get]
+    }
+
+    # each unique set of cmds is compiled into a separate extension
+    set digest [Xomti_Crixotcl_builder md5_hex $digest_string]
+
+    set cache_dir [my get_cache_dir]
+    regsub {^~} $cache_dir "$::env(HOME)/" cache_dir
+    set cache_dir [my file_normalize $cache_dir]
+
+    set base [file join $cache_dir $digest]
+    set libfile $base
+
+    # the compiled library will be saved for permanent use if the outdir
+    # option is set (in which case rebuilds will no longer be automatic)
+    if {[my option_get outdir] != ""} {
+        set odir [file join [file dirname [self]] [my option_get outdir]]
+        set oroot [file root [file tail [self]]]
+        set libfile [my file_normalize [file join $odir $oroot]]
+        file mkdir $odir
+    }
+
+    # modify the output file name if debugging symbols are requested
+    if {[lsearch -exact [my hdrs_get] "-g"] >= 0} { append libfile _g }
+
+    # choose distinct suffix so switching between them causes a rebuild
+    switch -- [my option_get combine] {
+        ""         { append libfile [my get_sharedlibext] }
+        dynamic    { append libfile _pic.o }
+        static     { append libfile _stub.o }
+        standalone { append libfile .o }
+    }
+
+    # the init proc name takes a capitalized prefix from the package name
+    set ininame Stdin ;# in case it's called interactively
+    regexp {^\w+} [file tail [self]] ininame
+    set ininame [string totitle $ininame]
+    if {$prefix != {}} {
+        set ininame "${prefix}_$ininame"
+    }
+
+    if {[my option_get force] || ![file exists $libfile]} {
+        set msgs [my cbuild_compile $cache_dir $base $libfile $ininame]
+    }
+
+    if {[my failed_count_get] != 0} {
+        if {$silent == ""} {
+            puts stderr $msgs
+            puts stderr "critcl build failed ([self])"
+        }
+    } elseif {$load} {
+        load $libfile $ininame
+    }
+
+
+    #[self]::hdrs end [self]
+    #[self]::srcs end [self]
+    #my unset v_code_init([self])
+
+    return [list $libfile $ininame]
+}
+Xomti_Crixotcl_builder instproc cbuild_compile {cache_dir base libfile ininame} {
+    file mkdir $cache_dir
+
+    set log [file join $cache_dir [pid].log]
+    set log_fd [open $log w]
+    puts $log_fd "\n[clock format [clock seconds]] - [self]"
+
+    set fd [open $base.c w]
+    ###################
+    my cbuild_emit_code $fd $libfile $ininame
+    ###################
+    close $fd
+
+    foreach x [glob -directory [my get_hdrdir] *.h] {
+        set fn [file join $cache_dir [file tail $x]]
+        if {![file exists $fn]} {
+            file copy $x $fn
+        }
+    }
+
+    set copts [list]
+    if {[my option_get language] != ""} {
+        lappend copts -x [my option_get language]
+    }
+    if {[my option_get I] != ""} {
+        lappend copts -I[my option_get I]
+    }
+    lappend copts -I$cache_dir
+    set copies {}
+
+    foreach x [my hdrs_get] {
+        if {[string index $x 0] == "-"} {
+            lappend copts $x
+        } else {
+            set copy [file join $cache_dir [file tail $x]]
+            file delete $copy
+            file copy $x $copy
+            lappend copies $copy
+        }
+    }
+
+    set cmdline "[my get_compile_string] $copts -o $libfile ${base}.c [[self]::srcs param_get]"
+    if {[my option_get language] != ""} {
+        # Allow the compiler to determine the type of file
+        # otherwise it will try to compile the libs
+        append cmdline " -x none"
+    }
+
+    append cmdline " " [[self]::libs param_get]
+
+    if {[my option_get combine] == ""} {
+        if {![regexp { -g } $cmdline]} {
+            append cmdline " -O2 -DNDEBUG -Wl,-s"
+        }
+    } else {
+        if {$::tcl_platform(os) eq "OSF1"} {
+            regsub { -shared } $cmdline { -c } cmdline
+        } else {
+            regsub { -shared } $cmdline { -r -nostdlib } cmdline
+        }
+        if {[my option_get combine] != "dynamic"} {
+            regsub { -fPIC } $cmdline { } cmdline
+            if {[my set option_get combine] == "standalone"} {
+                regsub { -DUSE_TCL_STUBS } $cmdline { } cmdline
+            }
+        }
+    }
+
+    if {$::tcl_platform(os) == "Darwin"} {
+        regsub { -shared } $cmdline { -dynamiclib -fno-common } cmdline
+        regsub { -Wl,-s} $cmdline {} cmdline
+    } elseif {$::tcl_platform(os) eq "OSF1"} {
+        regsub { -Wl,-s} $cmdline {} cmdline
+    }
+
+    puts $log_fd $cmdline
+    my failed_count_reset
+    if {[catch {
+        eval exec $cmdline 2>@ $log_fd
+        if {![my option_get keepsrc]} { file delete ${base}.c }
+        puts $log_fd "${libfile}: [file size $libfile] bytes"
+    } err]} {
+        puts $log_fd "ERROR while compiling code in [self]:"
+        my failed_count_incr
+    }
+    # read build log
+    close $log_fd
+    set log_fd [open $log]
+    set msgs [read $log_fd]
+    close $log_fd
+    file delete -force $log
+    # append to critcl log
+    set log [file join $cache_dir cbuild.log]
+    set log_fd [open $log a]
+    puts $log_fd $msgs
+    close $log_fd
+    foreach x $copies {
+        file delete $x
+    }
+    return $msgs
+}
+Xomti_Crixotcl_builder instproc cbuild_emit_code {fd libfile ininame} {
+    my instvar v_clientdata v_delproc
+
+    set names {}
+
+        puts $fd "/* Generated by critcl on [clock format [clock seconds]]
+ * source: [self] from class [[self] info class]
+ * binary: $libfile
+ */
+#include \"tcl.h\"\n"
+
+        if {[my option_get tk]} {
+            puts $fd "\n#include \"tk.h\""
+        }
+
+        foreach proc_obj [my set code_obj_list] {
+            if {[$proc_obj code_get] != {}} {
+                puts $fd "/* [string repeat - 70] */\n"
+                puts $fd [$proc_obj code_get]
+                if {[$proc_obj istype Xomti_Crixotcl_proc]} {
+                    set name [$proc_obj name_get]
+	            if {$name == ""} {
+                        return -code error "nom vide"
+                    }
+                    lappend names $name
+                }
+            }
+        }
+        puts $fd "/* [string repeat - 70] */"
+
+        puts -nonewline $fd {
+#if USE_TCL_STUBS
+TclStubs *tclStubsPtr;
+TclPlatStubs *tclPlatStubsPtr;
+struct TclIntStubs *tclIntStubsPtr;
+struct TclIntPlatStubs *tclIntPlatStubsPtr;
+
+static int
+MyInitTclStubs (Tcl_Interp *ip)
+{
+    typedef struct {
+        char *result;
+        Tcl_FreeProc *freeProc;
+        int errorLine;
+        TclStubs *stubTable;
+    } HeadOfInterp;
+
+    HeadOfInterp *hoi = (HeadOfInterp*) ip;
+
+    if (hoi->stubTable == NULL || hoi->stubTable->magic != TCL_STUB_MAGIC) {
+        ip->result = "This extension requires stubs-support.";
+        ip->freeProc = TCL_STATIC;
+        return 0;
+    }
+
+    tclStubsPtr = hoi->stubTable;
+
+    if (Tcl_PkgRequire(ip, "Tcl", "8.1", 0) == NULL) {
+        tclStubsPtr = NULL;
+        return 0;
+    }
+
+    if (tclStubsPtr->hooks != NULL) {
+        tclPlatStubsPtr = tclStubsPtr->hooks->tclPlatStubs;
+        tclIntStubsPtr = tclStubsPtr->hooks->tclIntStubs;
+        tclIntPlatStubsPtr = tclStubsPtr->hooks->tclIntPlatStubs;
+    }
+
+    return 1;
+}
+#endif
+        }
+        # now do the Tk stuff
+        if {[my option_get tk]} {
+my setup_tk_stubs $fd
+            append compile " -DUSE_TK_STUBS"
+        }
+
+        puts $fd "
+#ifdef __cplusplus
+extern \"C\" {
+#endif
+[my code_ext_get]
+DLLEXPORT int
+${ininame}_Init(Tcl_Interp *ip)
+{
+    #if USE_TCL_STUBS
+    if (!MyInitTclStubs(ip)) return TCL_ERROR;
+#endif"
+        if {[my option_get tk]} {
+            puts $fd "
+#if USE_TK_STUBS
+  if (!MyInitTkStubs(ip)) return TCL_ERROR;
+#endif"
+        }
+        puts $fd "[my code_init_get] "
+
+ puts stderr "defines_get = \"[my defines_get]\""
+        if {[my defines_get] != {}} {
+            my defines_build $fd
+        }
+        foreach x [lsort $names] {
+            if {[info exists clientdata($name)]} {
+                set cd $v_clientdata($name)
+            } else {
+                set cd NULL
+            }
+            if {[info exists v_delproc($name)]} {
+                set dp $v_delproc($name)
+            } else {
+                set dp 0
+            }
+            puts $fd "  Tcl_CreateObjCommand(ip, ns_$x, tcl_$x, $cd, $dp);"
+        }
+        puts $fd "  return TCL_OK;
+}
+#ifdef __cplusplus
+}
+#endif"
+}
+Xomti_Crixotcl_builder instproc ccode text {
+    set ccode [Xomti_Crixotcl_ccode new -childof [self]::ccodes $text [my option_get lines]]
+    my lappend  code_obj_list $ccode
+    puts stderr "code_obj_list = [my set code_obj_list]"
+    my lappend ccode_obj_list $ccode
+    return $ccode
+}
+Xomti_Crixotcl_builder instproc ccommand {name arg_defs args} {
+    set cproc [Xomti_Crixotcl_ccommand new -childof [self]::ccommands $name $arg_defs $args]
+puts $cproc
+    my lappend code_obj_list $cproc
+    my lappend proc_obj_list $cproc
+    return $cproc
+}
+Xomti_Crixotcl_builder instproc cdata {name data} {
+
+    binary scan $data c* bytes ;# split as bytes, not (unicode) chars
+
+    set inittext ""
+    set line ""
+    foreach x $bytes {
+        if {[string length $line] > 70} {
+            append inittext "    " $line \n
+            set line ""
+        }
+        append line $x ,
+    }
+    append inittext "    " $line
+
+    set count [llength $bytes]
+
+    uplevel [list [self] ccommand $name {dummy ip objc objv} "
+  static char script\[$count\] = {
+    $inittext
+  };
+  Tcl_SetByteArrayObj(Tcl_GetObjResult(ip), (unsigned char*) script, $count);
+  return TCL_OK;
+"]
+    return $name
+}
+Xomti_Crixotcl_builder instproc cdefines {defines {namespace ::}} {
+    foreach def $defines {
+        my defines_append $namespace $def
+    }
+}
+Xomti_Crixotcl_builder instproc cheaders args {
+    return [[self]::hdrs param_set $args]
+}
+Xomti_Crixotcl_builder instproc check code {
+    set cache_dir [my get_cache_dir]
+    file mkdir $cache_dir ;# just in case
+    set pref [my file_normalize [file join $cache_dir check_[pid]]]
+    set fd [open $pref.c w]
+    puts $fd $code
+    close $fd
+    exec ls -lrt [my file_normalize $cache_dir]
+    set copts [list]
+    if {[my option_get I] != ""} {
+        lappend copts -I[my option_get I]
+    }
+    lappend copts -I$cache_dir
+    set cmdline [concat [my get_compile_string] [list $copts $pref.c -o $pref.o]]
+    if {[catch {eval exec $cmdline} err]} {
+        set result 0
+        my set last_error $err
+    } else {
+        set result 1
+    }
+    foreach tmp [glob -directory $cache_dir check_[pid].*] {
+        file delete -force $tmp
+    }
+    return $result
+}
+Xomti_Crixotcl_builder instproc cinit {text {exts {}}} {
+    [self]::init set code $text
+    [self]::ext  set code $exts
+
+    [self]::init compute_digest
+    [self]::ext  compute_digest
+}
+Xomti_Crixotcl_builder instproc clibraries args {
+    return [[self]::libs param_set $args]
+}
+Xomti_Crixotcl_builder instproc code_ccode_get {} {
+    set ret ""
+    foreach ccode [my set ccode_obj_list] {
+        append ret [$ccode code_get]
+    }
+    return $ret
+}
+Xomti_Crixotcl_builder instproc code_ext_get {} {
+    return [[self]::ext code_get]
+}
+Xomti_Crixotcl_builder instproc code_init_get {} {
+    return [[self]::init code_get]
+}
+Xomti_Crixotcl_builder instproc cproc {name arg_defs return_type {body #}} {
+    set cproc [Xomti_Crixotcl_cproc new -childof [self]::cprocs $name $arg_defs $return_type $body]
+    my lappend code_obj_list $cproc
+    my lappend proc_obj_list $cproc
+    return $cproc
+}
+Xomti_Crixotcl_builder instproc csources args {
+    return [[self]::srcs set $args]
+}
+Xomti_Crixotcl_builder instproc defines_append {ns def} {
+    my lappend defines $ns $def
+}
+Xomti_Crixotcl_builder instproc defines_build fd {
+    # we process the cdefines in three steps
+    #   - get the list of defines by preprocessing the source using the
+    #     cpp -dM directive which causes any #defines to be output
+    #   - extract the list of enums using regular expressions (not perfect,
+    #     but will do for now)
+    #   - generate Tcl_ObjSetVar2 commands to initialise Tcl variables
+    set def [my file_normalize [file join [my get_cache_dir] define_[pid]]]
+    # first step - get list of matching defines
+    set cmd "[my get_compile_string] [[self]::hdrs param_get] -E"
+    set dfd [open $def.c w]
+    puts $dfd [my code_ccode_get]
+    close $dfd
+    set efd [open "| $cmd -dM $def.c" r]
+    set defines [list]
+    while {[gets $efd line] >= 0} {
+        set fields [split [string trim $line]]
+        if {[lindex $fields 0] eq "#define"} {
+            set var [lindex $fields 1]
+            set val [lindex $fields 2]
+            foreach {nm dfn} [my defines_get] {
+                if {[string match $dfn $var]} {
+                    lappend defines $nm $var $val
+                }
+            }
+        }
+    }
+    # second step - get list of enums
+    set efd [open "| $cmd $def.c" r]
+    set code [read $efd]
+    set matches [regexp -all -inline {enum [^\{\(\)]*{([^\}]*)}} $code]
+    foreach {match submatch} $matches {
+        foreach line [split $submatch \n] {
+            foreach sub [split $line ,] {
+                set enum [lindex $sub 0]
+                foreach {nm dfn} [my defines_get] {
+                    if {[string match $dfn $enum]} {
+                        lappend defines $nm $enum $enum
+                    }
+                }
+            }
+        }
+    }
+    # third step - generate Tcl_ObjSetVar2 commands
+    foreach {nm df val} $defines {
+        if {![info exists created($nm)]} {
+            # we need to force the creation of the namespace
+            # because this code will be run before the user code
+            puts $fd "  Tcl_Eval(ip, \"namespace eval $nm {}\");"
+            set created($nm) 1
+        }
+        set var "Tcl_NewStringObj(\"${nm}::$df\", -1)"
+        if {$df eq $val} {
+            # enum - assume integer
+            set val "Tcl_NewIntObj($val)"
+        } else {
+            # text or int - force to string
+            set val "Tcl_NewStringObj(\"$val\", -1)"
+        }
+        puts $fd "  Tcl_ObjSetVar2(ip, $var, NULL, $val, TCL_GLOBAL_ONLY);"
+    }
+    
+    puts stderr "$def.c"
+    if {![my option_get keepsrc]} {
+        file delete $def.c
+    }
+    my defines_reset
+}
+Xomti_Crixotcl_builder instproc defines_get {} {
+    return [my set defines]
+}
+Xomti_Crixotcl_builder instproc defines_reset {} {
+    my set defines {}
+}
+Xomti_Crixotcl_builder instproc emulate_file_normalize script_file {
+    set sp [file split $script_file]
+    if {[file pathtype [lindex $sp 0]] == "relative"} {
+        set sp [file split [eval [list file join [pwd]] $sp]]
+    }
+    if {[lindex $sp 0] == "~"} {
+        set sp [lreplace $sp 0 0 $::env(HOME)]
+    }
+    set np {}
+    foreach ele $sp {
+        if {$ele != ".."} {
+            if {$ele != "."} { lappend np $ele }
+        } elseif {[llength $np]> 1} {
+            set np [lrange $np 0 [expr {[llength $np] - 2}]]
+        }
+    }
+    if {[llength $np] > 0} {
+        return [eval file join $np]
+    }
+}
+Xomti_Crixotcl_builder instproc failed_count_get {} {
+    return [my set v_failed]
+}
+Xomti_Crixotcl_builder instproc failed_count_incr {} {
+    my incr v_failed
+}
+Xomti_Crixotcl_builder instproc failed_count_reset {} {
+    my set v_failed 0
+}
+Xomti_Crixotcl_builder instproc file_normalize file {
+    return [my emulate_file_normalize $file]
+}
+Xomti_Crixotcl_builder instproc get_cache_dir {} {
+    return [file join ~ .critcl [my get_platform]]
+}
+Xomti_Crixotcl_builder instproc get_compile_string {} {
+    return [my set compile_string]
+}
+Xomti_Crixotcl_builder instproc get_hdrdir {} {
+    return [my set hdrdir]
+}
+Xomti_Crixotcl_builder instproc get_platform {} {
+    global tcl_platform
+    set plat [lindex $tcl_platform(os) 0]
+    set mach $tcl_platform(machine)
+    switch -glob -- $mach {
+        sun4* { set mach sparc }
+           intel -
+           i*86* { set mach x86 }
+           "Power Macintosh" { set mach ppc }
+        }
+    switch -- $plat {
+        AIX   { set mach ppc }
+        HP-UX { set mach hppa }
+    }
+    return "$plat-$mach"
+}
+Xomti_Crixotcl_builder instproc get_sharedlibext {} {
+    my instvar v_sharedlibext
+
+    if {![info exists v_sharedlibext]} {
+        set v_sharedlibext [info sharedlibextension]
+    }
+    return $v_sharedlibext
+}
+Xomti_Crixotcl_builder instproc hdrs_get {} {
+    return [[self]::hdrs param_get]
+}
+Xomti_Crixotcl_builder instproc init {} {
+    package require xomti_tcllib_md5 20050124
+
+    # my set hdrdir [file join [file dirname [info script]] critcl_c]
+    puts stderr "hdrdir a revoir"
+    # my set hdrdir ~/Z/critcl.vfs/lib/critcl/critcl_c
+    my set hdrdir /home/p10admin/prog/Tcl/distrib/tcl8.4.1/generic/
+
+    my set compile_string {gcc -shared -DUSE_TCL_STUBS}
+
+    # this should be deferred until after we know if we are cross compiling
+    if {$::tcl_platform(platform) != "windows"} { lappend compile "-fPIC" }
+
+    my defines_reset
+
+    foreach {k v} {outdir ""
+                   keepsrc 0
+                   combine ""
+                   appinit ""
+                   force   0
+                   I       ""
+                   L       ""
+                   tk      0
+                   language ""
+                   lines 1
+                   } {
+        # only these options are permitted
+        my set options($k) $v
+    }
+    my failed_count_reset
+
+    set rien {
+    set compiling 0  ;# indicates that the gcc/cc is available
+    set ininame ""
+    set libfile ""
+    }
+    
+    my set  code_obj_list [list] ;# cumule les suivants
+    my set  proc_obj_list [list] ;# cproc et ccommand
+    my set ccode_obj_list [list]
+    
+    Xomti_Crixotcl_param         create [self]::hdrs
+    Xomti_Crixotcl_param         create [self]::libs
+    Xomti_Crixotcl_param         create [self]::srcs
+    
+    Object                 create [self]::cprocs
+    Object                 create [self]::ccommands
+    Object                 create [self]::ccodes
+    
+    Xomti_Crixotcl_code_fragment create [self]::init
+    Xomti_Crixotcl_code_fragment create [self]::ext
+    
+
+}
+Xomti_Crixotcl_builder instproc option_get option {
+    return [my set options($option)]
+}
+Xomti_Crixotcl_builder instproc option_set {option args} {
+    my instvar options
+
+    if {![info exists options($option)] || [llength $args] > 1} {
+      error "option must be one of: [lsort [array names options]]"
+    }
+    if {[llength $args] == 0} {
+        return [my set options($option)]
+    } else {
+        set options($option) [lindex $args 0]
+    }
+}
+Xomti_Crixotcl_builder instproc setup_tk_stubs fd {
+    puts -nonewline $fd {
+        #if USE_TK_STUBS
+
+        TkStubs *tkStubsPtr;
+        struct TkPlatStubs *tkPlatStubsPtr;
+        struct TkIntStubs *tkIntStubsPtr;
+        struct TkIntPlatStubs *tkIntPlatStubsPtr;
+        struct TkIntXlibStubs *tkIntXlibStubsPtr;
+
+        static int
+        MyInitTkStubs (Tcl_Interp *ip)
+        {
+            if (Tcl_PkgRequireEx(ip, "Tk", "8.1", 0, (ClientData*) &tkStubsPtr) == NULL)      return 0;
+            if (tkStubsPtr == NULL || tkStubsPtr->hooks == NULL) {
+                Tcl_SetResult(ip, "This extension requires Tk stubs-support.", TCL_STATIC);
+                return 0;
+            }
+            tkPlatStubsPtr = tkStubsPtr->hooks->tkPlatStubs;
+            tkIntStubsPtr = tkStubsPtr->hooks->tkIntStubs;
+            tkIntPlatStubsPtr = tkStubsPtr->hooks->tkIntPlatStubs;
+            tkIntXlibStubsPtr = tkStubsPtr->hooks->tkIntXlibStubs;
+            return 1;
+        }
+        #endif
+    }
+}
+Xomti_Crixotcl_builder instproc tk {} {
+    my option_set tk 1
+}
+Xomti_Crixotcl_builder proc md5_hex msg {
+    set s [Tcllib_md5pure md5 $msg]
+    binary scan $s H* md
+    return $md
+}
+Class Xomti_Crixotcl_code_and_digest
+@ ::Xomti_Crixotcl_code_and_digest idemeta component xomti_critcl
+Xomti_Crixotcl_code_and_digest instproc code_get {} {
+    return [my set code]
+}
+Xomti_Crixotcl_code_and_digest instproc compute_digest {} {
+    my set digest [Xomti_Crixotcl_builder md5_hex [my set code]]
+}
+Xomti_Crixotcl_code_and_digest instproc digest_get {} {
+    return [my set digest]
+}
+Class Xomti_Crixotcl_ccode -superclass ::Xomti_Crixotcl_code_and_digest 
+@ ::Xomti_Crixotcl_ccode idemeta component xomti_critcl
+Xomti_Crixotcl_ccode instproc init {text with_lines} {
+    my set code ""
+    if {$with_lines} {
+        my append code "#line 1 \"[my info parent]\"\n"
+    }
+    my append code "$text\n"
+    my compute_digest
+}
+Class Xomti_Crixotcl_proc -superclass ::Xomti_Crixotcl_code_and_digest 
+@ ::Xomti_Crixotcl_proc idemeta component xomti_critcl
+Xomti_Crixotcl_proc instproc define_proc {name args} {
+
+    set ns [namespace qualifiers $name]
+    set tail_name [namespace tail $name]
+    my set name $tail_name
+
+    ## called from ccommand or cproc
+    #set ns [uplevel 2 namespace current]
+    #if {$ns == "::"} {
+    #} else {
+    #    append ns ::
+    #}
+
+    set ::auto_index(${ns}::$tail_name) [list [[my info parent] info parent] cbuild]
+
+    my emit "#define ns_$tail_name \"${ns}::$tail_name\"\n"
+    if {[my option_get lines]} {
+        my emit "#line 1 \"[self]/$tail_name\"\n"
+    }
+    return $tail_name
+}
+Xomti_Crixotcl_proc instproc emit s {
+    my append code $s
+}
+Xomti_Crixotcl_proc instproc emitln {{s {}}} {
+    my emit "$s\n"
+}
+Xomti_Crixotcl_proc instproc name_get {} {
+    return [my set name]
+}
+Xomti_Crixotcl_proc instproc option_get key {
+    return [[[my info parent] info parent] set options($key)]
+}
+Class Xomti_Crixotcl_ccommand -superclass ::Xomti_Crixotcl_proc 
+@ ::Xomti_Crixotcl_ccommand idemeta component xomti_critcl
+Xomti_Crixotcl_ccommand instproc init {name anames args} {
+    my instvar v_clientdata v_delproc
+puts stderr "A REFAIRE"
+    set tail_name [my define_proc $name $anames $args]
+
+    set clientdata NULL
+    set delproc 0
+    while {[string match "-*" $args]} {
+        switch -- [lindex $args 0] {
+          -clientdata { set clientdata [lindex $args 1] }
+          -delproc { set delproc [lindex $args 1] }
+        }
+        set args [lrange $args 2 end]
+    }
+    set v_clientdata($tail_name) $clientdata
+    set v_delproc($tail_name) $delproc
+    set body $args
+    if {$body != ""} {
+      lappend anames ""
+      foreach {cd ip oc ov} $anames break
+      if {$cd == ""} { set cd clientdata }
+      if {$ip == ""} { set ip interp }
+      if {$oc == ""} { set oc objc }
+      if {$ov == ""} { set ov objv }
+
+      set ca "(ClientData $cd, Tcl_Interp *$ip, int $oc, Tcl_Obj *CONST $ov\[])"
+
+      my emitln "static int"
+      my emitln "tcl_$tail_name$ca"
+      my emitln \{
+      my emit $body
+      my emitln \}
+    } else {
+      # if no body is specified, then $anames is alias for the real cmd proc
+      my emitln "#define tcl_$tail_name $anames"
+      my emitln "int $anames\(\);"
+    }
+    my compute_digest
+}
+Class Xomti_Crixotcl_cproc -superclass ::Xomti_Crixotcl_proc 
+@ ::Xomti_Crixotcl_cproc idemeta component xomti_critcl
+Xomti_Crixotcl_cproc instproc init {name arg_defs return_type body} {
+    set tail_name [my define_proc $name $arg_defs $return_type $body]
+
+    set cname c_$tail_name
+    set wname tcl_$tail_name
+
+    array set type_from_name {}
+    set names {}
+    set cargs {}
+    set cnames {}
+
+    # is first arg is "Tcl_Interp*", pass it without counting it as a cmd arg
+    if {[lindex $arg_defs 0] == "Tcl_Interp*"} {
+	lappend cnames ip
+	lappend cargs [lrange $arg_defs 0 1]
+	set arg_defs [lrange $arg_defs 2 end]
+    }
+
+    foreach {t n} $arg_defs {
+	set type_from_name($n) $t
+	lappend names $n
+	lappend cnames _$n
+	lappend cargs "$t $n"
+    }
+
+    switch -- $return_type {
+	ok      { set rtype2 "int" }
+	string -
+	dstring -
+	vstring { set rtype2 "char*" }
+	default { set rtype2 $return_type }
+    }
+
+    if {$body != "#"} {
+	my emitln "static $rtype2"
+	my emitln "${cname}([join $cargs {, }])"
+	my emit \{
+	my emit $body
+	my emitln \}
+    } else {
+	my emitln "#define $cname $tail_name"
+    }
+
+    set ca "(ClientData cd, Tcl_Interp *ip, int oc, Tcl_Obj *CONST ov\[])"
+
+    my emitln
+    my emitln "static int"
+    my emitln "$wname$ca"
+    my emitln \{
+
+    foreach x $names {
+	set t $type_from_name($x)
+	switch -- $t {
+	    int - long - float - double - char* - Tcl_Obj* {
+		my emitln "  $type_from_name($x) _$x;"
+	    }
+	    default {
+		my emitln "  void *_$x;"
+	    }
+	}
+    }
+
+    if {$return_type != "void"} { my emit "  $rtype2 rv;" }
+
+    my emitln "
+  if (oc != [expr {[llength $names] + 1}]) {
+    Tcl_WrongNumArgs(ip, 1, ov, \"[join $names { }]\");
+    return TCL_ERROR;
+  }
+"
+    set n 0
+    foreach x $names {
+	incr n
+	switch -- $type_from_name($x) {
+	    int {
+		my emitln "  if (Tcl_GetIntFromObj(ip, ov\[$n], &_$x) != TCL_OK)"
+		my emitln "    return TCL_ERROR;"
+	    }
+	    long {
+		my emitln "  if (Tcl_GetLongFromObj(ip, ov\[$n], &_$x) != TCL_OK)"
+		my emitln "    return TCL_ERROR;"
+	    }
+	    float {
+		my emitln "  { double t;"
+		my emitln "    if (Tcl_GetDoubleFromObj(ip, ov\[$n], &t) != TCL_OK)"
+		my emitln "      return TCL_ERROR;"
+		my emitln "    _$x = (float) t;"
+		my emitln "  }"
+	    }
+	    double {
+		my emitln "  if (Tcl_GetDoubleFromObj(ip, ov\[$n], &_$x) != TCL_OK)"
+		my emitln "    return TCL_ERROR;"
+	    }
+	    char* {
+		my emitln "  _$x = Tcl_GetString(ov\[$n]);"
+	    }
+	    default {
+		my emitln "  _$x = ov\[$n];"
+	    }
+	}
+    }
+    my emitln
+
+    my emit "  ";
+    if {$return_type != "void"} { my emit "rv = " }
+    my emitln "${cname}([join $cnames {, }]);"
+    my emitln
+
+    switch -- $return_type {
+	void      { }
+	ok        { my emitln "  return rv;" }
+	int       { my emitln "  Tcl_SetIntObj(Tcl_GetObjResult(ip), rv);" }
+	long      { my emitln "  Tcl_SetLongObj(Tcl_GetObjResult(ip), rv);" }
+	float -
+	double    { my emitln "  Tcl_SetDoubleObj(Tcl_GetObjResult(ip), rv);" }
+	char*     { my emitln "  Tcl_SetResult(ip, rv, TCL_STATIC);" }
+	string -
+	dstring   { my emitln "  Tcl_SetResult(ip, rv, TCL_DYNAMIC);" }
+	vstring   { my emitln "  Tcl_SetResult(ip, rv, TCL_VOLATILE);" }
+	default   { my emitln "  Tcl_SetObjResult(ip, rv); Tcl_DecrRefCount(rv);" }
+    }
+    if {$return_type != "ok"} { my emitln "  return TCL_OK;" }
+    my emitln \}
+
+    my compute_digest
+}
+Class Xomti_Crixotcl_martyr
+@ ::Xomti_Crixotcl_martyr idemeta component xomti_critcl
+Xomti_Crixotcl_martyr instproc check_for_compiler {} {
+    # check that we can indeed run a compiler
+    # should only need to do this if we have to compile the code?
+    my instvar can_compile
+
+    set nul /dev/null
+    if {$::tcl_platform(platform) == "windows"} {
+        set nul NUL
+    }
+    if {[catch {exec gcc -v 2> $nul}] && [catch {exec cc -v 2> $nul}]} {
+        set can_compile 0
+    } else {
+        set can_compile 1
+    }
+    return $can_compile
+}
+Xomti_Crixotcl_martyr instproc done {} {
+    return 0
+}
+Xomti_Crixotcl_martyr instproc failed {{silent {}}} {
+    my instvar v_libsrc v_failed
+
+    if {$v_libsrc == ""} {
+        my cbuild "" 0 "" $silent
+    } else {
+        lassign [my cbuild $v_libsrc 0 ns silent] libfile ininame
+    }
+    Xomti_Crixotcl_builder instproc failed {args} {
+        puts stderr "error: critcl::failed can only be called once"
+        exit 1
+    }
+    return $v_failed
+}
+Xomti_Crixotcl_martyr instproc get_prefix {} {
+    return [my set v_prefix]
+}
+Xomti_Crixotcl_martyr instproc scripting {} {
+    my instvar can_compile
+    return [expr {$can_compile == 0}]
+}
+Xomti_Crixotcl_martyr instproc tsources args {
+    my lappend tsources $args
+}
+Xomti_Crixotcl_martyr proc tclAppInit.c {} {
+    set code {
+/*
+ * tclAppInit.c --
+ *
+ *      Provides a default version of the main program and Tcl_AppInit
+ *      procedure for Tcl applications (without Tk).
+ *
+ * Copyright (c) 1993 The Regents of the University of California.
+ * Copyright (c) 1994-1997 Sun Microsystems, Inc.
+ * Copyright (c) 1998-1999 by Scriptics Corporation.
+ *
+ * See the file "license.terms" for information on usage and redistribution
+ * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+ *
+ * RCS: @(#) $Id: tclAppInit.c,v 1.2 2002/09/26 09:46:47 wcvs Exp $
+ */
+
+#include "tcl.h"
+
+#ifdef TCL_TEST
+
+#include "tclInt.h"
+
+extern int              Procbodytest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+extern int              Procbodytest_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
+extern int              TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+extern int              Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+#ifdef TCL_THREADS
+extern int              TclThread_Init _ANSI_ARGS_((Tcl_Interp *interp));
+#endif
+
+#endif /* TCL_TEST */
+
+#ifdef TCL_XT_TEST
+extern void             XtToolkitInitialize _ANSI_ARGS_((void));
+extern int              Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+#endif
+
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * main --
+ *
+ *      This is the main program for the application.
+ *
+ * Results:
+ *      None: Tcl_Main never returns here, so this procedure never
+ *      returns either.
+ *
+ * Side effects:
+ *      Whatever the application does.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+main(argc, argv)
+    int argc;                   /* Number of command-line arguments. */
+    char **argv;                /* Values of command-line arguments. */
+{
+    /*
+     * The following #if block allows you to change the AppInit
+     * function by using a #define of TCL_LOCAL_APPINIT instead
+     * of rewriting this entire file.  The #if checks for that
+     * #define and uses Tcl_AppInit if it doesn't exist.
+     */
+
+#ifndef TCL_LOCAL_APPINIT
+#define TCL_LOCAL_APPINIT Tcl_AppInit
+#endif
+    extern int TCL_LOCAL_APPINIT _ANSI_ARGS_((Tcl_Interp *interp));
+
+    /*
+     * The following #if block allows you to change how Tcl finds the startup
+     * script, prime the library or encoding paths, fiddle with the argv,
+     * etc., without needing to rewrite Tcl_Main()
+     */
+
+#ifdef TCL_LOCAL_MAIN_HOOK
+    extern int TCL_LOCAL_MAIN_HOOK _ANSI_ARGS_((int *argc, char ***argv));
+#endif
+
+#ifdef TCL_XT_TEST
+    XtToolkitInitialize();
+#endif
+
+#ifdef TCL_LOCAL_MAIN_HOOK
+    TCL_LOCAL_MAIN_HOOK(&argc, &argv);
+#endif
+
+    Tcl_Main(argc, argv, TCL_LOCAL_APPINIT);
+
+    return 0;                   /* Needed only to prevent compiler warning. */
+}
+
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Tcl_AppInit --
+ *
+ *      This procedure performs application-specific initialization.
+ *      Most applications, especially those that incorporate additional
+ *      packages, will have their own version of this procedure.
+ *
+ * Results:
+ *      Returns a standard Tcl completion code, and leaves an error
+ *      message in the interp's result if an error occurs.
+ *
+ * Side effects:
+ *      Depends on the startup script.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Tcl_AppInit(interp)
+    Tcl_Interp *interp;         /* Interpreter for application. */
+{
+    if (Tcl_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+
+#ifdef TCL_TEST
+#ifdef TCL_XT_TEST
+     if (Tclxttest_Init(interp) == TCL_ERROR) {
+         return TCL_ERROR;
+     }
+#endif
+    if (Tcltest_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
+            (Tcl_PackageInitProc *) NULL);
+    if (TclObjTest_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+#ifdef TCL_THREADS
+    if (TclThread_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+#endif
+    if (Procbodytest_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "procbodytest", Procbodytest_Init,
+            Procbodytest_SafeInit);
+#endif /* TCL_TEST */
+
+    /*
+     * Call the init procedures for included packages.  Each call should
+     * look like this:
+     *
+     * if (Mod_Init(interp) == TCL_ERROR) {
+     *     return TCL_ERROR;
+     * }
+     *
+     * where "Mod" is the name of the module.
+     */
+
+    /*
+     * Call Tcl_CreateCommand for application-specific commands, if
+     * they weren't already created by the init procedures called above.
+     */
+
+    /*
+     * Specify a user-specific startup file to invoke if the application
+     * is run interactively.  Typically the startup file is "~/.apprc"
+     * where "app" is the name of the application.  If this line is deleted
+     * then no user-specific startup file will be run under any conditions.
+     */
+
+#ifdef DJGPP
+    Tcl_SetVar(interp, "tcl_rcFileName", "~/tclsh.rc", TCL_GLOBAL_ONLY);
+#else
+    Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclshrc", TCL_GLOBAL_ONLY);
+#endif
+    return TCL_OK;
+}
+    }
+}
+Xomti_Crixotcl_martyr proc test {} {
+    Xomti_Crixotcl_builder create c
+    c private_init
+    c option_set keepsrc 1
+    c option_set force 1
+    c cproc plus {double a double b} double {
+        return a+b;
+    }
+    puts [plus 1 2]
+}
+Class Xomti_Crixotcl_code_fragment -superclass ::Xomti_Crixotcl_code_and_digest 
+@ ::Xomti_Crixotcl_code_fragment idemeta component xomti_critcl
+Xomti_Crixotcl_code_fragment instproc init {} {
+    my set code {}
+    my compute_digest
+}
+Class Xomti_Crixotcl_param
+@ ::Xomti_Crixotcl_param idemeta component xomti_critcl
+Xomti_Crixotcl_param instproc end {} {
+    my unset param
+}
+Xomti_Crixotcl_param instproc param_get {} {
+    my instvar param
+    if {![info exists param]} {
+        set param {}
+    }
+    return $param
+}
+Xomti_Crixotcl_param instproc param_set list {
+
+    # pas utile, on a le digest : [my info parent] lappend code_obj_list [self] ;# add so we can detect changes
+
+    if {[llength $list] > 0} {
+        # set base [file dirname $script_file]
+        set base "A_FAIRE"
+        foreach x $list {
+            if {[string index $x 0] == "-"} {
+                my lappend param $x
+            } else {
+                return -code error "A FAIRE : $base"
+                foreach y [glob [file join $base $x]] {
+                    set z [[my info parent] file_normalize $y]
+                    if {![file exists $z]} {
+                        error "${z}: not found"
+                    }
+                    my lappend param $z
+                }
+            }
+        }
+    my set digest [Xomti_Crixotcl_builder md5_hex [my param_get]]
+    } else {
+        return [my param_get]
+    }
+}
+Class Xomti_Crixotcl
+@ ::Xomti_Crixotcl idemeta component xomti_critcl
+Xomti_Crixotcl proc test {} {
+    catch {destroy .test}
+    toplevel .test
+    set t [text .test.t -height 10]
+    pack $t
+
+    Xomti_Crixotcl_builder create mama
+    mama option_set keepsrc 1
+    mama option_set force 1  
+
+    mama cproc sqr {double x} double {return x*x;}
+    set x [sqr 2]
+    $t insert end "sqr 2 -> $x\n"
+
+    mama ccommand sqr_c {data interp objc objv} {
+        double x;
+        /* La liste de commande doit contenir la commande + un argument, donc objc == 2 */
+        if (objc != 2) {
+            /* Si ne n'est pas le cas, on renvoit un message d'erreur contenant 1 (le premier)
+               argument de la liste de commande "argv" - donc le nom de la commande -,
+               suivi de "nombre"
+            */
+	    Tcl_WrongNumArgs(interp, 1, objv, "nombre");
+	    return TCL_ERROR;
+        }
+    
+        /* objv[1] est l'argument 1 de la commande ;
+           il doit pouvoir être convertible en "double",
+           sinon il y a erreur.
+           Le message d'erreur est généré automatiquement par "Tcl_GetDoubleFromObj"
+        */
+        if (Tcl_GetDoubleFromObj(interp, objv[1], &x) != TCL_OK) {
+    	    return TCL_ERROR;
+        }
+
+        /* Pour finir, si l'on arrive ici (donc sans erreur) l'objet retourné par la commande
+           sera un objet "double"
+        */
+        Tcl_SetObjResult(interp, Tcl_NewDoubleObj(x*x));
+
+        /* et ne pas oublier de retourner "TCL_OK" */
+        return TCL_OK;
+    }
+    $t insert end "sqr_c 3 -> [sqr_c 3]\n"
+
+    mama cdata hi "hi there!"
+    $t insert end [hi]\n
+    
+    Xomti_Crixotcl_builder create cricon
+    cricon cheaders "-I/home/p10admin/prog/Tcl/ "
+    cricon ccode "#include <tcl.h>\n#include <math.h>"
+    namespace eval ::concon {}
+    cricon cdefines {
+        NULL
+        TRUE
+        FALSE
+        TCL_OK
+        TCL_ERROR
+        M_PI
+    } ::concon
+    cricon cbuild
+    foreach v [info vars ::concon::*] {
+        $t insert end [list $v [set $v]]\n
+    }
+    
+    set c [canvas .test.c]
+    pack $c
+    $c create line {0 200 50 50 100 100}
+    Xomti_Crixotcl_builder create tkt
+    tkt tk
+    tkt option_set keepsrc 1
+    set tcl_prefix [file normalize /home/p10admin/prog/Tcl/distrib/tcl8.4.1]
+    set tk_prefix [file normalize /home/p10admin/prog/Tcl/distrib/tk8.4.1]
+    tkt cheaders -I$tk_prefix/generic -I$tk_prefix -I$tcl_prefix/generic -I$tcl_prefix
+    #
+    # platform specific declarations #
+    switch $::tcl_platform(platform) {
+        unix {
+            switch $::tcl_platform(os) {
+                Darwin {
+                    set xinclude /usr/X11R6/include
+                    set xlib /usr/X11R6/lib
+                }
+                default {
+                    set xinclude /usr/X11R6/lib
+                    set xlib $xinclude
+                }
+            }
+            tkt cheaders -I$xinclude
+            tkt clibraries -L$xlib -lX11
+        }
+        windows {
+            tkt cheaders -DWIN32 -I$tk_prefix/win -I$tk_prefix/xlib
+        }
+        default {
+            puts stderr "tkspline hasn't been ported to $::tcl_platform(platform)"
+            exit 1
+        }
+    }
+    tkt ccode {
+        #define Tkspline_Init ns_Tkspline_Init
+        #include "/home/fab/A/xomti/Y/config.h"
+        #include "/home/fab/A/xomti/Y/tkspline.c"
+    }
+    tkt cinit {
+        Tk_CreateSmoothMethod(ip, &splineSmoothMethod);
+    }
+    tkt cbuild
+    $c create line {0 200 00 50 100 100} -smooth spline
+}
+

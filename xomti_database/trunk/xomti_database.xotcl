@@ -1,0 +1,23 @@
+# automatically generated from XOTclIDE
+package provide xomti_database 99991231.1
+Class Xomti_Key_Byte
+@ ::Xomti_Key_Byte idemeta component xomti_database
+Xomti_Key_Byte instproc byte_get name {
+    return [my set param($name)]
+}
+Xomti_Key_Byte instproc init kvlist {
+    foreach {k v} $kvlist {
+        my set param($k) [expr {$v}]
+    }
+}
+Class Xomti_Key_String
+@ ::Xomti_Key_String idemeta component xomti_database
+Xomti_Key_String instproc init {lang kvlist} {
+    foreach {k v} $kvlist {
+        my set param($k,$lang) $v
+    }
+}
+Xomti_Key_String instproc string_get {name lang} {
+    return [my set param($name,$lang)]
+}
+
