@@ -1,0 +1,78 @@
+package require xomti 0.1
+package require xomti_assume 0.1
+package require xomti_critcl 0.3
+package require xomti_memory 0.1
+
+Class create Xomti_Blas
+
+Xomti_Blas proc types {} {
+    return double long doublecomplex
+}
+
+Class create Xomti_Blas_vector
+
+Xomti_Blas_vector instproc init {args} {
+    if {[llength $args] == 1} {
+	set data [lindex $args 0]
+	set length [llength $data]
+    } else {
+	if {[llength $args] != 2 || [lindex $args 0] ne "-length"} {
+	    error "bad args"
+	}
+	length [lindex $args 1]
+    }
+    my set length $length
+    my set data [Xomti_Memory calloc $length [my set word_size]]
+    if {[info exists data]} {
+	set i 0
+	foreach x $data {
+	    my c_set_at $i $x 
+	    incr i
+	}
+    } else {
+	for {set i 0} {$i < $length} {incr i} {
+	    my c_set_at $i 0
+	}
+    }
+    next
+}
+
+Xomti_Blas_vector instproc as_list {} {
+    set ret [list]
+    set N [my set length]
+    for {set i 0} {$i < $N} {incr i} {
+	lappend ret [my c_get_at $i]
+    }
+    return $ret
+}
+
+Class create Xomti_Blas_vector_double -superclass Xomti_Blas_vector
+
+Xomti_Blas_vector_double instproc init {args} {
+    my set word_size [Xomti_Memory word_size_of double]
+    my set type double
+    next
+}
+
+Xomti_Blas_vector_double instproc c_set_at {i x} {
+    Xomti_Memory write_double [expr {[my set data] + $i * [my set word_size]}] $x
+}
+
+Xomti_Blas_vector_double instproc c_get_at {i} {
+    Xomti_Assume size_t $i
+    if {$i < 0 || $i >= [my set length]} {
+	error "Out of bounds"
+    } 
+    return [Xomti_Memory read_double [expr {[my set data] + $i * [my set word_size]}]]
+}
+
+Class create Xomti_Blas_subvector_double
+
+Xomti_Blas_subvector_double instproc init {vector offset step} {
+
+}
+
+Xomti_Critcl_builder create Xomti_Blas::builder
+Xomti_Blas::builder 
+
+package provide xomti_blas 0.1

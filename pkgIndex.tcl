@@ -9,6 +9,11 @@
 # full path name of this file's directory.
 
 package ifneeded xomti 0.1 [list source [file join $dir xomti/tags/0.1/xomti.xotcl]]
+package ifneeded xomti_assume 0.1 [list source [file join $dir xomti_assume/trunk/xomti_assume.xotcl]]
+package ifneeded xomti_blas 0.1 [list source [file join $dir xomti_blas/trunk/xomti_blas.xotcl]]
 package ifneeded xomti_critcl 0.3 [list source [file join $dir xomti_critcl/trunk/xomti_critcl.xotcl]]
 package ifneeded xomti_database 99991231.1 [list source [file join $dir xomti_database/trunk/xomti_database.xotcl]]
+package ifneeded xomti_gsl 0.1 [list source [file join $dir xomti_gsl/trunk/xomti_gsl.xotcl]]
+package ifneeded xomti_gsl_math 0.1 [list source [file join $dir xomti_gsl/trunk/xomti_gsl_math.xotcl]]
+package ifneeded xomti_memory 0.1 [list source [file join $dir xomti_memory/trunk/xomti_memory.xotcl]]
 package ifneeded xomti_tcllib_md5 1.2 [list source [file join $dir xomti_tcllib_md5/tags/1.2/xomti_tcllib_md5.xotcl]]

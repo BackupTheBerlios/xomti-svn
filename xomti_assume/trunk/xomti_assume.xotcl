@@ -1,0 +1,9 @@
+package require xomti 0.1
+
+Object create Xomti_Assume
+
+Xomti_Assume proc size_t i {
+    if {$i != int($i)} {error "Not size_t (really not Tcl int)"} 
+}
+
+package provide xomti_assume 0.1

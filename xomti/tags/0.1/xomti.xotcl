@@ -4,7 +4,7 @@ package require XOTcl 1.3
 
 # pkg_mkIndex source this file without loading package, need to catch this instruction
 if {![catch {package present XOTcl}]} {
-    namespace import xotcl::Class xotcl::Object xotcl::@ xotcl::my xotcl::self
+    namespace import xotcl::Class xotcl::Object xotcl::@ xotcl::my xotcl::self xotcl::next
 }
 
 Object create Xomti
@@ -24,4 +24,8 @@ Xomti proc get_package_root_of_script {} {
         }
     }
     error "script is not in a xomti-svn-conforming file system" 
+}
+
+Xomti proc warning text {
+    puts stderr $text
 }

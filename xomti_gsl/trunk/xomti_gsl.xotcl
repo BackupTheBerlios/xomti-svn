@@ -1,0 +1,19 @@
+package require xomti 0.1
+package require xomti_critcl 0.3
+
+Class create Xomti_Gsl
+
+Xomti_Critcl_builder create Xomti_Gsl::builder
+
+
+Xomti_Gsl::builder ccode "#include <gsl/gsl_sf_bessel.h>"
+
+Xomti_Gsl::builder cproc Xomti_Gsl::_sf_bessel_J0_ {double x} double {
+    return gsl_sf_bessel_J0 (x);
+}
+
+Xomti_Gsl::builder clibraries -lgsl -lgslcblas -lm
+
+Xomti_Gsl::builder cbuild
+
+package provide xomti_gsl 0.1

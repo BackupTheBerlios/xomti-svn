@@ -1,0 +1,34 @@
+package require xomti 0.1
+package require xomti_critcl 0.3
+
+Class create Xomti_Gsl_Math
+
+Xomti_Critcl_builder create Xomti_Gsl_Math::builder
+
+Xomti_Gsl_Math::builder ccode "#include <gsl/gsl_math.h>"
+
+foreach f {log1p expm1 acosh asinh atanh
+	pow_2 pow_3 pow_4 pow_5 pow_6 pow_7 pow_8 pow_9} {
+    Xomti_Gsl_Math::builder cproc Xomti_Gsl_Math::$f {double x} double "return gsl_$f (x);"
+}
+
+foreach f {ldexp pow_int} {
+    Xomti_Gsl_Math::builder cproc Xomti_Gsl_Math::$f {double x int e} double "return gsl_$f (x, e);"
+}
+
+Xomti_Gsl_Math::builder cproc Xomti_Gsl_Math::fcmp {double x double y double eps} int {return gsl_fcmp(x, y, eps);}
+
+Xomti_Gsl_Math requireNamespace
+Xomti_Gsl_Math::builder cdefines {
+    M_E M_LOG2E
+} ::Xomti_Gsl_Math
+
+Xomti_Gsl_Math::builder clibraries -lgsl -lm
+
+#Xomti_Gsl_Math::builder option_set keepsrc 1
+#Xomti_Gsl_Math::builder option_set force 1  
+#Xomti_Gsl_Math::builder option_set lines 0
+
+Xomti_Gsl_Math::builder cbuild
+
+package provide xomti_gsl_math 0.1
