@@ -513,7 +513,7 @@ IDE::Component instproc getVersionNumber {} {
     if {[info exists version]} {
         return $version
     }
-    return 1.0
+    return 0.0
 }
 IDE::Component instproc getVisibleClasses {} {
     my instvar classes
@@ -1465,7 +1465,7 @@ Object create IDE::IntroProxy
 @ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
 @ ::IDE::IntroProxy idemeta component IDECore
 IDE::IntroProxy proc asDescriptionList comment {
-   return "description [list $comment]"
+    return "description [list $comment]"
 }
 IDE::IntroProxy proc getBaseObjDef name {
     set cname [my stripNamespace [$name info class]]
@@ -1626,13 +1626,13 @@ IDE::IntroProxy proc getComponents {} {
     return [IDE::Component getComponentNames]
 }
 IDE::IntroProxy proc getComponentsNoIDE {} {
-   set ideComps [concat [IDE::System getCoreComponents] [IDE::System getExtraComponents]]
-   set ret {}
-   foreach comp [IDE::Component getComponentNames] {
-       if {![ide::lcontain $ideComps $comp]} {
-           lappend ret $comp
-       }
-   }
+    set ideComps [concat [IDE::System getCoreComponents] [IDE::System getExtraComponents]]
+    set ret {}
+    foreach comp [IDE::Component getComponentNames] {
+        if {![ide::lcontain $ideComps $comp]} {
+            lappend ret $comp
+        }
+    }
    return $ret
 }
 IDE::IntroProxy proc getInstanceMethods {class categories} {

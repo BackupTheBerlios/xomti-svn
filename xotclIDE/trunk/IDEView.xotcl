@@ -788,20 +788,21 @@ IDE::ClassView instproc renameTclProcsGroup actual {
         my refreshList
     }
 }
-IDE::ClassView instproc selectFor component {
+IDE::ClassView instproc selectFor component_and_version {
     my instvar vcomponent vtype cobj treeView
+    set component [lindex $component_and_version 0]
     set vcomponent $component
-    if {$component==""} {
-         my resetList
-         set cobj {}
-         [my info parent]::methodcatview selectFor {} $vtype
-         return
+    if {$component eq ""} {
+        my resetList
+        set cobj {}
+        [my info parent]::methodcatview selectFor {} $vtype
+        return
     }
     set mtype $vtype
     set cobj [IDE::Component getCompObjectForNameIfExist $vcomponent]
-    if {$cobj==""} {error "Can find component object for $vcomponent"}
-    if {$mtype=="Tcl Procs"} {set mtype ProcsGroups}
-    if {$treeView && $vtype=="Classes"} {
+    if {$cobj eq ""} {error "Can find component object for $vcomponent"}
+    if {$mtype eq "Tcl Procs"} {set mtype ProcsGroups}
+    if {$treeView && $vtype eq "Classes"} {
         my setHList [$cobj getClassesHierarchy]
     } else {
         my setList [lsort [IDE::IntroProxy get${mtype}ForComponent $component]]
@@ -1037,7 +1038,7 @@ Class create IDE::CompView -superclass {::IDE::ListView ::IDE::GUICommands ::IDE
 @ ::IDE::CompView idemeta component IDEView
 IDE::CompView instproc changeWorkingDir {} {
     set newdir [IDE::Dialog getDir [pwd]]
-    if {$newdir!=""} {
+    if {$newdir ne ""} {
         cd $newdir
     }
 }
@@ -1049,11 +1050,11 @@ IDE::CompView instproc editSave comment {
     my editSaveComment $comment
 }
 IDE::CompView instproc editSaveComment comment {
-   my instvar vcomponent
-   set cobj [IDE::Component getCompObjectForNameIfExist $vcomponent]
-   if {$cobj!=""} {
+    my instvar vcomponent
+    set cobj [IDE::Component getCompObjectForNameIfExist $vcomponent]
+    if {$cobj ne ""} {
         $cobj setComment $comment
-   }
+    }
 }
 IDE::CompView instproc fillMenuStruct ms {
     $ms enablementHandler [self]
@@ -1087,16 +1088,16 @@ IDE::CompView instproc fillMenuStruct ms {
     next
 }
 IDE::CompView instproc getActualComponentObject {} {
-   set actual [my selectedItem]
-   if {$actual==""} return
-   return [IDE::Component getCompObjectForNameIfExist $actual]
+    set actual [my selectedItem]
+    if {$actual eq ""} return
+    return [IDE::Component getCompObjectForNameIfExist $actual]
 }
 IDE::CompView instproc getMenuStruct {} {
     return [IDE::MenuStruct [self]::ms Component 0]
 }
 IDE::CompView instproc importFromSource {} {
     set source [IDE::Dialog getOpenFile {{{Tcl Files} *.tcl} {{Xotcl Files} *.xotcl} {{All files} *}}]
-    if {$source!=""} {
+    if {$source ne ""} {
         IDE::Component importCompsFromFile $source
         IDE::System signalComponentsChanged
     }
@@ -1131,13 +1132,13 @@ IDE::CompView instproc loadPackage {} {
 }
 IDE::CompView instproc newComponent {} {
     set component [IDE::IDialogEntry getValue {Enter the component name}]
-    if {$component!=""} {
+    if {$component ne ""} {
         if {![regexp {^[\w:]+$} $component]} {
            IDE::Dialog error {Wrong name for the component}
             return
         }
         # The component should not already exits
-        if {$component!="" && [IDE::Component getCompObjectForNameIfExist $component]==""} {
+        if {$component ne "" && [IDE::Component getCompObjectForNameIfExist $component] eq ""} {
             my createNewComponent $component
         }
     }
@@ -1154,45 +1155,47 @@ IDE::CompView instproc refreshView {} {
 }
 IDE::CompView instproc registerClass actual {
     set cls [IDE::ClassSelector getUnregisteredClass]
-    if {$cls==""} return
+    if {$cls eq ""} return
     if {![[my info parent]::classview canModifyComponent]} return
     $cls moveToComponent $actual
 }
 IDE::CompView instproc registerTclProcs {} {
     IDE::ImportMethodView startBrowserForComponent [IDE::Component getCompObjectForNameIfExist [my set vcomponent]]
 }
-IDE::CompView instproc renameComponent component {
-   set compObj [IDE::Component getCompObjectForName $component]
-   set ret [IDE::IDialogEntry getValue {Enter new name for the component} [$compObj getName]]
-   if {$ret!="" && $ret!=[$compObj getName]} {
-       if {![regexp {^[\w:]+$} $ret]} {
-           IDE::Dialog error {Wrong name for the component}
-           return
-       }
-       $compObj rename $ret
-       IDE::System signalComponentsChanged
-   }
+IDE::CompView instproc renameComponent component_and_version {
+    set component_name [lindex $component_and_version 0]
+    set compObj [IDE::Component getCompObjectForName $component_name]
+    set ret [IDE::IDialogEntry getValue {Enter new name for the component} [$compObj getName]]
+    if {$ret ne "" && $ret ne [$compObj getName]} {
+        if {![regexp {^[\w:]+$} $ret]} {
+            IDE::Dialog error {Wrong name for the component}
+            return
+        }
+        $compObj rename $ret
+        IDE::System signalComponentsChanged
+    }
 }
 IDE::CompView instproc runPkgMkIndex {} {
-   pkg_mkIndex -direct [pwd] *.xotcl
-   IDE::Dialog message "command \"pkg_mkIndow -direct [pwd] *.xotcl\" succesful finished"
+    pkg_mkIndex -direct [pwd] *.xotcl
+    IDE::Dialog message "command \"pkg_mkIndow -direct [pwd] *.xotcl\" succesful finished"
 }
-IDE::CompView instproc saveAsSource actual {
-   set source [IDE::Dialog getSaveFile $actual.xotcl]
-    if {$source!=""} {
-         [IDE::Component getCompObjectForName $actual] saveAsScript $source
+IDE::CompView instproc saveAsSource component_and_version {
+    set component_name [lindex $component_and_version 0]
+    set source [IDE::Dialog getSaveFile $component_name.xotcl]
+    if {$source ne ""} {
+        [IDE::Component getCompObjectForName $component_name] saveAsScript $source
     }   
 }
 IDE::CompView instproc searchClass {} {
     set class [IDE::ClassSelector getClass]
-    if {$class==""} return
+    if {$class eq ""} return
     my setSelectedItem [$class getComponentName]
     if {[$class isclass]} {
         set shouldView Classes
     } else {
         set shouldView Objects
     }
-    if {[[my info parent]::classview set vtype]!=$shouldView} {
+    if {[[my info parent]::classview set vtype] ne $shouldView} {
         [my info parent]::classview::stateButton changeStateTo $shouldView
     }
     [my info parent]::classview setSelectedItem [string trimleft $class :]
@@ -1201,51 +1204,59 @@ IDE::CompView instproc selectItem item {
     if {[Object isobject [my info parent]::classview]} {
         [my info parent]::classview selectFor $item        
     }
-    my set vcomponent $item
+    my set vcomponent [lindex $item 0]
     my refreshView
     [my info parent] setTitleAddition $item
 }
 IDE::CompView instproc setAutoPath {} {
-   global auto_path
-   set ret [IDE::IDialogEntry getValue {Set auto_path global varible} $auto_path]
-   if {$ret!=""} {
-       set auto_path $ret
-   }
+    global auto_path
+    set ret [IDE::IDialogEntry getValue {Set auto_path global variable} $auto_path]
+    if {$ret ne ""} {
+        set auto_path $ret
+    }
 }
-IDE::CompView instproc setVersion actual {
-   set appObj [IDE::Component getCompObjectForName $actual]
-   set ret [IDE::IDialogEntry getValue {Set the Version Number} [$appObj getVersionNumber]]
-   if {$ret!=""} {
-       if {![catch {expr {$ret+0}}]} {
-           $appObj setVersionNumber $ret
-       } else {
-           IDE::Dialog error "$ret is wrong version number"
-       }
-   }
+IDE::CompView instproc setVersion component_and_version {
+    set component_name [lindex $component_and_version 0]
+    set appObj [IDE::Component getCompObjectForName $component_name]
+    set ret [IDE::IDialogEntry getValue {Set the Version Number} [$appObj getVersionNumber]]
+    if {$ret ne ""} {
+        if {![catch {expr {$ret+0}}]} {
+            $appObj setVersionNumber $ret
+            IDE::System signalComponentsChanged
+        } else {
+            IDE::Dialog error "$ret is wrong version number"
+        }
+    }
 }
 IDE::CompView instproc showComponents {} {
-   my instvar visibilityNoIDE
-   if {$visibilityNoIDE} {
-      my setList [IDE::IntroProxy getComponentsNoIDE]
-   } else {
-      my setList [IDE::IntroProxy getComponents]
-   }
+    my instvar visibilityNoIDE
+    if {$visibilityNoIDE} {
+        set list [IDE::IntroProxy getComponentsNoIDE]
+    } else {
+        set list [IDE::IntroProxy getComponents]
+    }
+    set list_with_version [list]
+    foreach l $list {
+        lappend list_with_version [list $l [[IDE::Component getCompObjectForName $l] getVersionNumber]]
+    }
+    my setList $list_with_version
 }
-IDE::CompView instproc unloadComponent actual {
-   set reqComp [IDE::System getCoreComponentsAll]
-   if {[::ide::lcontain $reqComp $actual]} {
+IDE::CompView instproc unloadComponent component_and_version {
+    set component_name [lindex $component_and_version 0]
+    set reqComp [IDE::System getCoreComponentsAll]
+    if {[::ide::lcontain $reqComp $component_name]} {
         IDE::Dialog message "You can not unload this IDE-System Component [list $reqComp]"
         return
-   }
-   set appObj [IDE::Component getCompObjectForName $actual]
-   set reqFor [$appObj getRequiredFor]
-   if {$reqFor!=""} {
-        IDE::Dialog message "You can not unload $actual. It is required from $reqFor"
+    }
+    set appObj [IDE::Component getCompObjectForName $component_name]
+    set reqFor [$appObj getRequiredFor]
+    if {$reqFor ne ""} {
+        IDE::Dialog message "You can not unload $component_name. It is required from $reqFor"
         return
-   }
-   $appObj unload
-   [my info parent]::classview selectFor {}
-   IDE::System signalComponentsChanged
+    }
+    $appObj unload
+    [my info parent]::classview selectFor {}
+    IDE::System signalComponentsChanged
 }
 
                               ##########
