@@ -328,8 +328,8 @@ will be continued
 }
 }
 Class create IDE::Debugger -superclass {::IDE::Browser ::IDE::GUICommands} -parameter {{atHead 1}}
-@ ::IDE::Debugger idemeta categoriesMethods {{editSave destroy} {evalLevel inspectLevelVar inspectLevel inspectCalledObject showArguments} {evalAtLevel displayIndex} specificInit}
 @ ::IDE::Debugger idemeta categories {actions actions-results actions-trigger initialize}
+@ ::IDE::Debugger idemeta categoriesMethods {{editSave destroy} {evalLevel inspectLevelVar inspectLevel inspectCalledObject showArguments} {evalAtLevel displayIndex} specificInit}
 @ ::IDE::Debugger idemeta component IDEDebug
 IDE::Debugger instproc destroy {} {
      my instvar win
@@ -837,8 +837,8 @@ IDE::VariableTraceList instproc varsTracker {} {
                               ##########
 
 Class create IDE::VarsTracker -superclass ::IDE::Browser
-@ ::IDE::VarsTracker idemeta categoriesMethods {{getTitle specificInit initVarList} hasAnyWatch {removeAllTraces removeAllWatches removeReadTrace removeWatch removeWriteTrace removeWatchOn removeVariable}}
 @ ::IDE::VarsTracker idemeta categories {init-release testing action-remove}
+@ ::IDE::VarsTracker idemeta categoriesMethods {{getTitle specificInit initVarList} hasAnyWatch {removeAllTraces removeAllWatches removeReadTrace removeWatch removeWriteTrace removeWatchOn removeVariable}}
 @ ::IDE::VarsTracker idemeta component IDEDebug
 IDE::VarsTracker instproc addVariable {var options changedoption} {
     my instvar varList
@@ -1031,8 +1031,8 @@ It handle adding and deleting tracking by settings filters and
 redirect the calls to IDE::TrackerBrowser.}
 }
 Object create IDE::MethodTracker
-@ ::IDE::MethodTracker idemeta categoriesProcs {api filter-dispatch}
 @ ::IDE::MethodTracker idemeta categoriesMethodsProcs {{unregisterClassForTracking unregisterObjectForTracking registerClassForTracking registerObjectForTracking getTrackingList} {methodExit methodEntry}}
+@ ::IDE::MethodTracker idemeta categoriesProcs {api filter-dispatch}
 @ ::IDE::MethodTracker idemeta component IDEDebug
 IDE::MethodTracker proc getTrackingList {} {
     my instvar trackedArr

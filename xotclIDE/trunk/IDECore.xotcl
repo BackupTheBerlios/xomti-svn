@@ -175,10 +175,10 @@ Components are currently sets or Xotcl classes and objects
 that can be loaded and saved as tcl packages}
 }
 Class create IDE::Component -superclass ::IDE::CommentHandler -parameter name
-@ ::IDE::Component idemeta categoriesProcs {private importing-loading recreation api}
 @ ::IDE::Component idemeta categoriesMethodsProcs {{registerObject registerInstproc registerProc loadCompFromFile} {loadPackageIfNone loadPackage initFromInterpreter initPackageTracking importCompsFromFile} {saveComplex getObjectBody saveAllToPath} {getCompObjectForNameIfExist getComponentNames getAllComponents getCompObjectForName}}
-@ ::IDE::Component idemeta categoriesMethods {{basicRemoveProcsGroup getProcsGroupWithName removeProcsGroup createTclProcsGroup basicCreateTclProcsGroup addProcsGroup getProcsGroups getProcsGroupsObjects} {isPersistent saveAsScript unload asScript getVersionNumber addRequiredCompList computeRequirements rename copyClassOrObject getVisibleClasses} {addObject basicAddObject basicRemoveObject addClass init destroy getObjectDefineList rekBuildDefList} {removeClass getCommentBody setVersionNumber removeObject standardFileNameBase standardFileName getRequiredFrom getClassesHierarchy getName getObjects getClasses getHierarchyFrom getRequiredFor getRequiredFromDeep}}
+@ ::IDE::Component idemeta categoriesProcs {private importing-loading recreation api}
 @ ::IDE::Component idemeta categories {tcl-procs service private accessing}
+@ ::IDE::Component idemeta categoriesMethods {{basicRemoveProcsGroup getProcsGroupWithName removeProcsGroup createTclProcsGroup basicCreateTclProcsGroup addProcsGroup getProcsGroups getProcsGroupsObjects} {isPersistent saveAsScript unload asScript getVersionNumber addRequiredCompList computeRequirements rename copyClassOrObject getVisibleClasses} {addObject basicAddObject basicRemoveObject addClass init destroy getObjectDefineList rekBuildDefList} {removeClass getCommentBody setVersionNumber removeObject standardFileNameBase standardFileName getRequiredFrom getClassesHierarchy getName getObjects getClasses getHierarchyFrom getRequiredFor getRequiredFromDeep}}
 @ ::IDE::Component idemeta component IDECore
 IDE::Component instproc addClass class {
    # use $object moveToComponent name for right initialisation
@@ -958,8 +958,8 @@ namespace eval myNameSpace {
 }
 }
 Class create IDE::ProcsGroup -superclass ::IDE::CommentHandler -parameter {name {withNamespace 0}}
-@ ::IDE::ProcsGroup idemeta categoriesMethods {isPersistent {getDescription getComponent getBody getObjectName getComponentName getDefBody setDefBody} {removeMethodObj createProcForName setMethodComment hasMethodComment getProcsObjects getProcsNames getMethodComment deleteMethod getProcObjForName getProcObjForNameIfExist} {rename unload handleDefinitionScript moveToComponent handleScript} init}
 @ ::IDE::ProcsGroup idemeta categories {testing accessing methods actions initialize}
+@ ::IDE::ProcsGroup idemeta categoriesMethods {isPersistent {getDescription getComponent getBody getObjectName getComponentName getDefBody setDefBody} {removeMethodObj createProcForName setMethodComment hasMethodComment getProcsObjects getProcsNames getMethodComment deleteMethod getProcObjForName getProcObjForNameIfExist} {rename unload handleDefinitionScript moveToComponent handleScript} init}
 @ ::IDE::ProcsGroup idemeta component IDECore
 IDE::ProcsGroup instproc createProcForName name {
     #[self] halt
@@ -1157,8 +1157,8 @@ That is comments, getting body
 }
 }
 Class create IDE::TclProcsDescription -superclass ::IDE::CommentHandler -parameter name
-@ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
 @ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
+@ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
 @ ::IDE::TclProcsDescription idemeta component IDECore
 IDE::TclProcsDescription instproc getBody {} {
     # ??? Vielleicht durch IntroProxy
@@ -1253,8 +1253,8 @@ the method "parseAndCleanMeta" try to initilize loaded Objects with
 comment after loading}
 }
 Object create IDE::CommentsContainer
-@ ::IDE::CommentsContainer idemeta categoriesProcs {parse-import comments-mirrow tclproc-handling private}
 @ ::IDE::CommentsContainer idemeta categoriesMethodsProcs {{parseAndCleanMeta importMeta importComponentMeta importObjectMethodMeta importProcGroupMeta importProcMeta importObjectMeta} {destroyObject getObjectContainer objectMethodGetComment getObjectContainerWithCreate objectSetComment objectMethodSetComment objectMethodHasComment objectGetComment objectHasComment} {makeTclGroupsFromMeta getGroupForMethod cleanTclProcComments searchCommentForMethod searchCommentForGroup} extractComment}
+@ ::IDE::CommentsContainer idemeta categoriesProcs {parse-import comments-mirrow tclproc-handling private}
 @ ::IDE::CommentsContainer idemeta component IDECore
 IDE::CommentsContainer proc cleanTclProcComments {} {
     if {[my exists proc_groupcomment]} {[self] unset proc_groupcomment}
@@ -1462,8 +1462,8 @@ IDE::CommentsContainer proc searchCommentForMethod method {
 description {Fasade for xotcl introspection.}
 }
 Object create IDE::IntroProxy
-@ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
 @ ::IDE::IntroProxy idemeta categoriesMethodsProcs {{getInstanceMethods getClassMethods getCategoriesForClass getCategoriesForObject getBodyTclMethod} {getClassesForComponent getObjectsForComponent getComponents getProcsGroupsForComponent getComponentsNoIDE getClasses getObjects} {getBodyMetadata getBodyInstanceMethodIfExist getBodyClassMethodIfExist getObjDef getBodyInstanceSearchMethod getProcBody getBodyInstanceMethod getBodyClassMethod} {stripNamespace asDescriptionList getBaseObjDef} {getObjectMethodCommentBody getObjectCommentBody}}
+@ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
 @ ::IDE::IntroProxy idemeta component IDECore
 IDE::IntroProxy proc asDescriptionList comment {
    return "description [list $comment]"

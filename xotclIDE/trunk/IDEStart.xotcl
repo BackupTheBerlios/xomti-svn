@@ -27,8 +27,8 @@ connection for version system.
 The prefereces can by set by installation tool}
 }
 Object create IDEPreferences
-@ ::IDEPreferences idemeta categoriesProcs {constans windows db-prefs}
 @ ::IDEPreferences idemeta categoriesMethodsProcs {{prefFileName setDefaultPreferences} {windowsRegKey windowsSavePrefs windowsLoadPrefs windowsRegistryKey} getDBLoginParameters}
+@ ::IDEPreferences idemeta categoriesProcs {constans windows db-prefs}
 @ ::IDEPreferences idemeta component IDEStart
 IDEPreferences proc getDBLoginParameters args {
    my getParameter connection
@@ -146,8 +146,8 @@ Followin Starting options are possibly.
 Test von Umlauten äöüß}
 }
 Object create IDEStarter
-@ ::IDEStarter idemeta categoriesProcs {constans loading-vc start-up private starting-intern arguments-prefs dumping}
 @ ::IDEStarter idemeta categoriesMethodsProcs {{coreComponents argumentsDescription} {loadObject loadComponent} {startIDEFromDB startIDEWithDB startIDEOnly startLoader startConfId startIDEFromApp} {initProcWrappersStruct isDevelopingMode} {establishDBConnection getConnectionObject initializeAfterLoad loadIDECoreFromDB startUpIDE closeWaitDialog setWaitDialog} {loadPreferences parseCommandLineArgs showHelpAndExit} {dumpCompId dumpConfId getComponentBody getComponentsForConfigmapId getConfigMapBodyDeep getObjectBody getSubconfigsForId}}
+@ ::IDEStarter idemeta categoriesProcs {constans loading-vc start-up private starting-intern arguments-prefs dumping}
 @ ::IDEStarter idemeta component IDEStart
 IDEStarter proc argumentsDescription {} {
     return {

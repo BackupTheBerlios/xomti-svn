@@ -142,8 +142,8 @@ description {The class has very important rolle by parsing xotcl/tcl sources.
 	2. know variables}
 }
 Class create PrsContext -parameter {{variables {}} parser errors warnings}
-@ ::PrsContext idemeta categoriesMethods {{addError visit checkProcArgsCount checkObjectMethodArgsCount} {checkObjectCall checkDirectObjectCall checkCommand checkTclCommand checkObjectSelfCall} {hasErrors parseAndVisit parseAndCheck parse} {checkVariableFrom addVariableFromList addVariableFrom checkVariable} {check_set check_instvar check_for check_foreach check_regexp check_switch check_incr check_append check_catch check_lappend check_unset check_global check_while check_gets check_array check_keylset check_upvar check_if}}
 @ ::PrsContext idemeta categories {private checking-command interface check-variables complex-command}
+@ ::PrsContext idemeta categoriesMethods {{addError visit checkProcArgsCount checkObjectMethodArgsCount} {checkObjectCall checkDirectObjectCall checkCommand checkTclCommand checkObjectSelfCall} {hasErrors parseAndVisit parseAndCheck parse} {checkVariableFrom addVariableFromList addVariableFrom checkVariable} {check_set check_instvar check_for check_foreach check_regexp check_switch check_incr check_append check_catch check_lappend check_unset check_global check_while check_gets check_array check_keylset check_upvar check_if}}
 @ ::PrsContext idemeta component IDETclParser
 PrsContext instproc addError {text elem} {
     my lappend errors [list [$elem begin] [$elem end] $text]
@@ -959,8 +959,8 @@ description {This class can parse tcl code from stream parameter
     }
 }
 Class create TclParser -parameter {stream root}
-@ ::TclParser idemeta categoriesMethods {{getChar skipCharacters skipSeparators skipBlanks skipUpToCharacters searchCloseBrace searchCloseQuote getCharWithMasking skipToWordEnd skipUpTo} {getNoSubst getCommandSubst getQuoted getBeginingVariable getCharKeySequence getBeginingCommandSubst getCharSequence getVariable} {getList getComment substituteTo extractListTo parseScriptTo getCommandOrComment getCommand getArrayKey} {hasParseErrors parseError catchParseErrors} init}
 @ ::TclParser idemeta categories {stream-delegation list-elems prs-structure prs-errors initialize}
+@ ::TclParser idemeta categoriesMethods {{getChar skipCharacters skipSeparators skipBlanks skipUpToCharacters searchCloseBrace searchCloseQuote getCharWithMasking skipToWordEnd skipUpTo} {getNoSubst getCommandSubst getQuoted getBeginingVariable getCharKeySequence getBeginingCommandSubst getCharSequence getVariable} {getList getComment substituteTo extractListTo parseScriptTo getCommandOrComment getCommand getArrayKey} {hasParseErrors parseError catchParseErrors} init}
 @ ::TclParser idemeta component IDETclParser
 TclParser instproc catchParseErrors eval {
     if {[[self class] isDevelMode]} {
