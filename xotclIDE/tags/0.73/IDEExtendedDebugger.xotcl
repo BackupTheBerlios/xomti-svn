@@ -1,0 +1,651 @@
+# automatically generated from XOTclIDE
+# script require component {IDECore IDEBaseGUI}
+package provide IDEExtendedDebugger 0.57
+package require IDECore
+package require IDEBaseGUI
+Class IDE::BreakpointEdit -superclass ::IDE::Browser  -parameter breakpoint
+@ ::IDE::BreakpointEdit idemeta component IDEExtendedDebugger
+IDE::BreakpointEdit instproc actionOk {} {
+    my instvar win expression breakpoint
+    set newexpr [$win.expression get]
+    if {$newexpr!=$expression} {
+        $breakpoint expression $newexpr
+    }
+    my cancelBrowser
+}
+IDE::BreakpointEdit instproc breakpointRemoved dummy {
+    my destroy
+}
+IDE::BreakpointEdit instproc cancelBrowser {} {
+   my destroy
+}
+IDE::BreakpointEdit instproc changeActivity {} {
+  my instvar isActive breakpoint
+  if {$isActive} {
+      $breakpoint activate
+  } else {
+      $breakpoint deactivate
+  }
+}
+IDE::BreakpointEdit instproc createSystemMenu {} {
+    # no system menu
+}
+IDE::BreakpointEdit instproc destroy {} {
+   if {[my breakpoint]!=""} {
+       [my breakpoint] removeInterestFrom [self]
+   }
+   next
+}
+IDE::BreakpointEdit instproc getTitle {} {
+    return Breakpoint
+}
+IDE::BreakpointEdit instproc removeBreakpoint {} {
+   [my breakpoint] remove
+   my breakpoint {}
+   my cancelBrowser
+}
+IDE::BreakpointEdit instproc setEventHandlers {} {
+    set b [my breakpoint]
+    $b addEventInteres [self] breakpointRemoved remove
+}
+IDE::BreakpointEdit instproc specificInit {} {
+    my instvar win superclassList mode className parameter expression isActive
+    
+    my requireNamespace
+    frame $win.buttons -relief raised -border 3
+    label $win.lmethod -text "[[my breakpoint] displayMethodName] [[my breakpoint] counter]"
+    checkbutton $win.active -text "active" -command [list [self] changeActivity] -variable [self]::isActive
+    
+    if {[[my breakpoint] isActive]} {
+        $win.active select
+    }
+    label $win.lexpression -text "Conditional Expression"
+    entry $win.expression
+    set expression [[my breakpoint] expression]
+    $win.expression insert 0 $expression
+    
+    button $win.buttons.ok -text Ok -command [list [self] actionOk]
+    button $win.buttons.cancel -text Cancel -command [list [self] cancelBrowser]
+    button $win.buttons.remove -text {Remove Breakpoint} -command [list [self] removeBreakpoint]
+
+    pack $win.buttons.ok $win.buttons.remove $win.buttons.cancel -side left
+    pack $win.lmethod  -anchor w
+    pack $win.active  -anchor w
+    pack $win.lexpression -anchor w
+    pack $win.expression -fill x -expand yes
+    pack $win.buttons -fill x -expand yes
+
+    my setEventHandlers
+    next
+}
+IDE::BreakpointEdit proc editBreakpoint breakpoint {
+   my new [Object autoname .bpedit] -breakpoint $breakpoint
+}
+Class IDE::ExtendedDebugger -superclass {::IDE::Browser ::IDE::GUICommands}  -parameter {{atHead 1}}
+@ ::IDE::ExtendedDebugger idemeta categoriesMethods {{getMenuStruct fillMenuStruct specificInit} {evalLevel substituteLevel substituteAtLevel evalAtLevel} {showLocalVar setVarValue selectLocalVars} {showDebugLevel selectLevel}}
+@ ::IDE::ExtendedDebugger idemeta categories {initialize evaluation actions-variables actions-levels}
+@ ::IDE::ExtendedDebugger idemeta component IDEExtendedDebugger
+IDE::ExtendedDebugger instproc destroy {} {
+     my instvar win
+     ::destroy $win
+}
+IDE::ExtendedDebugger instproc editSave varValue {
+    Transcript warning "edit Save [my set selectedLocalVar] $varValue"
+    my setAction [list my updateLocalVar [my set selectedLocalVar] $varValue]
+}
+IDE::ExtendedDebugger instproc evalAtLevel string {
+    my setAction [list [self] evalLevel $string]
+}
+IDE::ExtendedDebugger instproc evalLevel string {
+    my instvar realLevel
+    set err [catch {set ret [uplevel #$realLevel $string]} errInfo]
+    if {!$err} {
+        [self]::methodedit setEvaluationRet $ret
+    } else {
+        IDE::Dialog message "Fehler by evaluation $errInfo"
+    }
+}
+IDE::ExtendedDebugger instproc fillMenuStruct aMenuStruct {
+  $aMenuStruct enablementHandler [self]
+ 
+  $aMenuStruct addCommand {Inspect Object} [list [self] inspectCalledObject]
+  $aMenuStruct addCommand {Show Error Message} [list [self] showErrorMessage]
+}
+IDE::ExtendedDebugger instproc getMenuStruct {} {
+    return [IDE::MenuStruct [self]::ms Debugger 0]
+}
+IDE::ExtendedDebugger instproc inspectCalledObject {} {
+    my instvar obj
+    if {[info exists obj] && [Object isobject $obj]} {
+        $obj inspect
+    }
+}
+IDE::ExtendedDebugger instproc resume {} {
+    wm withdraw [my set win]
+}
+IDE::ExtendedDebugger instproc selectLevel item {
+    my instvar objectList obj
+    [self]::varsvalue makeEmpty
+    my set valueController {}
+    set index [[self]::methodlist selectedIndex]
+    set level [expr {[atk::debuglevel] - $index}]
+    my setAction [list my showDebugLevel $level]
+    
+    set obj [lindex $objectList $index]
+    if {[Object isobject $obj]} {
+        [self]::varsview selectFor $obj
+    } else {
+        [self]::varsview setList ""
+    }
+}
+IDE::ExtendedDebugger instproc selectLocalVars item {
+    my set selectedLocalVar $item
+    my setAction [list my showLocalVar $item]
+}
+IDE::ExtendedDebugger instproc setAction action {
+     global debugAction
+     set debugAction $action
+}
+IDE::ExtendedDebugger instproc setVarValue {value controller} {
+    [self]::varsvalue setText $value
+    my set valueController $controller
+}
+IDE::ExtendedDebugger instproc showDebugLevel level {
+    set res [atk::runplace $level]
+    my set realLevel $level
+    [self]::methodedit setText [lindex $res 0]
+    set twin [[self]::methodedit getTextWindow]
+    set cur [lindex $res 1]
+    $twin tag add hlight "1.0 + $cur char" "1.0 + [expr {$cur + [lindex $res 2]}] char"
+    $twin see "1.0 + $cur char"
+
+    [self]::local setList [uplevel #$level {::info vars}]
+}
+IDE::ExtendedDebugger instproc showErrorMessage {} {
+    my setVarValue [my set errorMessage] [self]
+}
+IDE::ExtendedDebugger instproc showLevels {} {
+    my instvar objectList entryLevel levelInfo methodList argumentList
+    set objectList {}
+    set argumentList {}
+    set levelInfo {}
+    for {set x $entryLevel} {$x>0} {incr x -1} {
+          set level [info level $x]
+          set method [lindex $level 0]
+          set expr "!\[catch self\] && \[self proc\]==\"$method\""
+          set isobject [uplevel #$x [list expr $expr]]
+          # puts "debugger showLevels $x $method $isobject"
+          if {$isobject} {
+             set object [uplevel #$x {list [self]}]
+             set class [uplevel #$x {list [self class]}]
+             set oclass [uplevel #$x {list [my info class]}]
+             #puts "o $object c $class oclass $oclass"
+             if {[Object isobject $object]} {
+                 if {[$object isclass] || $class=="" || $class=="{}"} {
+                    lappend stackList "[string trimleft $object :] class>$method"
+                 } else {
+                    if {$class==$oclass} {
+                       lappend stackList "[string trimleft $class :]>$method"
+                    } else {
+                       lappend stackList "[string trimleft $class :] ([string trimleft $oclass :])>$method"
+                    }
+                 }
+                 lappend objectList $object
+              }
+          } else {
+              # normal tcl proc
+              lappend stackList $method
+              lappend objectList {}
+          }
+          lappend levelInfo [list $x $method]
+          lappend methodList $method
+          lappend argumentList [lrange $level 1 end]
+     }
+     lappend stackList "global context"
+     [self]::methodlist setListUnsorted $stackList
+     [self]::methodlist setSelectedIndex 0
+}
+IDE::ExtendedDebugger instproc showLocalVar var {
+    my instvar realLevel
+    if {[uplevel #$realLevel "array exists ${var}"]} {
+        set value [uplevel #$realLevel "::array get ${var}"]
+    } else {
+        set value [uplevel #$realLevel "::set ${var}"]
+    }
+    my setVarValue $value [self]
+}
+IDE::ExtendedDebugger instproc specificInit {} {
+    my instvar win
+    
+    IDE::NListView [self]::methodlist $win.methodlist -height 6 -notify [self] -notifyProc selectLevel
+    IDE::Text [self]::methodedit $win.methodedit -height 10
+    IDE::Text [self]::varsvalue $win.varsvalue -height 9 -width 20
+    IDE::VarsView [self]::varsview $win.varsview  -height 6
+    IDE::NListView [self]::local $win.localvars  -height 6 -label {Local Vars} -notify [self] -notifyProc selectLocalVars
+    
+    bind [[self]::varsvalue getTextWindow] <Control-s> [list [self] updateVarValue]
+    
+    frame $win.buttonf
+    button $win.stepInto -command [list set debugAction "atk::stepInto; break"] -text {step Into}
+    button $win.stepOver -command [list set debugAction "atk::stepOver; break"] -text {step Over}
+    button $win.resume -command [list set debugAction "[self] resume; break"] -text Resume
+
+    pack $win.stepInto $win.stepOver $win.resume -side left -in $win.buttonf
+    
+    grid $win.methodlist -row 0 -column 0 -columnspan 3 -sticky news
+    grid $win.varsvalue -row 1 -column 2 -sticky news
+    grid $win.varsview -row 1 -column 1 -sticky news
+    grid $win.localvars -row 1 -column 0 -sticky news
+    grid $win.buttonf -row 2 -column 0 -columnspan 3 -sticky we
+    grid $win.methodedit -row 3 -column 0 -columnspan 3 -sticky news
+
+    grid columnconfigure $win 0 -weight 1
+    grid columnconfigure $win 1 -weight 1
+    grid columnconfigure $win 2 -weight 1
+    grid rowconfigure $win 3 -weight 1
+
+    wm protocol [winfo toplevel $win] WM_DELETE_WINDOW [list [self] resume]
+    my set valueController {}
+    next
+}
+IDE::ExtendedDebugger instproc startBrowsing {} {
+     my instvar entryLevel win
+     global debugAction
+     set stackList {}
+     wm deiconify $win
+     set entryLevel [atk::debuglevel]
+     my showLevels
+     my showDebugLevel $entryLevel
+     my set errorMessage {}
+     if {[atk::wasError]} {
+         my setTitleAddition "Tcl Error was occured"
+         global errorInfo
+         my set errorMessage $errorInfo
+         my setVarValue $errorInfo [self]
+     } else {
+         my setTitleAddition ""
+     }
+     while 1 {
+        vwait debugAction
+        update idletasks
+        eval $debugAction
+     }
+}
+IDE::ExtendedDebugger instproc substituteAtLevel string {
+    my setAction [list [self] substituteLevel $string]
+}
+IDE::ExtendedDebugger instproc substituteLevel string {
+    my instvar realLevel
+    set err [catch {set ret [uplevel #$realLevel subst $string]} errInfo]
+    if {!$err} {
+        [self]::methodedit setEvaluationRet $ret
+    } else {
+        IDE::Dialog message "Fehler by evaluation $errInfo"
+    }
+}
+IDE::ExtendedDebugger instproc updateLocalVar {var varValue} {
+    my instvar realLevel
+    if {[uplevel #$realLevel "array exists ${var}"]} {
+        set value [uplevel #$realLevel "::array set ${var} [list $varValue]"]
+    } else {
+        set value [uplevel #$realLevel "::set ${var} [list $varValue]"]
+    }
+    my setVarValue $value [self]
+}
+IDE::ExtendedDebugger instproc updateVarValue {} {
+   Transcript warning "Here"
+   if {[my set valueController]==""} return
+   [my set valueController] editSave [[self]::varsvalue getText]
+}
+IDE::ExtendedDebugger proc appendMenu ms {
+    $ms addCommand {Browse Breakpoints} [list IDE::BreakpointsBrowser newBrowser]
+    $ms addCheckButton {Enable Ext. Debugging} [self]::isActive [list [self] changeDebuggerActivity]
+    $ms addCheckButton {Start Debugger by Error} [self]::debugByError [list [self] changeDebuggByErrorStatus]
+}
+IDE::ExtendedDebugger proc changeDebuggByErrorStatus {} {
+    atk::debugByError [my set debugByError]
+}
+IDE::ExtendedDebugger proc changeDebuggerActivity {} {
+    atk::debugstatus [my set isActive]
+}
+IDE::ExtendedDebugger proc clearDebugger {} {
+    ::destroy .edebugger
+    if {[Object isobject edebugger]} {
+       edebugger destroy
+    }
+}
+IDE::ExtendedDebugger proc initializeDebugger {} {
+     package require atkdebugger
+     atk::debugproc [list [self] startDebugging]
+     IDE::TclModeEdit instmixinappend IDE::EditBreakpointMix
+     IDE::BreakpointFasade mixinappend IDE::EventHandlerMix
+     IDE::System resetMenuStruct
+     my set isActive 1
+     my set debugByError 1
+}
+IDE::ExtendedDebugger proc startDebugging {} {
+    # puts "Entering XOTclIDE Debugger"
+    if {![Object isobject edebugger] || ![winfo exists .edebugger]} {
+       set debugger [my create edebugger .edebugger]
+    }
+    if {[catch {edebugger startBrowsing}]} {
+        global errorInfo
+        puts $errorInfo
+    }
+}
+@ Class IDE::BreakpointFasade {
+description {This is OO-fasade to procedual atk::breakpoint commands
+Please use IDE::BreakpointFasade getAllBreakpoints to get breakpoints object
+This method care about object identity among atk::brakpoint handles
+und fasade objects. It destroy unnesesary objects if one breakpoint is not more
+idle.
+You should not destroy fasade object be yourself.
+To remove breakpoint use method remove from this fasade}
+}
+Class IDE::BreakpointFasade -superclass ::IDE::EventHandlerMix  -parameter {method handle}
+@ ::IDE::BreakpointFasade idemeta component IDEExtendedDebugger
+IDE::BreakpointFasade instproc activate {} {
+   atk::breakpoint configure [my handle] -active 1
+}
+IDE::BreakpointFasade instproc counter {} {
+    lindex [atk::breakpoint info [my handle]] 3
+}
+IDE::BreakpointFasade instproc deactivate {} {
+   atk::breakpoint configure [my handle] -active 0
+}
+IDE::BreakpointFasade instproc displayMethodName {} {
+   foreach {class type method} [my getDescriptionList] {}
+   if {$type=="Tcl Procs"} {
+       return $method
+   } elseif {$type=="Class"} {
+       return "$class Class>$method"
+   } else {
+       return "$class>$method"
+   }
+}
+IDE::BreakpointFasade instproc displayName {} {
+   set infolist [atk::breakpoint info [my handle]]
+   set discr "[my displayMethodName] [lindex $infolist 2] [lindex $infolist 3]"
+   if {[llength $infolist]>4} {
+       append discr { conditional}
+   }
+   return $discr
+}
+IDE::BreakpointFasade instproc expression args {
+   if {[llength $args]==0} {
+       lindex [atk::breakpoint info [my handle]] 4
+   } else {
+       atk::breakpoint configure [my handle] -expression [lindex $args 0]
+   }
+}
+IDE::BreakpointFasade instproc getDescriptionList {} {
+    set class [namespace qualifiers [my method]]
+    if {[string match xotcl::classes::* [my method]]} {
+        set type Instance
+        set class [string range $class [string length xotcl::classes::] end]
+        set method [namespace tail [my method]]
+    } else {
+        if {[Object isobject $class]} {
+            set type Class
+            set method [namespace tail [my method]]
+        } else {
+            set type "Tcl Procs"
+            set method [my method]
+        }
+    }
+    return [list $class $type $method]
+}
+IDE::BreakpointFasade instproc isActive {} {
+   lindex [atk::breakpoint info [my handle]] 2
+}
+IDE::BreakpointFasade instproc isDeactive {} {
+   expr ![my isActive]
+}
+IDE::BreakpointFasade instproc position {} {
+    lindex [atk::breakpoint info [my handle]] 1
+}
+IDE::BreakpointFasade instproc remove {} {
+    my signalEvent remove [self]
+    atk::breakpoint remove [my handle]
+    [self class] removeBreakpoint [self]
+    my destroy
+}
+IDE::BreakpointFasade proc getAllBreakpoints {} {
+    my instvar breakpointsArr
+    set handleList {}
+    foreach handle [atk::breakpoint info] {
+        lappend handleList $handle
+        if {![info exists breakpointsArr($handle)]} {
+            set breakpointsArr($handle) [IDE::BreakpointFasade new -childof [self] -handle $handle -method [lindex [atk::breakpoint info $handle] 0]]
+        }
+    }
+    set breakpoints {}
+    set deleteList {}
+    if {![array exists breakpointsArr]} return
+    set indicator [array startsearch breakpointsArr]
+    while {[array anymore breakpointsArr $indicator]} {
+        set elem [array nextelement breakpointsArr $indicator]
+        if {[ide::lcontain $handleList $elem]} {
+            lappend breakpoints $breakpointsArr($elem)
+        } else {
+            lappend deleteList $elem
+        }
+    }
+    array donesearch breakpointsArr $indicator
+    foreach dobj $deleteList {
+        $breakpointsArr($elem) destroy
+        unset breakpointsArr($elem)
+    }
+    return $breakpoints
+}
+IDE::BreakpointFasade proc getMethodForDescriptionList {vctype vclass method} {
+    my instvar breakpointsArr
+    if {$vctype=="Tcl Procs"} {
+        return $method
+    } else {
+        if {$vctype=="Instance"} {
+            return xotcl::classes::${vclass}::${method}
+        } else {
+            return ${vclass}::${method}
+        }
+    }
+}
+IDE::BreakpointFasade proc removeBreakpoint breakpoint {
+    my unset breakpointsArr([$breakpoint handle])
+    my signalEvent removeBreakpoint $breakpoint
+}
+IDE::BreakpointFasade proc searchBreakpoint {vctype vclass method} {
+    my instvar breakpointsArr methodArr
+    set method [my getMethodForDescriptionList $vctype $vclass $method]
+    if {[info exists methodArr($method)]} {
+        set handle $methodArr($method)
+        if {[info exists breakpointsArr($handle)]} {
+            return $breakpointsArr($handle)
+        } else {
+            # clean up deleted breakpoint
+            unset methodArr($method)
+        }
+    }
+    return {}
+}
+IDE::BreakpointFasade proc setNewBreakpoint {vctype vclass method {position 0}} {
+    my instvar breakpointsArr methodArr
+    set method [my getMethodForDescriptionList $vctype $vclass $method]
+    set handle [atk::breakpoint add $method $position]
+    set bobj [IDE::BreakpointFasade new -childof [self] -handle $handle -method [lindex [atk::breakpoint info $handle] 0]]
+    set breakpointsArr($handle) $bobj
+    set methodArr($method) $handle
+    my signalEvent addBreakpoint $bobj
+    return $bobj
+}
+IDE::BreakpointFasade proc unknown args {
+    error "no unknown method"
+}
+Class IDE::BreakpointListView -superclass {::IDE::ListView ::IDE::GUICommands} 
+@ ::IDE::BreakpointListView idemeta categoriesMethods {{editSave getCurrentBreakpoint selectItem destroy} {getMenuStruct fillMenuStruct setEventHandles} {removeBreakpoint activateBreakpoint deactivateBreakpoint editBreakpoint refreshList} {isActive isDeactive}}
+@ ::IDE::BreakpointListView idemeta categories {private initialize actions testing}
+@ ::IDE::BreakpointListView idemeta component IDEExtendedDebugger
+IDE::BreakpointListView instproc activateBreakpoint args {
+   [my set breakpoint] activate
+   my refreshList
+}
+IDE::BreakpointListView instproc deactivateBreakpoint args {
+   [my set breakpoint] deactivate
+   my refreshList
+}
+IDE::BreakpointListView instproc destroy {} {
+    IDE::BreakpointFasade removeInterestFrom [self]
+    next
+}
+IDE::BreakpointListView instproc editBreakpoint dummy {
+   IDE::BreakpointEdit editBreakpoint [my set breakpoint]
+}
+IDE::BreakpointListView instproc editSave skript {
+   
+}
+IDE::BreakpointListView instproc fillMenuStruct ms {
+    $ms enablementHandler [self]
+    $ms addCommand2 {Remove Breakpoint} [list [self] dispatchWithSelected removeBreakpoint] isValidSelection
+    $ms addCommand2 {Activate Breakpoint} [list [self] dispatchWithSelected activateBreakpoint] {isValidSelection isDeactive}
+    $ms addCommand2 {Deactivate Breakpoint} [list [self] dispatchWithSelected deactivateBreakpoint] {isValidSelection isActive}
+    $ms addCommand2 {Edit Breakpoint} [list [self] dispatchWithSelected editBreakpoint] isValidSelection
+    $ms addCommand2 {Refresh List} [list [self] refreshList]
+    next
+}
+IDE::BreakpointListView instproc getCurrentBreakpoint {} {
+    set index [my selectedIndex]
+    return [lindex [my set breakpointsList] $index]
+}
+IDE::BreakpointListView instproc getMenuStruct {} {
+    return [IDE::MenuStruct create [self]::ms {Breakpoints} 0]
+}
+IDE::BreakpointListView instproc isActive {} {
+     [my set breakpoint] isActive  
+}
+IDE::BreakpointListView instproc isDeactive {} {
+     [my set breakpoint] isDeactive  
+}
+IDE::BreakpointListView instproc refreshList args {
+   my instvar breakpointsList
+   set breakpointsList [IDE::BreakpointFasade getAllBreakpoints]
+   set blist {}
+   foreach bhandle $breakpointsList {
+       lappend blist [$bhandle displayName]
+   }
+   my setListUnsorted $blist
+   [[self] info parent]::methodedit makeEmpty
+}
+IDE::BreakpointListView instproc removeBreakpoint item {
+    [my set breakpoint] remove
+    my refreshList
+}
+IDE::BreakpointListView instproc selectItem item {
+    my instvar breakpoint
+    set breakpoint [my getCurrentBreakpoint]
+    foreach {class type method} [$breakpoint getDescriptionList] {}
+    [[self] info parent]::methodedit setBodyTextControler $class $type $method [self]
+}
+IDE::BreakpointListView instproc setEventHandles {} {
+    IDE::BreakpointFasade addEventInteres [self] refreshList removeBreakpoint 
+    IDE::BreakpointFasade addEventInteres [self] refreshList addBreakpoint 
+}
+Class IDE::BreakpointsBrowser -superclass ::IDE::Browser 
+@ ::IDE::BreakpointsBrowser idemeta component IDEExtendedDebugger
+IDE::BreakpointsBrowser instproc getTitle {} {
+  return {Breakpoints Browser}
+}
+IDE::BreakpointsBrowser instproc specificInit {} {
+    my instvar win
+    
+    IDE::BreakpointListView [self]::blist $win.methodlist
+    IDE::TclModeEdit [self]::methodedit $win.methodedit -mixin IDE::CodeController -height 15 -width 60
+
+    grid $win.methodlist -row 0 -column 0 -sticky news
+    grid $win.methodedit -row 1 -column 0 -sticky news
+
+    grid columnconfigure $win 0 -weight 1
+    grid rowconfigure $win 1 -weight 1
+
+    [self]::blist setEventHandles
+    [self]::blist refreshList
+    
+    next
+}
+IDE::BreakpointsBrowser proc newBrowser {} {
+    # BreakpointsBrowser is a singleton browser
+    if {![winfo exists .bpbrowser]} {
+        return [my new .bpbrowser]
+    } else {
+        return {}
+    }
+}
+Class IDE::EditBreakpointMix
+@ ::IDE::EditBreakpointMix idemeta component IDEExtendedDebugger
+IDE::EditBreakpointMix instproc breakpointRemoved bpoint {
+    my instvar breakpoint
+    if {$breakpoint!=""} {
+        set twin [my getTextWindow]
+        if {[$twin window names]!=""} {
+            [my getTextWindow] delete [my set bpwindow]
+            set breakpoint {}
+        }
+    }
+}
+IDE::EditBreakpointMix instproc canSetBreakpoint {} {
+   my instvar vtype editMode breakpoint
+   return [expr {$editMode=="xotcl" && $vtype=="Source" && [info exists breakpoint] && $breakpoint==""}]
+}
+IDE::EditBreakpointMix instproc editBreakpoint {} {
+    IDE::BreakpointEdit editBreakpoint [my set breakpoint]
+}
+IDE::EditBreakpointMix instproc getBodyStart {} {
+    my instvar vclass vctype method
+    set text [my getText]
+    if {$vctype=="Tcl Procs"} {
+        set elem 3
+    } else {
+        set elem 4
+    }
+    string first [lindex $text $elem] $text
+}
+IDE::EditBreakpointMix instproc menuInsertions ms {
+   $ms addCommand2 {Set Breakpoint} [list [self] setBreakpoint] {canSetBreakpoint haveNoChanges}
+   next
+}
+IDE::EditBreakpointMix instproc setBodyTextControler {class type method controler} {
+    next
+    my instvar breakpoint
+    if {[info exists breakpoint] && $breakpoint!=""} {
+        $breakpoint removeInterestFrom [self]
+    }
+    my set breakpoint [IDE::BreakpointFasade searchBreakpoint $type $class $method]
+    if {[my set breakpoint]!=""} {     
+        my visibleBreakpoint
+    } else {
+        my unvisibleBreakpoint
+    }
+}
+IDE::EditBreakpointMix instproc setBreakpoint {} {
+    my instvar vctype vtype vclass method
+    set insertPos [string length [[my getTextWindow] get 1.0 insert]]
+    set position [expr {$insertPos-[my getBodyStart]}]
+    my set breakpoint [IDE::BreakpointFasade setNewBreakpoint $vctype $vclass $method $position]
+    my visibleBreakpoint
+}
+IDE::EditBreakpointMix instproc unvisibleBreakpoint {} {
+}
+IDE::EditBreakpointMix instproc visibleBreakpoint {} {
+    my instvar breakpoint bpwindow
+    if {![info exists bpwindow] || ![winfo exists $bpwindow]} {
+        set bpwindow [button [my getTextWindow].bpbutton -text Break -bg red -padx 1m -pady 0m -command [list [self] editBreakpoint]]
+    }
+    if {[$breakpoint isActive]} {
+        $bpwindow configure -bg red
+    } else {
+        $bpwindow configure -bg [lindex [$bpwindow configure -bg] 3]
+    }
+    $breakpoint addEventInteres [self] breakpointRemoved remove
+    set bpointStart [expr {[my getBodyStart]+[$breakpoint position]}]
+    [my getTextWindow] window create "1.0 + $bpointStart char" -window $bpwindow
+}
+
