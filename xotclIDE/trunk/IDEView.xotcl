@@ -2067,7 +2067,7 @@ IDE::ObjectBrowser instproc specificInit {} {
         panedwindow $win.upperarea -orient horizontal
 
         IDE::TclModeEdit [self]::methodedit $win.methodedit -height 16 -width 65
-        if {$type!="single"} {
+        if {$type!="browse"} {
             IDE::ObjectsView [self]::objectsview $win.upperarea.objectsview
             set col 1
         } else {
