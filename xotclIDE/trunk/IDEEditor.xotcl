@@ -1,5 +1,5 @@
 # automatically generated from XOTclIDE
-# script require component {IDECore IDEBaseGUI IDEView IDETclParser}
+# script require component {IDECore IDEView IDEBaseGUI IDETclParser}
 @ Component IDEEditor {
 description {Xotcl Text Editing
 
@@ -12,8 +12,8 @@ In the future place for such things as
 }
 package provide IDEEditor 0.70
 package require IDECore
-package require IDEBaseGUI
 package require IDEView
+package require IDEBaseGUI
 package require IDETclParser
 @ Class IDE::TclModeEdit {
 description {Tcl Mode
@@ -29,8 +29,8 @@ supports function
 4. Statix Syntax Checking}
 }
 Class IDE::TclModeEdit -superclass {::IDE::MethodEdit ::IDE::EditorPopDown}  -parameter {{editMode none}}
-@ ::IDE::TclModeEdit idemeta categoriesMethods {{searchCloseQuote searchCloseBrace doubleButton searchOpenBrace keyReturn getIdent} {setType syntaxHighlightIfWanted simpleSyntaxHighlight syntaxHighlight syntaxHighlightRemove complexSyntaxHighlight} {setText saveValue} {xotclLint lintIfWanted} {initTags init menuInsertions} {getProcSubcommand invokePopDown getInstanceCommand getVariable tabPress}}
 @ ::IDE::TclModeEdit idemeta categories {edit-helper syntax-hightlighting interface tcl-lint initialize context-quick-edit}
+@ ::IDE::TclModeEdit idemeta categoriesMethods {{searchCloseQuote searchCloseBrace doubleButton searchOpenBrace keyReturn getIdent} {setType syntaxHighlightIfWanted simpleSyntaxHighlight syntaxHighlight syntaxHighlightRemove complexSyntaxHighlight} {setText saveValue} {xotclLint lintIfWanted} {initTags init menuInsertions} {getProcSubcommand invokePopDown getInstanceCommand getVariable tabPress}}
 @ ::IDE::TclModeEdit idemeta component IDEEditor
 IDE::TclModeEdit instproc addIndent {} {
     set twin [my getTextWindow]
