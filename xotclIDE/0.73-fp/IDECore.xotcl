@@ -9,6 +9,82 @@ package provide IDECore 0.73
 namespace eval ::ide {}
 @ tclgroup ide idemeta comment IDECore {The are some extented list functions based
 on Smalltalk container protocol}
+@ tclproc ide::ldetect idemeta struct IDECore ide
+proc ide::ldetect {var_ref list test} {
+	upvar $var_ref var
+        foreach a $list {
+            set var $a
+            set rtest [uplevel [list expr $test]]
+	    if $rtest {
+                return $a
+            }
+        }
+        return
+}
+@ tclproc ide::lappendIfNone idemeta struct IDECore ide
+proc ide::lappendIfNone {list_ref elem} {
+	upvar $list_ref list
+	if {![lcontain $list $elem]} {
+	    lappend list $elem
+	    return 1
+	}
+	return 0
+}
+@ tclproc ide::lcollect idemeta struct IDECore ide
+proc ide::lcollect {var_ref list eval_action} {
+	upvar $var_ref var
+        set ret {}
+        foreach a $list {
+            set var $a
+            lappend ret [uplevel $eval_action]
+	}
+        return $ret
+}
+@ tclproc ide::addToValueForKey idemeta struct IDECore ide
+proc ide::addToValueForKey {arr_ref key value} {
+    upvar $arr_ref arr
+    if {[info exists arr($key)]} {
+        set lvalue $arr($key)
+    } else {
+        set lvalue {}
+    }
+    lappend lvalue $value
+    set arr($key) $lvalue
+}
+@ tclproc ide::addToValueForKeyIfNone idemeta struct IDECore ide
+proc ide::addToValueForKeyIfNone {arr_ref key value} {
+    upvar $arr_ref arr
+    if {[info exists arr($key)]} {
+        set lvalue $arr($key)
+    } else {
+        set lvalue {}
+    }
+    ide::lappendIfNone lvalue $value
+    set arr($key) $lvalue
+}
+@ tclproc ide::addToValueForKeyAt idemeta struct IDECore ide
+proc ide::addToValueForKeyAt {arr_ref key value index} {
+    upvar $arr_ref arr
+    if {[info exists arr($key)]} {
+        set lvalue $arr($key)
+    } else {
+        set lvalue {}
+    }
+    set arr($key) [linsert $lvalue $index $value]
+}
+@ tclproc ide::lcontain idemeta struct IDECore ide
+proc ide::lcontain {list elem} {
+	return [expr [lsearch -exact $list $elem]>=0]
+}
+@ tclproc ide::lremove idemeta struct IDECore ide
+proc ide::lremove {list_ref elem} {
+    upvar $list_ref list
+    if {[set index [lsearch -exact $list $elem]]>=0} {
+	    set list [lreplace $list $index $index]
+	    return 1
+    }
+    return 0
+}
 @ tclproc ide::lselect idemeta struct IDECore ide
 proc ide::lselect {var_ref list test} {
 	upvar $var_ref var
@@ -22,88 +98,12 @@ proc ide::lselect {var_ref list test} {
         }
         return $ret
 }
-@ tclproc ide::lappendIfNone idemeta struct IDECore ide
-proc ide::lappendIfNone {list_ref elem} {
-	upvar $list_ref list
-	if {![lcontain $list $elem]} {
-	    lappend list $elem
-	    return 1
-	}
-	return 0
-}
-@ tclproc ide::addToValueForKey idemeta struct IDECore ide
-proc ide::addToValueForKey {arr_ref key value} {
-    upvar $arr_ref arr
-    if {[info exists arr($key)]} {
-        set lvalue $arr($key)
-    } else {
-        set lvalue {}
-    }
-    lappend lvalue $value
-    set arr($key) $lvalue
-}
 @ tclproc ide::lremoveAll idemeta struct IDECore ide
 proc ide::lremoveAll {list_ref listr} {
 	upvar $list_ref list
         foreach elem $listr {
             lremove list $elem
         }
-}
-@ tclproc ide::lremove idemeta struct IDECore ide
-proc ide::lremove {list_ref elem} {
-    upvar $list_ref list
-    if {[set index [lsearch -exact $list $elem]]>=0} {
-	    set list [lreplace $list $index $index]
-	    return 1
-    }
-    return 0
-}
-@ tclproc ide::ldetect idemeta struct IDECore ide
-proc ide::ldetect {var_ref list test} {
-	upvar $var_ref var
-        foreach a $list {
-            set var $a
-            set rtest [uplevel [list expr $test]]
-	    if $rtest {
-                return $a
-            }
-        }
-        return
-}
-@ tclproc ide::lcontain idemeta struct IDECore ide
-proc ide::lcontain {list elem} {
-	return [expr [lsearch -exact $list $elem]>=0]
-}
-@ tclproc ide::addToValueForKeyAt idemeta struct IDECore ide
-proc ide::addToValueForKeyAt {arr_ref key value index} {
-    upvar $arr_ref arr
-    if {[info exists arr($key)]} {
-        set lvalue $arr($key)
-    } else {
-        set lvalue {}
-    }
-    set arr($key) [linsert $lvalue $index $value]
-}
-@ tclproc ide::addToValueForKeyIfNone idemeta struct IDECore ide
-proc ide::addToValueForKeyIfNone {arr_ref key value} {
-    upvar $arr_ref arr
-    if {[info exists arr($key)]} {
-        set lvalue $arr($key)
-    } else {
-        set lvalue {}
-    }
-    ide::lappendIfNone lvalue $value
-    set arr($key) $lvalue
-}
-@ tclproc ide::lcollect idemeta struct IDECore ide
-proc ide::lcollect {var_ref list eval_action} {
-	upvar $var_ref var
-        set ret {}
-        foreach a $list {
-            set var $a
-            lappend ret [uplevel $eval_action]
-	}
-        return $ret
 }
 Class IDE
 @ ::IDE idemeta component IDECore
@@ -142,16 +142,106 @@ IDE::CommentHandler instproc hasComment {} {
 IDE::CommentHandler instproc setComment text {
     my set comment $text
 }
+@ Class IDE::TclProcsDescription {
+description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
+This instaces has similar interface as xotcl class/objects.
+That is comments, getting body
+}
+}
+Class IDE::TclProcsDescription -superclass ::IDE::CommentHandler  -parameter name
+@ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
+@ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
+@ ::IDE::TclProcsDescription idemeta component IDECore
+IDE::TclProcsDescription instproc getBody {} {
+    # ??? Vielleicht durch IntroProxy
+    IDE::IntroProxy getProcBody [my set name]
+}
+IDE::TclProcsDescription instproc getGroupObj {} {
+    return [my info parent]
+}
+IDE::TclProcsDescription instproc getMetaBody {} {
+    set group [my getGroupObj]
+    set script "@ tclproc [my getName] idemeta struct [list [[$group getComponent] getName] [$group getObjectName]]\n"
+    if {[my hasComment]} {
+        append script "@ tclproc [my getName] idemeta comment [list [my getComment]]\n"
+    }
+    return $script
+}
+IDE::TclProcsDescription instproc getName {} {
+    my name
+}
+IDE::TclProcsDescription instproc handleScript script {
+    # Warning! no check for syntax at this level 
+    # see handleScript in IDE::ProcsGroup
+    # TODO namespace handling
+    namespace eval :: $script
+}
+IDE::TclProcsDescription instproc import {} {
+
+}
+IDE::TclProcsDescription instproc init {} {
+    [self class] registerMethod [my name] [self]
+}
+IDE::TclProcsDescription instproc isPersistent {} {
+    return 0  
+}
+IDE::TclProcsDescription instproc unload {} {
+    # TODO namespace proc handling
+    if {[info procs [my getName]]!=""} {
+	rename [my getName] {}
+        [self class] unregisterMethod [my getName]
+    } else {
+	puts stderr "no proc [my getName] in interpreter"
+    }
+}
+IDE::TclProcsDescription proc getAllMethodsFromNamespace namespace {
+    if {$namespace eq "::xotcl"} return
+    set res [namespace eval $namespace info procs]
+    set res [ide::lcollect each $res {namespace eval $namespace [list namespace which -command $each]}]
+    foreach chns [namespace children $namespace] {
+        if {[Object isobject $chns]} continue
+        set res [concat $res [my getAllMethodsFromNamespace $chns]]
+    }
+    return $res
+}
+IDE::TclProcsDescription proc getAllRegisteredMethods {} {
+    if {[my array exists methodArr]} {
+        return [my array names methodArr]
+    }
+    return
+}
+IDE::TclProcsDescription proc getAllUnRegisteredMethods {} {
+    set allMethods [my getAllMethodsFromNamespace ::]
+    ide::lremoveAll allMethods [my getAllRegisteredMethods]
+    return $allMethods
+}
+IDE::TclProcsDescription proc getMethodFor method {
+    if {[my exists methodArr($method)]} {
+        return [my set methodArr($method)]
+    }
+    return
+}
+IDE::TclProcsDescription proc registerMethod {method wrapper} {
+   my set methodArr($method) $wrapper
+}
+IDE::TclProcsDescription proc unknown args {
+    error "unknown method on [self] $args"
+}
+IDE::TclProcsDescription proc unregisterMethod method {
+    if {[my exists methodArr($method)]} {
+        my unset methodArr($method)
+    }
+}
 @ Class IDE::Component {
 description {IDE::Component is base class for handling components.
 Components are currently sets or Xotcl classes and objects
 that can be loaded and saved as tcl packages}
 }
 Class IDE::Component -superclass ::IDE::CommentHandler  -parameter name
-@ ::IDE::Component idemeta categoriesMethodsProcs {{registerObject registerInstproc registerProc loadCompFromFile} {loadPackageIfNone loadPackage initFromInterpreter initPackageTracking importCompsFromFile} {saveComplex getObjectBody saveAllToPath} {getCompObjectForNameIfExist getComponentNames getAllComponents getCompObjectForName}}
 @ ::IDE::Component idemeta categoriesProcs {private importing-loading recreation api}
-@ ::IDE::Component idemeta categoriesMethods {{basicRemoveProcsGroup getProcsGroupWithName removeProcsGroup createTclProcsGroup basicCreateTclProcsGroup addProcsGroup getProcsGroups getProcsGroupsObjects} {isPersistent saveAsScript unload asScript getVersionNumber addRequiredCompList computeRequirements rename copyClassOrObject getVisibleClasses} {addObject basicAddObject basicRemoveObject addClass init destroy getObjectDefineList rekBuildDefList} {removeClass getCommentBody setVersionNumber removeObject standardFileNameBase standardFileName getRequiredFrom getClassesHierarchy getName getObjects getClasses getHierarchyFrom getRequiredFor getRequiredFromDeep}}
+@ ::IDE::Component idemeta categoriesMethodsProcs {{registerObject registerInstproc registerProc loadCompFromFile} {loadPackageIfNone loadPackage initFromInterpreter initPackageTracking importCompsFromFile} {saveComplex getObjectBody saveAllToPath} {getCompObjectForNameIfExist getComponentNames getAllComponents getCompObjectForName}}
 @ ::IDE::Component idemeta categories {tcl-procs service private accessing}
+@ ::IDE::Component idemeta categoriesMethods {{basicRemoveProcsGroup getProcsGroupWithName removeProcsGroup createTclProcsGroup basicCreateTclProcsGroup addProcsGroup getProcsGroups getProcsGroupsObjects} {isPersistent saveAsScript unload asScript getVersionNumber addRequiredCompList computeRequirements rename copyClassOrObject getVisibleClasses} {addObject basicAddObject basicRemoveObject addClass init destroy getObjectDefineList rekBuildDefList} {removeClass getCommentBody setVersionNumber removeObject standardFileNameBase standardFileName getRequiredFrom getClassesHierarchy getName getObjects getClasses getHierarchyFrom getRequiredFor getRequiredFromDeep}}
 @ ::IDE::Component idemeta component IDECore
 IDE::Component instproc addClass class {
    # use $object moveToComponent name for right initialisation
@@ -830,96 +920,6 @@ IDE::Component::Tracker proc trackProc args {
     set name [lindex $args 0]
     my set methodsArr($name) $component
 }
-@ Class IDE::TclProcsDescription {
-description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
-This instaces has similar interface as xotcl class/objects.
-That is comments, getting body
-}
-}
-Class IDE::TclProcsDescription -superclass ::IDE::CommentHandler  -parameter name
-@ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
-@ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
-@ ::IDE::TclProcsDescription idemeta component IDECore
-IDE::TclProcsDescription instproc getBody {} {
-    # ??? Vielleicht durch IntroProxy
-    IDE::IntroProxy getProcBody [my set name]
-}
-IDE::TclProcsDescription instproc getGroupObj {} {
-    return [my info parent]
-}
-IDE::TclProcsDescription instproc getMetaBody {} {
-    set group [my getGroupObj]
-    set script "@ tclproc [my getName] idemeta struct [list [[$group getComponent] getName] [$group getObjectName]]\n"
-    if {[my hasComment]} {
-        append script "@ tclproc [my getName] idemeta comment [list [my getComment]]\n"
-    }
-    return $script
-}
-IDE::TclProcsDescription instproc getName {} {
-    my name
-}
-IDE::TclProcsDescription instproc handleScript script {
-    # Warning! no check for syntax at this level 
-    # see handleScript in IDE::ProcsGroup
-    # TODO namespace handling
-    namespace eval :: $script
-}
-IDE::TclProcsDescription instproc import {} {
-
-}
-IDE::TclProcsDescription instproc init {} {
-    [self class] registerMethod [my name] [self]
-}
-IDE::TclProcsDescription instproc isPersistent {} {
-    return 0  
-}
-IDE::TclProcsDescription instproc unload {} {
-    # TODO namespace proc handling
-    if {[info procs [my getName]]!=""} {
-	rename [my getName] {}
-        [self class] unregisterMethod [my getName]
-    } else {
-	puts stderr "no proc [my getName] in interpreter"
-    }
-}
-IDE::TclProcsDescription proc getAllMethodsFromNamespace namespace {
-    if {$namespace eq "::xotcl"} return
-    set res [namespace eval $namespace info procs]
-    set res [ide::lcollect each $res {namespace eval $namespace [list namespace which -command $each]}]
-    foreach chns [namespace children $namespace] {
-        if {[Object isobject $chns]} continue
-        set res [concat $res [my getAllMethodsFromNamespace $chns]]
-    }
-    return $res
-}
-IDE::TclProcsDescription proc getAllRegisteredMethods {} {
-    if {[my array exists methodArr]} {
-        return [my array names methodArr]
-    }
-    return
-}
-IDE::TclProcsDescription proc getAllUnRegisteredMethods {} {
-    set allMethods [my getAllMethodsFromNamespace ::]
-    ide::lremoveAll allMethods [my getAllRegisteredMethods]
-    return $allMethods
-}
-IDE::TclProcsDescription proc getMethodFor method {
-    if {[my exists methodArr($method)]} {
-        return [my set methodArr($method)]
-    }
-    return
-}
-IDE::TclProcsDescription proc registerMethod {method wrapper} {
-   my set methodArr($method) $wrapper
-}
-IDE::TclProcsDescription proc unknown args {
-    error "unknown method on [self] $args"
-}
-IDE::TclProcsDescription proc unregisterMethod method {
-    if {[my exists methodArr($method)]} {
-        my unset methodArr($method)
-    }
-}
 @ Class IDE::ObjectCommentsContainer {
 description {Helper class for hanlde methods comments.
 It will be used for not persistent classes}
@@ -956,8 +956,8 @@ namespace eval myNameSpace {
 }
 }
 Class IDE::ProcsGroup -superclass ::IDE::CommentHandler  -parameter {name {withNamespace 0}}
-@ ::IDE::ProcsGroup idemeta categoriesMethods {isPersistent {getDescription getComponent getBody getObjectName getComponentName getDefBody setDefBody} {removeMethodObj createProcForName setMethodComment hasMethodComment getProcsObjects getProcsNames getMethodComment deleteMethod getProcObjForName getProcObjForNameIfExist} {rename unload handleDefinitionScript moveToComponent handleScript} init}
 @ ::IDE::ProcsGroup idemeta categories {testing accessing methods actions initialize}
+@ ::IDE::ProcsGroup idemeta categoriesMethods {isPersistent {getDescription getComponent getBody getObjectName getComponentName getDefBody setDefBody} {removeMethodObj createProcForName setMethodComment hasMethodComment getProcsObjects getProcsNames getMethodComment deleteMethod getProcObjForName getProcObjForNameIfExist} {rename unload handleDefinitionScript moveToComponent handleScript} init}
 @ ::IDE::ProcsGroup idemeta component IDECore
 IDE::ProcsGroup instproc createProcForName name {
     #[self] halt
@@ -1145,6 +1145,286 @@ IDE::ProcsGroup proc buildStuctFromArray arr_ref {
 IDE::ProcsGroup proc unknown args {
     error "unknown method on [self] $args"
 }
+@ Object IDE::IntroProxy {
+description {Fasade for xotcl introspection.}
+}
+Object IDE::IntroProxy
+@ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
+@ ::IDE::IntroProxy idemeta categoriesMethodsProcs {{getInstanceMethods getClassMethods getCategoriesForClass getCategoriesForObject getBodyTclMethod} {getClassesForComponent getObjectsForComponent getComponents getProcsGroupsForComponent getComponentsNoIDE getClasses getObjects} {getBodyMetadata getBodyInstanceMethodIfExist getBodyClassMethodIfExist getObjDef getBodyInstanceSearchMethod getProcBody getBodyInstanceMethod getBodyClassMethod} {stripNamespace asDescriptionList getBaseObjDef} {getObjectMethodCommentBody getObjectCommentBody}}
+@ ::IDE::IntroProxy idemeta component IDECore
+IDE::IntroProxy proc asDescriptionList comment {
+   return "description [list $comment]"
+}
+IDE::IntroProxy proc getBaseObjDef name {
+    set cname [my stripNamespace [$name info class]]
+    return "$cname [string trimleft $name :]"
+}
+IDE::IntroProxy proc getBodyClassMethod {obj p} {
+    set arguments {}
+    foreach arg [$obj info args $p] {
+        if {[$obj info default $p $arg val]} {
+            # add variables (val)
+            lappend arguments [list $arg $val]
+        } else {
+            lappend arguments $arg
+        }
+    }
+    if {$::xotcl::version>=1.3} {
+        if {[$obj info nonposargs $p] eq ""} {
+            set ret "[string trimleft $obj :] proc [list $p] [list $arguments] \{[$obj info body $p]\}"
+        } else {
+            set ret "[string trimleft $obj :] proc [list $p] [list [$obj info instnonposargs $p]] [list $arguments] \{[$obj info body $p]\}"
+        }
+    } else {
+        set ret "[string trimleft $obj :] proc [list $p] [list $arguments] \{[$obj info body $p]\}"
+    }
+    if {[set add [$obj info pre $p]]!=""} {
+        append ret " \{\n"
+        foreach ass $add {
+            append ret "  [list $ass]\n"
+        }
+        append ret \}
+        set wasPre 1
+    } else {
+        set wasPre 0
+    }
+    if {[set add [$obj info post $p]]!=""} {
+        if {$wasPre} {
+           append ret " \{\n"
+        } else {
+           append ret " \{\} \{\n"
+        }
+        foreach ass $add {
+            append ret "  [list $ass]\n"
+        }
+        append ret \}
+    }
+    append ret \n
+    return $ret}
+IDE::IntroProxy proc getBodyClassMethodIfExist {obj p} {
+    if {![Object isobject $obj] ||
+         [$obj info procs $p]==""} return
+    my getBodyClassMethod $obj $p
+}
+IDE::IntroProxy proc getBodyInstanceMethod {class p} {
+    set arguments {}
+    foreach arg [$class info instargs $p] {
+        if {[$class info instdefault $p $arg val]} {
+            # add variables (val)
+            lappend arguments [list $arg $val]
+        } else {
+            lappend arguments $arg 
+        }
+    }
+    if {$::xotcl::version>=1.3} {
+        if {[$class info instnonposargs $p] eq ""} {
+            set ret "[string trimleft $class :] instproc [list $p] [list $arguments] \{[$class info instbody $p]\}"
+        } else {
+            set ret "[string trimleft $class :] instproc [list $p] [list [$class info instnonposargs $p]] [list $arguments] \{[$class info instbody $p]\}"
+        }
+    } else {
+        set ret "[string trimleft $class :] instproc [list $p] [list $arguments] \{[$class info instbody $p]\}"
+    }
+    if {[set add [$class info instpre $p]]!=""} {
+        append ret " \{\n"
+        foreach ass $add {
+            append ret "  [list $ass]\n"
+        }
+        append ret \}
+    }
+    if {[set add [$class info instpost $p]]!=""} {
+        append ret " \{\n"
+        foreach ass $add {
+            append ret "  [list $ass]\n"
+        }
+        append ret \}
+    }
+    append ret \n
+    return $ret
+}
+IDE::IntroProxy proc getBodyInstanceMethodIfExist {obj p} {
+    if {![Object isclass $obj] ||
+         [$obj info instprocs $p]==""} return
+    my getBodyInstanceMethod $obj $p
+}
+IDE::IntroProxy proc getBodyInstanceSearchMethod {object ip} {
+    set arguments {}
+    set p [$object procsearch $ip]
+    foreach arg [info args $p] {
+        if {[info default $p $arg val]} {
+            # add variables (val)
+            lappend arguments [list $arg $val]
+        } else {
+            lappend arguments $arg 
+        }
+    }
+    return "proc $p [list $arguments] \{[info body $p]\}\n"
+}
+IDE::IntroProxy proc getBodyMetadata {class m} {
+    return [$class metadataBody $m]
+}
+IDE::IntroProxy proc getBodyTclMethod method {
+    set arguments {}
+    foreach arg [info args $method] {
+        if {[info default $method $arg val]} {
+            # add variables (val)
+            lappend arguments [list $arg $val]
+        } else {
+            lappend arguments $arg 
+        }
+    }
+    return "proc [list $method] [list $arguments] \{[info body $method]\}\n"
+}
+IDE::IntroProxy proc getCategoriesForClass class {
+    if {[$class istype Class]} {
+        return [$class getCategories]
+    }
+    return all_categories
+}
+IDE::IntroProxy proc getCategoriesForObject object {
+    return [$object getCategoriesB]
+}
+IDE::IntroProxy proc getClassMethods {class categories} {
+    set methods {}
+    foreach category $categories {
+        set methods [concat $methods [$class getMethodsForCategoryB $category]]
+    }
+    return $methods
+}
+IDE::IntroProxy proc getClasses {} {
+    if {[IDE::System isIgnoreIDEComponents]} {
+        set ret {}
+        foreach comp [my getComponentsNoIDE] {
+           set cobj [IDE::Component  getCompObjectForNameIfExist $comp]
+           set ret [concat $ret [$cobj getClasses]]
+        }
+    } else {
+        set ret [Class info instances]
+        foreach cls [my getSubclassesDeep Class] {
+            set ret [concat [$cls info instances] $ret]
+        }
+    }
+    return $ret
+}
+IDE::IntroProxy proc getClassesForComponent component {
+    set appObj [IDE::Component getCompObjectForName $component]
+    return [$appObj getClasses]
+}
+IDE::IntroProxy proc getComponents {} {
+    return [IDE::Component getComponentNames]
+}
+IDE::IntroProxy proc getComponentsNoIDE {} {
+   set ideComps [concat [IDE::System getCoreComponents] [IDE::System getExtraComponents]]
+   set ret {}
+   foreach comp [IDE::Component getComponentNames] {
+       if {![ide::lcontain $ideComps $comp]} {
+           lappend ret $comp
+       }
+   }
+   return $ret
+}
+IDE::IntroProxy proc getInstanceMethods {class categories} {
+    set methods {}
+    foreach category $categories {
+        set methods [concat $methods [$class getMethodsForCategory $category]]
+    }
+    return $methods
+}
+IDE::IntroProxy proc getObjDef name {
+    set script [my getBaseObjDef $name]
+    if {[Object isclass $name]} {
+        set sl [$name info superclass]
+        if {$sl != "" && $sl != "::Object" && $sl!="::xotcl::Object"} {
+            append script " -superclass [list $sl] "
+        }
+        set pr [$name info parameter]         
+        if {$pr != ""} {
+            append script " -parameter [list $pr]\n"
+        } else {
+            append script "\n"
+        }
+    } else {
+        append script "\n"
+    }
+    return $script
+}
+IDE::IntroProxy proc getObjectCommentBody object {
+    set comment [$object getComment]
+    if {$comment==""} return
+    set script "@ [my getBaseObjDef $object] \{\n[my asDescriptionList $comment]\n\}\n"
+    return $script
+}
+IDE::IntroProxy proc getObjectMethodCommentBody {object type method} {
+    set comment [$object getMethodComment $type $method]
+    if {$comment==""} return
+    if {$type=="Class"} {
+        set type proc
+    } else {
+        set type instproc
+    }
+    # !!! method parameter will be ignored
+
+    return "@ [string trimleft $object :] $type $method {} \{\n[my asDescriptionList $comment]\n\}\n"
+}
+IDE::IntroProxy proc getObjects {} {
+    if {[IDE::System isIgnoreIDEComponents]} {
+        set ret {}
+        foreach comp [my getComponentsNoIDE] {
+           set cobj [IDE::Component  getCompObjectForNameIfExist $comp]
+           set ret [concat $ret [$cobj getObjects]]
+        }
+        return $ret
+    } else {
+        return [Object info instances]
+    }
+}
+IDE::IntroProxy proc getObjectsForComponent component {
+    set appObj [IDE::Component getCompObjectForName $component]
+    return [$appObj getObjects]
+}
+IDE::IntroProxy proc getProcBody p {
+     set arguments {}
+     foreach arg [::info args $p] {
+         if {[::info default $p $arg val]} {
+            # add variables (val)
+            lappend arguments [list $arg $val]
+         } else {
+            lappend arguments $arg 
+         }
+     }
+     return "proc [list $p] [list $arguments] \{[::info body $p]\}\n" 
+}
+IDE::IntroProxy proc getProcsGroupsForComponent component {
+    set appObj [IDE::Component getCompObjectForName $component]
+    return [$appObj getProcsGroups]
+}
+IDE::IntroProxy proc getSubclassesDeep cls {
+    set subc [$cls info subclass]
+    set ret $subc
+    foreach s $subc {
+        set ret [concat $ret [my getSubclassesDeep $s]]
+    }
+    return $ret
+}
+IDE::IntroProxy proc getUnregisteredClasses {} {
+    set dcomp [IDE::Component getCompObjectForName default]
+    set dcompClasses [$dcomp getClasses]
+    set ret {}
+    foreach cls [my getClasses] {
+        set cobj [$cls getCompObject]
+        if {$cobj==$dcomp && ![ide::lcontain $dcompClasses $cls]} {
+            lappend ret $cls
+        }
+    }
+    return $ret
+}
+IDE::IntroProxy proc stripNamespace name {
+    if {[string match ::xotcl::* $name]} {
+        string range $name 9 end
+    } else {
+        string trimleft $name  :
+    }
+}
 @ Object IDE::CommentsContainer {
 description {Hanlde objects comments and is parent object for methods comments
 (class IDE::ObjectsCommentsContainer)
@@ -1155,8 +1435,8 @@ the method "parseAndCleanMeta" try to initilize loaded Objects with
 comment after loading}
 }
 Object IDE::CommentsContainer
-@ ::IDE::CommentsContainer idemeta categoriesMethodsProcs {{parseAndCleanMeta importMeta importComponentMeta importObjectMethodMeta importProcGroupMeta importProcMeta importObjectMeta} {destroyObject getObjectContainer objectMethodGetComment getObjectContainerWithCreate objectSetComment objectMethodSetComment objectMethodHasComment objectGetComment objectHasComment} {makeTclGroupsFromMeta getGroupForMethod cleanTclProcComments searchCommentForMethod searchCommentForGroup} extractComment}
 @ ::IDE::CommentsContainer idemeta categoriesProcs {parse-import comments-mirrow tclproc-handling private}
+@ ::IDE::CommentsContainer idemeta categoriesMethodsProcs {{parseAndCleanMeta importMeta importComponentMeta importObjectMethodMeta importProcGroupMeta importProcMeta importObjectMeta} {destroyObject getObjectContainer objectMethodGetComment getObjectContainerWithCreate objectSetComment objectMethodSetComment objectMethodHasComment objectGetComment objectHasComment} {makeTclGroupsFromMeta getGroupForMethod cleanTclProcComments searchCommentForMethod searchCommentForGroup} extractComment}
 @ ::IDE::CommentsContainer idemeta component IDECore
 IDE::CommentsContainer proc cleanTclProcComments {} {
     if {[my exists proc_groupcomment]} {[self] unset proc_groupcomment}
@@ -1590,286 +1870,6 @@ IDE::SystemConfigMap proc startScripts {} {
     }
     if {!$run} {
          IDE::Dialog message "There are no configuration map scripts to run"
-    }
-}
-@ Object IDE::IntroProxy {
-description {Fasade for xotcl introspection.}
-}
-Object IDE::IntroProxy
-@ ::IDE::IntroProxy idemeta categoriesMethodsProcs {{getInstanceMethods getClassMethods getCategoriesForClass getCategoriesForObject getBodyTclMethod} {getClassesForComponent getObjectsForComponent getComponents getProcsGroupsForComponent getComponentsNoIDE getClasses getObjects} {getBodyMetadata getBodyInstanceMethodIfExist getBodyClassMethodIfExist getObjDef getBodyInstanceSearchMethod getProcBody getBodyInstanceMethod getBodyClassMethod} {stripNamespace asDescriptionList getBaseObjDef} {getObjectMethodCommentBody getObjectCommentBody}}
-@ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
-@ ::IDE::IntroProxy idemeta component IDECore
-IDE::IntroProxy proc asDescriptionList comment {
-   return "description [list $comment]"
-}
-IDE::IntroProxy proc getBaseObjDef name {
-    set cname [my stripNamespace [$name info class]]
-    return "$cname [string trimleft $name :]"
-}
-IDE::IntroProxy proc getBodyClassMethod {obj p} {
-    set arguments {}
-    foreach arg [$obj info args $p] {
-        if {[$obj info default $p $arg val]} {
-            # add variables (val)
-            lappend arguments [list $arg $val]
-        } else {
-            lappend arguments $arg
-        }
-    }
-    if {$::xotcl::version>=1.3} {
-        if {[$obj info nonposargs $p] eq ""} {
-            set ret "[string trimleft $obj :] proc [list $p] [list $arguments] \{[$obj info body $p]\}"
-        } else {
-            set ret "[string trimleft $obj :] proc [list $p] [list [$obj info instnonposargs $p]] [list $arguments] \{[$obj info body $p]\}"
-        }
-    } else {
-        set ret "[string trimleft $obj :] proc [list $p] [list $arguments] \{[$obj info body $p]\}"
-    }
-    if {[set add [$obj info pre $p]]!=""} {
-        append ret " \{\n"
-        foreach ass $add {
-            append ret "  [list $ass]\n"
-        }
-        append ret \}
-        set wasPre 1
-    } else {
-        set wasPre 0
-    }
-    if {[set add [$obj info post $p]]!=""} {
-        if {$wasPre} {
-           append ret " \{\n"
-        } else {
-           append ret " \{\} \{\n"
-        }
-        foreach ass $add {
-            append ret "  [list $ass]\n"
-        }
-        append ret \}
-    }
-    append ret \n
-    return $ret}
-IDE::IntroProxy proc getBodyClassMethodIfExist {obj p} {
-    if {![Object isobject $obj] ||
-         [$obj info procs $p]==""} return
-    my getBodyClassMethod $obj $p
-}
-IDE::IntroProxy proc getBodyInstanceMethod {class p} {
-    set arguments {}
-    foreach arg [$class info instargs $p] {
-        if {[$class info instdefault $p $arg val]} {
-            # add variables (val)
-            lappend arguments [list $arg $val]
-        } else {
-            lappend arguments $arg 
-        }
-    }
-    if {$::xotcl::version>=1.3} {
-        if {[$class info instnonposargs $p] eq ""} {
-            set ret "[string trimleft $class :] instproc [list $p] [list $arguments] \{[$class info instbody $p]\}"
-        } else {
-            set ret "[string trimleft $class :] instproc [list $p] [list [$class info instnonposargs $p]] [list $arguments] \{[$class info instbody $p]\}"
-        }
-    } else {
-        set ret "[string trimleft $class :] instproc [list $p] [list $arguments] \{[$class info instbody $p]\}"
-    }
-    if {[set add [$class info instpre $p]]!=""} {
-        append ret " \{\n"
-        foreach ass $add {
-            append ret "  [list $ass]\n"
-        }
-        append ret \}
-    }
-    if {[set add [$class info instpost $p]]!=""} {
-        append ret " \{\n"
-        foreach ass $add {
-            append ret "  [list $ass]\n"
-        }
-        append ret \}
-    }
-    append ret \n
-    return $ret
-}
-IDE::IntroProxy proc getBodyInstanceMethodIfExist {obj p} {
-    if {![Object isclass $obj] ||
-         [$obj info instprocs $p]==""} return
-    my getBodyInstanceMethod $obj $p
-}
-IDE::IntroProxy proc getBodyInstanceSearchMethod {object ip} {
-    set arguments {}
-    set p [$object procsearch $ip]
-    foreach arg [info args $p] {
-        if {[info default $p $arg val]} {
-            # add variables (val)
-            lappend arguments [list $arg $val]
-        } else {
-            lappend arguments $arg 
-        }
-    }
-    return "proc $p [list $arguments] \{[info body $p]\}\n"
-}
-IDE::IntroProxy proc getBodyMetadata {class m} {
-    return [$class metadataBody $m]
-}
-IDE::IntroProxy proc getBodyTclMethod method {
-    set arguments {}
-    foreach arg [info args $method] {
-        if {[info default $method $arg val]} {
-            # add variables (val)
-            lappend arguments [list $arg $val]
-        } else {
-            lappend arguments $arg 
-        }
-    }
-    return "proc [list $method] [list $arguments] \{[info body $method]\}\n"
-}
-IDE::IntroProxy proc getCategoriesForClass class {
-    if {[$class istype Class]} {
-        return [$class getCategories]
-    }
-    return all_categories
-}
-IDE::IntroProxy proc getCategoriesForObject object {
-    return [$object getCategoriesB]
-}
-IDE::IntroProxy proc getClassMethods {class categories} {
-    set methods {}
-    foreach category $categories {
-        set methods [concat $methods [$class getMethodsForCategoryB $category]]
-    }
-    return $methods
-}
-IDE::IntroProxy proc getClasses {} {
-    if {[IDE::System isIgnoreIDEComponents]} {
-        set ret {}
-        foreach comp [my getComponentsNoIDE] {
-           set cobj [IDE::Component  getCompObjectForNameIfExist $comp]
-           set ret [concat $ret [$cobj getClasses]]
-        }
-    } else {
-        set ret [Class info instances]
-        foreach cls [my getSubclassesDeep Class] {
-            set ret [concat [$cls info instances] $ret]
-        }
-    }
-    return $ret
-}
-IDE::IntroProxy proc getClassesForComponent component {
-    set appObj [IDE::Component getCompObjectForName $component]
-    return [$appObj getClasses]
-}
-IDE::IntroProxy proc getComponents {} {
-    return [IDE::Component getComponentNames]
-}
-IDE::IntroProxy proc getComponentsNoIDE {} {
-   set ideComps [concat [IDE::System getCoreComponents] [IDE::System getExtraComponents]]
-   set ret {}
-   foreach comp [IDE::Component getComponentNames] {
-       if {![ide::lcontain $ideComps $comp]} {
-           lappend ret $comp
-       }
-   }
-   return $ret
-}
-IDE::IntroProxy proc getInstanceMethods {class categories} {
-    set methods {}
-    foreach category $categories {
-        set methods [concat $methods [$class getMethodsForCategory $category]]
-    }
-    return $methods
-}
-IDE::IntroProxy proc getObjDef name {
-    set script [my getBaseObjDef $name]
-    if {[Object isclass $name]} {
-        set sl [$name info superclass]
-        if {$sl != "" && $sl != "::Object" && $sl!="::xotcl::Object"} {
-            append script " -superclass [list $sl] "
-        }
-        set pr [$name info parameter]         
-        if {$pr != ""} {
-            append script " -parameter [list $pr]\n"
-        } else {
-            append script "\n"
-        }
-    } else {
-        append script "\n"
-    }
-    return $script
-}
-IDE::IntroProxy proc getObjectCommentBody object {
-    set comment [$object getComment]
-    if {$comment==""} return
-    set script "@ [my getBaseObjDef $object] \{\n[my asDescriptionList $comment]\n\}\n"
-    return $script
-}
-IDE::IntroProxy proc getObjectMethodCommentBody {object type method} {
-    set comment [$object getMethodComment $type $method]
-    if {$comment==""} return
-    if {$type=="Class"} {
-        set type proc
-    } else {
-        set type instproc
-    }
-    # !!! method parameter will be ignored
-
-    return "@ [string trimleft $object :] $type $method {} \{\n[my asDescriptionList $comment]\n\}\n"
-}
-IDE::IntroProxy proc getObjects {} {
-    if {[IDE::System isIgnoreIDEComponents]} {
-        set ret {}
-        foreach comp [my getComponentsNoIDE] {
-           set cobj [IDE::Component  getCompObjectForNameIfExist $comp]
-           set ret [concat $ret [$cobj getObjects]]
-        }
-        return $ret
-    } else {
-        return [Object info instances]
-    }
-}
-IDE::IntroProxy proc getObjectsForComponent component {
-    set appObj [IDE::Component getCompObjectForName $component]
-    return [$appObj getObjects]
-}
-IDE::IntroProxy proc getProcBody p {
-     set arguments {}
-     foreach arg [::info args $p] {
-         if {[::info default $p $arg val]} {
-            # add variables (val)
-            lappend arguments [list $arg $val]
-         } else {
-            lappend arguments $arg 
-         }
-     }
-     return "proc [list $p] [list $arguments] \{[::info body $p]\}\n" 
-}
-IDE::IntroProxy proc getProcsGroupsForComponent component {
-    set appObj [IDE::Component getCompObjectForName $component]
-    return [$appObj getProcsGroups]
-}
-IDE::IntroProxy proc getSubclassesDeep cls {
-    set subc [$cls info subclass]
-    set ret $subc
-    foreach s $subc {
-        set ret [concat $ret [my getSubclassesDeep $s]]
-    }
-    return $ret
-}
-IDE::IntroProxy proc getUnregisteredClasses {} {
-    set dcomp [IDE::Component getCompObjectForName default]
-    set dcompClasses [$dcomp getClasses]
-    set ret {}
-    foreach cls [my getClasses] {
-        set cobj [$cls getCompObject]
-        if {$cobj==$dcomp && ![ide::lcontain $dcompClasses $cls]} {
-            lappend ret $cls
-        }
-    }
-    return $ret
-}
-IDE::IntroProxy proc stripNamespace name {
-    if {[string match ::xotcl::* $name]} {
-        string range $name 9 end
-    } else {
-        string trimleft $name  :
     }
 }
 
