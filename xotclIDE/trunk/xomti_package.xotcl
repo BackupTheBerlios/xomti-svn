@@ -12,7 +12,7 @@ Package instproc has_standard_script {} {
     return [my set has_standard_script]
 }
 Package instproc init {package version script} {
-    if {[llength $script] == 2 && [lindex $script 0] eq "source"} {
+    if {![catch {llength $script} len] && $len == 2 && [lindex $script 0] eq "source"} {
         my set script_has_standard_script 1
         my set file [lindex $script 1]
     } else {

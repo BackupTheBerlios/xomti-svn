@@ -5055,8 +5055,13 @@ IDE::System proc getVersion {} {
     return 0.72
 }
 IDE::System proc getXotclPackages {} {
-    # I dont know any method to request the available xotcl packages
-    return [split {xotcl::awo::htmlPlace
+    set names [lsort [package names]]
+    set xp [list]
+    foreach n $names {
+        if {[string match xotcl::* $n]} {lappend xp $n}
+    }
+    return $xp
+set old_list {
 xotcl::awo::secureHtmlPlace
 xotcl::awo::userMgt
 xotcl::awo::webAgent
@@ -5115,7 +5120,7 @@ xotcl::wafecompat
 xotcl::xml::parser
 xotcl::xml::printVisitor
 xotcl::xml::recreatorVisitor
-xotcl::xodoc}]
+xotcl::xodoc}
 }
 IDE::System proc handleResult result {
     IDE::ResultBrowser newBrowser $result
