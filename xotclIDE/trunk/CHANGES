@@ -1,3 +1,35 @@
+# Version xomti r20 Fabrice Pardo
+- This file up-to date ! (to be automated)
+# Version xomti r19 Fabrice Pardo
+- Idemeta now alphabetically sorted
+# Version xomti r18 Fabrice Pardo
+- Cosmetics for better human reading of ".xotcl" files.
+# Version xomti r17 Fabrice Pardo
+- Metadata are now alphabetically sorted (not really, wait r19)
+# Version xomti r16 Fabrice Pardo
+- Suppressed a space after "-superclass ..."
+# Version xomti r15 Fabrice Pardo
+- Now classes/objects should be really sorted (alphabetically + by heritage)
+# Version xomti r14 Fabrice Pardo
+# Version xomti r13 Fabrice Pardo
+- Now tclproc are alphabetically ordered
+# Version xomti r12 Fabrice Pardo
+- Risky rewriting: In xotcl, the opposite of "heritage" is "subclass", not "child"...
+# Version xomti r11 Fabrice Pardo
+- typo hightlight -> highlight (also in method names)
+# Version xomti r10 Fabrice Pardo
+-  listbox states where "multiple" or "single". Now "multiple" or "browse".
+# Version xomti r9 Fabrice Pardo
+- typo isTkNev(w)erThan84 -> isTkNotOlderThan84
+# Version xomti r8 Fabrice Pardo
+- Classes are now sorted (not really, wait r15)
+# Version xomti r7 Fabrice Pardo
+# Version xomti r6 Fabrice Pardo
+- Added ../README
+# Version xomti r5 Fabrice Pardo
+- XotclIDE -> XotclIDE.tcl
+# Version xomti r4 Fabrice Pardo
+- /usr/local/bin/tclsh replaced by standard /bin/sh
 # Version 0.72
 * Sun Jan 09 2005 Artur Trzewik
 - class wizard define class in :: namespace not in ::IDE (workaround define name as ::example)
