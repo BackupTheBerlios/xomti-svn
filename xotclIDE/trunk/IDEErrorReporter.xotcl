@@ -10,10 +10,10 @@ package provide IDEErrorReporter 0.57
                     ########## Classes and Objects ##########
 
 Class ErrorReporter
-@ ::ErrorReporter idemeta categoriesProcs interface
-@ ::ErrorReporter idemeta categoriesMethodsProcs report
-@ ::ErrorReporter idemeta categoriesMethods {maskString {destroy init}}
 @ ::ErrorReporter idemeta categories {private initializing-finalizing}
+@ ::ErrorReporter idemeta categoriesMethods {maskString {destroy init}}
+@ ::ErrorReporter idemeta categoriesMethodsProcs report
+@ ::ErrorReporter idemeta categoriesProcs interface
 @ ::ErrorReporter idemeta component IDEErrorReporter
 ErrorReporter instproc destroy {} {
     my instvar win

@@ -19,8 +19,8 @@ It can buid the system menu and status info bar.
 Please overwrite method specificInit for your own GUI.}
 }
 Class IDE::Browser
-@ ::IDE::Browser idemeta categoriesMethods {{specificInit buildTopLevel init initStatusBar}}
 @ ::IDE::Browser idemeta categories initialize
+@ ::IDE::Browser idemeta categoriesMethods {{specificInit buildTopLevel init initStatusBar}}
 @ ::IDE::Browser idemeta component IDEBaseGUI
 IDE::Browser instproc buildTopLevel {} {
     my instvar win
@@ -421,8 +421,8 @@ IDE::GUICommands instproc upsMessage text {
 description {Fasade for tk widget text}
 }
 Class IDE::Text -parameter {{height 24} {width 80}}
-@ ::IDE::Text idemeta categoriesMethods {{makeEmpty getSelection getText colorizeRange removeColorize viewPos tagRange setText appendToCursor} {colorizeTextAll tagRegExprTextAll colorizeRegExprTextAll colorizeRegExprText colorizeText tagRegExprText} {initTags init}}
 @ ::IDE::Text idemeta categories {service search-tag initialize}
+@ ::IDE::Text idemeta categoriesMethods {{makeEmpty getSelection getText colorizeRange removeColorize viewPos tagRange setText appendToCursor} {colorizeTextAll tagRegExprTextAll colorizeRegExprTextAll colorizeRegExprText colorizeText tagRegExprText} {initTags init}}
 @ ::IDE::Text idemeta component IDEBaseGUI
 IDE::Text instproc appendToCursor text {
   [my getTextWindow] insert insert $text
@@ -593,8 +593,8 @@ IDE::Text proc setColor color {
                               ##########
 
 Class IDE::Editor -superclass {::IDE::Text ::IDE::GUICommands} -parameter {{height 24} {width 80}}
-@ ::IDE::Editor idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {fileAppend fileIn fileOut} {browseSelection evalInspectSelection evalSelection evalDisplaySelection evalSubstituteSelection} getWordUnderCursor setTypedText}
 @ ::IDE::Editor idemeta categories {initialize user-action selection-action private service}
+@ ::IDE::Editor idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {fileAppend fileIn fileOut} {browseSelection evalInspectSelection evalSelection evalDisplaySelection evalSubstituteSelection} getWordUnderCursor setTypedText}
 @ ::IDE::Editor idemeta component IDEBaseGUI
 IDE::Editor instproc appendToCursorAndSelect text {
     set sIndex [[my getTextWindow] index insert]
@@ -1025,8 +1025,8 @@ IDE::FontChooser proc getFont {{font {}}} {
                               ##########
 
 Class IDE::ListView -parameter {{multiselect 0} label {height 10} width}
-@ ::IDE::ListView idemeta categoriesMethods {{selectedItem setSelectedItem reorderSelected unselect renameItem removeItemAt addItemAt setList addItem markItem removeItem} isValidSelection}
 @ ::IDE::ListView idemeta categories {service test-service}
+@ ::IDE::ListView idemeta categoriesMethods {{selectedItem setSelectedItem reorderSelected unselect renameItem removeItemAt addItemAt setList addItem markItem removeItem} isValidSelection}
 @ ::IDE::ListView idemeta component IDEBaseGUI
 IDE::ListView instproc addItem item {
     # add Item and sort
@@ -1814,8 +1814,8 @@ Only the all of specified method return true the menu item is enabled
 See also IDE::MenuItem}
 }
 Class IDE::MenuStruct -superclass ::IDE::MenuItem -parameter enablementHandler
-@ ::IDE::MenuStruct idemeta categoriesMethods {{addSeparator addCascadeMenu addRadioButton addCheckButton addMenuItem addCommand} migrateTkMenu}
 @ ::IDE::MenuStruct idemeta categories {shortcuts obsolete-migration}
+@ ::IDE::MenuStruct idemeta categoriesMethods {{addSeparator addCascadeMenu addRadioButton addCheckButton addMenuItem addCommand} migrateTkMenu}
 @ ::IDE::MenuStruct idemeta component IDEBaseGUI
 IDE::MenuStruct instproc addCascadeMenu menu {
    my addMenuItem $menu
