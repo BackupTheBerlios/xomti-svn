@@ -1,3 +1,24 @@
+# Version xomti r36 Fabrice Pardo
+- Cosmetics
+# Version xomti r35 Fabrice Pardo
+- Introduced "lock" on "Object Vars" list of "Object Inspector"
+# Version xomti r34 Fabrice Pardo
+- Cosmetics
+# Version xomti r33 Fabrice Pardo
+- Cosmetics
+# Version xomti r32 Fabrice Pardo
+- Cosmetics
+# Version xomti r29 Fabrice Pardo
+- Cosmetics
+# Version xomti r26 Fabrice Pardo
+- Idemeta now alphabetically sorted (file ideCore.tcl was not modified by IDE on r19)
+# Version xomti r25 Fabrice Pardo
+- Solved a problem with renaming of "proc"
+# Version xomti r24 Fabrice Pardo
+- Corrected buggy r21 r22
+# Version xomti r21 Fabrice Pardo
+- "Object create ..." or "Class create ..." is more clean than "Object
+..." or "Class ..."
 # Version xomti r20 Fabrice Pardo
 - This file up-to date ! (to be automated)
 # Version xomti r19 Fabrice Pardo

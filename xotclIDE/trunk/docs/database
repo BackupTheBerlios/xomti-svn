@@ -1,0 +1,106 @@
+2004-02-07
+
+Format de la base de données SQLite, observée avec dgSQLite.kit
+
+
+    Userlib
+
+        userid      : index unique
+        name        : ex. "fab"
+        longName    : ex. "Fabrice Pardo"
+
+
+    Info
+
+        infoid      : index unique
+        infotext    : texte
+
+        * Permet une extension des tables "Component", "Method"
+
+
+    Component
+
+        componentid : index numérique unique
+        timest        time stamp genre "20050103141840"
+        userid      : identification de l'utilisateur
+
+        infoid      : "NA" ou référence à Info.infoid
+
+        name        : nom du component genre "IDEView"
+        versioninfo : genre "[import] 0.604"
+
+        isclosed    : ???
+        defcounter  : ??
+        basedon     : ?? souvent "NA"
+
+
+    ComponentObject
+
+        componentid : index numérique non unique
+        name        : nom de composant
+
+        * Chaque ligne signifie : le composant d'index "componentid" requiert le composant de nom "name".
+
+
+    Object
+
+        objectid    : index unique
+        timest      : time stamp
+        userid      :
+
+        name        : genre "IDE::IntroProxy"
+        versioninfo : genre "[import 1.0]"
+        defbody     :
+        type        : Object/Class/ProcsGroup
+
+        infoid      : "NA" ou référence à Info.infoid
+        metadata    : NA sauf pour un !
+
+        isclosed    : ???
+        isextension : ???
+        basedon     : ???
+
+        * C'est la table des objets, classes ou groupes de procédures
+
+
+    ComponentObject
+
+        objectid    : index unique
+        componentid : index identifiant le composant Component.componentid
+        deforder    : index d'ordre d'apparition de l'objet dans le composant
+
+        * Extension de la table "Object", cette table construit des listes qui servent à faire apparaître dans un composant les superclasses avant les sous-classes, etc.
+
+
+    Method
+
+        methodid    : index unique
+        timest      : timestamp
+        userid      :
+        versioninfo : souvent NA
+
+        infoid      : "NA" ou référence à Info.infoid
+
+        category    : nom de la catégorie dans le composant
+
+        objectname  : nom de l'objet/classe
+        type        : Class/Instance/tclproc
+        name        : nom de la méthode
+        body        :
+
+        basedon     : ?? souvent NA
+
+
+    ObjectMethod
+
+        methodid    : index non nécessairement unique
+        objectid    : index Object.objectid
+
+        * donne l'ensemble des méthodes (proc ou instproc) d'un objet, classe ou groupe de procédures
+        
+
+Tables vides :
+
+    Configmap
+    ConfigmapChildren
+    ConfigmapComponent
