@@ -1,0 +1,73 @@
+# automatically generated from XOTclIDE
+package provide xomti_packages_manager 0.1
+
+                    ########## Classes and Objects ##########
+
+@ Class Xomti_Package_Manager {
+description {A Xomti_Package_Manager manages a Tcl package $package + his version $version
+with his script $script.
+
+If $script has the standard form "source _a_file_", then "has_standard_script" return 1
+and "get_file" returns _a_file_.
+}
+}
+Class create Xomti_Package_Manager
+@ ::Xomti_Package_Manager idemeta categories {api private}
+@ ::Xomti_Package_Manager idemeta categoriesMethods {{get_file has_standard_script} init}
+@ ::Xomti_Package_Manager idemeta component xomti_packages_manager
+Xomti_Package_Manager instproc get_file {} {
+    return [my set file]
+}
+Xomti_Package_Manager instproc has_standard_script {} {
+    return [my set has_standard_script]
+}
+@ Xomti_Package_Manager instproc init {} {
+description {A Xomti_Package_Manager manages a Tcl package $package + his version $version
+with his script $script.
+
+If $script has the standard form "source _a_file_", then "has_standard_script" return 1
+and "get_file" returns _a_file_.
+}
+}
+Xomti_Package_Manager instproc init {package version script} {
+    if {![catch {llength $script} len] && $len == 2 && [lindex $script 0] eq "source"} {
+        my set script_has_standard_script 1
+        my set file [lindex $script 1]
+    } else {
+        my set has_standard_script 0
+        my set script $script
+    }
+    my set name $package
+    my set version $version
+}
+
+                              ##########
+
+@ Class Xomti_Packages_Manager {
+description {A Xomti_Packages_Manage manage all the available packages.
+
+The method "get_package_managers" return the list of available package managers.}
+}
+Class create Xomti_Packages_Manager
+@ ::Xomti_Packages_Manager idemeta categories {private api}
+@ ::Xomti_Packages_Manager idemeta categoriesMethods {init get_package_managers}
+@ ::Xomti_Packages_Manager idemeta component xomti_packages_manager
+Xomti_Packages_Manager instproc get_package_managers {} {
+    return [my set packages]
+}
+Xomti_Packages_Manager instproc init {} {
+    set names [lsort [package names]]
+    set pvs [list]
+    foreach p $names {
+        set versions [lsort -command "package vcompare" [package versions $p]]
+        foreach v $versions {
+            set s [package ifneeded $p $v]
+            lappend pvs $p $v $s
+        }
+    }
+    my set packages [list]
+    foreach {p v s} $pvs {
+        my lappend packages [Xomti_Package_Manager new -childof [self] $p $v $s]
+    }
+}
+
