@@ -491,7 +491,7 @@ PrsContext instproc hasErrors {} {
 }
 @ PrsContext instproc parse {} {
 description {This Method parse a text and build a parse tree
-        It return 1 on success}
+It return 1 on success}
 }
 PrsContext instproc parse script {
     # !!! no base list consistency check
@@ -870,7 +870,7 @@ PrsVariable instproc visit visitor {
 }
 @ Class ReadStringStream {
 description {This class wrap a string to use it as a stream.
-        Additional you can set the last position (end of stream)}
+Additional you can set the last position (end of stream)}
 }
 Class ReadStringStream -parameter {string pos lastpos}
 @ ::ReadStringStream idemeta component IDETclParser

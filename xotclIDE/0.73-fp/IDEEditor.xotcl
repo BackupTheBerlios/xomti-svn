@@ -521,8 +521,8 @@ IDE::TclModeEdit instproc xotclLint text {
 }
 @ Class PrsSyntaxHightlight {
 description {This Class is special tcl parser context that can be used
-        for syntax hightlight into IDE::Text (View for parsed method).
-        How tokens will be handled is specified in syntaxHightlight method (PrsElem)}
+for syntax hightlight into IDE::Text (View for parsed method).
+How tokens will be handled is specified in syntaxHightlight method (PrsElem)}
 }
 Class PrsSyntaxHightlight -superclass ::PrsContext -parameter text
 @ ::PrsSyntaxHightlight idemeta component IDEEditor

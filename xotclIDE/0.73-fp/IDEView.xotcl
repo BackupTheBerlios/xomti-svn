@@ -1557,12 +1557,12 @@ IDE::ConfigurationBrowser proc showBrowser {} {
 }
 @ Class IDE::ContextEval {
 description {This class is used for mixins to overwrite the string
-        evalution from selected text.
+evalution from selected text.
 
-        please init the instance variable "context" with the contex object.
-        All eval are do by using
+please init the instance variable "context" with the contex object.
+All eval are do by using
 
-        $context eval $script}
+$context eval $script}
 }
 Class IDE::ContextEval
 @ ::IDE::ContextEval idemeta component IDEView
@@ -4739,7 +4739,7 @@ IDE::Transcript proc warning string {
 @ Object IDE::PlugInsManager {
 description {# PlugIns List Format
 
-        Name Label Component Startscript DepComponent}
+Name Label Component Startscript DepComponent}
 }
 Object IDE::PlugInsManager
 @ ::IDE::PlugInsManager idemeta component IDEView
