@@ -780,6 +780,97 @@ IDE::Component proc saveComplex {comps nometa onefile target} {
         close $of
     }
 }
+@ Class IDE::Component::Tracker {
+description {Helper class for tracking new classes
+by package loading
+
+The tracker can recognize the new created classes and tcl-procs.
+No all informations are computed yet. The tracker do not know
+witch instproc and procs are defined in each package (this information are
+sended to componet and ignored in it).
+So all methods belong to package where the object were defined.
+
+}
+}
+Class IDE::Component::Tracker
+@ ::IDE::Component::Tracker idemeta component IDECore
+IDE::Component::Tracker instproc create {cls args} {
+    next
+    IDE::Component registerObject $cls
+    if {[Object ismetaclass $cls]} {
+        [self class] trackClass $cls
+    }
+}
+IDE::Component::Tracker instproc instproc {instproc args} {
+    IDE::Component registerInstproc $instproc
+    next
+}
+IDE::Component::Tracker instproc proc {proc args} {
+    IDE::Component registerProc $proc
+    next
+}
+IDE::Component::Tracker proc importProc args {
+    my instvar methodsArr
+    if {![info exists methodsArr]} return
+    foreach method [array names methodsArr] {
+        set cobj [IDE::Component getCompObjectForName $methodsArr($method)]
+        set group [IDE::CommentsContainer getGroupForMethod $method]
+        if {$group==""} {set group default}
+        if {"::[namespace tail $method]" ne $method} {
+            set withNamespace 1
+            if {$group=="default"} {
+                set tail [namespace tail $method]
+                regexp "(.+)::$tail" $method _ group
+            }
+        } else {
+            set withNamespace 0
+        }
+        set gobj [$cobj createTclProcsGroup $group $withNamespace]
+        IDE::CommentsContainer searchCommentForGroup $gobj
+        $gobj getProcObjForName $method
+        IDE::CommentsContainer searchCommentForMethod $method
+    }
+    IDE::CommentsContainer cleanTclProcComments
+    unset methodsArr
+}
+IDE::Component::Tracker proc setOff {} {
+   if {[my exists trackedClasses]} {
+       foreach class [my set trackedClasses] {
+           $class mixin {}
+       }
+   }
+   my set trackedClasses {}
+   namespace eval :: {
+       rename proc {}
+       rename procOld proc
+   }
+}
+IDE::Component::Tracker proc setOn {} {
+    my trackClass Class
+    my trackClass Object
+    namespace eval :: {
+        proc procNew args {
+            set evalns [uplevel {namespace current}]
+            uplevel procOld $args
+            set procname [uplevel namespace origin [lindex $args 0]]
+            eval IDE::Component::Tracker trackProc $procname [lrange $args 1 end]
+        }
+        rename proc procOld
+        rename procNew proc
+    }
+}
+IDE::Component::Tracker proc trackClass class {
+    $class mixin [self]
+    my lappend trackedClasses $class
+}
+IDE::Component::Tracker proc trackProc args {
+    set component [package set component]
+    if {$component=="."} {
+       set component [file rootname [file tail [info script]]]
+    }
+    set name [lindex $args 0]
+    my set methodsArr($name) $component
+}
 @ Class IDE::TclProcsDescription {
 description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
 This instaces has similar interface as xotcl class/objects.
@@ -1094,97 +1185,6 @@ IDE::ProcsGroup proc buildStuctFromArray arr_ref {
 IDE::ProcsGroup proc unknown args {
     error "unknown method on [self] $args"
 }
-@ Class IDE::Component::Tracker {
-description {Helper class for tracking new classes
-by package loading
-
-The tracker can recognize the new created classes and tcl-procs.
-No all informations are computed yet. The tracker do not know
-witch instproc and procs are defined in each package (this information are
-sended to componet and ignored in it).
-So all methods belong to package where the object were defined.
-
-}
-}
-Class IDE::Component::Tracker
-@ ::IDE::Component::Tracker idemeta component IDECore
-IDE::Component::Tracker instproc create {cls args} {
-    next
-    IDE::Component registerObject $cls
-    if {[Object ismetaclass $cls]} {
-        [self class] trackClass $cls
-    }
-}
-IDE::Component::Tracker instproc instproc {instproc args} {
-    IDE::Component registerInstproc $instproc
-    next
-}
-IDE::Component::Tracker instproc proc {proc args} {
-    IDE::Component registerProc $proc
-    next
-}
-IDE::Component::Tracker proc importProc args {
-    my instvar methodsArr
-    if {![info exists methodsArr]} return
-    foreach method [array names methodsArr] {
-        set cobj [IDE::Component getCompObjectForName $methodsArr($method)]
-        set group [IDE::CommentsContainer getGroupForMethod $method]
-        if {$group==""} {set group default}
-        if {"::[namespace tail $method]" ne $method} {
-            set withNamespace 1
-            if {$group=="default"} {
-                set tail [namespace tail $method]
-                regexp "(.+)::$tail" $method _ group
-            }
-        } else {
-            set withNamespace 0
-        }
-        set gobj [$cobj createTclProcsGroup $group $withNamespace]
-        IDE::CommentsContainer searchCommentForGroup $gobj
-        $gobj getProcObjForName $method
-        IDE::CommentsContainer searchCommentForMethod $method
-    }
-    IDE::CommentsContainer cleanTclProcComments
-    unset methodsArr
-}
-IDE::Component::Tracker proc setOff {} {
-   if {[my exists trackedClasses]} {
-       foreach class [my set trackedClasses] {
-           $class mixin {}
-       }
-   }
-   my set trackedClasses {}
-   namespace eval :: {
-       rename proc {}
-       rename procOld proc
-   }
-}
-IDE::Component::Tracker proc setOn {} {
-    my trackClass Class
-    my trackClass Object
-    namespace eval :: {
-        proc procNew args {
-            set evalns [uplevel {namespace current}]
-            uplevel procOld $args
-            set procname [uplevel namespace origin [lindex $args 0]]
-            eval IDE::Component::Tracker trackProc $procname [lrange $args 1 end]
-        }
-        rename proc procOld
-        rename procNew proc
-    }
-}
-IDE::Component::Tracker proc trackClass class {
-    $class mixin [self]
-    my lappend trackedClasses $class
-}
-IDE::Component::Tracker proc trackProc args {
-    set component [package set component]
-    if {$component=="."} {
-       set component [file rootname [file tail [info script]]]
-    }
-    set name [lindex $args 0]
-    my set methodsArr($name) $component
-}
 @ Object IDE::CommentsContainer {
 description {Hanlde objects comments and is parent object for methods comments
 (class IDE::ObjectsCommentsContainer)
@@ -1395,6 +1395,241 @@ IDE::CommentsContainer proc searchCommentForGroup gobj {
 IDE::CommentsContainer proc searchCommentForMethod method {
     if {[my exists proc_comment($method)]} {
         [IDE::TclProcsDescription getMethodFor $method] setComment [my set proc_comment($method)]
+    }
+}
+Object IDE::SystemConfigMap
+@ ::IDE::SystemConfigMap idemeta component IDECore
+IDE::SystemConfigMap proc asScript {} {
+    set script {}
+    append script "set preStartScript [list [my getValueForType preStartScript]]\n"
+    append script "set componentsToLoad [list [my getValueForType componentsToLoad]]\n"
+    append script "set startScript [list [my getValueForType startScript]]\n"
+    return $script
+}
+IDE::SystemConfigMap proc checkRequirements compList {
+     set outCompList {}
+     set procList {}
+     set cleanList [ide::lcollect each $compList {lindex $each 0}]
+
+     foreach comp $compList {
+            set cname [lindex $comp 0]
+            if {[ide::lcontain $procList $cname]} continue
+            set cobj [IDE::Component getCompObjectForNameIfExist $cname]
+            if {$cobj!=""} {
+                set reqComps [$cobj getRequiredFromDeep]
+                foreach sreq $reqComps {
+                     if {![ide::lcontain $procList $sreq]} {
+                          set id [lsearch -exact $cleanList $sreq]
+                          if {$id>=0} {
+                              lappend outCompList [lindex $compList $id]
+                          } else {
+                              lappend outCompList $sreq
+                          }
+                          lappend procList $sreq
+                     }
+                }
+            }
+            lappend outCompList $comp
+            lappend procList $cname
+     }
+     return $outCompList
+}
+IDE::SystemConfigMap proc getCleanedLoadList {components {ignoreLoaded 1}} {
+    my instvar dbAvailable packageAvailable
+    # dbAvailable will be puffered 
+    if {[Object isobject IDE::ComponentPersistence]} {
+         my set dbAvailable [IDE::ComponentPersistence getAvailable]
+    } else {
+         my set dbAvailable {}
+    }
+    set cloaded [IDE::Component getComponentNames]
+    set loadList {}
+    set tclpackages [package names]
+    foreach comp $components {
+       if {$ignoreLoaded && [IDE::Component getCompObjectForNameIfExist [lindex $comp 0]]!=""} continue
+       if {[llength $comp]==1} {
+           if {[ide::lcontain $dbAvailable $comp]} {
+               set versionList [IDE::ComponentPersistence getVersionsForName $comp]
+              lappend loadList [list $comp [lindex [lindex $versionList 0] 0]]
+           } elseif {[ide::lcontain $tclpackages $comp]} {
+              lappend loadList [list $comp package]
+           } elseif {![ide::lcontain $cloaded $comp]} {
+             IDE::Dialog message "Component $comp can not be found in Database or as tcl package. Operation canceled"
+              return
+           }
+       } else {
+           set name [lindex $comp 0]; set type [lindex $comp 1]
+           if {$type=="package"} {
+                if {![ide::lcontain $tclpackages $name]} {
+                     IDE::Dialog message "Component $comp can not be found as tcl package. Operation canceled"
+                }
+                lappend loadList $comp
+           } else {
+                set versionList [IDE::ComponentPersistence getVersionsForName $name]
+                if {[llength $versionList]==0} {
+                     IDE::Dialog message "Component $comp can not be found in Database. Operation canceled"
+                }
+                if {$type=="newest"} {
+                   lappend loadList [list $name [lindex [lindex $versionList end] 0]]
+                } else {
+                   set versionList [ide::lcollect each $versionList {lindex $each 0}]
+                   if {![ide::lcontain $versionList $type]} {
+                     IDE::Dialog message "Component $comp Version $type can not be found in Database. Operation canceled"
+                   }
+                   lappend loadList [list $name $type]
+                }
+           }
+       }
+    }
+    return $loadList
+}
+IDE::SystemConfigMap proc getComponentsList {{ignoreLoaded 1}} {
+    my instvar componentsToLoad
+    if {![info exists componentsToLoad] || $componentsToLoad==""} return
+    return [my getCleanedLoadList $componentsToLoad $ignoreLoaded]
+}
+IDE::SystemConfigMap proc getValueForType type {
+  if {[my exists $type]} {
+     return [my set $type]
+  }
+}
+@ IDE::SystemConfigMap proc initFromSystem {} {
+description {Try to get configuration map list from actual loaded foreign components
+}
+}
+IDE::SystemConfigMap proc initFromSystem {} {
+     my instvar componentsToLoad
+     set coreComps [IDE::System getCoreComponentsAll]
+     set comps {}
+     foreach comp [IDE::Component getComponentNames] {
+          if {![ide::lcontain $coreComps $comp]} {
+               set cobj [IDE::Component getCompObjectForNameIfExist $comp]
+               if {[$cobj isPersistent]} {
+                   append comps "{$comp [$cobj getIdValue]}\n"
+               } else {
+                   append comps "{$comp package}\n"
+               }
+          }
+     }
+     set componentsToLoad $comps
+}
+IDE::SystemConfigMap proc loadComponentFromAny component {
+    if {[IDE::Component getCompObjectForNameIfExist $component]!=""} {
+       return 1
+    }
+    set loadList [my getCleanedLoadList $component]
+    my loadComponentsFromList $loadList
+    return 1
+}
+IDE::SystemConfigMap proc loadComponents {} {
+    my instvar componentsToLoad
+    if {![info exists componentsToLoad] || $componentsToLoad==""} {
+         IDE::Dialog message "Nothing to load. Create components list first or load a configuration map file"
+         return
+    }
+    set loadList [my getCleanedLoadList $componentsToLoad]
+    my loadComponentsFromList $loadList
+}
+IDE::SystemConfigMap proc loadComponentsFromList loadList {
+    if {$loadList==""} return
+    foreach item $loadList {
+         set name [lindex $item 0]; set type [lindex $item 1]
+         if {$type=="package"} {
+             IDE::Component loadPackageIfNone $name
+         } else {
+             if {[Object isobject IDE::ComponentPersistence]} {
+                 IDE::ComponentPersistence loadNameVersionId $name $type {}
+             } else {
+                 IDE::Component loadPackageIfNone $name
+             }
+         }
+    }
+    IDE::System signalComponentsChanged
+}
+IDE::SystemConfigMap proc loadFromFile {{file {}}} {
+    my instvar configName fileName
+    if {$file==""} {
+      set file [IDE::Dialog getOpenFile {{ConfigMap .cfmap}}]
+    }
+    if {$file==""} {return 0}
+    source $file
+    foreach list {preStartScript startScript componentsToLoad} {
+         if {[info exists $list]} {
+              my set $list [::set $list]
+         }
+    }
+    set fileName $file
+    set configName [file rootname [file tail $file]]
+    return 1
+}
+IDE::SystemConfigMap proc saveAsFile {{file {}}} {
+    my instvar fileName configName
+    if {![my exists fileName]} {
+       my set fileName newconfig.cfmap
+    }
+    if {$file==""} {
+      set file [IDE::Dialog getSaveFile $fileName]
+    }
+    if {$file==""} return
+    set of [open $file w]
+    puts $of [my asScript]
+    close $of
+    set fileName $file
+    set configName [file rootname [file tail $file]]
+}
+IDE::SystemConfigMap proc saveConfigMapComponents {} {
+    my instvar componentsToLoad
+    if {![info exists componentsToLoad] || $componentsToLoad==""} {
+         IDE::Dialog message "Nothing to save. Create components list first or load a configuration map file"
+         return
+    }
+    set saveList {}
+    foreach comp $componentsToLoad {
+        set compName [lindex $comp 0]
+        if {[IDE::Component getCompObjectForNameIfExist $compName]==""} {
+             IDE::Dialog message "Component $compName can not be saved bacause it is not loaded into interpreter"
+             return
+        }
+        lappend saveList $compName
+    }
+    IDE::Component saveComplex $saveList 0 0 [pwd]
+    pkg_mkIndex -direct [pwd] *.xotcl
+    IDE::Dialog message "Components $saveList was saved in acuall dictionary [pwd]. pkgIndex.tcl was updated in this dictionary"
+}
+IDE::SystemConfigMap proc saveDistribution {{dir {}}} {
+    my instvar componentsToLoad
+    if {![info exists componentsToLoad] || $componentsToLoad==""} {
+         IDE::Dialog message "The distribution must have at least on component"
+         return
+    }
+    foreach comp $componentsToLoad {
+        set name [lindex $comp 0]
+        set cobj [IDE::Component getCompObjectForNameIfExist $name]
+        if {$cobj==""} {
+            IDE::Dialog message "$comp is not currently loaded. You can only maka a distribution from loaded components. Operation canceled"
+            return
+        }
+    }
+    IDE::Deployer newBrowser
+}
+IDE::SystemConfigMap proc setValueForType {type value} {
+  my set $type $value
+}
+IDE::SystemConfigMap proc startScripts {} {
+    my instvar preStartScript startScript
+    global progdir xotclidedir
+    set progdir $xotclidedir
+    set run 0
+    if {[info exists preStartScript] && $preStartScript!=""} {
+        namespace eval :: $preStartScript
+        set run 1
+    }
+    if {[info exists startScript] && $startScript!=""} {
+        namespace eval :: $startScript
+        set run 1
+    }
+    if {!$run} {
+         IDE::Dialog message "There are no configuration map scripts to run"
     }
 }
 @ Object IDE::IntroProxy {
@@ -1675,241 +1910,6 @@ IDE::IntroProxy proc stripNamespace name {
         string range $name 9 end
     } else {
         string trimleft $name  :
-    }
-}
-Object IDE::SystemConfigMap
-@ ::IDE::SystemConfigMap idemeta component IDECore
-IDE::SystemConfigMap proc asScript {} {
-    set script {}
-    append script "set preStartScript [list [my getValueForType preStartScript]]\n"
-    append script "set componentsToLoad [list [my getValueForType componentsToLoad]]\n"
-    append script "set startScript [list [my getValueForType startScript]]\n"
-    return $script
-}
-IDE::SystemConfigMap proc checkRequirements compList {
-     set outCompList {}
-     set procList {}
-     set cleanList [ide::lcollect each $compList {lindex $each 0}]
-
-     foreach comp $compList {
-            set cname [lindex $comp 0]
-            if {[ide::lcontain $procList $cname]} continue
-            set cobj [IDE::Component getCompObjectForNameIfExist $cname]
-            if {$cobj!=""} {
-                set reqComps [$cobj getRequiredFromDeep]
-                foreach sreq $reqComps {
-                     if {![ide::lcontain $procList $sreq]} {
-                          set id [lsearch -exact $cleanList $sreq]
-                          if {$id>=0} {
-                              lappend outCompList [lindex $compList $id]
-                          } else {
-                              lappend outCompList $sreq
-                          }
-                          lappend procList $sreq
-                     }
-                }
-            }
-            lappend outCompList $comp
-            lappend procList $cname
-     }
-     return $outCompList
-}
-IDE::SystemConfigMap proc getCleanedLoadList {components {ignoreLoaded 1}} {
-    my instvar dbAvailable packageAvailable
-    # dbAvailable will be puffered 
-    if {[Object isobject IDE::ComponentPersistence]} {
-         my set dbAvailable [IDE::ComponentPersistence getAvailable]
-    } else {
-         my set dbAvailable {}
-    }
-    set cloaded [IDE::Component getComponentNames]
-    set loadList {}
-    set tclpackages [package names]
-    foreach comp $components {
-       if {$ignoreLoaded && [IDE::Component getCompObjectForNameIfExist [lindex $comp 0]]!=""} continue
-       if {[llength $comp]==1} {
-           if {[ide::lcontain $dbAvailable $comp]} {
-               set versionList [IDE::ComponentPersistence getVersionsForName $comp]
-              lappend loadList [list $comp [lindex [lindex $versionList 0] 0]]
-           } elseif {[ide::lcontain $tclpackages $comp]} {
-              lappend loadList [list $comp package]
-           } elseif {![ide::lcontain $cloaded $comp]} {
-             IDE::Dialog message "Component $comp can not be found in Database or as tcl package. Operation canceled"
-              return
-           }
-       } else {
-           set name [lindex $comp 0]; set type [lindex $comp 1]
-           if {$type=="package"} {
-                if {![ide::lcontain $tclpackages $name]} {
-                     IDE::Dialog message "Component $comp can not be found as tcl package. Operation canceled"
-                }
-                lappend loadList $comp
-           } else {
-                set versionList [IDE::ComponentPersistence getVersionsForName $name]
-                if {[llength $versionList]==0} {
-                     IDE::Dialog message "Component $comp can not be found in Database. Operation canceled"
-                }
-                if {$type=="newest"} {
-                   lappend loadList [list $name [lindex [lindex $versionList end] 0]]
-                } else {
-                   set versionList [ide::lcollect each $versionList {lindex $each 0}]
-                   if {![ide::lcontain $versionList $type]} {
-                     IDE::Dialog message "Component $comp Version $type can not be found in Database. Operation canceled"
-                   }
-                   lappend loadList [list $name $type]
-                }
-           }
-       }
-    }
-    return $loadList
-}
-IDE::SystemConfigMap proc getComponentsList {{ignoreLoaded 1}} {
-    my instvar componentsToLoad
-    if {![info exists componentsToLoad] || $componentsToLoad==""} return
-    return [my getCleanedLoadList $componentsToLoad $ignoreLoaded]
-}
-IDE::SystemConfigMap proc getValueForType type {
-  if {[my exists $type]} {
-     return [my set $type]
-  }
-}
-@ IDE::SystemConfigMap proc initFromSystem {} {
-description {Try to get configuration map list from actual loaded foreign components
-}
-}
-IDE::SystemConfigMap proc initFromSystem {} {
-     my instvar componentsToLoad
-     set coreComps [IDE::System getCoreComponentsAll]
-     set comps {}
-     foreach comp [IDE::Component getComponentNames] {
-          if {![ide::lcontain $coreComps $comp]} {
-               set cobj [IDE::Component getCompObjectForNameIfExist $comp]
-               if {[$cobj isPersistent]} {
-                   append comps "{$comp [$cobj getIdValue]}\n"
-               } else {
-                   append comps "{$comp package}\n"
-               }
-          }
-     }
-     set componentsToLoad $comps
-}
-IDE::SystemConfigMap proc loadComponentFromAny component {
-    if {[IDE::Component getCompObjectForNameIfExist $component]!=""} {
-       return 1
-    }
-    set loadList [my getCleanedLoadList $component]
-    my loadComponentsFromList $loadList
-    return 1
-}
-IDE::SystemConfigMap proc loadComponents {} {
-    my instvar componentsToLoad
-    if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "Nothing to load. Create components list first or load a configuration map file"
-         return
-    }
-    set loadList [my getCleanedLoadList $componentsToLoad]
-    my loadComponentsFromList $loadList
-}
-IDE::SystemConfigMap proc loadComponentsFromList loadList {
-    if {$loadList==""} return
-    foreach item $loadList {
-         set name [lindex $item 0]; set type [lindex $item 1]
-         if {$type=="package"} {
-             IDE::Component loadPackageIfNone $name
-         } else {
-             if {[Object isobject IDE::ComponentPersistence]} {
-                 IDE::ComponentPersistence loadNameVersionId $name $type {}
-             } else {
-                 IDE::Component loadPackageIfNone $name
-             }
-         }
-    }
-    IDE::System signalComponentsChanged
-}
-IDE::SystemConfigMap proc loadFromFile {{file {}}} {
-    my instvar configName fileName
-    if {$file==""} {
-      set file [IDE::Dialog getOpenFile {{ConfigMap .cfmap}}]
-    }
-    if {$file==""} {return 0}
-    source $file
-    foreach list {preStartScript startScript componentsToLoad} {
-         if {[info exists $list]} {
-              my set $list [::set $list]
-         }
-    }
-    set fileName $file
-    set configName [file rootname [file tail $file]]
-    return 1
-}
-IDE::SystemConfigMap proc saveAsFile {{file {}}} {
-    my instvar fileName configName
-    if {![my exists fileName]} {
-       my set fileName newconfig.cfmap
-    }
-    if {$file==""} {
-      set file [IDE::Dialog getSaveFile $fileName]
-    }
-    if {$file==""} return
-    set of [open $file w]
-    puts $of [my asScript]
-    close $of
-    set fileName $file
-    set configName [file rootname [file tail $file]]
-}
-IDE::SystemConfigMap proc saveConfigMapComponents {} {
-    my instvar componentsToLoad
-    if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "Nothing to save. Create components list first or load a configuration map file"
-         return
-    }
-    set saveList {}
-    foreach comp $componentsToLoad {
-        set compName [lindex $comp 0]
-        if {[IDE::Component getCompObjectForNameIfExist $compName]==""} {
-             IDE::Dialog message "Component $compName can not be saved bacause it is not loaded into interpreter"
-             return
-        }
-        lappend saveList $compName
-    }
-    IDE::Component saveComplex $saveList 0 0 [pwd]
-    pkg_mkIndex -direct [pwd] *.xotcl
-    IDE::Dialog message "Components $saveList was saved in acuall dictionary [pwd]. pkgIndex.tcl was updated in this dictionary"
-}
-IDE::SystemConfigMap proc saveDistribution {{dir {}}} {
-    my instvar componentsToLoad
-    if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "The distribution must have at least on component"
-         return
-    }
-    foreach comp $componentsToLoad {
-        set name [lindex $comp 0]
-        set cobj [IDE::Component getCompObjectForNameIfExist $name]
-        if {$cobj==""} {
-            IDE::Dialog message "$comp is not currently loaded. You can only maka a distribution from loaded components. Operation canceled"
-            return
-        }
-    }
-    IDE::Deployer newBrowser
-}
-IDE::SystemConfigMap proc setValueForType {type value} {
-  my set $type $value
-}
-IDE::SystemConfigMap proc startScripts {} {
-    my instvar preStartScript startScript
-    global progdir xotclidedir
-    set progdir $xotclidedir
-    set run 0
-    if {[info exists preStartScript] && $preStartScript!=""} {
-        namespace eval :: $preStartScript
-        set run 1
-    }
-    if {[info exists startScript] && $startScript!=""} {
-        namespace eval :: $startScript
-        set run 1
-    }
-    if {!$run} {
-         IDE::Dialog message "There are no configuration map scripts to run"
     }
 }
 

@@ -79,7 +79,7 @@ IDE::ConfigmapBrowser proc newBrowser {} {
 @ Class IDE::ListViewEvent {
 description {This List view is prepared to work with xotck objects as lists elements.
 It has also an actions interface and send events.
-You can specify test method that cause that items are displayed hightlighted.
+You can specify test method that cause that items are displayed highlighted.
 The interface is specified per parameters
 
 isMarkedMethod - specify test method that 

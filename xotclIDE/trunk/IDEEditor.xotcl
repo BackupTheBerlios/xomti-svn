@@ -6,7 +6,7 @@ description {Xotcl Text Editing
 Find and Replace Object
 
 In the future place for such things as
-1. syntax hightlighting
+1. syntax highlighting
 2. indenting
 3. delegation to syntax checker in IDETclParser component}
 }
@@ -25,12 +25,12 @@ supports function
  - tcl subcommands
  - variables
 2. Selecting parenthesis areas by double-click
-3. interface to syntax hightlighting
+3. interface to syntax highlighting
 4. Statix Syntax Checking}
 }
 Class IDE::TclModeEdit -superclass {::IDE::MethodEdit ::IDE::EditorPopDown}  -parameter {{editMode none}}
 @ ::IDE::TclModeEdit idemeta categoriesMethods {{searchCloseQuote searchCloseBrace doubleButton searchOpenBrace keyReturn getIdent} {setType syntaxHighlightIfWanted simpleSyntaxHighlight syntaxHighlight syntaxHighlightRemove complexSyntaxHighlight} {setText saveValue} {xotclLint lintIfWanted} {initTags init menuInsertions} {getProcSubcommand invokePopDown getInstanceCommand getVariable tabPress}}
-@ ::IDE::TclModeEdit idemeta categories {edit-helper syntax-hightlighting interface tcl-lint initialize context-quick-edit}
+@ ::IDE::TclModeEdit idemeta categories {edit-helper syntax-highlighting interface tcl-lint initialize context-quick-edit}
 @ ::IDE::TclModeEdit idemeta component IDEEditor
 IDE::TclModeEdit instproc addIndent {} {
     set twin [my getTextWindow]
@@ -86,7 +86,7 @@ IDE::TclModeEdit instproc commentRegion {} {
     }
 }
 IDE::TclModeEdit instproc complexSyntaxHighlight {} {
-    set prs [PrsSyntaxHightlight new -volatile -text [self]]
+    set prs [PrsSyntaxHighlight new -volatile -text [self]]
     set text [my getText]
     if {$text!=""} {
         $prs parseAndVisit [my getText]
@@ -244,7 +244,7 @@ IDE::TclModeEdit instproc getVariable pattern {
 IDE::TclModeEdit instproc init args {
    next
    my set useEditMode 1
-   my set syntaxHightlight 2
+   my set syntaxHighlight 2
    my set xotclLint 1
    set twin [my getTextWindow]
    $twin tag configure comment -foreground red
@@ -258,7 +258,7 @@ IDE::TclModeEdit instproc initTags {} {
    set twin [my getTextWindow]    
    $twin tag configure comment -foreground red
    $twin tag configure quoted -foreground SpringGreen3
-   # full hightligthing
+   # full highlighting
    $twin tag configure variable -foreground blue
    $twin tag configure tclproc -foreground brown
    $twin tag configure xotcl -foreground orange
@@ -328,11 +328,11 @@ IDE::TclModeEdit instproc menuInsertions ms {
    $m addCommand {Uncomment} [list [self] uncommentRegion]
 
    set m ${ms}::vcontrol
-   IDE::MenuStruct $m {Syntax Hightlight}
+   IDE::MenuStruct $m {Syntax Highlight}
    $ms addCascadeMenu $m
-   $m addRadioButton {No Syntax Hightlight} [self]::syntaxHightlight {} 0
-   $m addRadioButton {Simple Syntax Hightlight} [self]::syntaxHightlight {} 1
-   $m addRadioButton {Complext Syntax Hightlight} [self]::syntaxHightlight {} 2
+   $m addRadioButton {No Syntax Highlight} [self]::syntaxHighlight {} 0
+   $m addRadioButton {Simple Syntax Highlight} [self]::syntaxHighlight {} 1
+   $m addRadioButton {Complext Syntax Highlight} [self]::syntaxHighlight {} 2
    $m addSeparator
    $m addCommand {Force Syntax Highlight} [list [self] syntaxHighlight]
    $m addCommand {Force Syntax Check} [list [self] syntaxCheck]
@@ -445,13 +445,13 @@ IDE::TclModeEdit instproc syntaxCheck {} {
 }
 IDE::TclModeEdit instproc syntaxHighlight {} {
     my syntaxHighlightRemove
-    switch [my set syntaxHightlight] {
+    switch [my set syntaxHighlight] {
         1 { my simpleSyntaxHighlight }
         2 { my complexSyntaxHighlight }
     }
 }
 IDE::TclModeEdit instproc syntaxHighlightIfWanted {} {
-   if {[my set syntaxHightlight] && [my set editMode]=="xotcl" && [my set vtype]=="Source"} {
+   if {[my set syntaxHighlight] && [my set editMode]=="xotcl" && [my set vtype]=="Source"} {
        my syntaxHighlight
    }
 }
@@ -520,25 +520,25 @@ IDE::TclModeEdit instproc uncommentRegion {} {
 IDE::TclModeEdit instproc xotclLint text {
     
 }
-@ Class PrsSyntaxHightlight {
+@ Class PrsSyntaxHighlight {
 description {This Class is special tcl parser context that can be used
-for syntax hightlight into IDE::Text (View for parsed method).
-How tokens will be handled is specified in syntaxHightlight method (PrsElem)}
+for syntax highlight into IDE::Text (View for parsed method).
+How tokens will be handled is specified in syntaxHighlight method (PrsElem)}
 }
-Class PrsSyntaxHightlight -superclass ::PrsContext  -parameter text
-@ ::PrsSyntaxHightlight idemeta component IDEEditor
-PrsSyntaxHightlight instproc checkObjectSelfCall {command notifier} {
-    my hightlightElement [$command getElem 0] xotcl
+Class PrsSyntaxHighlight -superclass ::PrsContext  -parameter text
+@ ::PrsSyntaxHighlight idemeta component IDEEditor
+PrsSyntaxHighlight instproc checkObjectSelfCall {command notifier} {
+    my highlightElement [$command getElem 0] xotcl
 }
-PrsSyntaxHightlight instproc checkTclCommand {name command notifier} {
+PrsSyntaxHighlight instproc checkTclCommand {name command notifier} {
     if {[next]} {
-        my hightlightElement [$command getElem 0] tclproc
+        my highlightElement [$command getElem 0] tclproc
     }
 }
-PrsSyntaxHightlight instproc hightlightElement {prsElem tag {shiftLeft 0} {shiftRight 0}} {
+PrsSyntaxHighlight instproc highlightElement {prsElem tag {shiftLeft 0} {shiftRight 0}} {
     [my text] tagRange $tag [expr {[$prsElem begin]+$shiftLeft}] [expr {[$prsElem end]+1+$shiftRight}]
 }
-PrsSyntaxHightlight instproc visit prsElem {
-    [my parser] catchParseErrors {$prsElem syntaxHightlight [self]}
+PrsSyntaxHighlight instproc visit prsElem {
+    [my parser] catchParseErrors {$prsElem syntaxHighlight [self]}
 }
 
