@@ -1,1 +1,1 @@
-pkg_mkIndex .  xomti*/tags/*/*.xotcl xomti*/trunk/*.xotcl
+pkg_mkIndex -verbose .  xomti*/tags/*/*.xotcl xomti*/trunk/*.xotcl
