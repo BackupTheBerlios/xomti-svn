@@ -2,8 +2,11 @@
 # adverbes
 
 ahx                      ah
+
 aj                       aïe
+
 ajn                      n'importe
+
 ad-i-aù                     adieu
 
 cxar                     attendu que, car, parce que, puisque, vu que
@@ -17,6 +20,8 @@ de nun                   désormais
 de tempo al tempo        de temps en temps
 de tiam                  depuis lors
 de                       de, par
+ek-de                     à partir de, depuis, dès
+ek-de nun                 désormais
 
 dum                      durant, lors, pendant, pendant que, tandis que
 
@@ -35,6 +40,13 @@ gxis-mort-a                perpétuel
 
 ha                       ah
 ha lo                    allô
+
+ho                       oh
+hop                      hop, houp
+
+iom                      une certaine quantité
+iom post iom             de proche en proche, peu à peu, petit à petit
+
 
 ja                       d'abord, certes, si
 
@@ -73,6 +85,15 @@ por                      à, afin de, pour
 por ke                   afin de pour, afin que, pour que
 por tiel dir-i            pour ainsi dire
 
+preter                   au-delà de
+
+se                       à condition que, si
+se ne                    sinon
+
+sed                      mais
+
+sen                      sans
+
 tiam                     alors
 
 tia                      autant, tel
@@ -107,6 +128,7 @@ tiu cxi                  celle-ci, celui-ci
 tiu-okaz-e                 alors
 
 tra                      à travers, par
+tre                      bien, fort, tout, très
 tro                      trop
 
 ve                       hélas
@@ -127,6 +149,10 @@ ci                       tu
 ci-a                      ta, ton
 ci-n                      te, t'
 
+li                       il, lui
+li-a                      sa, son
+li-aj                     ses
+
 ili                      elles, ils
 ili-a                     leur
 ili-n                     les, leur
@@ -141,6 +167,10 @@ sxi-aj                    ses
 sxi-n                     la, l'
 
 oni                      on
+
+ni                       nous
+niaj                     nos
+nin                      nous
 
 # nombres
 
@@ -302,6 +332,7 @@ skandi-o			  scandium
 titan-o                  titane
 vanadi-o		 vanadium
 kromi-o			 chrome
+krom-o                    chrome
 mangan-o		 manganèse
 fer-o			 fer
 kobalt-o		 cobalt
@@ -334,6 +365,7 @@ jod-o			  iode
 ksenon-o			  xénon
 cezi-o			  césium
 bari-o			  baryum
+barium-o                  baryum
 lantan-o			  lanthane
 hafni-o			  hafnium
 tantal-o			  tantale
@@ -363,6 +395,7 @@ oksigen-akv-o             eau oxygénée
 ozon-o                    ozone
 pirit-o                   pyrite
 polivinilklorid-o         chlorure de polyvinyle
+propan-o                  propane
 
 #
 
@@ -371,16 +404,110 @@ polivinilklorid-o         chlorure de polyvinyle
 alaùd-o                   alouette
 albatros-o                albatros
 alced-o                   martin-pêcheur
-
 alcion-o                  martin-pêcheur
 aligator-o                alligator
 anas-o                    canard
-
 ancxov-o                  anchois
 angil-o                   anguille
+apr-o                     sanglier
+arane-o                   araignée
+arde-o                    héron
+azen-o                    âne
+boac-o                    renne
+boa-o                     boa
+bov-ajx-o                  boeuf
+bov-id-ajx-o                veau
+bov-id-o                   veau
+bov-in-o                   vache
+bov-o                     boeuf
+brasik-papili-o            papillon blanc du chou, piéride du chou
+buf-o                     crapaud
+burd-o                    bourdon
+cerv-in-o                 biche
+cerv-o                    cerf
+cign-o                    cygne
+cikad-o                   cigale
+cikoni-o                  cigogne
+cxam-o                    chamois
+cxeval-acx-o               canasson
+cxeval-in-o               jument
+cxeval-o                  cheval
+cxeval-trink-ej-o           abreuvoir
 
+
+
+ekin-o                    oursin
+
+
+falk-o                    faucon
+fring-o                   pinson
 gxiraf-o                  girafe
+heliko                   escargot, limaçon
 hien-o                    hyène
+hipopotam-o               hippopotame
+hirudo                   sangsue
+hirundo                  hirondelle
+iksod-o                   tique
+kamel-o                   chameau
+kanguru-o                 kangourouo
+kankr-o                   écrevisse
+kapreol-o                 chevreuil
+kapr-o                    chèvre
+kapr-in-o                 chèvre
+kardel-o                  chardonneret
+kastrit-a vir-cxeval-o      cheval hongre
+karp-o                    carpe
+kat-o                     chat
+kavi-o                    cobaye, cochon d'Inde
+kirmes-o                  cochenille
+klupe-o                   sardine
+kobaj-o                   cobaye, cochon d'Inde
+kobr-o                    cobra
+kocx-o                    cochenille
+kojot-o                   coyote
+kokcinel-o                coccinelle
+kolibr-o                  oiseau-mouche
+kolomb-o                  colombe, pigeon
+kolubr-o                  couleuvre
+korak-o                   corbeau
+koral-o                   corail
+kormoran-o                cormoran
+korv-o                    corbeau
+koturn-o                  caille
+krab-o                    crabe
+krizalid-o                chrysalide
+kukol-o                   coucou
+kul-o                     cousin, moustique
+kunikl-o                  lapin
+kunikl-ej-o                cabane à lapins, clapier, lapinière
+kunikl-o-kav-o              trou de lapin
+labrak-o                  loup
+lacerto                  lézard
+lagopo                   lagopède
+lam-o                     lama
+lampir-o                  ver luisant
+larv-o                    larve
+lav-urs-o                  raton laveur
+leon-id-o                  lionceau
+leon-in-o                  lionne
+leon-o                    lion
+leopard-o                 léopard
+lepor-o                   lièvre
+libel-o                   libellule
+limako                   limace
+link-o                    lynx
+lojt-o                    lotte
+lokust-o                  sauterelle
+lumbrik-o                 lombric, ver de terre
+lup-in-o                  louve
+lupino[1]                louve
+lupino[2]                lupine
+lupo                     loup
+lutreolo                 vison
+lutro                    loutre
+majskarab-o               hanneton
+makaon-o                  grand porte-queue, machaon
+
 mitul-o                   moule
 moru-o                    morue
 mus-o                     souris
@@ -403,10 +530,14 @@ pilcxard-o                pilchard, sardine
 pingven-o                 pingouin
 polip-o                   pieuvre
 polpo                    poulpe
-
 pirol-o                   bouvreuil
 plot-o                    gardon
-poefago                  yack, yak
+poefag-o                  yack, yak
+rinocer-o                 rhinocéros
+
+sciur-o                   écureuil
+skombro                  maquereau
+skorpio                  scorpion
 
 taban-o                   taon
 testud-o                  tortue
@@ -415,7 +546,6 @@ tigr-o                    tigre
 tigr-in-o                 tigresse
 tine-o                    mite
 tinus-o                   thon
-
 ur-o                      aurochs
 urogal-o                  grand tétras
 urs-o                     ours
@@ -436,7 +566,99 @@ aln-o                     aulne
 alo-o                     aloès
 ananas-o                  ananas
 anemon-o                  anémone
-edelvejso                edelweiss
+arakid-o                  cacahouète, cacahuète
+artisxok-o                artichaut
+asparag-o                 asperge
+avel-o                    noisette
+aven-o                    avoine
+azale-o                   azalée
+balan-o                   gland
+bambu-o                   bambou
+banan-o                   banane
+bet-o                     betterave
+betul-o                   bouleau
+brasik-o                  chou
+cedr-o                    cèdre
+cejan-o                   bleuet
+celeri-o                  céleri
+cep-o                     oignon
+cerefoli-o                cerfeuil
+cidoni-o                  coing
+cidr-o                    cidre
+cipres-o                  cyprès
+citron-o                  citron
+cxampan-o                 champagne
+cxampinjon-o              champignon
+cxeriz-o                  cerise
+cxeriz-uj-o               cerisier
+dali-o                    dahlia
+diant-o                   oeillet
+
+
+
+edelvejs-o                edelweiss
+fag-o                     hêtre
+fag-o-frukt-o               faine, faîne
+fag-o-nuks-o                faine, faîne
+frag-o                    fraise
+fraksen-o                 frêne
+framb-o                   framboise
+hedero                   lierre
+hiacint-o                 jacinthe
+horde-o                   orge
+ignam-o                   igname
+ileks-o                   houx
+irid-o                    iris
+jugland-o                 noix
+jugland-arb-o              noyer
+jugland-uj-o              noyer
+juka-o                    yucca
+juniper-o                 genèvrier
+junk-o                    jonc
+kakt-o                    cactus
+kalabas-et-o               courgette
+kalendul-o                calendula, souci
+kalistef-o                reine-marguerite
+kan-o                     roseau
+kard-o                    chardon
+kareks-o                  laîche
+karot-o                   carotte
+karpen-o                  charme
+kasxtan-o                 châtaigne
+kasxtan-arb-o             châtaignier
+kasxtan-uj-o              châtaignier
+katun-o                   coton
+keirant-o                 giroflée des murailles
+koleopter-o               scarabée
+kolz-o                    colza
+konus-o                   pomme de pin
+konval-o                  muguet
+konvolvul-o               liseron
+kratag-o                  aubépine
+kren-o                    raifort
+krizantem-o               chrysanthème
+kukum-o                   concombre
+kukurb-o                  potiron
+kulm-o                    chaume
+kverk-o                   chêne
+larik-o                   mélèze
+laùr-o                    laurier
+lavend-o                  lavande
+legom-o                   légume
+lekant-et-o                pâquerette
+lekant-o                  marguerite
+lent-o                    lentille
+leontod-o                 pissenlit
+levkoj-o                  giroflée des jardins
+ligustr-o                 troène
+liken-o                   lichen
+lili-o                    lis, lys
+lin-o                     lin
+lonicer-o                 chèvrefeuille
+lupol-o                   houblon
+luzerno                  luzerne
+maizo                    maïs
+
 
 miozot-o                  myosotis
 mirh-o                    myrrhe
@@ -444,6 +666,8 @@ mirtel-o                  myrtille
 mirt-o                    myrthe
 morus-arb-o                mûrier
 morus-uj-o                mûrier
+nigr-a rib-o               cassis
+nimfeo                   nymphéa
 oleandr-o                 laurier-rose
 palinur-o                 langouste
 papav-o                   pavot
@@ -455,11 +679,13 @@ petrosel-o                persil
 piz-o                     pois
 platan-o                  platane
 popl-o                    peuplier
+prun-o                    prune
 tili-o                    tilleul
 timian-o                  thym
 tomat-o                   tomate
 tremol-o                  tremble
 trikoloret-o              pensée
+tropeol-o                 capucine
 
 veronik-o                 véronique
 zini-o                    zinnia
@@ -525,9 +751,11 @@ abomen-ind-a              abject, abominable, hideux, horrible, odieux
 abomen-ind-ajx-o            abomination, atrocité, horreur
 abomen-o                  abomination, aversion, dégoût, répulsion
 
-abon-ant-o                 abonné
 abon-i                    s'abonner, s'abonner à
 abon-o                    abonnement
+abon-ant-o                 abonné
+ek-abon-i                  s'abonner
+
 
 aborigen-o                aborigène
 
@@ -686,7 +914,6 @@ adres-i                   adresser
 adres-ig-il-o               machine à adresser
 adres-it-o                 destinataire
 adres-o                   adresse, destination
-adres-sxangx-o             changement d'adresse
 
 adstring-a                astringent
 
@@ -796,6 +1023,8 @@ ag-em-ec-o                  besoin d'activité
 ag-em-o                    activité, besoin d'activité
 ag-i                      agir, opérer
 ag-i laù                  agir selon, respecter, suivre
+kontr-aù-ag-i               contrarier
+
 
 agit-a                    séditieux
 agit-ad-o                  agitation
@@ -886,14 +1115,14 @@ akapar-i                  accaparer, monopoliser
 
 akar-o                    acarien
 
-akcelant-a                accélérateur
-
+akcel-ant-a                accélérateur
 akcel-ant-o                promoteur
 akcel-i                   accélerer, hâter, presser
 akcel-igx-i                accélérer
 akcel-igx-o                accélération
 akcel-il-o                accélérateur, pédale d'accélération
 akcel-o                   accéleration, avancement, empressement, précipitation
+mal-akcel-i                ralentir
 
 akcent-i                  accentuer, souligner
 akcent-o                  accent
@@ -914,6 +1143,8 @@ akcept-istin-o             receptionniste
 akcept-it-a                accepté
 akcept-o                  abord, accueil, réception
 akcept-salon-o             réception, salon de réception
+mal-akcepti               rejeter
+
 
 akcesor-a                 accessoire, auxiliaire, secondaire
 akcesor-a fak-o            sujet secondaire
@@ -1008,16 +1239,16 @@ aksiom-o                  axiome
 
 aks-o                     axe
 
-aktiv-a                   actif
-aktiv-ec-o                 activité
-aktiv-i                   militer
-aktiv-ig-i                 activer
-aktiv-ism-o               activisme, militantisme
-aktiv-o                   actif
-aktiv-ul-o                militant
-
 akt-o[1]                  acte
 akt-o[2]                  acte, document, pièce, titre
+akt-iv-a                   actif
+akt-iv-ec-o                 activité
+akt-iv-i                   militer
+akt-iv-ig-i                 activer
+akt-iv-ism-o               activisme, militantisme
+akt-iv-o                   actif
+akt-iv-ul-o                militant
+
 
 aktor-ar-o                 distribution
 aktor-i                   faire l'acteur, jouer
@@ -1158,6 +1389,10 @@ alt-ec-o                   altitude, hauteur
 alt-ig-i                   hausser
 alt-itud-o                 altitude
 alt-o                     altitude, hauteur
+mal-alt-ig-i                abaisser
+mal-alt-ig-i sin            s'abaisser
+mal-alt-ig-o                abaissement
+
 
 altar-o                   autel
 
@@ -1189,6 +1424,7 @@ am-eg-i                    chérir
 am-em-a                    amoureux, tendre
 am-em-e                    tendrement
 am-i                      aimer
+mal-am-i                   haïr
 am-o                      amour
 am-orant-in-o               maîtresse
 am-or-i                    faire l'amour
@@ -1202,6 +1438,8 @@ am-ik-e                    amicalement
 am-ik-ec-o                  amitié
 am-ik-in-o                  amie
 am-ik-o                    ami
+mal-amik-a                 ennemi, hostile
+mal-amik-o                 ennemi
 
 amar-a                    amer
 
@@ -1317,6 +1555,9 @@ anstat-aù-ig-o              remplacement
 
 *
 ant-aù ...                il y a ..., avant ...
+mal-ant-aù                 derrière
+mal-ant-aù-e                arrière
+
 ant-aù cxi-o               surtout, tout d'abord
 ant-aù long-e              jadis
 ant-aù ne-long-e            dernièrement
@@ -1380,6 +1621,9 @@ aper-ad-o                  apparition
 aper-ajx-o                 apparition
 aper-i                    paraître, apparaître, surgir
 aper-ig-i                  dégager
+ek-aper-i                  surgir, survenir
+mal-aper-i                 disparaître
+mal-aper-o                 disparition
 
 apert-i                   ouvrir
 apert-ur-o                 orifice, ouverture
@@ -1407,10 +1651,10 @@ aprez-i                   apprécier
 
 *
 
-apr-o                     sanglier
 
 aprob-i                   approuver, donner son accord
 aprob-o                   agrément
+mal-aprob-i                repousser
 
 *
 
@@ -1419,12 +1663,12 @@ apud-a                    adjacent
 apud-e                    près
 apud-ec-o                  voisinage
 
-arakid-o                  cacahouète, cacahuète
 
-arane-o                   araignée
 
 arangx-i                  arranger, disposer
 arangx-o                  construction, disposition
+mal-arangx-i               défaire
+
 
 *
 
@@ -1443,8 +1687,6 @@ ard-a                     ardant
 ard-i                     brûler, être en feu
 ard-o                     ardeur
 
-arde-o                    héron
-
 ardez-o                   ardoise
 
 aren-o                    arène, piste
@@ -1459,6 +1701,7 @@ argan-o                   grue
 argil-o                   argile
 
 argument-o                argument
+kontr-aù-argument-i         rouspéter
 
 argxent-i                 argenter
 argxent-o                 argent
@@ -1468,6 +1711,7 @@ arhxitekt-o               architecte
 arig-i                    grouper, rassembler
 
 ari-o                     air de musique, aria, mélodie
+mal-ari-o                  malaria
 
 arkitekt-o                architecte
 
@@ -1515,7 +1759,6 @@ artileri-o                artillerie
 
 *
 
-artisxok-o                artichaut
 
 ascend-a                  montant
 
@@ -1537,7 +1780,6 @@ asist-i                   aider, assister, secourir
 
 asoci-o                   association
 
-asparag-o                 asperge
 
 aspekt-i                  avoir l'air de, paraître
 aspekt-o                  air, allure, apparence, aspect, spectacle
@@ -1572,6 +1814,7 @@ atenc-i                   attenter
 atend-bud-o                abri
 atend-i                   attendre
 atend-o                   attente
+ne-atend-it-a               inattendu
 
 *
 
@@ -1582,6 +1825,14 @@ atent-i                   surveiller
 atent-i pri               faire attention à, prêter attention à
 atent-ig-i                 signaler
 atent-o                   attention
+mal-atenta                distrait, négligent
+mal-atent-em-o             distraction, inattention
+mal-atento                distraction, inattention, négligence
+ne-atenta                 étourdi
+preter-atent-i             dédaigner, négliger
+pri-atenti                réfléchir
+sen-atent-a                distrait
+
 
 *
 
@@ -1666,12 +1917,12 @@ avanc-i                   avancer
 
 avantagx-a                avantageux, interéssant
 avantagx-o                avantage
+mal-avantagx-e de          aux dépens de
+mal-avantagx-o             inconvénient
 
 avar-a                    avare
+mal-avara                 généreux
 
-avel-o                    noisette
-
-aven-o                    avoine
 
 aventur-o                 aventure
 
@@ -1695,15 +1946,9 @@ av-in-jo                   grand-maman
 av-in-o                    grand-mère
 av-o                      grand-père
 
-azale-o                   azalée
-
-azen-o                    âne
-
 azil-o                    abri, refuge
 
 azimut-o                  azimut
-
-azot-o                    azote
 
 babil-i                   bavarder
 
@@ -1722,7 +1967,6 @@ bala-il-o                 balai
 
 balanc-i                  balancer
 
-balan-o                   gland
 
 balast-o                  ballast, lest
 
@@ -1748,11 +1992,7 @@ balustrad-o               rampe
 
 balzam-o                  baume
 
-bambu-o                   bambou
-
 banal-a                   banal
-
-banan-o                   banane
 
 ban-o                     bain
 ban-i                     baigner
@@ -1795,10 +2035,9 @@ barel-o                   fût, tonneau
 bargx-o                   péniche
 
 bar-i                     barrer
+mal-bar-i                  dégager
 
-bari-o                    baryum
 
-barium-o                  baryum
 
 bark-o                    barque
 
@@ -1817,6 +2056,7 @@ baston-o                  bâton, canne
 batal-ant-o                combattant, militant
 batal-i                   combattre, lutter
 batal-o                   combat
+inter-batal-i              se battre
 
 *
 
@@ -1852,6 +2092,8 @@ bek-o                     bec
 bel-a                     beau
 bel-eg-a                   magnifique, splendide
 bel-et-a                   joli, mignon
+mal-bel-a                  laid, vilain
+mal-bel-eg-a                affreux, épouvantable, horrible
 pli-bel-ig-i                embellir, rendre plus beau
 
 beletr-o                  belles-lettres
@@ -1861,6 +2103,7 @@ belig-ej-o                 institut de beauté
 bend-o                    bande, bandeau
 
 ben-i                     bénir
+mal-beni                  maudire
 
 benk-o                    banc
 
@@ -1879,11 +2122,7 @@ ber-o                     baie
 best-o                    animal, bête
 best-o-tru-o                terrier
 
-bet-o                     betterave
-
 beton-o                   béton
-
-betul-o                   bouleau
 
 *
 
@@ -1977,9 +2216,6 @@ bo-                      par alliance
 bo-fil-o                   beau-fils, gendre
 bo-parenc-i                s'allier
 
-boac-o                    renne
-
-boa-o                     boa
 
 board-i                   louvoyer
 
@@ -2008,12 +2244,15 @@ bomb-o                    bombe
 bombon-o                  bonbon
 
 bon-a                     bon
+mal-bon-a                  mal, mauvais, méchant
+mal-bon-o                  mal
 bon-an maten-on            bonjour
 bon-an nokt-on             bonne nuit
 bon-an tag-on              bonjour
 bon-an vesper-on           bonsoir
 bon-dezir-o                souhait
 bon-e                     bien
+mal-bon-e                  mal
 bon-eg-a                   excellent, éminent
 bon-eg-e                   à merveille
 bon-et-e                   comme ci, comme ça
@@ -2026,8 +2265,10 @@ bon-o                     intérêt
 bon-stat-a                 intact
 bon-sxanc-a                chanceux
 bon-sxanc-e                heureusement
+mal-bon-sxanc-e             malheureusement
 bon-veno-n                 bienvenue
-bon-vol-u                  s'il vous plaît
+mal-bon-ajx-o               défaut
+mal-bon-ig-i                abîmer, gâter
 pli-bon-ig-i                améliorer, réformer
 pli-bon-igx-i               se réformer
 
@@ -2046,12 +2287,6 @@ botel-o                   bouteille
 
 bot-o                     botte
 
-bov-ajx-o                  boeuf
-bov-id-ajx-o                veau
-bov-id-o                   veau
-bov-in-o                   vache
-bov-o                     boeuf
-
 bovl-o                    bol, jatte
 
 bragxuj-o                 chaufferette, réchaud
@@ -2069,10 +2304,9 @@ brand-o                   eau-de-vie
 
 brank-o                   branchie
 
-brasik-o                  chou
-brasik-papili-o            papillon blanc du chou, piéride du chou
 
 brav-a                    brave, vaillant
+mal-brava                 lâche
 brav-e                    bravo
 
 brecx-o                   brèche
@@ -2087,6 +2321,7 @@ bret-o                    étagère, planche, tablette, rayon, rayon de rangemen
 
 brid-i                    réprimer, retenir
 brid-o                    bride
+sen-brid-ig-i               déchaîner
 
 brik-o                    brique
 
@@ -2113,15 +2348,19 @@ brov-o                    sourcil
 
 bru-eg-o                   tapage
 bru-i                     faire du bruit
+sen-bru-a                  silencieux
 
+
+brul-i                    brûler
 brul-a                    brûlant
 brul-alkohol-o             alcool dénaturé
 brul-bomb-o                bombe à incendie
 brul-difekt-o              brûlure
 brul-gluigx-i              brûler
 brul-gust-a                brûlé
-brul-i                    brûler
 brul-vund-o                brûlure
+ek-brul-i                  s'allumer
+ek-brul-ig-i                allumer, enflammer
 
 brun-a                    brun
 brun-igx-i                 bronzer, se brunir
@@ -2136,7 +2375,7 @@ brut-igx-i                 s'abêtir
 brut-igx-o                 abêtissement
 brut-o                    tête de bétail
 
-bubacx-o                  affreux jojo, gamin, morpion
+bub-acx-o                  affreux jojo, gamin, morpion
 
 bubal-o                   bubale, buffle
 
@@ -2154,7 +2393,6 @@ telefon-bud-o              cabine téléphonique
 
 bufed-o                   bar, buffet
 
-buf-o                     crapaud
 
 bufr-o                    pare-choc, tampon
 
@@ -2180,8 +2418,6 @@ bunkr-o                   abri
 
 bunt-a                    bigarré, multicolore
 
-burd-o                    bourdon
-
 burgx-o                   bourgeois
 
 bus-o                     autobus
@@ -2205,14 +2441,11 @@ ced-i                     abandonner, abdiquer, céder, reculer
 ced-ig-i                   forcer
 ced-il-o                  cédille
 ced-o                     abandon, abdication
+mal-ced-em-a               impitoyable
 
-cedr-o                    cèdre
-
-cejan-o                   bleuet
 
 celebr-i                  célébrer
 
-celeri-o                  céleri
 
 cel-i                     avoir pour but, viser
 cel-o                     but, dessein
@@ -2226,14 +2459,10 @@ centr-o                   centre
 
 cenzur-i                  censurer
 
-cep-o                     oignon
-
 cerb-o                    cerveau, cervelle
 cerb-o-labor-ist-o          travailleur intellectuel
 
 cerebel-o                 cervelet
-
-cerefoli-o                cerfeuil
 
 ceremoni-o                cérémonie
 
@@ -2243,20 +2472,14 @@ cert-ig-i                  assurer, certifier, garantir
 ne-cert-a                  incertain, vague
 ne-cert-ec-o                incertitude
 
-cerv-in-o                 biche
-cerv-o                    cerf
 
 ceter-a                   autre, qui reste
 ceter-e                   d'ailleurs, et puis
 ceter-o                   reste
 
-cezi-o                    césium
-
 cic-o                     mamelon
 
-cidoni-o                  coing
 
-cidr-o                    cidre
 
 cifer-o                   chiffre
 
@@ -2265,9 +2488,6 @@ cigan-o                   gitan, tzigane
 cigar-ed-o                 cigarette
 cigar-o                   cigare
 
-cign-o                    cygne
-
-cikad-o                   cigale
 
 cikatr-o                  cicatrice
 
@@ -2275,10 +2495,8 @@ ciklant-o                 cycliste
 
 ciklon-o                  cyclone
 
-cikoni-o                  cigogne
 
 cilindr-o                 cylindre
-
 cilindr-o-kovr-il-o         joint de culasse
 
 cim-o                     punaise
@@ -2288,7 +2506,6 @@ cindr-uj-o                cendrier
 
 cinik-a                   cynique
 
-cipres-o                  cyprès
 
 cir-i                     cirer
 
@@ -2314,7 +2531,6 @@ cit-i                     citer, rapporter des propos
 cit-il-o                  guillemet
 cit-ilo-j                  guillemets
 
-citron-o                  citron
 
 civil-a                   civil
 
@@ -2328,11 +2544,7 @@ cxagren-o                 désolation, peine
 cxambr-ist-in-o            femme de chambre
 cxambr-o                  chambre, local, pièce, salle
 
-cxam-o                    chamois
 
-cxampan-o                 champagne
-
-cxampinjon-o              champignon
 
 cxampion-o                champion
 
@@ -2379,10 +2591,6 @@ cxef-o                    chef
 cxef-rolul-o               vedette
 cxef-part-e                pour la plus part
 
-cxehx-oslovak-a            tchécoslovaque
-cxehx-oslovak-io           Tchécoslovaquie
-cxehx-oslovak-o            Tchécoslovaque
-cxehx-oslovak-uj-o          Tchécoslovaquie
 
 cxek-o                    chèque
 
@@ -2394,9 +2602,6 @@ sub-cxemiz-o               maillot de corps
 
 cxen-o                    chaîne
 
-cxeriz-o                  cerise
-cxeriz-uj-o               cerisier
-
 cxerk-o                   cercueil
 
 cxerp-i                   puiser
@@ -2405,10 +2610,6 @@ cxes-i                    cesser
 cxes-ig-i                  arrêter, faire cesser, interrompre, terminer
 cxes-ig-o                  interruption, rupture
 
-cxeval-acx-o               canasson
-cxeval-in-o               jument
-cxeval-o                  cheval
-cxeval-trink-ej-o           abreuvoir
 
 cxevron-o                 comble
 
@@ -2467,7 +2668,6 @@ cxiz-oj-o                  cisailles
 
 cxokolad-o                chocolat
 
-dali-o                    dahlia
 
 damagx-i                  endommager
 damagx-kompens-o           dommages et intérêts
@@ -2508,8 +2708,8 @@ debit-i                   débiter
 
 dec-a                     convenable
 dec-e                     convenablement, proprement
-
 dec-i                     être décent
+mal-dec-a                  grossier
 
 decid-i                   décider
 decid-ig-i                 déterminer
@@ -2518,7 +2718,7 @@ decid-o                   décision, résolution
 decid-pov-o                autorité
 
 dedicx-i                  consacrer, dédier
-dedicx-i atenton al       faire attention à, prêter attention à
+dedicx-i atent-on al       faire attention à, prêter attention à
 dedicx-i sin              se dévouer
 dedicx-i sin al           se consacrer
 
@@ -2560,6 +2760,7 @@ dekoraci-o                décor, décoration
 dekstr-a                  droit
 dekstr-e                  à droite
 dekstr-ular-o              droite
+mal-dekstr-a               gauche
 
 deleg-i                   déléguer
 deleg-it-o                 représentant
@@ -2570,6 +2771,7 @@ delic-a                   délicieux, divin
 delic-o                   délice
 
 delikat-a                 délicat, tendre
+mal-delikata              grossier, rude, rustique, vulgaire
 
 delir-i                   délirer
 delir-o                   transport
@@ -2589,6 +2791,7 @@ denov-e                   de nouveau, encore
 
 dens-a                    dense
 dens-ig-i                  serrer
+mal-dens-ej-o               clairière
 
 dent-o                    dent
 dent-ist-o                dentiste
@@ -2684,7 +2887,6 @@ dialog-o                  dialogue
 
 diamant-o                 diamant
 
-dianto                   oeillet
 
 dibocx-a                  dissolu
 dibocx-em-o               vice
@@ -2766,7 +2968,9 @@ dir-manier-o               locution
 dir-o                     propos
 ant-aù-dir-i                prédire
 ci-dir-i                   tutoyer
-re-diri                   redire
+re-dir-i                   redire
+kontr-aù-dir-ant-o           contradicteur
+kontr-aù-dir-o              objection
 
 disciplin-it-a             docile
 disciplin-o               discipline
@@ -2900,32 +3104,34 @@ dom-eg-o                   immeuble
 
 domicil-o                 domicile
 
-don-ac-i                   faire cadeau, offrir
-don-ac-o                   cadeau, don
-don-i                     abouler, donner, passer
-don-i logx-ej-on            abriter
-don-i sin                 se dévouer
-don-o                     don
-al-don-a                   supplémentaire
-al-don-i                   ajouter, joindre
-al-don-o                   addition, appendice
-dis-don-ad-o                distribution
+    don-i                     abouler, donner, passer
+    don-i logx-ej-on          abriter
+    don-i sin                 se dévouer
+    don-o                     don
+    don-ac-i                  faire cadeau, offrir
+    don-ac-o                  cadeau, don
+ al-don-i                   ajouter, joindre
+ al-don-o                   addition, appendice
+ al-don-a                   supplémentaire
 dis-don-i                  dispenser, distribuer
 dis-don-o                  répandre
+dis-don-ad-o                distribution
 for-don-i                  livrer
 sin-don-a                  affectueux, attaché, dévoué
 sin-don-em-a               affectueux, attaché, dévoué
 sin-don-em-o               dévouement
-el-don-i                   éditer
+ el-don-i                   éditer
 
 dorlot-i                  choyer, dorloter
 tro-dorlot-i               gâter
 
-dorm-ado                  sommeil
+dorm-ad-o                  sommeil
+mal-dorm-ad-o               veille
 dorm-cxambr-o              chambre à coucher
 dorm-ej-o                  dortoir
 dorm-em-i                  avoir sommeil
 dorm-i                    dormir
+mal-dormi                 veiller
 dorm-o                    sommeil
 
 dorn-o                    épine
@@ -2971,8 +3177,10 @@ duk-land-o                 duché
 dum-e                     dans l'intervalle
 
 dung-i                    embaucher
+mal-dung-i                 licencier, renvoyer
 dung-itar-o                personnel
 dung-it-o                  employé
+mal-dung-o                 congé
 
 dun-o                     dune
 
@@ -3012,12 +3220,16 @@ edz-in-igx-inta             mariée
 edz-in-igx-o                mariage
 edz-in-o                   épouse, femme
 edz-o                     époux, mari
-
-efektiv-a                 effectif
-efektiv-e                 en réalité
-efektiv-ig-i               réaliser
+ge-edz-ec-o                 mariage
+ge-edz-igx-i                marier
+ge-edz-igx-int-a             mariés
+ge-edz-igx-o                noces
+ge-edz-oj                  couple, époux, mari et femme
 
 efekt-o                   effet, impression
+efekt-iv-a                 effectif
+efekt-iv-e                 en réalité
+efekt-iv-ig-i               réaliser
 
 efemer-a                  éphémère
 
@@ -3028,51 +3240,15 @@ egal-a                    égal
 egal-later-a               équilatéral
 egal-mezur-a               régulier
 
-egipta                   égyptien
 
-Egiptio                  Egypte
+egiptolog-o               égyptologue
 
-egipto                   Egyptien
+egx-o                     arête
 
-egiptologo               égyptologue
+ek-i                      aborder, commencer
 
-Egipt-uj-o                Egypte
+ekip-i                    équiper
 
-egxo                     arête
-
-ek-                      action soudaine ou momentanée
-
-ek-abon-i                  s'abonner
-
-ek-aper-i                  surgir, survenir
-
-ek-brul-i                  s'allumer
-
-ek-brul-ig-i                allumer, enflammer
-
-ek-de                     à partir de, depuis, dès
-
-ek-de nun                 désormais
-
-ek-flamig-i                allumer
-
-ek-frap-o                  choc
-
-ek-funkci-i                partir, se mettre à fonctionner
-
-ekhavi                   obtenir
-
-eki                      aborder, commencer
-
-ekino                    oursin
-
-ekipi                    équiper
-
-ekkanti                  entonner
-
-ekkanto                  intonation
-
-ekkapti                  saisir
 
 ekkonscii pri            s'apercevoir de, se rendre compte
 
@@ -3172,7 +3348,6 @@ ektremi                  tressaillir
 
 ekvacio                  équation
 
-Ekvatora Gvineo          Guinée Equatoriale
 
 ekvivalenta              équivalent
 
@@ -3306,7 +3481,8 @@ elvagon-igx-i              descendre
 
 emancipi                 émanciper
 
-embaraso                 embarras
+embaras-o                 embarras
+mal-embaras-i              débarrasser
 
 embrio                   embryon
 
@@ -3516,7 +3692,7 @@ estonta                  futur
 
 estont-ec-o                avenir, futur
 
-estrado                  tenue
+estrad-o                  tenue
 
 estraro                  commandement
 
@@ -3572,29 +3748,19 @@ facil-ig-i                 faciliter, soulager
 facil-mov-a                agile
 
 fac-o                     pan
+inter-fac-o                interface
 
 faden-o                   fil
 
-fag-o                     hêtre
-
-fag-o-frukt-o               faine, faîne
-
-fag-o-nuks-o                faine, faîne
-
 fajf-i                    siffler
-
 fajf-il-o                 sifflet
-
 fajl-i                    limer
-
 fajl-il-o                 lime
 
 fajn-a                    delié, fin
 
 fajr-ej-o                  foyer
-
 fajr-o                    feu
-
 fajr-o-mani-ul-o            pyromane
 
 fak-o                     domaine, spécialité
@@ -3606,24 +3772,17 @@ fakultat-o                faculté
 falang-o                  phalange
 
 falcx-i                   faucher
-
 falcx-il-o                faux
 
 fald-i                    plier
-
 fald-o                    pli
 
 fal-i                     s'abattre, tomber
-
 fal-ig-i                   abattre, faire tomber
-
 fal-ig-o                   abattage
-
 fal-o                     chute
-
 fal-stel-o                 étoile filante
 
-falk-o                    faucon
 
 fals-i                    falsifier, fausser
 
@@ -3632,14 +3791,11 @@ falt-i                    rider
 falt-o                    ride
 
 fam-o                     réputation, rennomée
-
 fam-a                     célèbre, fameux
-
 fam-ec-o                   renommée, réputation
+fam-konat-a                célèbre, fameux, illustre
 
 famili-o                  famille
-
-famkonat-a                célèbre, fameux, illustre
 
 fanatik-a                 fanatique
 
@@ -3865,7 +4021,9 @@ flak-on-o                  flacon
 flam-i                    flamber
 flam-o                    flamme
 flam-ig-i                  enflammer
+ek-flam-ig-i                allumer
 flam-ing-o                 flamant
+
 
 flank-o                   côté, flanc
 flank-a                   auxiliaire
@@ -4030,12 +4188,9 @@ per-fort-i                 violer
 
 forum-o                   forum
 
-forvisx-i                 effacer
-
 fos-i                     creuser
-sub-fos-i                  saper, miner
-
 fos-ajx-o                  fossé
+sub-fos-i                  saper, miner
 
 fost-o                    pieu, poteau
 
@@ -4044,22 +4199,15 @@ fotad-o                   photographie
 fotel-o                   fauteuil
 
 fot-i                     photographier
-
 fot-o                     photo
-
 fot-ist-o                 photographe
 
 fotograf-ad-o              photographie
-
 fotograf-ajx-o             photo
-
 fotograf-i-o               photographie
-
 fotograf-ist-o            photographe
 
 fragil-a                  fragile
-
-frag-o                    fraise
 
 frakas-i                  briser, fracasser, réduire en miettes
 
@@ -4067,31 +4215,22 @@ frakci-o                  fraction
 
 frak-o                    habit
 
-fraksen-o                 frêne
-
 fraktur-o                 fracture
 
 framason-o                franc-maçon
 
-framb-o                   framboise
-
 frand-i                   se délecter, savourer
-
 frand-ajx-o                friandise
-
 frand-em-a                gourmand
-
 frand-em-ul-o              gourmet
 
 frank-a                   franc
-
 frank-o                   franc
 
 frap-i                    frapper, heurter
-
 frap-o                    coup
-
 frap-et-i                  taper
+ek-frap-o                  choc
 
 frat-o                    frère
 frat-in-o                 soeur
@@ -4101,9 +4240,7 @@ kun-frat-o                 confrère
 fraùd-i                   frauder
 
 fraùl-a                   célibataire
-
 fraùl-in-o                célibataire, demoiselle, mademoiselle
-
 fraùl-o                   célibataire, garçon
 
 fraz-o                    phrase
@@ -4111,47 +4248,32 @@ fraz-o                    phrase
 frekvent-i                fréquenter
 
 fremd-a                   étranger
-
 fremd-ul-o                inconnu
 
 frenez-a                  aberrant, agité, fou
-
 frenez-ec-o                aberration
-
 frenez-i                  être fou
-
 frenez-ig-i                affoler
-
 frenez-ig-ita              affolé
-
 frenez-o                  affolement
 
 fresx-a                   frais
-
 fresx-dat-a                récent
-
 fresx-dat-e                récemment
 
 frid-a                    froid
-
 frid-kamer-o               chambre froide
-
 frid-uj-o                 réfrigérateur
-
-fring-o                   pinson
 
 fripon-i                  tricher
 
 frit-i                    frire
 
 frivol-a                  frivole
-
 frivol-ec-o                futilité, vanité
 
 friz-i                    coiffer, friser
-
 friz-ist-in-o              coiffeuse
-
 friz-ist-o                coiffeur
 
 frizon-in-o               frisonne
@@ -4204,15 +4326,11 @@ fuk-o                     goémon, varech
 fulg-o                    suie
 
 fulm-o                    éclair, foudre
-
 fulm-o-sxirm-il-o           paratonnerre
-
 fulm-o-tondr-o              orage
 
 fum-ajx-i                  fumer, fumer des aliments
-
 fum-i                     fumer
-
 fum-o                     fumée
 
 fundament-a               radical
@@ -4225,6 +4343,7 @@ funel-o                   entonnoir
 
 funkci-i                  fonctionner
 funkci-o                  fonction
+ek-funkci-i                partir, se mettre à fonctionner
 pusx-ek-funkci-ig-i          pousser
 
 furagx-o                  pâture
@@ -4247,74 +4366,58 @@ futur-o                   futur
 
 fuzi-o                    fusion
 
-gaja                     gai, joyeux
-
+gaj-a                     gai, joyeux
 gaj-ec-o                   gaité
-
 gaj-em-a                  joyeux
+gaj-i                     folâtrer
+gaj-ig-a                   amusant, drôle
 
-gaji                     folâtrer
+gajn-i                    gagner, remporter
+gajn-o                    bénéfice, gain
 
-gajiga                   amusant, drôle
+galant-a                  galant
+galant-o                  perce-neige
 
-gajni                    gagner, remporter
+gal-o                     bile, fiel
 
-gajno                    bénéfice, gain
+galop-i                   galoper
 
-galanta                  galant
+galosx-o                  galoche
 
-galanto                  perce-neige
+gamb-o                    jambe, patte
 
-galo                     bile, fiel
+gant-o                    gant
 
-galopi                   galoper
+gap-i                     badauder, bayer aux corneilles, béer
+gap-i al                  regarder bouche bée
 
-galosxo                  galoche
+garagx-o                  garage
 
-gambo                    jambe, patte
-
-ganto                    gant
-
-gapi                     badauder, bayer aux corneilles, béer
-
-gapi al                  regarder bouche bée
-
-garagxo                  garage
-
-garantii                 assurer, cautionner, garantir
-
+garanti-i                 assurer, cautionner, garantir
 garanti-ul-o              otage
 
-garbo                    gerbe
-
+garb-o                    gerbe
 gard-i                    garder, protéger
 ant-aù-gard-i               préserver
-
 gard-ist-o                garde, gardien
+gard-o-starant-o            sentinelle
 
-Gardolago                lac de Garde
+gargar-i                  rincer
 
-gardostaranto            sentinelle
+garn-ajx-o                 garniture
+garn-i                    garnir
 
-gargari                  rincer
+garnitur-o                garniture
 
-garnajxo                 garniture
-
-garni                    garnir
-
-garnituro                garniture
-
-gaso                     gaz
+gas-o                     gaz
 
 gast-ej-o                  auberge
-
-gastiganto               hôte
-
+gast-ig-ant-o               hôte
 gast-ig-i                  abriter
 
-gasto                    convive, hôte
+gast-o                    convive, hôte
 
-gastronomo               gastronome, gourmet
+gastronom-o               gastronome, gourmet
 
 gazet-ar-o                 presse
 gazet-in-ist-o             journaliste
@@ -4324,11 +4427,6 @@ gazet-o                   gazette, journal
 gazon-o                   gazon, pelouse
 
 ge-a                      mixte
-ge-edz-ec-o                 mariage
-ge-edz-igx-i                marier
-ge-edz-igx-int-a             mariés
-ge-edz-igx-o                noces
-ge-edz-oj                  couple, époux, mari et femme
 ge-fiancx-igx-o             fiançailles
 ge-fil-oj                  enfants, 
 ge-patr-oj                 parents, père et mère
@@ -4766,13 +4864,9 @@ haùto                    peau
 
 havaja                   hawaiien
 
-Havajo                   Hawaii
 
-Havano                   La Havane
-
-haveno                   port
-
-havi                     avoir
+hav-i                     avoir
+ek-hav-i                   obtenir
 
 havi bonan famon         être bien vu
 
@@ -4780,21 +4874,11 @@ havi inklinon por        affectionner
 
 hav-ig-i                   procurer
 
-hazarde                  par hasard
+hazard-e                  par hasard
+hazard-o                  hasard
 
-hazardo                  hasard
-
-hebrea                   hébraïque, hébreu
-
-hebreo                   Hébreu
-
-Hebridoj                 Hébrides
-
-hedero                   lierre
-
-hegxo                    haie
-
-hegxtond-il-o             taille-haie
+hegx-o                    haie
+hegx-tond-il-o             taille-haie
 
 hejm-a                    domestique, relatif à la maison
 hejm-o                    domicile
@@ -4803,294 +4887,165 @@ re-hejm-en-ir-i              rentrer, rentrer chez soi
 re-hejm-ig-i                rapatrier
 sen-hejm-a                 sans abri
 
-hejtado                  chauffage
+hejt-ad-o                  chauffage
+hejt-i                    chauffer
 
-hejti                    chauffer
+hekto-gram-o               hectogramme
+hekto-litr-o               hectolitre
+hekto-metr-o               hectomètre
 
-hektogramo               hectogramme
+hel-a                     clair
 
-hektolitro               hectolitre
+helic-o                   hélice
 
-hektometro               hectomètre
+helikopter-o              hélicoptère
 
-hela                     clair
+help-a                    auxiliaire
+help-i                    aider, assister, secourir
+help-o                    aide
 
-Helaso                   Hellade
+hemikrani-o               migraine
 
-Heleno                   Hélène
+hemofili-o                hémophilie
 
-helico                   hélice
+hemoragi-o                hémorragie
 
-heliko                   escargot, limaçon
+hemoroid-o                hémorrhoïde
+hemoroid-oj               hémorrhoïdes
 
-helikoptero              hélicoptère
+hen-i                     hennir
 
-helpa                    auxiliaire
+hepat-o                   foie
 
-helpi                    aider, assister, secourir
-
-helpo                    aide
-
-Helvetio                 Helvétie
-
-helveto                  Helvète
-
-hemikranio               migraine
-
-hemofilio                hémophilie
-
-hemoragio                hémorragie
-
-hemoroido                hémorrhoïde
-
-hemoroidoj               hémorrhoïdes
-
-Henegovio                Hainaut
-
-henegovo                 Hainuyer
-
-heni                     hennir
-
-hepato                   foie
-
-herakleo                 berce
+herakle-o                 berce
 
 herb-ej-o                  prairie, pré
+herb-o-bed-o                pelouse
 
-herbobedo                pelouse
+hered-ajx-o                héritage
+hered-i                   hériter
 
-heredajxo                héritage
+herez-o                   hérésie
 
-heredi                   hériter
+herni-o                   hernie
 
-herezo                   hérésie
-
-Herk-ul-o                 Hercule
-
-Herkurbo                 Herck-la-Ville
-
-Hermeso                  Hermès
-
-hernio                   hernie
-
-heroa                    héroïque
-
+hero-a                    héroïque
 hero-ec-o                  héroïsme
+hero-en-o                  héroïne
 
-heroeno                  héroïne
+heroin-o[1]               héroïne
+heroin-o[2]               héroïne
 
-heroino[1]               héroïne
+herold-o                  hérault
 
-heroino[2]               héroïne
+hero-o                    héros
 
-heroldo                  hérault
+hezit-i                   hésiter
 
-heroo                    héros
+hibrid-a                  hybride
 
-heziti                   hésiter
+hidrat-ig-a                hydratant
+hidrat-o                  hydrate
 
-hiacinto                 jacinthe
+hidraùlik-a               hydraulique
+hidraùlik-o               hydraulique
 
-hibrida                  hybride
-
-hidrargo                 mercure
-
-hidratiga                hydratant
-
-hidrato                  hydrate
-
-hidraùlika               hydraulique
-
-hidraùliko               hydraulique
-
-hidroelektra             hydro-électrique
+hidroelektr-a             hydro-électrique
 
 hidr-oplan-o               hydravion
 
-hierarhxio               hiérarchie
+hierarhxi-o               hiérarchie
 
-hierarkio                hiérarchie
+hierarki-o                hiérarchie
 
 hier-aù                   hier
 hier-aù vespere           hier soir
 ant-aù-hier-aù              avant-hier
 
-higiena                  hygiénique
+higien-a                  hygiénique
+higien-o                  hygiène
 
-higieno                  hygiène
+higro-metr-o               hygromètre
 
-higrometro               hygromètre
+himen-o                   hymen
 
-Himalajoj                Himalaya
-
-himeno                   hymen
-
-himno                    hymne
-
-hinda                    indien
-
-hinda tigro              tigre royal
-
-hind-in-o                 Indienne
-
-Hindio                   Inde
-
-hindo                    Indien
-
-Hindocxinio              Indochine
-
-Hindocxin-uj-o            Indochine
-
-hindu-ism-o               hindouisme
-
-Hind-uj-o                 Inde
-
-hinduo                   hindou
+himn-o                    hymne
 
 hipnot-ig-i                hypnotiser
+hipnot-o                  hypnose
 
-hipnoto                  hypnose
-
-Hipokrato                Hippocrate
-
-hipokrita                hypocrite
-
+hipokrit-a                hypocrite
 hipokrit-ec-o              hypocrisie
-
-hipokriti                agir en hypocrite
-
+hipokrit-i                agir en hypocrite
 hipokrit-ul-o             hypocrite
 
-hipopotamo               hippopotame
+hipotek-a                 hypothécaire
+hipotek-a debitor-o        emprunteur sur hypothèque
+hipotek-a kreditor-o       créancier hypothécaire
+hipotek-o                 hypothèque
 
-hipoteka                 hypothécaire
+hipotenuz-o               hypoténuse
 
-hipoteka debitoro        emprunteur sur hypothèque
+hipotez-a                 hipothétique
+hipotez-o                 hypothèse
 
-hipoteka kreditoro       créancier hypothécaire
-
-hipoteko                 hypothèque
-
-hipotenuzo               hypoténuse
-
-hipoteza                 hipothétique
-
-hipotezo                 hypothèse
-
-hirta                    ébouriffé, hirsute
-
+hirt-a                    ébouriffé, hirsute
 hirt-ig-i                  hérisser
 
-hirudo                   sangsue
+histeri-a                 hystérique
+histeri-o                 hystérie
 
-hirundo                  hirondelle
+hist-o                    tissu
 
-hisopo                   hysope
-
-hispana                  espagnol, hispanique
-
-hispana lingvo           espagnol, langue espagnole
-
-hispan-in-o               Espagnole
-
-Hispanio                 Espagne
-
-hispano                  Espagnol
-
-Hispan-uj-o               Espagne
-
-histeria                 hystérique
-
-histerio                 hystérie
-
-histo                    tissu
-
-historio                 histoire
-
-ho                       oh
+histori-o                 histoire
 
 hodi-aù                   aujourd'hui
-
 hodi-aù matene            ce matin
-
 hodi-aù vespere           ce soir
 
-hokfadeno                ligne
-
-hokfisx-il-o              canne
-
-hokfisxkaptanto          pêcheur à la ligne
-
+hok-faden-o                ligne
+hok-fisx-il-o              canne
+hok-fisx-kapt-ant-o          pêcheur à la ligne
 hok-o                     crochet
 sub-hok-o                  cédille
 
-holandano                Hollandais
+hom-o                     être humain, homme
+hom-oj                    gens
 
-Holando                  Hollande
+honest-a                  honnête
 
-Homero                   Homère
-
-homo                     être humain, homme
-
-homoj                    gens
-
-hondurasa                hondurien
-
-hondurasan-in-o           Hondurienne
-
-hondurasano              Hondurien
-
-Honduraso                Honduras
-
-honesta                  honnête
-
-Honkongo                 Hong Kong
-
-honori                   honorer
-
+honor-i                   honorer
 honor-ind-a               honorable
+honor-o                   honneur
+honor-plen-a               glorieux
 
-honoro                   honneur
+hont-i                    avoir honte
 
-honorplena               glorieux
+horizont-al-a              horizontal
+horizont-o                horizon
 
-honti                    avoir honte
-
-hop                      hop, houp
-
-hordeo                   orge
-
-horizontala              horizontal
-
-horizonto                horizon
-
-horlogxeto               montre
-
+horlogx-et-o               montre
 horlogx-ist-o             horloger
+horlogx-o                 horloge, pendule
 
-horlogxo                 horloge, pendule
+hormon-o                  hormone
 
-hormono                  hormone
+hor-o                     heure
 
-horo                     heure
+horoskop-o                horoscope
 
-horoskopo                horoscope
-
-hospitalo                hôpital
+hospital-o                hôpital
 
 hotel-ist-o               hôtelier
-
-hotelo                   hôtel
+hotel-o                   hôtel
 
 hub-ul-o                  petit cultivateur
 
-Hudsongolfo              baie d'Hudson
+huf-o                     sabot
 
-hufo                     sabot
+hu-i                      aboyer, aboyer à
 
-hui                      aboyer, aboyer à
-
-humana                   charitable, humain
+human-a                   charitable, humain
 
 humil-a                   humble
 humil-ec-o                 modestie
@@ -5098,97 +5053,55 @@ humil-ig-i                 abaisser, abattre, humilier
 humil-ig-o                 abaissement
 humil-igx-i                s'humilier
 
-humo                     humus
+hum-o                     humus
 
-humoro                   humeur
+humor-o                   humeur
+mal-bon-humor-a             maussade
 
-humuro                   humour
+humur-o                   humour
 
-hundacxo                 clébard
-
+hund-acx-o                 clébard
 hund-id-o                 chiot
-
 hund-in-o                 chienne
+hund-o                    chien, clébard
 
-hundo                    chien, clébard
+hurd-o                    claie
 
-hungara                  hongrois
+hurl-ad-o                  hurlement
+hurl-i                    hurler
 
-hungar-in-o               Hongroise
+husar-o                   hussard
 
-Hungario                 Hongrie
-
-hungaro                  Hongrois
-
-Hungar-uj-o               Hongrie
-
-hurdo                    claie
-
-hurlado                  hurlement
-
-hurli                    hurler
-
-husaro                   hussard
-
-Hx
-
-hxaldeano                Chaldéen
-
-hxaldeo                  Chaldée
-
-hxaoso                   chaos
+hxaos-o                   chaos
 
 hxemi-ist-o               chimiste
+hxemi-o                   chimie
 
-hxemio                   chimie
+hximer-o                  chimère
 
-hximero                  chimère
+hxirurg-i-o                chirurgie
+hxirurg-o                 chirurgien
 
-hxina                    chinois
+hxoler-o                  choléra
 
-hxin-in-o                 Chinoise
-
-hxinio                   Chine
-
-hx-in-o                   Chinois
-
-hxin-uj-o                 Chine
-
-hxirurgio                chirurgie
-
-hxirurgo                 chirurgien
-
-hxolero                  choléra
-
-hxoro                    choeur
-
-I
+hxor-o                    choeur
 
 ia                       quelconque
+ia-m                      jadis, un jour
+ia-m aj-n                  n'importe quand
 
-iam                      jadis, un jour
+idar-o                    descendance
 
-iam ajn                  n'importe quand
-
-ibera                    ibère, ibérien, ibérique
-
-ibero                    Ibère, Ibérien
-
-idaro                    descendance
-
-ideala                   idéal
-
+ideal-a                   idéal
 idealo                   idéal
 
-identa                   identique
-
+ident-a                   identique
 ident-ig-i                 identifier, situer
 
-ideo                     idée
+ide-o                     idée
 
-idiota                   stupide
-
-idioto                   idiot
+idiot-a                   stupide
+idiot-o                   idiot
 
 ie                       quelque part
 ie-l                      de façon ou d'autre, d'une façon ou d'une autre
@@ -5198,16 +5111,9 @@ ig-i                      faire, rendre
 
 igx-i                     devenir
 
-ignam-o                   igname
-
 ignor-i                   bouder, ignorer, méconnaître
 
-iksod-o                   tique
-
-ilar-o                    matériel
-
-ileks-o                   houx
-
+il-ar-o                    matériel
 il-o                      instrument, outil, produit, ustensile
 
 ilumin-i                  illuminer
@@ -5220,367 +5126,284 @@ imag-i                    imaginer
 imag-ajx-o                 imagination, invention
 imag-pov-o                 imagination
 
-imbecilo                 imbécile
+imbecil-o                 imbécile
 
-imiti                    copier, imiter
+imit-i                    copier, imiter
 
-imperativo               impératif
+imperativ-o               impératif
 
-imperial-ism-o            impérialisme
-
+imperi-al-ism-o            impérialisme
 imperi-estr-o             empereur
-
 imperi-ism-o              impérialisme
+imperi-o                  empire
 
-imperio                  empire
+impertinent-a             hardi
 
-impertinenta             hardi
+impet-i                   s'élancer
+impet-o                   transport
 
-impeti                   s'élancer
+implic-i                  impliquer
 
-impeto                   transport
+implik-ajx-o               imbroglio
+implik-i                  empêtrer, entortiller
 
-implici                  impliquer
+impon-a                   imposant
+impon-i                   en imposer à
 
-implikajxo               imbroglio
+import-i                  importer
 
-impliki                  empêtrer, entortiller
-
-impona                   imposant
-
-imponi                   en imposer à
-
-importi                  importer
-
-imposti                  imposer
-
-imposto                  impôt, taxe
+impost-i                  imposer
+impost-o                  impôt, taxe
 
 impres-ebl-a               sensible
+impres-o                  impression
 
-impreso                  impression
+improviz-i                improviser
 
-improvizi                improviser
-
-impulso                  impulsion, incitation
+impuls-o                  impulsion, incitation
 
 imun-ec-o                  immunité
 
-inaùguri                 inaugurer
+inaùgur-i                 inaugurer
+inaùgur-o                 inauguration
 
-inaùguro                 inauguration
+incendi-o                 incendie
 
-incendio                 incendie
+incest-o                  inceste
 
-incesto                  inceste
+incident-o                incident
 
-incidento                incident
-
-inciteti                 agacer, taquiner
-
-inciti                   agacer, irriter
-
+incit-et-i                 agacer, taquiner
+incit-i                   agacer, irriter
 incit-igx-em-a             susceptible
 
-indiano                  Indien
 
-indiferenta              indifférent
+indiferent-a              indifférent
 
-indigni                  s'indigner
-
-indigni pri              s'indigner de
-
+indign-i                  s'indigner
+indign-i pri              s'indigner de
 indign-ig-i                indigner
 
-indigxena                aborigène
+indigxen-a                aborigène
 
-indiki                   désigner, indiquer
+indik-i                   désigner, indiquer
+indik-o                   indication
 
-indiko                   indication
+individu-o                individu
 
-individuo                individu
+ind-o                     mérite
 
-indo                     mérite
-
-indonezia                indonésien
-
-indonezian-in-o           Indonésienne
-
-indoneziano              Indonésien
-
-Indonezio                Indonésie
-
-indulga                  indulgent
-
+indulg-a                  indulgent
 indulg-em-a               indulgent
+indulg-i                  être indulgent
 
-indulgi                  être indulgent
-
-industria                industriel
-
+industri-a                industriel
 industri-ist-o            industriel
+industri-o                industrie
 
-industrio                industrie
+inerci-o                  inertie
 
-inercio                  inertie
-
-inerta                   inerte
-
+inert-a                   inerte
 inert-ec-o                 inertie
 
-infanagxo                enfance
-
+infan-agx-o                enfance
 infan-ec-o                 enfance
+infan-et-o                 bébé
+infan-o                   enfant
+infan-vart-ej-o             crèche
 
-infaneto                 bébé
+infanteri-o               infanterie
 
-infano                   enfant
+infekt-i                  infecter
 
-infanterio               infanterie
+infinitiv-o               infinitif
 
-infanvart-ej-o             crèche
-
-infekti                  infecter
-
-infinitivo               infinitif
-
-infinito                 infini
+infinit-o                 infini
 
 in-flu-i                   influer
 in-flu-o                   empire, influence
 
-informi                  apprendre à, informer, renseigner
-
+inform-i                  apprendre à, informer, renseigner
 inform-igx-i               s'informer
+inform-o                  faire-part, renseignement
 
-informo                  faire-part, renseignement
-
-ingxeniero               ingénieur
+ingxenier-o               ingénieur
 
 iniciat-em-o              initiative, esprit d'initiative
+iniciat-i                 prendre l'initiative
+iniciat-iv-o               initiative
+iniciat-o                 initiative
 
-iniciati                 prendre l'initiative
+injekt-i                  injecter
 
-iniciativo               initiative
+inklin-a                  enclin
+inklin-i                  incliner
 
-iniciato                 initiative
+ink-o                     encre
 
-injekti                  injecter
+insekt-o                  insecte
 
-inklina                  enclin
+insid-i                   comploter, tendre un piège
 
-inklini                  incliner
-
-inko                     encre
-
--in-o                     femelle
-
-insekto                  insecte
-
-insidi                   comploter, tendre un piège
-
-insigno                  insigne
+insign-o                  insigne
 
 insist-ad-i                persévérer, persister
-
 insist-ad-o                impulsion, instance, instances, vive sollicitation
+insist-i                  insister, presser
+insist-o                  instance, instances
 
-insisti                  insister, presser
-
-insisto                  instance, instances
-
-inspekti                 inspecter
-
+inspekt-i                 inspecter
 inspekt-ist-o             inspecteur
+inspekt-or-o               inspecteur
 
-inspektoro               inspecteur
+inspir-i                  dicter, inspirer
+inspir-o                  souffle
 
-inspiri                  dicter, inspirer
+instal-i                  construire, installer, poser
 
-inspiro                  souffle
+instig-a okazajx-o         lieu, occasion
+instig-ad-o                incitation, invitation
+instig-i                  inciter, pousser à
+instig-il-o               mobile
+instig-o                  incitation
 
-instali                  construire, installer, poser
+instinkt-o                instinct
 
-instiga okazajxo         lieu, occasion
+instituci-o               fondation
 
-instigado                incitation, invitation
+institut-o                institut
 
-inst-ig-i                  inciter, pousser à
-
-inst-ig-il-o               mobile
-
-instigo                  incitation
-
-instinkto                instinct
-
-institucio               fondation
-
-instituto                institut
-
-instrua                  instructif
-
-instruado                enseignement, instruction
-
-instrui                  apprendre, enseigner, instruire
-
-instruist-in-o            institutrice
-
+instru-a                  instructif
+instru-ad-o                enseignement, instruction
+instru-i                  apprendre, enseigner, instruire
+instru-ist-in-o            institutrice
 instru-ist-o              instituteur
+instru-o                  enseignement
 
-instrukcio               instruction
+instrukci-o               instruction
 
-instruo                  enseignement
+insul-o                   île
 
-insulo                   île
+insult-i                  insulter
+insult-o                  injure
 
-insulti                  insulter
-
-insulto                  injure
-
-intelekta                intellectuel
-
+intelekt-a                intellectuel
 intelekt-ul-o             intellectuel
 
-inteligenta              intelligent
-
+inteligent-a              intelligent
 inteligent-ec-o            intelligence
 
-intence                  exprès
+intenc-e                  exprès
+intenc-o                  dessein, intention, propos
 
-intenco                  dessein, intention, propos
-
-intensa                  intense
+intens-a                  intense
 
 inter                    au milieu de, entre, parmi
+inter ali-e               notamment
+inter-a                   intermédiaire
 
-inter alie               notamment
 
-intera                   intermédiaire
-
-interbatali              se battre
-
-interesa                 intéressant
-
+interes-a                 intéressant
 interes-eg-a               captivant, passionnant
-
-interesi                 intéresser
-
+interes-i                 intéresser
 interes-igx-i              s'intéresser
+interes-o                 intérêt
 
-intereso                 intérêt
+interez-o                 intérêt
 
-interezo                 intérêt
+inter-jekci-o              interjection
 
-interfaco                interface
+inter-konatigx-o           abord
 
-interjekcio              interjection
+inter-konsentit-a          convenu
 
-interkonatigxo           abord
+inter-konsent-o            pacte
 
-interkonsentita          convenu
+inter-lig-i                allier, rellier
 
-interkonsento            pacte
+inter-mit-e                par intermitence
 
-interl-ig-i                allier, rellier
+inter-mont-o               col
 
-intermite                par intermitence
 
-intermonto               col
+inter-naci-a               international
 
-interna                  intérieur, interne
+inter-najx-o               milieu
 
-internacia               international
-
-internajxo               milieu
-
-interne                  dedans
-
+intern-a                  intérieur, interne
+intern-e                  dedans
 intern-ul-o               pensionnaire
 
-interparoli              intervenir
+inter-paroli              intervenir
 
-interpelacii             interpeller
+inter-pelaci-i             interpeller
 
-interpretanto            interprète
-
-interpreti               interpréter
-
+interpret-ant-o            interprète
+interpret-i               interpréter
 interpret-ist-o           interprète
 
-interpunkcio             ponctuation
+inter-punkci-o             ponctuation
 
-interrilati              fréquenter
+inter-rilat-i              fréquenter
+inter-rilat-o              abord, relation
 
-interrilato              abord, relation
+inter-romp-i               interrompre
+inter-romp-o               interruption, rupture
 
-interrompi               interrompre
+inter-spac-o               intervalle
 
-interrompo               interruption, rupture
+inter-temp-e               dans l'intervalle
+inter-temp-o               intervalle
 
-interspaco               intervalle
+inter-val-o                intervalle
 
-intersxangxi             échanger inter ... kaj: ... à
+inter-ven-i                intervenir
 
-intertempe               dans l'intervalle
+inter-vju-o                entrevue, interview
 
-intertempo               intervalle
+intest-o                  intestin
 
-intervalo                intervalle
+intim-a                   intime
 
-interveni                intervenir
+intrig-ant-o               intrigant
+intrig-i                  intriguer
+intrig-o                  intrigue
 
-intervjuo                entrevue, interview
+intuici-o                 intuition
 
-intesto                  intestin
+inund-i                   inonder
+inund-o                   inondation
 
-intima                   intime
+invad-i                   envahir
+invad-o                   invasion
 
-intriganto               intrigant
+invalid-o                 infirme, mutilé
 
-intr-ig-i                  intriguer
+invent-ajx-o               invention
+invent-ar-o                recensement
+invent-i                  inventer
+invent-o                  invention
 
-intrigo                  intrigue
-
-intuicio                 intuition
-
-inundi                   inonder
-
-inundo                   inondation
-
-invadi                   envahir
-
-invado                   invasion
-
-invalido                 infirme, mutilé
-
-inventajxo               invention
-
-inventaro                recensement
-
-inventi                  inventer
-
-invento                  invention
-
-inversa                  inverse
-
+invers-a                  inverse
 invers-ig-i                retourner
 
-investi                  investir, placer d'argent
+invest-i                  investir, placer d'argent
 
-inviti                   inviter
+invit-i                   inviter
+invit-o                   invitation
 
-invito                   invitation
+iom-et-e                   légerement
 
-iom                      une certaine quantité
-
-iom post iom             de proche en proche, peu à peu, petit à petit
-
-iomete                   légerement
-
+ir-i                      aller, se déplacer, tourner, fonctionner
+ir-o                       aller, marche, fonctionnement, allure, dmarche
+ir-ad-o                    aller, marche, fonctionnement
+ir-ej-o                    chemin, sentier, voie
+ir-ig-i                    faire aller, faire marcher, faire fonctionner, conduire
+ir-ig-i al                 henvise til
+ir-ebl-a                   praticable
+ir-ilo                     échasse
 ir-antar-o                 cortège
 ir-bilet-o                 billet d'aller
-ir-ej-o                    chemin
-ir-i                      aller, se déplacer
 ant-aù-ir-i                 précéder
 ant-aù-en-ir-i               avancer
 ant-aù-en-ir-o               avance
@@ -5600,48 +5423,34 @@ trans-ir-o                 passage, transition
 mal-supren-ir-i             s'abaisser, descendre
 mal-supren-ir-o             descente
 retro-ir-i                 reculer
+ir-manier-o                démarche, façon de marcher
 
-irido                    iris
+irigaci-i                 abreuver
 
-irigacii                 abreuver
+ironi-o                   ironie
 
-ir-ig-i al                 henvise til
-
-irmaniero                démarche, façon de marcher
-
-ironio                   ironie
-
-irpreni                  hente
-
--isto                    iste
+irpren-i                  hente
 
 iu                       un, quelqu'un
-
 iuj                      quelques uns
 
-izocela                  isocèle
+izocel-a                  isocèle
 
-izoli                    isoler
+izol-i                    isoler
+izol-it-ec-o                abandon
 
-izolit-ec-o                abandon
+jahurt-o                  yaourt, yoghourt, yogourt
 
-jahurto                  yaourt, yoghourt, yogourt
-
-jako                     veste, veston
+jak-o                     veste, veston
 
 jam                      déjà
 
-jara                     annuel
-
-jarcento                 siècle
-
-jarfina tago             Saint-Sylvestre
-
-jarkvino                 lustre
-
-jarlibro                 annuaire
-
-jaro                     an, année
+jar-a                     annuel
+jar-cento                 siècle
+jar-fin-a tag-o             Saint-Sylvestre
+jar-kvin-o                 lustre
+jar-libr-o                 annuaire
+jar-o                     an, année
 
 je                       de, en
 
@@ -5651,127 +5460,68 @@ jen                      voici, voilà
 
 jes                      bien, oïl, oui, si
 
-jeto                     avion à réaction
+jet-o                     avion à réaction
 
-Jezuo                    Jésus
 
-jodo                     iode
+jog-an-o                   yogi
+jog-o                     yoga
 
-jogano                   yogi
+jogurt-o                  yaourt, yoghourt, yogourt
 
-jogo                     yoga
+jol-o                     yole
 
-jogurto                  yaourt, yoghourt, yogourt
+jon-o                     ion
 
-jolo                     yole
-
-jono                     ion
-
-Jordanio                 Jordanie
-
-Jordano                  Jourdain
-
-Josxuo                   Josué
-
-Jozefo                   Joseph
-
-judo                     Juif
-
-juglandarbo              noyer
-
-juglando                 noix
-
-jugland-uj-o              noyer
-
-jugoslava                yougoslave
-
-jugoslav-in-o             Yougoslave
-
-Jugoslavio               Yougoslavie
-
-jugoslavo                Yougoslave
-
-Jugoslav-uj-o             Yougoslavie
-
-jugxa decido             arrêt
-
-jugxado                  jugement
-
-jugxi                    juger
-
-jugxistaro               magistrature
-
+jugx-a decid-o             arrêt
+jugx-ad-o                  jugement
+jugx-i                    juger
+jugx-i-star-o               magistrature
 jugx-ist-o                juge
 
-jukao                    yucca
+juk-i                     démanger
 
-juki                     démanger
+jun-a                     jeune
 
-juna                     jeune
+jung-i                    atteler
 
-jungi                    atteler
-
-junipero                 genèvrier
-
-junko                    jonc
-
-Juno                     Junon
-
-junto                    joint
-
-Jupitro                  Jupiter
+junt-o                    joint
 
 jupo                     jupe
 
-Juro                     Jura
-
-justa                    juste, moral
-
-juste                    justement
-
-justico                  justice
+just-a                    juste, moral
+just-e                    justement
+just-ic-o                  justice
 
 juvel-ist-o               bijoutier
+juvel-o                   bijou
 
-juvelo                   bijou
+jxak-o                    jack femelle
 
-Jx
+jxaluz-a                  jaloux
+jxaluz-o                  envie
 
-jxako                    jack femelle
+jxele-o                   gelée
 
-jxaluza                  jaloux
+jxet-ajx-o                 projectile
+jxet-i                    jeter, projeter
+jxet-i sin                s'abattre
+jxet-kovr-i                joncher
 
-jxaluzo                  envie
+jxongl-i                  jongler
 
-jxeleo                   gelée
+jxos-i                    butter, terrer
 
-jxetajxo                 projectile
+jxur-i                    jurer, prêter serment
 
-jxeti                    jeter, projeter
-
-jxeti sin                s'abattre
-
-jxetkovri                joncher
-
-jxongli                  jongler
-
-jxosi                    butter, terrer
-
-jxuri                    jurer, prêter serment
-
-jxurnalist-in-o           journaliste
-
+jxurnal-o                 journal, quotidien
 jxurnal-ist-o             journaliste
+jxurnal-ist-in-o           journaliste
 
-jxurnalo                 journal, quotidien
-
-jxuro                    serment
-
-jxurpromeso              voeu
+jxur-o                    serment
+jxur-promes-o              voeu
 
 jxus                     à l'instant, justement
-
-jxusa                    récent
+jxus-a                    récent
 
 k.t.p.                   etc.
 
@@ -5804,8 +5554,7 @@ kagx-o                    cage
 
 kahel-o                   carreau
 
-kaj                      et
-
+kaj                       et
 kaj ali-aj                et les autres
 
 kajer-o                   cahier
@@ -5816,19 +5565,12 @@ kajut-o                   cabine, cabine de bateau
 
 kaka-o                    cacao
 
-kakt-o                    cactus
-
-kalabaset-o               courgette
 
 kalcitr-i                 ruer
 
 kaldron-o                 chaudron
 
 kalendar-o                calendrier
-
-kalendul-o                calendula, souci
-
-kalistef-o                reine-marguerite
 
 kalkan-o                  talon
 
@@ -5841,7 +5583,6 @@ ne-kalkul-ebl-a             incalculable
 fin-kalkul-o               réglement
 
 kalson-et-o                slip
-
 kalson-o                  caleçon, culotte
 
 kalumni-i                 calomnier, diffamer, salir
@@ -5850,10 +5591,7 @@ kalv-a                    chauve
 
 kamarad-o                 camarade
 
-kamel-o                   chameau
-
 kamen-kapucx-o             abat-vent
-
 kamen-o                   cheminée
 
 kamera-o                  caméra
@@ -5867,13 +5605,9 @@ kampad-ej-o                camp
 kampanj-o                 campagne
 
 kamp-o                    champ
-
 kamp-ar-a                  rural, rustique
-
 kamp-ar-an-o                paysan
-
 kamp-ar-o                  campagne
-
 kamp-ul-o                 laboureur, paysan
 
 kanajl-o                  canaille, gredin
@@ -5892,19 +5626,13 @@ kandidat-o                candidat
 
 kanel-o                   cannelure, rainure, sillon
 
-kanguru-o                 kangourouo
-
-kankr-o                   écrevisse
-
-kan-o                     roseau
-
 kanon-o                   canon
 
 kant-i                    chanter
-
 kant-ist-in-o              chanteuse
-
 kant-ist-o                chanteur
+ek-kanti                  entonner
+ek-kant-o                  intonation
 
 kantin-o                  cantine
 
@@ -5919,60 +5647,37 @@ kapitan-o                 capitaine
 kap-o                     tête
 kap-kusen-o                oreiller
 
-kapreol-o                 chevreuil
-
 kapric-o                  caprice
-
-kapr-o                    chèvre
-
-kapr-in-o                 chèvre
 
 kapriol-i                 gambader
 
 kapt-i                    attraper, capturer, saisir
-
+ek-kapt-i                  saisir
 kapt-ajx-o                 proie
-
 kapt-il-o                 piège
-
 kapt-it-o                  prisonnier
-
 kapt-operac-o              razzia
-
 kapt-urn-igx-o              faiblesse, défaillance
 
 kar-a                     cher, coûteux
-
 kar-a[2]                  cher, coûteux
 
 karakter-o                caractère
 
-karbgudr-o                goudron de houille
-
+karb-gudr-o                goudron de houille
 karb-o                    charbon
 
 karbon-dioksid-o           gaz carbonique
-
 karbon-hidrogen-o          hydrocarbure
 
 karbur-i                  carburer
 
 karcer-o                  cachot, prison
 
-kardel-o                  chardonneret
-
-kard-o                    chardon
-
-kareks-o                  laîche
-
 kares-em-a                tendre
-
 kares-em-e                 tendrement
-
 kares-em-o                cajolerie, câlinerie
-
 kares-i                   caresser
-
 kares-o                   caresse
 
 karn-o                    chair
@@ -5980,20 +5685,11 @@ dent-karn-o                gencive
 dik-karn-a                 moelleux
 mol-karn-a                 moelleux
 
-karot-o                   carotte
-
-karpen-o                  charme
-
-karp-o                    carpe
-
 kart-o                    carte
-
-karton-o                  carton
+kart-on-o                  carton
 
 kas-o                     caisse
-
 kas-ed-o                   cassette
-
 kas-ist-o                 trésorier
 
 kaserol-o                 casserole
@@ -6004,17 +5700,8 @@ kasked-o                  casquette
 
 kastel-o                  château
 
-kastrit-a vir-cxeval-o      cheval hongre
-
 kasx-i                    cacher
-
 kasx-i sin                s'abriter
-
-kasxtan-arb-o              châtaignier
-
-kasxtan-o                 châtaigne
-
-kasxtan-uj-o              châtaignier
 
 katastrof-o               catastrophe, désastre
 
@@ -6024,21 +5711,14 @@ kategori-o                catégorie
 
 katen-o                   chaîne
 
-kat-o                     chat
-
-katun-o                   coton
-
 kaùcxuk-o                 caoutchouc
 
 kaùr-i                    être accroupi
 
 kaùz-i                    causer, déterminer, entraîner des conséquences, procurer
-
 kaùz-o                    cause
 
 kavalir-o                 chevalier
-
-kavi-o                    cobaye, cochon d'Inde
 
 kav-o                     creux
 kunikl-o-kav-o              trou de lapin
@@ -6048,99 +5728,69 @@ kazern-o                  caserne
 
 kaz-o                     cas
 
-keirant-o                 giroflée des murailles
-
 kelk-aj                   quelques
-
 kelk-foj-e                 parfois, quelquefois
 
+kel-o                     cave
 kel-ner-o                  garçon, garçon de café, serveur
 
-kel-o                     cave
-
-kemi-ist-o                chimiste
-
 kemi-o                    chimie
+kemi-ist-o                chimiste
 
 kep-o                     képi
 
 kermes-o                  kermesse
 
 kern-o                    centre, noyau
-
 kern-et-o                  pépin
 
 kest-o                    caisse, coffre
-
 kest-et-o                  cassette, coffret
 
 ki-a                      quel sorte de
-
 ki-al                     pourquoi
-
 ki-al-o                    motif
-
 ki-am                     quand, lorsque
 
 ki-e                      où
 
 ki-el long-e               pour combien de temps
-
 ki-el vi fart-as?          comment allez-vous?
-
 ki-el[2]                  comment, de quelle manière
-
 ki-el[3]                  comme
 
-kilogram-o                kilogramme
-
-kilometr-o                kilomètre
-
-kiloùathor-o              kilowatt-heure
-
-kiloùat-o                 kilowatt
-
-kilovatt-o                kilowatt
+kilo-gram-o                kilogramme
+kilo-metr-o                kilomètre
+kilo-ùat-hor-o              kilowatt-heure
+kilo-ùat-o                 kilowatt
+kilo-vatt-o                kilowatt
 
 kimon-o                   kimono
 
 kin-o                     cinéma
 
 kio                      quoi
-
-kio-m                     combien
-
-kio-m da                  combien de
-
-kio-m da tempo            pour combien de temps
-
-kio-ma horo               quelle heure
-
-kio-ma horo estas?        quelle heure est-il?
+kiom                     combien
+kiom da                  combien de
+kiom da tempo            pour combien de temps
+kioma horo               quelle heure
+kioma horo estas?        quelle heure est-il?
 
 kirl-i                    battre, faire tournoyer
-
 kirl-igx-i                 tourbilloner
 
-kirmes-o                  cochenille
-
-kirurg-i-o                 chirurgie
 kirurg-o                  chirurgien
+kirurg-i-o                 chirurgie
 
 kis-i                     embrasser
-
 kis-o                     baiser
 
 kitel-o                   blouse longue
 
 kiu                      qui, quel, lequel
-
 kiu ajn                  n'importe qui
-
 kiu-j                     qui, quels, quelles
-
 kiu-jn                    que
-
 kiu-n                     que, qu'
 
 klacx-i                   cancaner, jaser
@@ -6150,9 +5800,7 @@ klak-i                    claquer
 klap-o                    abattant
 
 klar-a                    clair, limpide, net
-
 klar-ec-o                  clarté
-
 klar-ig-i                  développer, expliquer
 
 klarion-o                 clairon
@@ -6166,11 +5814,9 @@ klas-o                    classe
 klaùn-o                   clown
 
 klav-o                    touche, touche de clavier
-
 klav-ar-o                  clavier
 
 kler-a                    cultivé
-
 kler-ul-o                 savant
 
 klient-o                  client
@@ -6184,13 +5830,11 @@ klimat-o                  climat
 kling-o                   lame, lame tranchante
 
 klin-i                    incliner
-
 klin-igx-i                 pencher, s'incliner
 
 kloak-o                   cloaque, égout
 
 klopod-i                  se démener
-
 klopod-o                  démarche, effort, peine, requête
 
 klosx-o                   pavillon
@@ -6201,27 +5845,17 @@ klucx-i                   embrayer
 
 kluk-i                    glousser
 
-klupe-o                   sardine
-
 kluz-o                    écluse
 
 knab-o                    garçon, gosse
-
 knab-in-et-o                fillette
-
 knab-in-o                 fille, jeune fille, gosse
 
 knar-i                    grincer
 
 kned-i                    pétrir
 
-kobaj-o                   cobaye, cochon d'Inde
-
 kobold-o                  lutin
-
-kobr-o                    cobra
-
-kocx-o                    cochenille
 
 kofr-o                    coffre, malle
 
@@ -6233,19 +5867,11 @@ koit-i                    coïter
 
 kojn-o                    cale, coin
 
-kojot-o                   coyote
-
 kok-o                     poule
-
 kok-ajx-o                  poulet
-
 kok-ej-o                   poulailler
-
 kok-id-o                  poussin
-
 kok-in-o                  poule
-
-kokcinel-o                coccinelle
 
 koket-a                   coquet
 
@@ -6258,48 +5884,34 @@ kolbas-o                  saucisse
 koleg-o                   collègue
 
 kolekt-i                  collectionner, ramasser, rassembler, recueillir
-
 kolekt-o                  collection
 
-koleopter-o               scarabée
-
 koler-i                   être en colère
-
 koler-o                   colère
-
 koler-eg-a                 furieux
-
 koler-eg-o                 fureur
-
 koler-ig-i                 hérisser
 
-kolibr-o                  oiseau-mouche
-
-kolizi-i kun              aborder
-
 kolizi-o                  choc, collision
+kolizi-i kun              aborder
 
 kol-o                     col, cou
 
 kolokv-o                  rencontre
 
-kolomb-o                  colombe, pigeon
 
 kolonel-o                 colonel
 
 koloni-a                  colonial
-
 koloni-o                  colonie, possession
 
 kolon-o                   colonne, pilier
 
 kolor-i                   colorer
-
 kolor-o                   couleur, teinte
 
 kolos-a                   énorme, formidable, immense
 
-kolubr-o                  couleuvre
 
 kolumn-o                  colonne, colonne de journal, file
 
@@ -6307,48 +5919,33 @@ kolum-o                   col, faux-col
 
 koluzi-o                  intelligence
 
-kolz-o                    colza
-
 komand-o                  commandement
 
 komb-i                    peigner
-
 komb-il-o                 peigne
 
 komenc-i                  aborder, commencer
-
 komenc-o                  commencement, inauguration
-
 komenc-e                  d'abord
-
 komenc-igx-i               débuter
-
 komenc-igx-o               début
-
 komenc-lok-o               point de contact
 
 komerc-o                  commerce
-
 komerc-a                  commercial
-
 komerc-ajx-o               marchandise
-
 komerc-ist-o              commerçant, marchand
 
 komet-o                   comète
 
 komfort-a                 confortable
-
 komfort-e                 à l'aise
-
 komfort-o                 confort
 
 komik-a                   comique, drôle
 
 komisi-i                  charger, confier une tâche
-
 komisi-o                  commission
-
 komisi-on-o                commission, groupe de travail
 
 komitat-o                 comité
@@ -6358,17 +5955,12 @@ kom-o                     virgule
 komod-o                   commode
 
 kompan-i-o                 compagnie
-
 kompan-o                  compagnon
 
 kompar-ad-o                comparaison
-
 kompar-e kun              vis-à-vis
-
 kompar-i                  comparer
-
 kompar-i kun              comparer à
-
 kompar-o                  comparaison
 
 kompas-o                  boussole
@@ -6378,29 +5970,22 @@ kompat-i                  avoir pitié, compatir, plaindre
 kompat-o                  compassion, pitié
 
 kompat-em-a               sensible
-
 kompat-ind-a              malheureux, misérable, pauvre
 
 kompendi-o                manuel
 
 kompens-e                 en retour, en revanche, par contre, pour la peine
-
 kompens-i                 compenser
 
 kompetent-a               compétent, qualifié
 
 komplet-a                 complet
-
 komplet-e                 complètement, entièrement
-
 komplet-ig-i               compléter, remplir
 
 komplez-a                 complaisant, gentil
-
 komplez-em-a              complaisant, serviable
-
 komplez-em-o              obligeance
-
 komplez-o                 complaisance, service
 
 komplik-i                 compliquer
@@ -6408,21 +5993,15 @@ komplik-i                 compliquer
 kompliment-o              compliment
 
 kompon-i                  composer
-
 kompon-ad-o                composition
-
 kompon-ajx-o               composition
 
 kompost-i                 composer
 
-ek-kompren-i               soupçonner
-
-kompren-eble              bien entendu, naturellement
-
 kompren-i                 comprendre
-
+kompren-eble              bien entendu, naturellement
+ek-kompren-i               soupçonner
 mis-kompren-o              malentendu
-
 ne-kompren-ebl-a            abracadabrant
 
 kompromis-o               compromis
@@ -6432,37 +6011,26 @@ komputer-o                ordinateur
 komputil-o                ordinateur
 
 komun-a                   commun
-
 komun-um-a                 communal, municipal
-
 komun-um-o                 commune
 
 komuni-igx-anto            communiant
-
 komuni-igx-i               communier
-
 komuni-o                  communion
 
 komunik-i                 communiquer
-
 komunik-o                 communication, faire-part
 
 komut-i                   aiguiller, commuter
-
 komut-il-o                commutateur
-
 komut-ist-in-o             standardiste
 
 konat-a                   connu
-
 konat-igx-o                abord
-
 konat-o                   connaissance, person de connaissance, relation
 
 koncern-a                 concerné
-
 koncern-e                 concernant, quant à
-
 koncern-i                 concerner, intéresser, regarder
 
 koncert-o                 concert
@@ -6474,7 +6042,6 @@ konciz-a                  concis
 kondamn-i                 condamner
 
 kondicx-e ke              à condition que, pourvu que
-
 kondicx-o                 condition
 
 kondiment-i               assaisonner
@@ -6484,67 +6051,47 @@ kondoleanc-oj             condoléances
 kondom-o                  condom, préservatif
 
 konduk-i                  aboutir, conduire, diriger, mener
-
 konduk-tor-o               contrôleur
 
-al-konduk-i                amener
-
-en-konduk-i                introduire
-
-en-konduk-o                introduction
-
-re-konduki                ramener, reconduire
-
 kondut-i                  se conduire
-
 kondut-o                  procédé
+al-konduk-i                amener
+en-konduk-i                introduire
+en-konduk-o                introduction
+re-konduki                ramener, reconduire
 
 koneks-e kun              en relation avec
 
 konekt-i                  aboucher, connecter
-
-konekting-o               prise de courant
+konekt-ing-o               prise de courant
 
 konfes-i                  avouer, confesser, reconnaître
-
 konfes-o                  reconnaissance
-
-konfespren-i              confesser
-
-konfid-enc-i               confier
+konfes-pren-i              confesser
 
 konfid-i                  confier, se fier à
-
 konfid-o                  confiance
+konfid-enc-i               confier
 
 konfirm-i                 confirmer
 
 konfisk-i                 confisquer, saisir
-
 konfisk-o                 saisie
 
-konfit-ajx-o               confiture
-
 konfit-i                  confire
+konfit-ajx-o               confiture
 
 konflikt-o                conflit
 
 konform-a                 conforme
-
 konform-e al              conformément
-
 konform-ec-o               concordance, correspondance
-
 konform-igx-i              concorder, correspondre
-
 konform-igx-i al           se conformer
 
 konfuz-a                  confus
-
 konfuz-eg-i                abasourdir
-
 konfuz-i                  confondre, troubler
-
 konfuz-it-ec-o              abasourdissement
 
 kongest-o                 afflux, congestion
@@ -6552,9 +6099,7 @@ kongest-o                 afflux, congestion
 kongres-o                 congrès
 
 kongru-a                  correspondant
-
 kongru-ec-o                concordance, correspondance
-
 kongru-i                  coïncider, concorder, convenir, correspondre
 
 kon-i                     connaître
@@ -6572,61 +6117,45 @@ konk-o                    conque, coquille
 konkret-a                 concret
 
 konkur-ant-o               rival
-
 konkur-i                  concourir, rivaliser
 
 konkurs-i                 concourir, être sur les rangs
-
 konkurs-o                 concours
 
 kon-o                     connaissance
 
 konsci-a                  conscient
-
 konsci-enc-o               conscience
-
 konsci-o                  connaissance, conscience
 
 konsekr-i                 consacrer
-
 konsekri-t-a               sacré
 
 konsekvenc-a              logique
-
 konsekvenc-o              aboutissement, conséquence, répersussion, suite
 
 konsent-i                 admettre, consentir, donner son accord, être d'accord
-
 konsent-it-e               ça va, soit
 
 konserv-ad-o               garde
-
 konserv-ej-o               réserve
-
 konserv-i                 conserver, maintenir, retenir
 
 konsider-i                considérer
-
 konsider-ind-a            considérable, imposant, majeur
 
 konsil-ant-o               conseilleur, guide
-
 konsil-i                  conseiller
-
 konsil-o                  conseil
 
 konsist-i                 consister
-
 konsist-i el              être composé de
-
 konsist-o                 composition
 
 konsol-i                  consoler
-
 konsol-o                  consolation
 
 konstant-a                continuel, constant, invariable, permanent
-
 konstant-e                constamment, continuellement
 
 konstat-i                 constater
@@ -6634,11 +6163,8 @@ konstat-i                 constater
 konstelaci-o              constellation
 
 konstern-i                abasourdir, consterner, stupéfier
-
 konstern-igx-o             stupéfaction
-
 konstern-it-a              stupéfait
-
 konstern-o                abasourdissement, abattement, stupeur, stupéfaction
 
 konstitu-i                constituer, représenter
@@ -6664,21 +6190,15 @@ konsum-ant-o               consommateur
 konsum-i                  consommer, consumer
 
 kontakt-i                 s'aboucher avec
-
 kontakt-ig-i               aboucher
-
 kontakt-o                 contact
 
 kontempl-i                contempler
 
 kontent-a                 content, satisfait
-
 kontent-ec-o               contentement
-
 kontent-ig-a               satisfaisant
-
 kontent-ig-i               contenter, satisfaire
-
 kontent-ig-o               satisfaction
 
 kontest-i                 contester, disputer
@@ -6686,7 +6206,6 @@ kontest-i                 contester, disputer
 kontinent-o               continent
 
 kontinu-a                 continuel
-
 kontinu-ig-i               redresser
 
 kont-o                    compte
@@ -6698,10 +6217,6 @@ kontrakt-i-ta              à forfait
 
 kontr-aù                  contre, en face de
 kontr-aù-a                 contradictoire, opposé
-kontr-aù-ag-i               contrarier
-kontr-aù-argument-i         rouspéter
-kontr-aù-dirant-o           contradicteur
-kontr-aù-dir-o              objection
 kontr-aù-i                 rouspéter, se mettre en tranvers
 kontr-aù-legx-a             illégal
 kontr-aù-respond-o          réfutation, réponse
@@ -6721,56 +6236,38 @@ kontrol-o                 contrôle
 
 kontuz-o                  contusion
 
-konus-o                   pomme de pin
-
-konval-o                  muguet
-
 konven-a                  convenable, raisonnable
-
 konven-e                  proprement
-
 konven-i                  convenir
 
-konversaci-o              conversation
-
-konversad-o               conversation
+konvers-aci-o              conversation
+konvers-ad-o               conversation
 
 konvert-i                 convertir
 
 konvink-i                 convaincre
-
 konvink-o                 conviction
 
-konvolvul-o               liseron
 
 kooper-a                  coopérant
 
 kooper-i                  coopérer
-
 kopi-i                    copier
 
 kor-a                     cordial
 kor-e                     cordialement
 kor-lig-igx-i               s'attacher
 
-korak-o                   corbeau
-
-koral-o                   corail
-
 korb-o                    corbeille, panier
 
 korekt-ec-o                correction
-
 korekt-i                  corriger, rectifier, redresser
-
 korekt-o                  correction
 
 korespond-ad-o             correspondance
-
 korespond-i               correspondre
 
 korfavor-a                indulgent
-
 korfavor-o                compassion
 
 koridor-o                 corridor, couloir
@@ -6778,17 +6275,13 @@ koridor-o                 corridor, couloir
 korint-a                  corinthien
 
 kork-o                    liège, bouchon de liège
-
 kork-tiril-o               tire-bouchon
-
-kormoran-o                cormoran
 
 kornar-o                  bois, ramure
 
 kornic-o                  corniche
 
 korn-o[1]                 corne
-
 korn-o[2]                 clairon, cor, cornet
 
 kor-o                     coeur
@@ -6802,67 +6295,48 @@ korsajx-o                 corsage
 kors-o                    promenade
 
 kort-eg-o                  cour
-
-korto                    cour
-
+kort-o                    cour
 kort-um-o                  cour
-
 kort-usx-a                 attendrissant
-
 kort-usx-i                 affecter, émouvoir, remuer
-
 kort-usx-it-a               ému
-
 kort-usx-o                 émotion
 
 korupt-i                  corrompre
 
-korv-o                    corbeau
-
 kosm-o                    cosmos
-
-kosmonaùt-o               cosmonaute
+kosm-onaùt-o               cosmonaute
 
 kost-e d-e                 aux dépens de
-
 kost-i                    coûter, revenir à
 
 kostum-o                  complet, costume
 
+kot-o                     boue, vase
 kot-a                     boueux, crotté
 
 kotiz-o                   cotisation
 
 kotlet-o                  côtelette
 
-kot-o                     boue, vase
-
 koton-o                   coton
-
-koturn-o                  caille
 
 kovert-o                  enveloppe
 
 kov-i                     couver
 
 kovr-i                    couvrir, recouvrir
-
 kovr-il-o                 couverture
-
-krab-o                    crabe
 
 kracx-i                   cracher
 
 krad-ajx-o                 grillage
-
 krad-o                    grille
 
 krajon-o                  crayon
 
 krak-i                    craquer
-
 krak-macx-i                croquer
-
 krak-o                    craquement
 
 kramp-o                   parenthèse
@@ -6871,7 +6345,6 @@ krani-o                   crâne
 
 kran-o                    robinet
 
-kratag-o                  aubépine
 
 kravat-o                  cravate
 
@@ -6893,20 +6366,14 @@ kred-o                    foi
 
 krem-o                    crème
 
-kren-o                    raifort
-
 krep-o                    crêpe
 
 krepusk-o                 crépuscule
 
 kresk-ad-o                 accroissement
-
 kresk-ajx-o                végétal
-
 kresk-i                   augmenter, grandir, croître
-
 kresk-ig-i                 accroître, développer, faire croître
-
 kresk-o                   accroissement, développement
 
 kresp-o                   crêpe
@@ -6926,32 +6393,21 @@ kribr-i                   tamiser
 kricx-i                   chanter, striduler
 
 kri-eg-i                   clamer
-
 kri-eg-o                   clameur
-
 kri-em-ul-o                aboyeur
-
 kri-i                     crier
-
 kri-o                     cri
 
 krim-i                    commettre, commettre un crime
-
 krim-o                    crime
 
 kripl-a                   infirme
-
 kripl-ajx-o                infirmité
-
 kripl-ec-o                 infirmité
-
 kripl-ig-i                 mutiler
-
 krip-ul-o                 infirme
 
 krip-o                    crèche
-
-kripton-o                 krypton
 
 krisp-a                   crêpé, frisé
 
@@ -6961,10 +6417,6 @@ kristan-o                 chrétien
 
 kritik-i                  critiquer, reprendre
 
-krizalid-o                chrysalide
-
-krizantem-o               chrysanthème
-
 kriz-o                    crise
 
 krocx-i                   accrocher
@@ -6973,23 +6425,16 @@ al-krocx-i                 aborder, accrocher, monter à l'abordage, sauter à l
 krokodil-o                crocodile
 
 krom-e                    d'ailleurs, en outre, en prime
-
-krom-o                    chrome
-
-krompag-o                 prime
-
-kromsalajr-o              indemnité
+krom-pag-o                 prime
+krom-salajr-o              indemnité
 
 kron-i                    couronner
 
 kroz-i                    croiser
 
 kruc-i                    croiser
-
 kruc-ig-i                  croiser
-
 kruc-ifiks-o               crucifix
-
 kruc-o                    croix
 
 krucx-o                   cruche
@@ -7008,8 +6453,6 @@ krust-o                   croûte
 krut-a                    abrupt, à pic, escarpé, raide
 
 ksenofobi-o               xénophobie
-
-ksenon-o                  xénon
 
 ksilofon-o                xylophone
 
@@ -7034,19 +6477,11 @@ kuk-o                     gâteau
 kuk-ajx-o                  pâtisserie
 kuk-ej-o                   pâtisserie
 
-kukol-o                   coucou
 
-kukum-o                   concombre
-
-kukurb-o                  potiron
 
 kuler-o                   cuiller, cuillère
 
 kulmin-o                  cime, point culminant, sommet
-
-kulm-o                    chaume
-
-kul-o                     cousin, moustique
 
 kulot-o                   culotte
 
@@ -7064,24 +6499,16 @@ kultur-i                  cultiver
 kultur-o                  culture
 
 kun                      à, avec
-
 kun-e                     ensemble
-
 kun-help-ant-a              allié
-
 kun-ig-a strek-o            trait d'union
 kun-ig-i                   joindre, rassembler, rej-oindre, réunir
 kun-ig-i nod-e              lier, nouer
 kun-ig-o                   réunion
-
 kun-pelad-o                razzia
-
 kun-ul-o                  compagnon
 kun-ul-in-o                compagne
 
-kunikl-o                  lapin
-kunikl-ej-o                cabane à lapins, clapier, lapinière
-kunikl-o-kav-o              trou de lapin
 
 kupe-o                    compartiment
 
@@ -7098,17 +6525,14 @@ kurac-ist-o               docteur, médecin, docteur médecin
 kurad-o                   course
 
 kuragx-i                  oser
-
 kuragx-o                  abattage, courage
-
 kuragx-a                  courageux, vaillant
-
 kuragx-e                  courageusement
-
 kuragx-ig-i                réconforter
+mal-kuragx-o               faiblesse, lâcheté
+mal-kuragx-a                 lache
 
 kurant-a                  en cours
-
 kurant-o                  coureur
 
 kurb-a                    courbe
@@ -7133,9 +6557,7 @@ kurioz-a                  curieux, intéressant, singulier
 kurs-o                    cours, leçon
 
 kurt-a                    court
-
 kurt-en-o                  rideau
-
 kurt-ig-i                  abréger, raccourcir
 
 kusen-o                   coussin
@@ -7179,8 +6601,6 @@ kverel-o                  dispute, querelle
 
 kver-i                    roucouler
 
-kverk-o                   chêne
-
 kviet-o                   repos
 kviet-a                   calme, quiet, paisible, tranquille
 kviet-e                   paisiblement
@@ -7210,115 +6630,72 @@ labor-ist-o               ouvrier
 kun-labor-o                collaboration
 cerb-o-labor-ist-o          travailleur intellectuel
 man-labor-ist-o            manuel
-man-laboro                travail manuel
+man-labor-o                travail manuel
 
-labrak-o                  loup
 
-laca                     fatigué, las
-
+lac-a                     fatigué, las
 lac-ec-o                   abattement, fatigue
-
 lac-eg-o                   abattement
-
-lacerto                  lézard
-
 lac-ig-i                   épuiser, fatiguer, lasser
-
 lac-igx-i                  se fatiguer
-
 lac-igx-o                  fatigue
 
-lacxo                    lacet
+lacx-o                    lacet
 
-ladajxoj                 quincaillerie
+lad-ajxo-j                 quincaillerie
+lad-o                     fer-blanc, tôle
 
-lado                     fer-blanc, tôle
+lag-et-o                   étang
+lag-o                     lac
 
-lageto                   étang
+lagun-o                   lagune
 
-lago                     lac
+laik-a                    laïque
+laik-o                    laïc
 
-lagopo                   lagopède
-
-laguno                   lagune
-
-laika                    laïque
-
-laiko                    laïc
-
-lakso                    diarrhée
+laks-o                    diarrhée
 
 lakt-ist-o                laitier
+lakt-o                    lait
 
-lakto                    lait
+laktuk-o                  laitue
 
-laktuko                  laitue
+lam-a                     boiteux
 
-lama                     boiteux
+lama-o                    lama tibtétain
 
-lamao                    lama
+lamen-o                   feuille de métal, lame
 
-lameno                   feuille de métal, lame
+lament-i                  se lamenter
 
-lamenti                  se lamenter
+lami-o                    lamier
 
-lamio                    lamier
+lamp-o                    lampe
 
-lamo                     lama
+lancx-i                   lancer
 
-lampiro                  ver luisant
+land-lim-a                 frontalier
+land-lim-o                 frontière
+land-o                    contrée, pays
+land-sinjor-o              seigneur
 
-lampo                    lampe
+lang-o                    langue
 
-lancxi                   lancer
+lan-o                     laine
 
-landlima                 frontalier
+lantern-o                 lanterne
 
-landlimo                 frontière
+lanug-o                   duvet
 
-lando                    contrée, pays
-
-landsinjoro              seigneur
-
-lango                    langue
-
-lano                     laine
-
-lanterno                 lanterne
-
-lanugo                   duvet
-
-laosa                    laotien
-
-laosano                  Laotien
-
-Laoso                    Laos
-
-lapona                   lapon
-
-lapon-in-o                Laponne
-
-Laponio                  Laponie
-
-lapono                   Lapon
-
-Lapon-uj-o                Laponie
-
-lardo                    lard
+lard-o                    lard
 
 largx-a                   ample, large
-
 largx-e                   largement
-
 largx-ec-o                 largeur
-
 largx-o                   largeur, mesure de largeur
+laù-largx-e                en largeur
 
-larik-o                   mélèze
-
-larmo                    larme, pleur
-
-larvo                    larve
+larm-o                    larme, pleur
 
 las-i                     laisser
 al-las-i                   admettre
@@ -7338,80 +6715,48 @@ last-emenci-it-a            ce dernier
 latero                   côté, pan
 
 latin-a                   latin
-
 latin-o                   latin
 
-latkurten-o               store vénitien
+lat-kurten-o               store vénitien
 
 latun-o                   laiton
 
-latv-a                    letton
+laùb-o                    tonnelle
 
-latv-in-o                  Lettonne
+laù-dir-e                  il paraît que
 
-Latv-i-o                   Lettonie
+laùd-o                    louange
 
-latv-o                    Letton
+laù-ir-i                   longer, suivre
+laù-legx-a                 légitime
 
-Latv-uj-o                  Lettonie
+laùt-a                    haut, fort, sonore
+laùt-e                    à haute voix, fort
+laùt-parol-il-o            haut-parleur
 
-laùbo                    tonnelle
+laù-vic-e                  successivement
 
-laùdire                  il paraît que
 
-laùdo                    louange
-
-laùiri                   longer, suivre
-
-laùlargxe                en largeur
-
-laùlegxa                 légitime
-
-laùmoda                  actuel, à la mode, dans le vent, dernier cri, moderne
-
-laùro                    laurier
-
-laùta                    haut, fort, sonore
-
-laùte                    à haute voix, fort
-
-laùtparol-il-o            haut-parleur
-
-laùvice                  successivement
-
-laùvole                  à volonté
-
-laùvorte                 à proprement parler, littéralement
+laù-vort-e                 à proprement parler, littéralement
 
 lavango                  avalanche
 
-lavendo                  lavande
-
 lavi                     laver
 
-lavurso                  raton laveur
-
 lazur-a                   azur
-
 lazur-o                   azur
 
-leciono                  leçon
+lecion-o                  leçon
 
 led-o                     cuir
-
 led-sak-o                  sacoche
 
 leg-ad-o                   lecture
-
 leg-ant-o                  lecteur
-
 leg-i                     lire
 
 legitim-a                 légitime
-
 legitim-ajx-o              papier d'identité
-
-legom-o                   légume
 
 legxera                  léger
 
@@ -7419,31 +6764,9 @@ legx-ec-o                  légalité
 
 legx-o                    loi
 
-Lejden-o                  Leyde
-
-lekant-et-o                pâquerette
-
-lekant-o                  marguerite
-
 lek-i                     lécher
 
 leksikon-o                lexique
-
-lent-o                    lentille
-
-leon-id-o                  lionceau
-
-leon-in-o                  lionne
-
-leon-o                    lion
-
-leontod-o                 pissenlit
-
-leopard-o                 léopard
-
-Leopoldburg-o             Bourg-Léopold
-
-lepor-o                   lièvre
 
 lern-i                    apprendre
 lern-ej-a                  scolaire
@@ -7457,92 +6780,41 @@ kun-lern-ant-o              condisciple
 met-i-lern-ant-o             apprenti
 
 lert-a                    adroit, habile
-
 lert-e                    légèrement
-
 lert-ec-o                  adresse, habileté
-
-Lesen-o                   Lessines
 
 lesiv-o                   lessive
 
 leter-kest-o               boîte aux lettres
-
 leter-o                   lettre
-
 leter-port-ist-o            facteur
 
-leùtenanto              lieutenant
+leùtenant-o              lieutenant
 
-levi                     lever, élever, soulever
-
-leviero                  levier
-
+lev-i                     lever, élever, soulever
+lev-ier-o                  levier
 lev-igx-i                  se soulever
-
 lev-il-o                  levier
 
-levkojo                  giroflée des jardins
-
-li                       il, lui
-
-lia                      sa, son
-
-liaj                     ses
-
-libana                   libanais
-
-libanano                 Libanais
-
-Libano                   Liban
-
-libelo                   libellule
-
-libera                   libre
-
+liber-a                   libre
 liber-ec-o                 liberté
-
-liberia                  libérien
-
-liberiano                Libérien
-
 liber-ig-i                 délivrer, libérer, réformer, relâcher
-
-Liberio                  Libéria
-
-libertempo               congé, loisirs, vacances
-
-libia                    libyen
-
-libiano                  Libyen
-
-Libio                    Libye
+liber-temp-o               congé, loisirs, vacances
 
 libr-ej-o                  bibliothèque
-
 libr-o                    livre
-
 libr-o-butik-o              librairie
-
 libr-o-sxrank-o             bibliothèque
-
 libr-o-vend-ist-o            libraire
 
-licencio                 licence
+licenci-o                 licence
+licenc-o                  licence
 
-licenco                  licence
-
-liceo                    lycée
-
-liegxano                 Liégois
-
-Liegxo                   Liège, Liége
+lice-o                    lycée
 
 lieno                    rate
 
-Liero                    Lierre
-
-lifto                    ascenseur
+lift-o                    ascenseur
 
 lig-i                     attacher, nouer, relier
 lig-o                     ligue
@@ -7553,108 +6825,70 @@ al-lig-it-ec-o               attachement
 kun-lig-i                  associer, joindre, relier, réunir
 
 lign-ajx-ist-o              menuisier
-
 lign-o                    bois
-
 lign-o-sxu-o                galoche, sabot
 
-ligustro                 troène
 
-likeno                   lichen
+lik-i                     faire eau, fuir
+lik-o                     fuite
 
-liki                     faire eau, fuir
+likv-a                    liquide
 
-liko                     fuite
+likvid-i                  liquider, supprimer
 
-likva                    liquide
+limf-o                    lymphe
 
-likvidi                  liquider, supprimer
+limig-a kondicx-o          réserve
 
-lilio                    lis, lys
+limig-i                   limiter
 
-limako                   limace
+lim-o                     frontière, limite
 
-limburga                 limbourgeois
-
-limburgano               Limbourgeois
-
-Limburgo                 Limbourg
-
-limfo                    lymphe
-
-limiga kondicxo          réserve
-
-lim-ig-i                   limiter
-
-limo                     frontière, limite
-
-limtusxanta              adjacent
-
-limtusxi                 aboutir
+lim-tusx-ant-a              adjacent
+lim-tusx-i                 aboutir
 
 lin                      le, l', lui
 
-lincxi                   lyncher
+lincx-i                   lyncher
 
-lingvo                   langue
+lingv-o                   langue
 
-liniaro                  portée
+liniar-o                  portée
 
-linio                    ligne
+lini-o                    ligne
 
-linko                    lynx
 
-lino                     lin
+lip-har-ar-o                moustache
+lip-har-oj                 moustache
+lip-o                     lèvre
 
-liphararo                moustache
+lirik-a                   lyrique
+lirik-o                   lyrisme
 
-lipharoj                 moustache
+lir-o[1]                  lyre
 
-lipo                     lèvre
+lir-o[2]                  lire
 
-lirika                   lyrique
+lisol-o                   lysol
 
-liriko                   lyrisme
+list-o                    liste
 
-liro[1]                  lyre
+literatur-o               littérature
 
-liro[2]                  lire
+liter-o                   lettre
 
-Lisbono                  Lisbonne
-
-lisolo                   lysol
-
-listo                    liste
-
-literaturo               littérature
-
-litero                   lettre
-
-litkapo                  chevet
-
-litkovr-il-o              couverture
-
-lito                     lit
-
-litov-in-o                Lituanienne
-
-Litovio                  Lituanie
-
-litovo                   Lituanien
-
-Litov-uj-o                Lituanie
+lit-kap-o                  chevet
+lit-kovr-il-o              couverture
+lit-o                     lit
+lit-tuko                  drap, drap de lit
 
 litro                    litre
 
-littuko                  drap, drap de lit
-
 liut-ist-o                luthiste
+liut-o                    luth
 
-liuto                    luth
-
-liverado                 fourniture
-
-liveri                   fournir, livrer
+liver-ad-o                 fourniture
+liver-i                   fournir, livrer
 
 log-i                     attirer
 al-log-a                   attrayant
@@ -7662,93 +6896,58 @@ al-log-i                   allécher, solliciter
 de-log-i                   détourner, dévoyer, entraîner hors du droit chemin
 for-log-a                  affreux, horrible, épouvantable
 
-logika                   logique
+logik-a                   logique
+logik-o                   logique
 
-logiko                   logique
+log-o                     attrait
 
-logo                     attrait
-
-logxantaro               population
-
-logxanto                 habitant
-
+logx-ant-ar-o               population
+logx-ant-o                 habitant
 logx-ej-o                  demeure, domicile, gîte, habitation, logement, logis
+logx-i                    demeurer, habiter, loger
+logx-i en                 habiter, occuper
+logx-i-o                   loge
+logx-lok-o                 domicile, localité
 
-logxi                    demeurer, habiter, loger
+lojal-a                   droit, honnête, loyal
 
-logxi en                 habiter, occuper
+lok-a                     local
+lok-i                     placer, poser, situer
+lok-o                     déstination, endroit, lieu, localité, place
 
-logxio                   loge
+lokal-o                   local
 
-logxloko                 domicile, localité
+lokomotiv-o               locomotive
 
-lojala                   droit, honnête, loyal
+lombard-i                 emprunter sur gages
 
-lojto                    lotte
-
-loka                     local
-
-lokalo                   local
-
-loki                     placer, poser, situer
-
-loko                     déstination, endroit, lieu, localité, place
-
-lokomotivo               locomotive
-
-lokusto                  sauterelle
-
-lombardi                 emprunter sur gages
-
-londona                  londonien
-
-londonano                Londonien
-
-Londono                  Londres
-
-longa                    long
-
-longaforma               allongé
-
-longe                    longtemps, longuement
-
+long-a                    long
+long-a-form-a               allongé
+long-e                    longtemps, longuement
 long-ec-o                  longueur
+long-o                    longueur
 
-longo                    longueur
+lontan-a                  lointain
 
-lonicero                 chèvrefeuille
+lorn-o                    lunette
 
-lontana                  lointain
+loteri-o                  loterie
 
-lorena                   lorrain
+lot-i                     tirer au sort
+lot-umad-o                 loterie
 
-lorenano                 Lorrain
+loz-a                     desserré, vague
 
-Loreno                   Lorraine
+lu-i                      louer
+lu-ant-o                   locataire
 
-lorno                    lunette
-
-loterio                  loterie
-
-loti                     tirer au sort
-
-lotumado                 loterie
-
-Loveno                   Louvain
-
-loza                     desserré, vague
-
-luanto                   locataire
-
-lubrikajxo               graisse, lubrifiant
+lubrikajx-o               graisse, lubrifiant
 
 lud-i                     jouer, représenter
 lud-o                     jeu
 lud-em-a                  joueur
 lud-il-et-o                 joujou
 kun-lud-ant-o               partenaire, partenaire d'un jeu
-
-lu-i                      louer
 
 luk-o                     lucarne
 
@@ -7770,210 +6969,69 @@ lum-verm-o                 ver luisant
 
 lumb-o                    lombes, reins
 
-lumbrik-o                 lombric, ver de terre
+lun-o                     lune
 
-luno                     lune
-
-lupeo                    loupe
-
-lup-in-o                  louve
-
-lupino[1]                louve
-
-lupino[2]                lupine
-
-lupo                     loup
-
-lupolo                   houblon
+lupe-o                    loupe
 
 luprezo                  loyer
 
 lupuso                   lupus
 
-luterana                 luthérien
-
-luteran-ism-o             luthéranisme
-
-luterano                 luthérien
-
 luti                     braser, souder
 
-lutreolo                 vison
+macx-gum-o                 chewing-gum
+macx-i                    mâcher
+macx-o                    match
 
-lutro                    loutre
+mafi-o                    mafia
 
-luzerno                  luzerne
+magi-a                    magique
+magi-o                    magie
 
-M
+magistrat-a dom-o          hôtel de ville
+magistrat-o               municipalité
 
-macxgumo                 chewing-gum
+magnetofon-o              magnétophone
 
-macxi                    mâcher
+magnetoskop-o             magnétoscope
 
-macxo                    match
+magr-a                    maigre
 
-Madagaskaro              Madagascar
-
-Madero                   Madère
-
-Madono                   Madone, Sainte-Vierge
-
-madrida                  madrilène
-
-madridano                Madrilène
-
-Madrido                  Madrid
-
-mafio                    mafia
-
-magia                    magique
-
-magio                    magie
-
-magistrata domo          hôtel de ville
-
-magistrato               municipalité
-
-magnetofono              magnétophone
-
-magnetoskopo             magnétoscope
-
-magra                    maigre
-
-Mahometo                 Mahomet
-
-maizo                    maïs
-
-majesta                  imposant, majesté
-
+majest-a                  imposant, majesté
 majest-ec-o                majesté
+majest-o                  majesté
 
-majesto                  majesté
+major-itat-o               majorité
+major-o                   commandant
 
-majoritato               majorité
+majstr-o                  maestro, maître
+majstr-o-verk-o             chef-d'oeuvre
 
-Majorko                  Majorque
+majuskl-o                 majuscule
 
-majoro                   commandant
+majxor-a                  majeur
 
-majskarabo               hanneton
-
-majstro                  maestro, maître
-
-majstroverko             chef-d'oeuvre
-
-majusklo                 majuscule
-
-majxora                  majeur
-
-makaono                  grand porte-queue, machaon
-
-makleri                  faire le courtage
-
+makler-i                  faire le courtage
 makler-ist-o              représentant
 
-maksimume                tout au plus
+maksimum-e                tout au plus
+maksimum-o                maximum
 
-maksimumo                maximum
+makul-i                   salir, souiller
+makul-it-a                 sale
+makul-o                   tache
 
-makuli                   salir, souiller
-
-makulita                 sale
-
-makulo                   tache
-
-makzelo                  mâchoire
-
-mal-                     marque l'opposition
+makzel-o                  mâchoire
 
 mal-a                     opposé
 
-mal-akceli                ralentir
-
-mal-akcepti               rejeter
-
-mal-alt-ig-i                abaisser
-
-mal-alt-ig-i sin            s'abaisser
-
-mal-altigo                abaissement
-
-mal-ami                   haïr
-
-mal-amik-a                 ennemi, hostile
-mal-amik-o                 ennemi
-
-mal-ant-aù                 derrière
-mal-ant-aù-e                arrière
-
-mal-aper-i                 disparaître
-mal-aper-o                 disparition
-
-mal-aprobi                repousser
-
-mal-arangxi               défaire
-
-mal-ario                  malaria
-
-mal-atenta                distrait, négligent
-
-mal-atent-em-o             distraction, inattention
-
-mal-atento                distraction, inattention, négligence
-
-mal-avantagxe de          aux dépens de
-
-mal-avantagxo             inconvénient
-
-mal-avara                 généreux
-
-mal-bari                  dégager
-
-mal-bela                  laid, vilain
-
-mal-bel-eg-a                affreux, épouvantable, horrible
-
-mal-beni                  maudire
-
-mal-bona                  mal, mauvais, méchant
-
-mal-bonajxo               défaut
-
 mal-bonaùgura             sinistre
 
-mal-bone                  mal
+mal-cxastul-in-o            roulure
 
-mal-bonhumora             maussade
 
-mal-bon-ig-i                abîmer, gâter
 
-mal-bono                  mal
 
-mal-bonsxance             malheureusement
-
-mal-brava                 lâche
-
-mal-ced-em-a               impitoyable
-
-mal-cxastulino            roulure
-
-mal-deca                  grossier
-
-mal-dekstra               gauche
-
-mal-delikata              grossier, rude, rustique, vulgaire
-
-mal-dens-ej-o               clairière
-
-mal-dormado               veille
-
-mal-dormi                 veiller
-
-mal-dungi                 licencier, renvoyer
-
-mal-dungo                 congé
-
-mal-embarasi              débarrasser
 
 mal-eolo                  cheville
 
@@ -8045,21 +7103,16 @@ mal-gaja                  maussade, sombre
 
 mal-gaj-ec-o                abattement
 
-mal-granda                petit
-
-Mal-granda Azio           Asie Mineure
-
+mal-grand-a                petit
 mal-grand-ec-o              modestie
-
 mal-grand-eg-a              miniscule
-
 mal-grand-igx-i             diminuer
 
-mal-grasa                 maigre
+mal-gras-a                 maigre
 
 mal-graù                  malgré
 
-mal-gxentila              impoli
+mal-gxentil-a              impoli
 
 mal-gxoja pri             affligé de, désolé de
 
@@ -8070,11 +7123,9 @@ mal-harmonia              dissonant
 mal-hela                  foncé, sombre
 
 mal-hel-ig-i                foncer
-
 mal-hel-igx-i               foncer
 
-mal-humila                orgueilleux
-
+mal-humil-a                orgueilleux
 mal-humil-ec-o              orgueil
 
 mal-ica                   méchant, perfide
@@ -8118,8 +7169,6 @@ mal-kovro                 découverte
 mal-krocxi                détacher
 
 mal-kupli                 détacher
-
-mal-kuragxo               faiblesse, lâcheté
 
 mal-kvieta                agité, inquiet
 
@@ -8328,8 +7377,6 @@ mal-supre                 dessous
 mal-supren-ig-i             abaisser
 
 mal-supren-ven-i            abattre
-
-mal-sxargxi               décharger
 
 mal-sxata                 péjoratif
 
@@ -8591,27 +7638,20 @@ masto                    mât
 mastodonto               mastodonte
 
 mastr-in-o                maîtresse
-
-mastro                   maître, patron
-
+mastr-o                   maître, patron
 mastr-um-a                 ménager
-
 mastr-um-ado               ménage
 
-masturbi                 se masturber
+masturb-i                 se masturber
 
-masxaro                  filet
+masx-o                    maille
+masx-ar-o                  filet
+masx-in-o                  machine
 
-masxino                  machine
-
-masxo                    maille
-
-matematika               mathématique
-
-matematiko               mathématiques
+matematik-a               mathématique
+matematik-o               mathématiques
 
 maten-e                   le matin
-
 maten-o                   matin, matinée
 
 materi-a                  matériel
@@ -8623,7 +7663,6 @@ matrac-o                  matelas
 matros-o                  matelot
 
 matur-a                   fait, mûr
-
 matur-igx-i                mûrir
 
 mav-a                     mauvais
@@ -8631,9 +7670,7 @@ mav-a                     mauvais
 mazut-o                   mazout
 
 mebl-ar-o                  mobilier
-
 mebl-i                    meubler
-
 mebl-o                    meuble
 
 mecx-o                    mèche
@@ -8651,11 +7688,8 @@ medit-i pri               réfléchir
 medol-o                   moelle, moelle osseuse
 
 mehxanik-ist-o            mécanicien
-
 mehxanik-o                mécanique
-
 mekanik-ist-o             mécanicien
-
 mekanik-o                 mécanique
 
 melankoli-a               mélancolique, sombre
@@ -8697,7 +7731,6 @@ memriprocx-o              remords
 
 memstar-a                 indépendant
 
-memvol-a                  volontaire
 
 menagxeri-o               ménagerie
 
@@ -8969,6 +8002,8 @@ modl-i                    modeler
 
 mod-o                     mode
 ordon-a mod-o              impératif
+laù-mod-a                  actuel, à la mode, dans le vent, dernier cri, moderne
+
 
 mok-i                     se moquer, railler
 mok-o                     simulacre
@@ -9178,9 +8213,7 @@ nav-ig-i                   naviguer
 naz-o                     nez
 naz-tuk-o                  mouchoir
 
-neatendita               inattendu
 
-neatenta                 étourdi
 
 nebul-ig-i                 brouiller, rendre confus, rendre trouble
 
@@ -9238,11 +8271,13 @@ neglekti                 dédaigner, négliger
 
 negoc-ist-o               négociant
 
-negracxo                 bougnoul
+negr-o                    nègre, Noir
+negr-acx-o                 bougnoul
 
-negrava                  mineur
 
-negro                    nègre, Noir
+negrav-a                  mineur
+
+
 
 negxero                  flocon de neige
 
@@ -9356,76 +8391,28 @@ neversxajna              invraisemblable
 
 nev-in-o                  nièce
 
-nevo                     neveu
+nev-o                     neveu
 
-nevola                   involontaire
+nicx-o                    niche
 
-ni                       nous
 
-niaj                     nos
-
-nicxo                    niche
-
-nigeria                  nigérian
-
-nigeriano                Nigérian
-
-Nigerio                  Nigeria
-
-nigra                    brun, noir
-
-Nigra Arbaro             Forêt-Noire
-
-Nigra Maro               Pont-Euxine
-
-nigra ribo               cassis
-
-nigra tabulo             tableau, tableau noir
-
+nigr-a                    brun, noir
+nigr-a tabul-o             tableau, tableau noir
 nigr-ig-i                  noircir
 
-nigxeria                 nigérien
+nilon-o                   nylon
 
-nigxeriano               Nigérien
+nimf-o                    nymphe
+nimf-o-mani-o               nymphomanie
 
-Nigxerio                 Niger
+nit-o                     rivet
 
-Nigxero                  Niger
+nivel-o                   niveau
 
-nikaragva                nicaraguayen
-
-nikaragvano              Nicaraguayen
-
-Nikaragvo                Nicaragua
-
-Nilo                     Nil
-
-nilono                   nylon
-
-nimega                   de Nimègue
-
-Nimego                   Nimègue
-
-nimfeo                   nymphéa
-
-nimfo                    nymphe
-
-nimfomanio               nymphomanie
-
-Nimrodo                  Nemrod
-
-nin                      nous
-
-nito                     rivet
-
-nivelo                   niveau
-
-Noahxo                   Noé
-
-nobelo                   noble, seigneur
+nobel-o                   noble, seigneur
 
 nobla                    élevé, noble
-nobl-ec-o                  grandeur
+nobl-ec-o                 grandeur
 mal-nobl-a                 abject, lâche
 mal-nobl-ajx-o              abjection
 mal-nobl-ec-o               abjection
@@ -9438,21 +8425,19 @@ noci-o                    notion
 nocx-o                    encoche
 nocx-o-stang-o              crémaillère
 
-nodi                     nouer
+nod-i                     nouer
+nod-o                     noeud
 
-nodo                     noeud
+nokt-o                    nuit
 
-nokto                    nuit
 
-noma akcio               action nominative
-
-nombrado                 recensement
-
-nombro                   nombre
+nombr-ad-o                 recensement
+nombr-o                   nombre
 
 nom-i                     nommer
 nom-o                     nom
 nom-igx-i                  s'appeler
+nom-a akci-o               action nominative
 
 nord-o                    nord
 
@@ -10585,8 +9570,7 @@ premo                    pression, oppression
 
 premsigno                impression
 
-preni                    prendre
-
+pren-i                    prendre
 pren-il-o                 pinces
 
 preparado                préparation
@@ -10623,13 +9607,9 @@ pretend-em-a              arrogant
 
 pretendi                 aspirer à, prétendre à
 
-preter                   au-delà de
+preterit-o                passé
 
-preteratenti             dédaigner, négliger
-
-preterito                passé
-
-preterpasi               passer, dépasser
+preter-pas-i               passer, dépasser
 
 preter-vetur-i             dépasser, doubler
 
@@ -10668,8 +9648,7 @@ pri kiu                  auquel, dont
 
 pri tio                  y
 
-priatenti                réfléchir
-
+w
 pridemandi               interroger
 
 primolo                  primevère
@@ -10782,17 +9761,16 @@ progresi                 avancer, progresser
 
 progreso                 progrès
 
-projekcii                projeter une image
+projekci-i                projeter une image
 
-projekti                 projeter
+projekt-i                 projeter
+projekt-o                 projet
 
-projekto                 projet
+proklam-i                 proclamer
 
-proklami                 proclamer
+prokrast-i                ajourner, différer, reculer, renvoyer, retarder, suspendre
 
-prokrasti                ajourner, différer, reculer, renvoyer, retarder, suspendre
-
-prokrasto                sursis
+prokrast-o                sursis
 
 proksim-a                 prochaine, proche
 proksim-e                 près, auprès
@@ -10807,237 +9785,160 @@ mal-proksim-a              lointain
 mal-proksim-o              lointain
 pli-proksim-ig-i            serrer
 
-prokuroro                procureur
+prokuror-o                procureur
 
-proleto                  prolétaire
+prolet-o                  prolétaire
 
-prologo                  prologue
+prolog-o                  prologue
 
-promenado                promenade
-
-promenanto               promeneur
-
+promen-ad-o                promenade
+promen-ant-o               promeneur
 promen-ej-o                promenade
-
-promeni                  se promener
-
+promen-i                  se promener
 promen-ig-i                promener
 
-promesi                  assurer, promettre
+promes-i                  assurer, promettre
+promes-o                  promesse
+promes-plen-a              plein de promesses
 
-promeso                  promesse
+promoci-i                 promouvoir
+promoci-it-o               promu
+promoci-o                 année, avancement, promotion
 
-promesplena              plein de promesses
+prompt-e                  rapidement
 
-promocii                 promouvoir
+pronom-o                  pronom
 
-promociito               promu
+prononc-ad-o               prononciation
+prononc-i                 prononcer
+prononc-o                 prononciation
 
-promocio                 année, avancement, promotion
-
-prompte                  rapidement
-
-pronomo                  pronom
-
-prononcado               prononciation
-
-prononci                 prononcer
-
-prononco                 prononciation
-
-propaganda               de propagande, propagandiste
-
-propagandi               propager
-
+propagand-a               de propagande, propagandiste
+propagand-i               propager
 propagand-ist-o           propagandiste
+propagand-o               propagande
 
-propagando               propagande
-
-propagi                  propager, répandre
-
+propag-i                  propager, répandre
 propag-igx-i               se propager
 
-propano                  propane
 
-propedeùtika             préparatoire
+propedeùtik-a             préparatoire
+propedeùtik-o             propédeutique
 
-propedeùtiko             propédeutique
+propon-ad-o                offre
+propon-i                  proposer
+propon-o                  offre, proposition
 
-proponado                offre
+proporci-o                proportion
 
-proponi                  proposer
-
-propono                  offre, proposition
-
-proporcio                proportion
-
-propra                   personnel, propre
-
-propre                   proprement
-
+propr-a                   personnel, propre
+propr-e                   proprement
 propr-ec-o                propriété
 
-proprieto                propriété
+propriet-o                propriété
 
-propulsakso              arbre de transmission
+propuls-aks-o              arbre de transmission
+propuls-i                 actionner
+propuls-o                 prise
 
-propulsi                 actionner
+prospekt-o                prospectus
 
-propulso                 prise
+prosper-i                 prospérer
+prosper-o                 prospérité
 
-prospekto                prospectus
-
-prosperi                 prospérer
-
-prospero                 prospérité
-
-prostituado              prostitution
-
+prostitu-ad-o              prostitution
 prostitu-ej-o              bordel
-
-prostitui                prostituer
-
-prostitui sin            se prostituer
-
+prostitu-i                prostituer
+prostitu-i sin            se prostituer
 prostitu-ist-o            maquereau, souteneur
+prostitu-it-in-o           prostituée
+prostitu-o                prostitution
 
-prostituit-in-o           prostituée
+protein-o                 protéine
 
-prostituo                prostitution
-
-proteino                 protéine
-
-protekta                 protecteur
-
-protektado               garde, protection
-
-protektanto              protecteur
-
-protekti                 abriter, assurer, garantir, protéger
-
+protekt-a                 protecteur
+protekt-ad-o               garde, protection
+protekt-ant-o              protecteur
+protekt-i                 abriter, assurer, garantir, protéger
 protekt-ism-o             protectionnisme
+protekt-o                 protection
 
-protekto                 protection
 
-Proteo                   Protée
-
-protestanta              protestant
-
+protestant-a              protestant
 protestant-ism-o          protestantisme
+protestant-o              protestant
 
-protestanto              protestant
+protest-i                 protester
+protest-o                 protestation
 
-protesti                 protester
+protez-o                  prothèse
 
-protesto                 protestation
+protokol-o                compte-rendu, procès-verbal, protocole
 
-protezo                  prothèse
+proton-o                  proton
 
-protokolo                compte-rendu, procès-verbal, protocole
+protoplasm-o              protoplasme
 
-protono                  proton
+prototip-o                prototype
 
-protoplasmo              protoplasme
+proverb-o                 proverbe
 
-prototipo                prototype
+prov-i                    essayer
 
-proverbo                 proverbe
+proviant-ad-o              ravitaillement
+proviant-o                provisions
 
-provi                    essayer
+providenc-o               providence
 
-proviantado              ravitaillement
+provinc-o                 province
 
-provianto                provisions
-
-providenco               providence
-
-provinco                 province
-
-provizado                fourniture, ravitaillement
-
-provizajxo               ravitaillement, réserve
-
+proviz-ad-o                fourniture, ravitaillement
+proviz-ajx-o               ravitaillement, réserve
 proviz-ej-o                office, réserve
+proviz-i                  munir, pourvoir
+proviz-o                  provision, réserve
+proviz-i-o                 provision
 
-provizi                  munir, pourvoir
+provizor-a                provisoire, temporaire
 
-provizio                 provision
+prov-o                    essai
 
-provizo                  provision, réserve
+prudent-a                 prudent, raisonnable, sage
+prudent-o                 sagesse
 
-provizora                provisoire, temporaire
+prujn-o                   gelée blanche, givre
 
-provo                    essai
+prunt-i                   emprunter, prêter
+prunt-o-pren-i              emprunter
 
-prudenta                 prudent, raisonnable, sage
+pruv-i                    démontrer, prouver
+pruv-o                    preuve, témoignage
 
-prudento                 sagesse
+psalm-o                   psaume
 
-prujno                   gelée blanche, givre
+pseùdonim-o               pseudonyme
 
-pruno                    prune
-
-prunti                   emprunter, prêter
-
-pruntopreni              emprunter
-
-prusa                    prussien
-
-Prusio                   Prusse
-
-pruso                    Prussien
-
-Prus-uj-o                 Prusse
-
-pruvi                    démontrer, prouver
-
-pruvo                    preuve, témoignage
-
-psalmo                   psaume
-
-pseùdonimo               pseudonyme
-
-psika                    psychique
-
-psikanaliza              psychanalytique
-
-psikanalizo              psychanalyse
-
-psikedela                psychédélique
-
-psikiatria               psychiatrique
-
-psikiatrio               psychiatrie
-
-psikiatro                psychiatre
-
-psiko                    psychisme
-
-psikologia               psychologique
-
-psikologio               psychologie
-
-psikologo                psychologue
-
-psikopatia               psychopathique
-
-psikopato                psychopathe
-
-psikoterapio             psychothérapie
-
-psikozo                  psychose
-
-Ptolemeo                 Ptolémée
+psik-a                    psychique
+psik-o                    psychisme
+psik-analiz-a              psychanalytique
+psik-analiz-o              psychanalyse
+psik-edel-a                psychédélique
+psik-iatr-i-a               psychiatrique
+psik-iatr-i-o               psychiatrie
+psik-iatr-o                psychiatre
+psik-o-log-i-a               psychologique
+psik-o-log-i-o               psychologie
+psik-o-log-o                psychologue
+psik-o-pati-a               psychopathique
+psik-o-pat-o                psychopathe
+psik-o-terapi-o             psychothérapie
+psik-oz-o                  psychose
 
 publik-ec-o               publicité
-
 publik-ig-i                publier
+publio                  public
 
-publiko                  public
-
-pudro                    poudre
-
-pufvanga                 joufflu
+pudr-o                    poudre
 
 pugno                    poing
 
@@ -11764,61 +10665,46 @@ rifo                     écueil, récif
 
 rifuz-i                   refuser, rejeter, repousser
 
-rigardacxi               regarder bouche bée
+rigard-acx-i               regarder bouche bée
+rigard-i                  regarder
+rigard-i return-e          se retourner
+rigard-o                  aspect, regard, spectacle, vue
 
-rigardi                  regarder
+rigid-a                   raide, rigide
 
-rigardi returne          se retourner
+rigl-i                    verrouiller
 
-rigardo                  aspect, regard, spectacle, vue
+rigor-a                   rigoureux
 
-rigida                   raide, rigide
+rikan-i                   ricaner
 
-rigli                    verrouiller
+rikolt-i                  récolter, recueillir
+rikolt-o                  moisson, récolte
 
-rigora                   rigoureux
-
-rikani                   ricaner
-
-rikolti                  récolter, recueillir
-
-rikolto                  moisson, récolte
-
-rilate                   concernant, quant à
-
-rilate al                en relation avec, vis-à-vis
-
-rilati                   concerner, être en relation avec
-
-rilati al                concerner, intéresser
-
-rilato                   relation
+rilat-e                   concernant, quant à
+rilat-e al                en relation avec, vis-à-vis
+rilat-i                   concerner, être en relation avec
+rilat-i al                concerner, intéresser
+rilat-o                   relation
 
 rimark-ebl-a               sensible
-
-rimarki                  remarquer
-
+rimark-i                  remarquer
 rimark-ig-i                signaler, souligner
-
-rimarkigo                remarque
-
+rimark-ig-o                remarque
 rimark-ind-a              remarquable, saillant
+rimark-o                  observation, réflexion, remarque
 
-rimarko                  observation, réflexion, remarque
+rimed-o                   moyen, remède, ressource
 
-rimedo                   moyen, remède, ressource
+rimen-o                   courroie, lanière
 
-rimeno                   courroie, lanière
+rim-o                     rime
 
-rimo                     rime
+rimors-o                  remords
 
-rimorso                  remords
+ring-o                    anneau
 
-ringo                    anneau
-
-rinito                   rhume
-
-rinocero                 rhinocéros
+rinit-o                   rhume
 
 ripari                   refaire, remédier, réparer, restaurer
 
@@ -12211,109 +11097,72 @@ sci-ig-i                   apprendre à, faire part de
 
 sciigo                   faire-part, renseignement
 
-scio                     connaissance
+sci-o                     connaissance
+sci-pov-o                  connaissance
+sci-vol-em-a               curieux
+sci-vol-o                  curiosité
 
-scipovo                  connaissance
+seanc-o                   séance
 
-sciuro                   écureuil
-
-scivol-em-a               curieux
-
-scivolo                  curiosité
-
-se                       à condition que, si
-
-se ne                    sinon
-
-seanco                   séance
-
-sed                      mais
-
-segi                     scier
-
+seg-i                     scier
 seg-il-o                  scie
 
-segxo                    chaise, siège
+segx-o                    chaise, siège
 
-seka                     sec
-
-sekalo                   seigle
-
-sekci                    sectionner
-
-sekcio                   branche, section, service
-
+sek-a                     sec
 sek-ig-i                   sécher
-
 sek-igx-i                  sécher
 
-sekretario               secrétaire
+sekal-o                   seigle
 
-sekreto                  secret
+sekc-i                    sectionner
+sekc-i-o                   branche, section, service
 
-seksarda                 rut
+sekretari-o               secrétaire
 
-seksatenci               violer
+sekret-o                  secret
 
-sekso                    sexe
+seks-o                    sexe
+seks-ard-a                 rut
+seks-atenc-i               violer
+seks-um-i                  baiser
 
-seksumi                  baiser
+sekt-o                    secte
 
-sekto                    secte
+sektor-o                  secteur
 
-sektoro                  secteur
-
-sekundo                  seconde
+sekund-o                  seconde
 
 sekur-a                   à l'abri, sûr, en sûreté
 sekur-ec-o                sécurité
 sekur-ig-i                 assurer, abriter
 
-sekva                    suivant
+sekv-a                    suivant
+sekv-ant-a                 suivant
+sekv-ant-ar-o               adhérents, parti, suite
+sekv-e                    ensuite
+sekv-i                    suivre
+sekv-o                    aboutissement, suite
+sekv-estrad-o              saisie
 
-sekvanta                 suivant
+sekvont-a                 prochain, suivant
 
-sekvantaro               adhérents, parti, suite
+selekt-i                  trier
 
-sekve                    ensuite
+sel-o                     selle
 
-sekvestrado              saisie
+sem-i                     semer
+sem-o                     graine, semence
+sem-ad-o                   semailles
 
-sekvi                    suivre
+semajn-fin-o               week-end
+semajn-o                  semaine
 
-sekvo                    aboutissement, suite
+seminari-o                séminaire
 
-sekvonta                 prochain, suivant
 
-selekti                  trier
+senat-o                   sénat
 
-selo                     selle
-
-semado                   semailles
-
-semajnfino               week-end
-
-semajno                  semaine
-
-semi                     semer
-
-semida                   sémitique
-
-semido                   Sémite
-
-seminario                séminaire
-
-semo                     graine, semence
-
-sen                      sans
-
-senatenta                distrait
-
-senato                   sénat
-
-senbrid-ig-i               déchaîner
-
-senbrua                  silencieux
 
 sencerba                 étourdi
 
@@ -12475,9 +11324,7 @@ sensona                  silencieux
 
 sensukcesa               abortif
 
-sensxangxa               invariable
 
-sensxargx-ig-i             soularger
 
 sensxel-ig-i               dépouiller
 
@@ -12769,19 +11616,7 @@ skolti                   reconnaître
 
 skolto                   reconnaissance
 
-skombro                  maquereau
 
-skorpio                  scorpion
-
-skot-in-o                 Ecossaise
-
-Skotio                   Ecosse
-
-Skotlando                Ecosse
-
-skoto                    Ecossais
-
-Skot-uj-o                 Ecosse
 
 skrapgumo                gomme
 
@@ -13476,19 +12311,22 @@ sxanceli                 ébranler
 
 sxanco                   chance
 
-sxangx i                  changer
-
-sxangx-igx-em-a            mobile
-
-sxangx-igx-o               transformation
-
-sxangx-mon-o               monnaie
-
+sxangx-i                  changer
 sxangx-o                  transformation
+sxangx-igx-em-a            mobile
+sxangx-igx-o               transformation
+sxangx-mon-o               monnaie
+adres-sxangx-o             changement d'adresse
+direkt-o-sxangx-o           virage
+inter-sxangxi             échanger inter ... kaj: ... à
+sen-sxangx-a               invariable
 
-sxargi                   charger
+sxarg-i                   charger
+sxargx-aùto               camion, poids lourd
+mal-sxargxi               décharger
+sen-sxargx-ig-i             soularger
+tro-sxargx-i               accabler
 
-sxargxaùto               camion, poids lourd
 
 sxarko                   requin
 
@@ -14050,9 +12888,9 @@ trak-o                    route, voie
 trakt-bus-o                autorail
 
 trakt-i                   traiter
-trakt-i malbone           maltraiter
+trakt-i malbon-e           maltraiter
 
-trakt-oro                 tracteur
+traktor-o                 tracteur
 
 tralav-i                  rincer
 
@@ -14111,23 +12949,19 @@ tra-rigard-i               mirer
 
 traùb-o                   grappe
 
-tre                      bien, fort, tout, très
 
-trejnado                 exercice
-
+trejn-ad-o                 exercice
 trejn-i                   entraîner
 
 trembril-i                scintiller
 
-tremet-i                  frémir, frissonner
-
+trem-et-i                  frémir, frissonner
 trem-i                    trembler
 trem-o                    frisson
 
 trempi                   tremper
 
 tren-i                    traîner
-
 tren-vetur-il-o            remorque
 
 tret-i                    fouler aux pieds, marcher sur, piétiner
@@ -14170,25 +13004,17 @@ triumf-o                  triomphe
 
 trivial-a                 trivial
 
-trogo                    auge
+trog-o                    auge
 
-trojano                  Troyen
+trojk-o                   troïka
 
-trojko                   troïka
+trombon-o                 trombone
 
-Trojo                    Troie
+tromp-i                   tricher, tromper
+tromp-it-a                 déçu
 
-trombono                 trombone
+tropik-a                  tropical
 
-trompi                   tricher, tromper
-
-trompita                 déçu
-
-tropeolo                 capucine
-
-tropika                  tropical
-
-trosxargxi               accabler
 
 troti                    trotter
 
@@ -14358,6 +13184,7 @@ uragan-o                  ouragan
 urbaniz-ad-o               urbanisme
 
 urb-dom-o                  hôtel de ville
+urb-o                     cité, ville
 urb-estr-o                maire
 urb-et-o                   localité
 urb-o                     cité, ville
@@ -14418,6 +13245,7 @@ vand-o                    cloison, paroi
 
 vang-o                    joue
 vang-o-sak-o                abajoue
+puf-vang-a                 joufflu
 
 vant-a                    frivole, vain, vaniteux
 vant-ec-o                 futilité, vanité
@@ -14672,24 +13500,16 @@ vir-bov-o                  taureau
 vir-cxeval-o               cheval entier, étalon
 
 vir-hund-o                 chien mâle
-
 vir-in-o                  femme
-
 vir-kapr-o                 bouc
-
 vir-kok-o                  coq
-
 vir-kunikl-o               bouquin
-
 vir-lepor-o                bouquin
-
 vir-o                     homme, mâle
-
 vir-pork-o                 verrat
 
 virg-a                    vierge, virginal
-
-virgul-in-o               vierge
+virg-ul-in-o               vierge
 
 virt-o                    vertu
 
@@ -14700,16 +13520,15 @@ viski-o                   whisky
 visk-o                    gui
 
 visx-i                    effacer, essuyer
-
+for-visx-i                 effacer
 visx-tuk-o                 torchon
 
+vit-o                     vigne
 vit-ej-o                   vignoble
 
-vit-o                     vigne
-
+vitr-o                    verre, vitre
 vitr-in-o                  vitrine
 
-vitr-o                    verre, vitre
 
 viv-a                     vivant
 
@@ -14775,6 +13594,10 @@ volb-o                    voûte
 
 vol-i                     vouloir
 vol-o                     gré, volonté
+bon-vol-u                  s'il vous plaît
+laù-vol-e                  à volonté
+mem-vol-a                  volontaire
+ne-vol-a                   involontaire
 
 volont-e                  volontiers
 
