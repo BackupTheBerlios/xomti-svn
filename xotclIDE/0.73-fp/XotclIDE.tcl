@@ -1,4 +1,7 @@
-#!/usr/local/bin/xowish
+#!/bin/sh
+# \
+exec tclsh "$0" ${1+"$@"}
+
 # start File for use XotclIDE as stand alone application
 # please adapt the xotcl library path for your machine
 # you can use tk or tix for XotclIDE
