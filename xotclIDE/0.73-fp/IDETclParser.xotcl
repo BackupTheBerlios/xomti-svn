@@ -93,7 +93,7 @@ PrsElement instproc visit visitor {
     $visitor visit [self]
     next
 }
-Class PrsCommand -superclass {::PrsElement ::MixPrsList} 
+Class PrsCommand -superclass {::PrsElement ::MixPrsList}
 @ ::PrsCommand idemeta component IDETclParser
 PrsCommand instproc argsCount {} {
     expr {[llength [my list]]-1}
@@ -104,12 +104,12 @@ PrsCommand instproc checkSyntax {context notifier} {
 PrsCommand instproc syntaxHightlight context {
     $context checkCommand [self] $context
 }
-Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList} 
+Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList}
 @ ::PrsCommandSubst idemeta component IDETclParser
 PrsCommandSubst instproc evalContents {} {
     my basicEvalContents
 }
-Class PrsComment -superclass ::PrsElement 
+Class PrsComment -superclass ::PrsElement
 @ ::PrsComment idemeta component IDETclParser
 PrsComment instproc syntaxHightlight context {
     $context hightlightElement [self] comment
@@ -820,9 +820,9 @@ PrsContext proc initializeAfterLoad {} {
         }
     }
 }
-Class PrsLiteral -superclass ::PrsElement 
+Class PrsLiteral -superclass ::PrsElement
 @ ::PrsLiteral idemeta component IDETclParser
-Class PrsNoSubst -superclass {::PrsElement ::MixPrsList} 
+Class PrsNoSubst -superclass {::PrsElement ::MixPrsList}
 @ ::PrsNoSubst idemeta component IDETclParser
 PrsNoSubst instproc evalContents {} {
     my basicEvalContents
@@ -841,7 +841,7 @@ PrsNoSubst instproc extractList {} {
 PrsNoSubst instproc substituteContents {} {
     my basicSubstituteContents
 }
-Class PrsQuoted -superclass {::PrsElement ::MixPrsList}  -parameter {{hasQuote 0}}
+Class PrsQuoted -superclass {::PrsElement ::MixPrsList} -parameter {{hasQuote 0}}
 @ ::PrsQuoted idemeta component IDETclParser
 PrsQuoted instproc substituteContents {} {
     my basicSubstituteContents
@@ -851,7 +851,7 @@ PrsQuoted instproc syntaxHightlight context {
         $context hightlightElement [self] quoted
     }
 }
-Class PrsVariable -superclass ::PrsElement 
+Class PrsVariable -superclass ::PrsElement
 @ ::PrsVariable idemeta component IDETclParser
 PrsVariable instproc checkSyntax {context notifier} {
     set name [my prsString]

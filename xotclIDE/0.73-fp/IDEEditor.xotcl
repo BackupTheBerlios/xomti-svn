@@ -28,7 +28,7 @@ supports function
 3. interface to syntax hightlighting
 4. Statix Syntax Checking}
 }
-Class IDE::TclModeEdit -superclass {::IDE::MethodEdit ::IDE::EditorPopDown}  -parameter {{editMode none}}
+Class IDE::TclModeEdit -superclass {::IDE::MethodEdit ::IDE::EditorPopDown} -parameter {{editMode none}}
 @ ::IDE::TclModeEdit idemeta categories {edit-helper syntax-hightlighting interface tcl-lint initialize context-quick-edit}
 @ ::IDE::TclModeEdit idemeta categoriesMethods {{searchCloseQuote searchCloseBrace doubleButton searchOpenBrace keyReturn getIdent} {setType syntaxHighlightIfWanted simpleSyntaxHighlight syntaxHighlight syntaxHighlightRemove complexSyntaxHighlight} {setText saveValue} {xotclLint lintIfWanted} {initTags menuInsertions init} {getProcSubcommand invokePopDown getInstanceCommand getVariable tabPress}}
 @ ::IDE::TclModeEdit idemeta component IDEEditor
@@ -524,7 +524,7 @@ description {This Class is special tcl parser context that can be used
         for syntax hightlight into IDE::Text (View for parsed method).
         How tokens will be handled is specified in syntaxHightlight method (PrsElem)}
 }
-Class PrsSyntaxHightlight -superclass ::PrsContext  -parameter text
+Class PrsSyntaxHightlight -superclass ::PrsContext -parameter text
 @ ::PrsSyntaxHightlight idemeta component IDEEditor
 PrsSyntaxHightlight instproc checkObjectSelfCall {command notifier} {
     my hightlightElement [$command getElem 0] xotcl

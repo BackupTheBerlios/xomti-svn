@@ -206,7 +206,7 @@ IDE::DialogHelper proc create args {
 @ Class IDE::Dialog {
 description {Class methods are fasade to tk_message}
 }
-Class IDE::Dialog -superclass ::IDE::DialogHelper  -parameter {{title Dialog} message {type ok}}
+Class IDE::Dialog -superclass ::IDE::DialogHelper -parameter {{title Dialog} message {type ok}}
 @ ::IDE::Dialog idemeta component IDEBaseGUI
 IDE::Dialog instproc init {} {
     my instvar title message type win
@@ -578,7 +578,7 @@ IDE::Text proc setColor color {
         }
     }
 }
-Class IDE::Editor -superclass {::IDE::Text ::IDE::GUICommands}  -parameter {{height 24} {width 80}}
+Class IDE::Editor -superclass {::IDE::Text ::IDE::GUICommands} -parameter {{height 24} {width 80}}
 @ ::IDE::Editor idemeta categories {initialize user-action selection-action private service}
 @ ::IDE::Editor idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {fileAppend fileIn fileOut} {browseSelection evalInspectSelection evalSelection evalDisplaySelection evalSubstituteSelection} getWordUnderCursor setTypedText}
 @ ::IDE::Editor idemeta component IDEBaseGUI
@@ -879,7 +879,7 @@ IDE::FocusPerKey instproc init args {
         bind [my getFocusWin] <<PrevWindow>> "focus $prevFocus; break"
     }
 }
-Class IDE::FontChooser -superclass ::IDE::Dialog  -parameter {{font {}} {type okcancel} {title {Font Chooser}}}
+Class IDE::FontChooser -superclass ::IDE::Dialog -parameter {{font {}} {type okcancel} {title {Font Chooser}}}
 @ ::IDE::FontChooser idemeta component IDEBaseGUI
 IDE::FontChooser instproc changeFamiliesVisibility {} {
     my instvar onlytk
@@ -1315,7 +1315,7 @@ IDE::ListView proc setColor color {
 @ Class IDE::HListView {
 description {Simple Hierarch List Browser.}
 }
-Class IDE::HListView -superclass ::IDE::ListView  -parameter {{multiselect 0} label}
+Class IDE::HListView -superclass ::IDE::ListView -parameter {{multiselect 0} label}
 @ ::IDE::HListView idemeta component IDEBaseGUI
 IDE::HListView instproc rekListInit {hlist deep} {
     my instvar listItems
@@ -1357,7 +1357,7 @@ IDE::HListView instproc setList list {
     set selectedIndex -1
     eval $win.listbox insert 0 $listItems
 }
-Class IDE::IDialogEntry -superclass ::IDE::Dialog  -parameter {entry {type okcancel} {width 20}}
+Class IDE::IDialogEntry -superclass ::IDE::Dialog -parameter {entry {type okcancel} {width 20}}
 @ ::IDE::IDialogEntry idemeta component IDEBaseGUI
 IDE::IDialogEntry instproc init {} {
     my instvar win entry width
@@ -1395,7 +1395,7 @@ IDE::IDialogEntry proc getValueWithCancel {mes {text {}}} {
     }
     return $ret
 }
-Class IDE::IDialogList -superclass ::IDE::Dialog  -parameter {list {selectedItem {}} {type okcancel}}
+Class IDE::IDialogList -superclass ::IDE::Dialog -parameter {list {selectedItem {}} {type okcancel}}
 @ ::IDE::IDialogList idemeta component IDEBaseGUI
 IDE::IDialogList instproc init {} {
     my instvar win list selectedItem selectPattern patternIndex
@@ -1471,7 +1471,7 @@ IDE::IDialogList proc getListItem {message list {default {}}} {
     set result [$listdialog selectedItem]
     return $result
 }
-Class IDE::IDialogListChooser -superclass ::IDE::Dialog  -parameter {listin listout {type okcancel}}
+Class IDE::IDialogListChooser -superclass ::IDE::Dialog -parameter {listin listout {type okcancel}}
 @ ::IDE::IDialogListChooser idemeta component IDEBaseGUI
 IDE::IDialogListChooser instproc addToList {} {
     set sitem [[self]::listin selectedItem]
@@ -1536,7 +1536,7 @@ IDE::IDialogListChooser instproc postOk {} {
     set listout [[self]::listout getList]
     next
 }
-Class IDE::IDialogListEntry -superclass ::IDE::Dialog  -parameter {entry list {type okcancel} {selectedItem {}}}
+Class IDE::IDialogListEntry -superclass ::IDE::Dialog -parameter {entry list {type okcancel} {selectedItem {}}}
 @ ::IDE::IDialogListEntry idemeta component IDEBaseGUI
 IDE::IDialogListEntry instproc getvalue {} {
     my instvar entry selectedItem
@@ -1582,7 +1582,7 @@ IDE::IDialogListEntry instproc postOk {} {
     set entry [$win.entry get]
     next
 }
-Class IDE::IDialogListOrderChooser -superclass ::IDE::IDialogListChooser  -parameter {listin listout {type okcancel}}
+Class IDE::IDialogListOrderChooser -superclass ::IDE::IDialogListChooser -parameter {listin listout {type okcancel}}
 @ ::IDE::IDialogListOrderChooser idemeta component IDEBaseGUI
 IDE::IDialogListOrderChooser instproc addToList {} {
     set sitem [[self]::listin selectedItem]
@@ -1619,7 +1619,7 @@ IDE::IDialogListOrderChooser instproc upItem {} {
 description {Prompter with additional check box
 addiational paramer -checktext -check}
 }
-Class IDE::IDialogWithCheck -superclass ::IDE::Dialog  -parameter {{check 0} {checktext {show it again}}}
+Class IDE::IDialogWithCheck -superclass ::IDE::Dialog -parameter {{check 0} {checktext {show it again}}}
 @ ::IDE::IDialogWithCheck idemeta component IDEBaseGUI
 IDE::IDialogWithCheck instproc init {} {
     my instvar win
@@ -1662,7 +1662,7 @@ IDE::MenuItem instproc migrateTkMenu {} {
     }
     puts $add
 }
-Class IDE::MenuCheckbox -superclass ::IDE::MenuItem  -parameter {name {command {}} {variable {}} {accelerator {}} {underline {}}}
+Class IDE::MenuCheckbox -superclass ::IDE::MenuItem -parameter {name {command {}} {variable {}} {accelerator {}} {underline {}}}
 @ ::IDE::MenuCheckbox idemeta component IDEBaseGUI
 IDE::MenuCheckbox instproc createItemTkMenu {win tl_win} {
     my instvar accelerator name command variable underline
@@ -1684,7 +1684,7 @@ IDE::MenuCheckbox instproc createItemTkMenu {win tl_win} {
         }
     }
 }
-Class IDE::MenuCommand -superclass ::IDE::MenuItem  -parameter {{accelerator {}} {underline {}} name command}
+Class IDE::MenuCommand -superclass ::IDE::MenuItem -parameter {{accelerator {}} {underline {}} name command}
 @ ::IDE::MenuCommand idemeta component IDEBaseGUI
 IDE::MenuCommand instproc createItemTkMenu {win tl_win} {
     my instvar accelerator underline name command
@@ -1702,7 +1702,7 @@ IDE::MenuCommand instproc createItemTkMenu {win tl_win} {
     }
     eval $win add command  -label [list $name] -command [list $command] $par
 }
-Class IDE::MenuRadiobutton -superclass ::IDE::MenuItem  -parameter {name command {value {}} {variable {}} {accelerator {}} {underline {}}}
+Class IDE::MenuRadiobutton -superclass ::IDE::MenuItem -parameter {name command {value {}} {variable {}} {accelerator {}} {underline {}}}
 @ ::IDE::MenuRadiobutton idemeta component IDEBaseGUI
 IDE::MenuRadiobutton instproc createItemTkMenu {win tl_win} {
     my instvar name command value variable underline accelerator
@@ -1724,7 +1724,7 @@ IDE::MenuRadiobutton instproc createItemTkMenu {win tl_win} {
         }
     }
 }
-Class IDE::MenuSeparator -superclass ::IDE::MenuItem 
+Class IDE::MenuSeparator -superclass ::IDE::MenuItem
 @ ::IDE::MenuSeparator idemeta component IDEBaseGUI
 IDE::MenuSeparator instproc createItemTkMenu {win tl_win} {
     $win add separator
@@ -1741,7 +1741,7 @@ Only the all of specified method return true the menu item is enabled
 
 See also IDE::MenuItem}
 }
-Class IDE::MenuStruct -superclass ::IDE::MenuItem  -parameter enablementHandler
+Class IDE::MenuStruct -superclass ::IDE::MenuItem -parameter enablementHandler
 @ ::IDE::MenuStruct idemeta categories {shortcuts obsolete-migration}
 @ ::IDE::MenuStruct idemeta categoriesMethods {{addSeparator addCascadeMenu addRadioButton addCheckButton addMenuItem addCommand} migrateTkMenu}
 @ ::IDE::MenuStruct idemeta component IDEBaseGUI
@@ -1916,7 +1916,7 @@ IDE::MenuStruct instproc showPopMenu {win x y} {
     my checkPopDownEnablement $win
     tk_popup $win $x $y
 }
-Class IDE::NListView -superclass ::IDE::ListView  -parameter {notify notifyProc doubleNotifyProc}
+Class IDE::NListView -superclass ::IDE::ListView -parameter {notify notifyProc doubleNotifyProc}
 @ ::IDE::NListView idemeta component IDEBaseGUI
 IDE::NListView instproc buttonDoublePush {} {
     my instvar notify doubleNotifyProc
@@ -1939,7 +1939,7 @@ IDE::NListView instproc selectItem item {
         }
     }
 }
-Class IDE::ProtocolText -superclass ::IDE::Editor 
+Class IDE::ProtocolText -superclass ::IDE::Editor
 @ ::IDE::ProtocolText idemeta component IDEBaseGUI
 IDE::ProtocolText instproc append text {
     my instvar odd itemsNumber regexpr inverseMatch count protocolOn itemLines itemsNumber
@@ -2065,7 +2065,7 @@ IDE::StateButton instproc setStates newStates {
         my setState [lindex $states 0]
     }
 }
-Class IDE::StateButtonActivity -superclass ::IDE::StateButton 
+Class IDE::StateButtonActivity -superclass ::IDE::StateButton
 @ ::IDE::StateButtonActivity idemeta component IDEBaseGUI
 IDE::StateButtonActivity instproc init window {
     next
