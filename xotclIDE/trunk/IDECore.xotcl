@@ -162,8 +162,8 @@ namespace eval myNameSpace {
 }
 }
 Class IDE::ProcsGroup -superclass ::IDE::CommentHandler  -parameter {name {withNamespace 0}}
-@ ::IDE::ProcsGroup idemeta categories {testing accessing methods actions initialize}
 @ ::IDE::ProcsGroup idemeta categoriesMethods {isPersistent {getDescription getComponent getBody getObjectName getComponentName getDefBody setDefBody} {removeMethodObj createProcForName setMethodComment hasMethodComment getProcsObjects getProcsNames getMethodComment deleteMethod getProcObjForName getProcObjForNameIfExist} {rename unload handleDefinitionScript moveToComponent handleScript} init}
+@ ::IDE::ProcsGroup idemeta categories {testing accessing methods actions initialize}
 @ ::IDE::ProcsGroup idemeta component IDECore
 IDE::ProcsGroup instproc createProcForName name {
     #[self] halt
@@ -350,16 +350,106 @@ IDE::ProcsGroup proc buildStuctFromArray arr_ref {
 IDE::ProcsGroup proc unknown args {
     error "unknown method on [self] $args"
 }
+@ Class IDE::TclProcsDescription {
+description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
+This instaces has similar interface as xotcl class/objects.
+That is comments, getting body
+}
+}
+Class IDE::TclProcsDescription -superclass ::IDE::CommentHandler  -parameter name
+@ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
+@ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
+@ ::IDE::TclProcsDescription idemeta component IDECore
+IDE::TclProcsDescription instproc getBody {} {
+    # ??? Vielleicht durch IntroProxy
+    IDE::IntroProxy getProcBody [my set name]
+}
+IDE::TclProcsDescription instproc getGroupObj {} {
+    return [my info parent]
+}
+IDE::TclProcsDescription instproc getMetaBody {} {
+    set group [my getGroupObj]
+    set script "@ tclproc [my getName] idemeta struct [list [[$group getComponent] getName] [$group getObjectName]]\n"
+    if {[my hasComment]} {
+        append script "@ tclproc [my getName] idemeta comment [list [my getComment]]\n"
+    }
+    return $script
+}
+IDE::TclProcsDescription instproc getName {} {
+    my name
+}
+IDE::TclProcsDescription instproc handleScript script {
+    # Warning! no check for syntax at this level 
+    # see handleScript in IDE::ProcsGroup
+    # TODO namespace handling
+    namespace eval :: $script
+}
+IDE::TclProcsDescription instproc import {} {
+
+}
+IDE::TclProcsDescription instproc init {} {
+    [self class] registerMethod [my name] [self]
+}
+IDE::TclProcsDescription instproc isPersistent {} {
+    return 0  
+}
+IDE::TclProcsDescription instproc unload {} {
+    # TODO namespace proc handling
+    if {[info procs [my getName]]!=""} {
+	rename [my getName] {}
+        [self class] unregisterMethod [my getName]
+    } else {
+	puts stderr "no proc [my getName] in interpreter"
+    }
+}
+IDE::TclProcsDescription proc getAllMethodsFromNamespace namespace {
+    if {$namespace eq "::xotcl"} return
+    set res [namespace eval $namespace info procs]
+    set res [ide::lcollect each $res {namespace eval $namespace [list namespace which -command $each]}]
+    foreach chns [namespace children $namespace] {
+        if {[Object isobject $chns]} continue
+        set res [concat $res [my getAllMethodsFromNamespace $chns]]
+    }
+    return $res
+}
+IDE::TclProcsDescription proc getAllRegisteredMethods {} {
+    if {[my array exists methodArr]} {
+        return [my array names methodArr]
+    }
+    return
+}
+IDE::TclProcsDescription proc getAllUnRegisteredMethods {} {
+    set allMethods [my getAllMethodsFromNamespace ::]
+    ide::lremoveAll allMethods [my getAllRegisteredMethods]
+    return $allMethods
+}
+IDE::TclProcsDescription proc getMethodFor method {
+    if {[my exists methodArr($method)]} {
+        return [my set methodArr($method)]
+    }
+    return
+}
+IDE::TclProcsDescription proc registerMethod {method wrapper} {
+   my set methodArr($method) $wrapper
+}
+IDE::TclProcsDescription proc unknown args {
+    error "unknown method on [self] $args"
+}
+IDE::TclProcsDescription proc unregisterMethod method {
+    if {[my exists methodArr($method)]} {
+        my unset methodArr($method)
+    }
+}
 @ Class IDE::Component {
 description {IDE::Component is base class for handling components.
 Components are currently sets or Xotcl classes and objects
 that can be loaded and saved as tcl packages}
 }
 Class IDE::Component -superclass ::IDE::CommentHandler  -parameter name
-@ ::IDE::Component idemeta categoriesProcs {private importing-loading recreation api}
 @ ::IDE::Component idemeta categoriesMethodsProcs {{registerObject registerInstproc registerProc loadCompFromFile} {loadPackageIfNone loadPackage initFromInterpreter initPackageTracking importCompsFromFile} {saveComplex getObjectBody saveAllToPath} {getCompObjectForNameIfExist getComponentNames getAllComponents getCompObjectForName}}
-@ ::IDE::Component idemeta categories {tcl-procs service private accessing}
+@ ::IDE::Component idemeta categoriesProcs {private importing-loading recreation api}
 @ ::IDE::Component idemeta categoriesMethods {{basicRemoveProcsGroup getProcsGroupWithName removeProcsGroup createTclProcsGroup basicCreateTclProcsGroup addProcsGroup getProcsGroups getProcsGroupsObjects} {isPersistent saveAsScript unload asScript getVersionNumber addRequiredCompList computeRequirements rename copyClassOrObject getVisibleClasses} {addObject basicAddObject basicRemoveObject addClass init destroy getObjectDefineList rekBuildDefList} {removeClass getCommentBody setVersionNumber removeObject standardFileNameBase standardFileName getRequiredFrom getClassesHierarchy getName getObjects getClasses getHierarchyFrom getRequiredFor getRequiredFromDeep}}
+@ ::IDE::Component idemeta categories {tcl-procs service private accessing}
 @ ::IDE::Component idemeta component IDECore
 IDE::Component instproc addClass class {
    # use $object moveToComponent name for right initialisation
@@ -988,116 +1078,6 @@ IDE::Component proc saveComplex {comps nometa onefile target} {
         close $of
     }
 }
-@ Class IDE::TclProcsDescription {
-description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
-This instaces has similar interface as xotcl class/objects.
-That is comments, getting body
-}
-}
-Class IDE::TclProcsDescription -superclass ::IDE::CommentHandler  -parameter name
-@ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
-@ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
-@ ::IDE::TclProcsDescription idemeta component IDECore
-IDE::TclProcsDescription instproc getBody {} {
-    # ??? Vielleicht durch IntroProxy
-    IDE::IntroProxy getProcBody [my set name]
-}
-IDE::TclProcsDescription instproc getGroupObj {} {
-    return [my info parent]
-}
-IDE::TclProcsDescription instproc getMetaBody {} {
-    set group [my getGroupObj]
-    set script "@ tclproc [my getName] idemeta struct [list [[$group getComponent] getName] [$group getObjectName]]\n"
-    if {[my hasComment]} {
-        append script "@ tclproc [my getName] idemeta comment [list [my getComment]]\n"
-    }
-    return $script
-}
-IDE::TclProcsDescription instproc getName {} {
-    my name
-}
-IDE::TclProcsDescription instproc handleScript script {
-    # Warning! no check for syntax at this level 
-    # see handleScript in IDE::ProcsGroup
-    # TODO namespace handling
-    namespace eval :: $script
-}
-IDE::TclProcsDescription instproc import {} {
-
-}
-IDE::TclProcsDescription instproc init {} {
-    [self class] registerMethod [my name] [self]
-}
-IDE::TclProcsDescription instproc isPersistent {} {
-    return 0  
-}
-IDE::TclProcsDescription instproc unload {} {
-    # TODO namespace proc handling
-    if {[info procs [my getName]]!=""} {
-	rename [my getName] {}
-        [self class] unregisterMethod [my getName]
-    } else {
-	puts stderr "no proc [my getName] in interpreter"
-    }
-}
-IDE::TclProcsDescription proc getAllMethodsFromNamespace namespace {
-    if {$namespace eq "::xotcl"} return
-    set res [namespace eval $namespace info procs]
-    set res [ide::lcollect each $res {namespace eval $namespace [list namespace which -command $each]}]
-    foreach chns [namespace children $namespace] {
-        if {[Object isobject $chns]} continue
-        set res [concat $res [my getAllMethodsFromNamespace $chns]]
-    }
-    return $res
-}
-IDE::TclProcsDescription proc getAllRegisteredMethods {} {
-    if {[my array exists methodArr]} {
-        return [my array names methodArr]
-    }
-    return
-}
-IDE::TclProcsDescription proc getAllUnRegisteredMethods {} {
-    set allMethods [my getAllMethodsFromNamespace ::]
-    ide::lremoveAll allMethods [my getAllRegisteredMethods]
-    return $allMethods
-}
-IDE::TclProcsDescription proc getMethodFor method {
-    if {[my exists methodArr($method)]} {
-        return [my set methodArr($method)]
-    }
-    return
-}
-IDE::TclProcsDescription proc registerMethod {method wrapper} {
-   my set methodArr($method) $wrapper
-}
-IDE::TclProcsDescription proc unknown args {
-    error "unknown method on [self] $args"
-}
-IDE::TclProcsDescription proc unregisterMethod method {
-    if {[my exists methodArr($method)]} {
-        my unset methodArr($method)
-    }
-}
-@ Class IDE::ObjectCommentsContainer {
-description {Helper class for hanlde methods comments.
-It will be used for not persistent classes}
-}
-Class IDE::ObjectCommentsContainer -parameter objectName
-@ ::IDE::ObjectCommentsContainer idemeta component IDECore
-IDE::ObjectCommentsContainer instproc getMethodComment {type method} {
-    if {[my exists  comment_${type}($method)]} {
-       return [my set comment_${type}($method)]
-    }
-    return
-}
-IDE::ObjectCommentsContainer instproc hasMethodComment {type method} {
-    return [expr {[my exists  comment_${type}($method)] && 
-          [my set comment_${type}($method)]!=""}]
-
-}
-IDE::ObjectCommentsContainer instproc setMethodComment {type method text} {
-    my set comment_${type}($method) $text
-}
 @ Class IDE::Component::Tracker {
 description {Helper class for tracking new classes
 by package loading
@@ -1189,247 +1169,244 @@ IDE::Component::Tracker proc trackProc args {
     set name [lindex $args 0]
     my set methodsArr($name) $component
 }
-Object IDE::SystemConfigMap
-@ ::IDE::SystemConfigMap idemeta component IDECore
-IDE::SystemConfigMap proc asScript {} {
-    set script {}
-    append script "set preStartScript [list [my getValueForType preStartScript]]\n"
-    append script "set componentsToLoad [list [my getValueForType componentsToLoad]]\n"
-    append script "set startScript [list [my getValueForType startScript]]\n"
-    return $script
+@ Class IDE::ObjectCommentsContainer {
+description {Helper class for hanlde methods comments.
+It will be used for not persistent classes}
 }
-IDE::SystemConfigMap proc checkRequirements compList {
-     set outCompList {}
-     set procList {}
-     set cleanList [ide::lcollect each $compList {lindex $each 0}]
+Class IDE::ObjectCommentsContainer -parameter objectName
+@ ::IDE::ObjectCommentsContainer idemeta component IDECore
+IDE::ObjectCommentsContainer instproc getMethodComment {type method} {
+    if {[my exists  comment_${type}($method)]} {
+       return [my set comment_${type}($method)]
+    }
+    return
+}
+IDE::ObjectCommentsContainer instproc hasMethodComment {type method} {
+    return [expr {[my exists  comment_${type}($method)] && 
+          [my set comment_${type}($method)]!=""}]
 
-     foreach comp $compList {
-            set cname [lindex $comp 0]
-            if {[ide::lcontain $procList $cname]} continue
-            set cobj [IDE::Component getCompObjectForNameIfExist $cname]
-            if {$cobj!=""} {
-                set reqComps [$cobj getRequiredFromDeep]
-                foreach sreq $reqComps {
-                     if {![ide::lcontain $procList $sreq]} {
-                          set id [lsearch -exact $cleanList $sreq]
-                          if {$id>=0} {
-                              lappend outCompList [lindex $compList $id]
-                          } else {
-                              lappend outCompList $sreq
-                          }
-                          lappend procList $sreq
-                     }
-                }
-            }
-            lappend outCompList $comp
-            lappend procList $cname
-     }
-     return $outCompList
 }
-IDE::SystemConfigMap proc getCleanedLoadList {components {ignoreLoaded 1}} {
-    my instvar dbAvailable packageAvailable
-    # dbAvailable will be puffered 
-    if {[Object isobject IDE::ComponentPersistence]} {
-         my set dbAvailable [IDE::ComponentPersistence getAvailable]
-    } else {
-         my set dbAvailable {}
+IDE::ObjectCommentsContainer instproc setMethodComment {type method text} {
+    my set comment_${type}($method) $text
+}
+@ Object IDE::CommentsContainer {
+description {Hanlde objects comments and is parent object for methods comments
+(class IDE::ObjectsCommentsContainer)
+
+all @ meta are delegating to method importMeta
+
+the method "parseAndCleanMeta" try to initilize loaded Objects with
+comment after loading}
+}
+Object IDE::CommentsContainer
+@ ::IDE::CommentsContainer idemeta categoriesMethodsProcs {{parseAndCleanMeta importMeta importComponentMeta importObjectMethodMeta importProcGroupMeta importProcMeta importObjectMeta} {destroyObject getObjectContainer objectMethodGetComment getObjectContainerWithCreate objectSetComment objectMethodSetComment objectMethodHasComment objectGetComment objectHasComment} {makeTclGroupsFromMeta getGroupForMethod cleanTclProcComments searchCommentForMethod searchCommentForGroup} extractComment}
+@ ::IDE::CommentsContainer idemeta categoriesProcs {parse-import comments-mirrow tclproc-handling private}
+@ ::IDE::CommentsContainer idemeta component IDECore
+IDE::CommentsContainer proc cleanTclProcComments {} {
+    if {[my exists proc_groupcomment]} {[self] unset proc_groupcomment}
+    if {[my exists proc_method]} {[self] unset proc_method}
+    if {[my exists proc_comment]} {[self] unset proc_comment}
+}
+IDE::CommentsContainer proc destroyObject object {
+    if {[my exists objComments($object)]} {
+         my unset objComments($object)
     }
-    set cloaded [IDE::Component getComponentNames]
-    set loadList {}
-    set tclpackages [package names]
-    foreach comp $components {
-       if {$ignoreLoaded && [IDE::Component getCompObjectForNameIfExist [lindex $comp 0]]!=""} continue
-       if {[llength $comp]==1} {
-           if {[ide::lcontain $dbAvailable $comp]} {
-               set versionList [IDE::ComponentPersistence getVersionsForName $comp]
-              lappend loadList [list $comp [lindex [lindex $versionList 0] 0]]
-           } elseif {[ide::lcontain $tclpackages $comp]} {
-              lappend loadList [list $comp package]
-           } elseif {![ide::lcontain $cloaded $comp]} {
-             IDE::Dialog message "Component $comp can not be found in Database or as tcl package. Operation canceled"
-              return
-           }
-       } else {
-           set name [lindex $comp 0]; set type [lindex $comp 1]
-           if {$type=="package"} {
-                if {![ide::lcontain $tclpackages $name]} {
-                     IDE::Dialog message "Component $comp can not be found as tcl package. Operation canceled"
-                }
-                lappend loadList $comp
-           } else {
-                set versionList [IDE::ComponentPersistence getVersionsForName $name]
-                if {[llength $versionList]==0} {
-                     IDE::Dialog message "Component $comp can not be found in Database. Operation canceled"
-                }
-                if {$type=="newest"} {
-                   lappend loadList [list $name [lindex [lindex $versionList end] 0]]
-                } else {
-                   set versionList [ide::lcollect each $versionList {lindex $each 0}]
-                   if {![ide::lcontain $versionList $type]} {
-                     IDE::Dialog message "Component $comp Version $type can not be found in Database. Operation canceled"
-                   }
-                   lappend loadList [list $name $type]
-                }
-           }
+    set oc [my getObjectContainer $object] 
+    if {$oc!=""} {
+       $oc destroy
+       my unset objectHash($object)
+    }
+}
+IDE::CommentsContainer proc extractComment meta {
+   if {[llength $meta]%2==0 && [llength $meta]>0} {
+       array set metaArr $meta
+       # add variables (metaArr)
+       if {[info exists metaArr(description)]} {
+           return $metaArr(description)
        }
+   }
+   return 
+}
+IDE::CommentsContainer proc getGroupForMethod method {
+    if {[my exists proc_method($method)]} {
+        return [lindex [my set proc_method($method)] 1]
     }
-    return $loadList
+    return
 }
-IDE::SystemConfigMap proc getComponentsList {{ignoreLoaded 1}} {
-    my instvar componentsToLoad
-    if {![info exists componentsToLoad] || $componentsToLoad==""} return
-    return [my getCleanedLoadList $componentsToLoad $ignoreLoaded]
+IDE::CommentsContainer proc getObjectContainer object {    
+    if {[my exists objectHash($object)]} {
+         return [my set objectHash($object)]
+    }
+    return
 }
-IDE::SystemConfigMap proc getValueForType type {
-  if {[my exists $type]} {
-     return [my set $type]
-  }
+IDE::CommentsContainer proc getObjectContainerWithCreate object {    
+    set c [my getObjectContainer $object]
+    if {$c==""} {
+       set c [IDE::ObjectCommentsContainer new -childof [self] -objectName $object]
+       my set objectHash($object) $c
+    }
+    return $c
 }
-@ IDE::SystemConfigMap proc initFromSystem {} {
-description {Try to get configuration map list from actual loaded foreign components
+IDE::CommentsContainer proc importComponentMeta meta {
+    if {[llength $meta]!=3} {
+       puts stderr "meta: unexepted length of Component Meta >>$meta<<"
+       return
+    }
+    set component [lindex $meta 1]
+    set contens [lindex $meta 2]
+    set cobj [IDE::Component getCompObjectForNameIfExist $component]
+    if {$cobj==""} {
+       puts stderr "meta: $component is not a Component"
+       return
+    }
+    $cobj setComment [my extractComment $contens]
 }
-}
-IDE::SystemConfigMap proc initFromSystem {} {
-     my instvar componentsToLoad
-     set coreComps [IDE::System getCoreComponentsAll]
-     set comps {}
-     foreach comp [IDE::Component getComponentNames] {
-          if {![ide::lcontain $coreComps $comp]} {
-               set cobj [IDE::Component getCompObjectForNameIfExist $comp]
-               if {[$cobj isPersistent]} {
-                   append comps "{$comp [$cobj getIdValue]}\n"
-               } else {
-                   append comps "{$comp package}\n"
-               }
+IDE::CommentsContainer proc importMeta meta {
+   set first [lindex $meta 0]
+   set second [lindex $meta 1]
+   if {$first=="Component"} {
+      my importComponentMeta $meta
+   } elseif {$first=="tclproc"} {
+      my importProcMeta $meta
+   } elseif {$first=="tclgroup"} {
+      my importProcGroupMeta $meta
+   } else {
+       switch $second {
+          proc {
+             my importObjectMethodMeta Class $meta
           }
-     }
-     set componentsToLoad $comps
+          instproc {
+             my importObjectMethodMeta Instance $meta
+          }
+          default {
+             my importObjectMeta $meta
+          }
+       }
+   }
 }
-IDE::SystemConfigMap proc loadComponentFromAny component {
-    if {[IDE::Component getCompObjectForNameIfExist $component]!=""} {
-       return 1
+IDE::CommentsContainer proc importObjectMeta meta {
+    if {[llength $meta]!=3} {
+       if {![string match @File* $meta]} {
+           puts stderr "meta: unexepted length of Object Meta >>$meta<<"
+       }
+       return
     }
-    set loadList [my getCleanedLoadList $component]
-    my loadComponentsFromList $loadList
-    return 1
+    set class [lindex $meta 0]
+    set object [lindex $meta 1]
+    set contens [lindex $meta 2]
+    if {![Object isobject $object]} {
+       puts stderr "meta: $object is not a Object"
+       return
+    }
+    $object setComment [my extractComment $contens]
 }
-IDE::SystemConfigMap proc loadComponents {} {
-    my instvar componentsToLoad
-    if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "Nothing to load. Create components list first or load a configuration map file"
-         return
+IDE::CommentsContainer proc importObjectMethodMeta {type meta} {
+    if {[llength $meta]!=5} {
+       puts stderr "unexepted length of Method Meta >>$meta<<"
+       return
     }
-    set loadList [my getCleanedLoadList $componentsToLoad]
-    my loadComponentsFromList $loadList
+    set object [lindex $meta 0]
+    set method [lindex $meta 2]
+    set contens [lindex $meta 4]
+    if {![Object isobject $object]} {
+       puts stderr "meta: $object is not a Object"
+       return
+    }
+    $object setMethodComment $type $method [my extractComment $contens]
 }
-IDE::SystemConfigMap proc loadComponentsFromList loadList {
-    if {$loadList==""} return
-    foreach item $loadList {
-         set name [lindex $item 0]; set type [lindex $item 1]
-         if {$type=="package"} {
-             IDE::Component loadPackageIfNone $name
-         } else {
-             if {[Object isobject IDE::ComponentPersistence]} {
-                 IDE::ComponentPersistence loadNameVersionId $name $type {}
-             } else {
-                 IDE::Component loadPackageIfNone $name
-             }
-         }
+IDE::CommentsContainer proc importProcGroupMeta meta {
+    if {[llength $meta]!=6} {
+        puts stderr "unexpected length of @ procgroup ..."
+        return
     }
-    IDE::System signalComponentsChanged
+    set name [lindex $meta 1]
+    set key [lindex $meta 2]
+    set type [lindex $meta 3]
+    set component [lindex $meta 4]
+    set body [lindex $meta 5]
+    if {$key!="idemeta"} {puts stderr "expect @ procgroup name idemeta .. ..."}
+    my set proc_groupcomment(${name}_${component}) $body
 }
-IDE::SystemConfigMap proc loadFromFile {{file {}}} {
-    my instvar configName fileName
-    if {$file==""} {
-      set file [IDE::Dialog getOpenFile {{ConfigMap .cfmap}}]
+IDE::CommentsContainer proc importProcMeta meta {
+    if {[llength $meta]<5} {
+        puts stderr "unexpected length of @ proc ..."
+        return
     }
-    if {$file==""} {return 0}
-    source $file
-    foreach list {preStartScript startScript componentsToLoad} {
-         if {[info exists $list]} {
-              my set $list [::set $list]
-         }
+    set name [lindex $meta 1]
+    set key [lindex $meta 2]
+    set type [lindex $meta 3]
+    if {$key!="idemeta"} {puts stderr "expect @ proc name idemeta .. ..."}
+    if {$type=="struct"} {
+        my set proc_method($name) [lrange $meta 4 end]
+    } elseif {$type=="comment"} {
+        my set proc_comment($name) [lrange $meta 4 end]
+    } else {
+        puts stderr "unexpected @ proc name idemeta $type"
     }
-    set fileName $file
-    set configName [file rootname [file tail $file]]
-    return 1
 }
-IDE::SystemConfigMap proc saveAsFile {{file {}}} {
-    my instvar fileName configName
-    if {![my exists fileName]} {
-       my set fileName newconfig.cfmap
+IDE::CommentsContainer proc makeTclGroupsFromMeta {} {
+    my instvar proc_method
+    IDE::ProcsGroup buildStuctFromArray proc_method
+    foreach gobj [IDE::ProcsGroup info instances] {
+        IDE::CommentsContainer searchCommentForGroup $gobj
     }
-    if {$file==""} {
-      set file [IDE::Dialog getSaveFile $fileName]
+    foreach mobj [IDE::TclProcsDescription info instances] {
+        IDE::CommentsContainer searchCommentForMethod $mobj
     }
-    if {$file==""} return
-    set of [open $file w]
-    puts $of [my asScript]
-    close $of
-    set fileName $file
-    set configName [file rootname [file tail $file]]
+    my cleanTclProcComments
 }
-IDE::SystemConfigMap proc saveConfigMapComponents {} {
-    my instvar componentsToLoad
-    if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "Nothing to save. Create components list first or load a configuration map file"
-         return
+IDE::CommentsContainer proc objectGetComment object {
+    my instvar objComments
+    if {[info exists objComments($object)]} {
+         return $objComments($object)
     }
-    set saveList {}
-    foreach comp $componentsToLoad {
-        set compName [lindex $comp 0]
-        if {[IDE::Component getCompObjectForNameIfExist $compName]==""} {
-             IDE::Dialog message "Component $compName can not be saved bacause it is not loaded into interpreter"
-             return
-        }
-        lappend saveList $compName
-    }
-    IDE::Component saveComplex $saveList 0 0 [pwd]
-    pkg_mkIndex -direct [pwd] *.xotcl
-    IDE::Dialog message "Components $saveList was saved in acuall dictionary [pwd]. pkgIndex.tcl was updated in this dictionary"
 }
-IDE::SystemConfigMap proc saveDistribution {{dir {}}} {
-    my instvar componentsToLoad
-    if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "The distribution must have at least on component"
-         return
-    }
-    foreach comp $componentsToLoad {
-        set name [lindex $comp 0]
-        set cobj [IDE::Component getCompObjectForNameIfExist $name]
-        if {$cobj==""} {
-            IDE::Dialog message "$comp is not currently loaded. You can only maka a distribution from loaded components. Operation canceled"
-            return
-        }
-    }
-    IDE::Deployer newBrowser
+IDE::CommentsContainer proc objectHasComment object {
+    my instvar objComments
+    return [expr {[info exists objComments($object)] && $objComments($object)!=""}]
 }
-IDE::SystemConfigMap proc setValueForType {type value} {
-  my set $type $value
+IDE::CommentsContainer proc objectMethodGetComment {object type method} {
+    set oc [my getObjectContainer $object]
+    if {$oc==""} return
+    $oc getMethodComment $type $method
 }
-IDE::SystemConfigMap proc startScripts {} {
-    my instvar preStartScript startScript
-    global progdir xotclidedir
-    set progdir $xotclidedir
-    set run 0
-    if {[info exists preStartScript] && $preStartScript!=""} {
-        namespace eval :: $preStartScript
-        set run 1
+IDE::CommentsContainer proc objectMethodHasComment {object type method} {
+    set oc [my getObjectContainer $object]
+    if {$oc==""} {return 0}
+    $oc hasMethodComment $type $method
+}
+IDE::CommentsContainer proc objectMethodSetComment {object type method comment} {
+    set oc [my getObjectContainerWithCreate $object]
+    $oc setMethodComment $type $method $comment
+}
+IDE::CommentsContainer proc objectSetComment {object comment} {
+    my set objComments($object) $comment
+}
+IDE::CommentsContainer proc parseAndCleanMeta {} {
+   if {![@ exists metaList] || [@ set metaList]==""} return
+   foreach meta [@ set metaList] {
+      my importMeta $meta
+   }
+   @ set metaList {}
+}
+IDE::CommentsContainer proc searchCommentForGroup gobj {
+    my instvar proc_groupcomment
+    set key [$gobj getObjectName]_[[$gobj getComponent] getName]
+    if {[my exists proc_groupcomment($key)]} {
+        $gobj setComment $proc_groupcomment($key)
     }
-    if {[info exists startScript] && $startScript!=""} {
-        namespace eval :: $startScript
-        set run 1
-    }
-    if {!$run} {
-         IDE::Dialog message "There are no configuration map scripts to run"
+}
+IDE::CommentsContainer proc searchCommentForMethod method {
+    if {[my exists proc_comment($method)]} {
+        [IDE::TclProcsDescription getMethodFor $method] setComment [my set proc_comment($method)]
     }
 }
 @ Object IDE::IntroProxy {
 description {Fasade for xotcl introspection.}
 }
 Object IDE::IntroProxy
-@ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
 @ ::IDE::IntroProxy idemeta categoriesMethodsProcs {{getInstanceMethods getClassMethods getCategoriesForClass getCategoriesForObject getBodyTclMethod} {getClassesForComponent getObjectsForComponent getComponents getProcsGroupsForComponent getComponentsNoIDE getClasses getObjects} {getBodyMetadata getBodyInstanceMethodIfExist getBodyClassMethodIfExist getObjDef getBodyInstanceSearchMethod getProcBody getBodyInstanceMethod getBodyClassMethod} {stripNamespace asDescriptionList getBaseObjDef} {getObjectMethodCommentBody getObjectCommentBody}}
+@ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
 @ ::IDE::IntroProxy idemeta component IDECore
 IDE::IntroProxy proc asDescriptionList comment {
    return "description [list $comment]"
@@ -1704,216 +1681,239 @@ IDE::IntroProxy proc stripNamespace name {
         string trimleft $name  :
     }
 }
-@ Object IDE::CommentsContainer {
-description {Hanlde objects comments and is parent object for methods comments
-(class IDE::ObjectsCommentsContainer)
+Object IDE::SystemConfigMap
+@ ::IDE::SystemConfigMap idemeta component IDECore
+IDE::SystemConfigMap proc asScript {} {
+    set script {}
+    append script "set preStartScript [list [my getValueForType preStartScript]]\n"
+    append script "set componentsToLoad [list [my getValueForType componentsToLoad]]\n"
+    append script "set startScript [list [my getValueForType startScript]]\n"
+    return $script
+}
+IDE::SystemConfigMap proc checkRequirements compList {
+     set outCompList {}
+     set procList {}
+     set cleanList [ide::lcollect each $compList {lindex $each 0}]
 
-all @ meta are delegating to method importMeta
-
-the method "parseAndCleanMeta" try to initilize loaded Objects with
-comment after loading}
+     foreach comp $compList {
+            set cname [lindex $comp 0]
+            if {[ide::lcontain $procList $cname]} continue
+            set cobj [IDE::Component getCompObjectForNameIfExist $cname]
+            if {$cobj!=""} {
+                set reqComps [$cobj getRequiredFromDeep]
+                foreach sreq $reqComps {
+                     if {![ide::lcontain $procList $sreq]} {
+                          set id [lsearch -exact $cleanList $sreq]
+                          if {$id>=0} {
+                              lappend outCompList [lindex $compList $id]
+                          } else {
+                              lappend outCompList $sreq
+                          }
+                          lappend procList $sreq
+                     }
+                }
+            }
+            lappend outCompList $comp
+            lappend procList $cname
+     }
+     return $outCompList
 }
-Object IDE::CommentsContainer
-@ ::IDE::CommentsContainer idemeta categoriesProcs {parse-import comments-mirrow tclproc-handling private}
-@ ::IDE::CommentsContainer idemeta categoriesMethodsProcs {{parseAndCleanMeta importMeta importComponentMeta importObjectMethodMeta importProcGroupMeta importProcMeta importObjectMeta} {destroyObject getObjectContainer objectMethodGetComment getObjectContainerWithCreate objectSetComment objectMethodSetComment objectMethodHasComment objectGetComment objectHasComment} {makeTclGroupsFromMeta getGroupForMethod cleanTclProcComments searchCommentForMethod searchCommentForGroup} extractComment}
-@ ::IDE::CommentsContainer idemeta component IDECore
-IDE::CommentsContainer proc cleanTclProcComments {} {
-    if {[my exists proc_groupcomment]} {[self] unset proc_groupcomment}
-    if {[my exists proc_method]} {[self] unset proc_method}
-    if {[my exists proc_comment]} {[self] unset proc_comment}
-}
-IDE::CommentsContainer proc destroyObject object {
-    if {[my exists objComments($object)]} {
-         my unset objComments($object)
-    }
-    set oc [my getObjectContainer $object] 
-    if {$oc!=""} {
-       $oc destroy
-       my unset objectHash($object)
-    }
-}
-IDE::CommentsContainer proc extractComment meta {
-   if {[llength $meta]%2==0 && [llength $meta]>0} {
-       array set metaArr $meta
-       # add variables (metaArr)
-       if {[info exists metaArr(description)]} {
-           return $metaArr(description)
-       }
-   }
-   return 
-}
-IDE::CommentsContainer proc getGroupForMethod method {
-    if {[my exists proc_method($method)]} {
-        return [lindex [my set proc_method($method)] 1]
-    }
-    return
-}
-IDE::CommentsContainer proc getObjectContainer object {    
-    if {[my exists objectHash($object)]} {
-         return [my set objectHash($object)]
-    }
-    return
-}
-IDE::CommentsContainer proc getObjectContainerWithCreate object {    
-    set c [my getObjectContainer $object]
-    if {$c==""} {
-       set c [IDE::ObjectCommentsContainer new -childof [self] -objectName $object]
-       my set objectHash($object) $c
-    }
-    return $c
-}
-IDE::CommentsContainer proc importComponentMeta meta {
-    if {[llength $meta]!=3} {
-       puts stderr "meta: unexepted length of Component Meta >>$meta<<"
-       return
-    }
-    set component [lindex $meta 1]
-    set contens [lindex $meta 2]
-    set cobj [IDE::Component getCompObjectForNameIfExist $component]
-    if {$cobj==""} {
-       puts stderr "meta: $component is not a Component"
-       return
-    }
-    $cobj setComment [my extractComment $contens]
-}
-IDE::CommentsContainer proc importMeta meta {
-   set first [lindex $meta 0]
-   set second [lindex $meta 1]
-   if {$first=="Component"} {
-      my importComponentMeta $meta
-   } elseif {$first=="tclproc"} {
-      my importProcMeta $meta
-   } elseif {$first=="tclgroup"} {
-      my importProcGroupMeta $meta
-   } else {
-       switch $second {
-          proc {
-             my importObjectMethodMeta Class $meta
-          }
-          instproc {
-             my importObjectMethodMeta Instance $meta
-          }
-          default {
-             my importObjectMeta $meta
-          }
-       }
-   }
-}
-IDE::CommentsContainer proc importObjectMeta meta {
-    if {[llength $meta]!=3} {
-       if {![string match @File* $meta]} {
-           puts stderr "meta: unexepted length of Object Meta >>$meta<<"
-       }
-       return
-    }
-    set class [lindex $meta 0]
-    set object [lindex $meta 1]
-    set contens [lindex $meta 2]
-    if {![Object isobject $object]} {
-       puts stderr "meta: $object is not a Object"
-       return
-    }
-    $object setComment [my extractComment $contens]
-}
-IDE::CommentsContainer proc importObjectMethodMeta {type meta} {
-    if {[llength $meta]!=5} {
-       puts stderr "unexepted length of Method Meta >>$meta<<"
-       return
-    }
-    set object [lindex $meta 0]
-    set method [lindex $meta 2]
-    set contens [lindex $meta 4]
-    if {![Object isobject $object]} {
-       puts stderr "meta: $object is not a Object"
-       return
-    }
-    $object setMethodComment $type $method [my extractComment $contens]
-}
-IDE::CommentsContainer proc importProcGroupMeta meta {
-    if {[llength $meta]!=6} {
-        puts stderr "unexpected length of @ procgroup ..."
-        return
-    }
-    set name [lindex $meta 1]
-    set key [lindex $meta 2]
-    set type [lindex $meta 3]
-    set component [lindex $meta 4]
-    set body [lindex $meta 5]
-    if {$key!="idemeta"} {puts stderr "expect @ procgroup name idemeta .. ..."}
-    my set proc_groupcomment(${name}_${component}) $body
-}
-IDE::CommentsContainer proc importProcMeta meta {
-    if {[llength $meta]<5} {
-        puts stderr "unexpected length of @ proc ..."
-        return
-    }
-    set name [lindex $meta 1]
-    set key [lindex $meta 2]
-    set type [lindex $meta 3]
-    if {$key!="idemeta"} {puts stderr "expect @ proc name idemeta .. ..."}
-    if {$type=="struct"} {
-        my set proc_method($name) [lrange $meta 4 end]
-    } elseif {$type=="comment"} {
-        my set proc_comment($name) [lrange $meta 4 end]
+IDE::SystemConfigMap proc getCleanedLoadList {components {ignoreLoaded 1}} {
+    my instvar dbAvailable packageAvailable
+    # dbAvailable will be puffered 
+    if {[Object isobject IDE::ComponentPersistence]} {
+         my set dbAvailable [IDE::ComponentPersistence getAvailable]
     } else {
-        puts stderr "unexpected @ proc name idemeta $type"
+         my set dbAvailable {}
     }
-}
-IDE::CommentsContainer proc makeTclGroupsFromMeta {} {
-    my instvar proc_method
-    IDE::ProcsGroup buildStuctFromArray proc_method
-    foreach gobj [IDE::ProcsGroup info instances] {
-        IDE::CommentsContainer searchCommentForGroup $gobj
+    set cloaded [IDE::Component getComponentNames]
+    set loadList {}
+    set tclpackages [package names]
+    foreach comp $components {
+       if {$ignoreLoaded && [IDE::Component getCompObjectForNameIfExist [lindex $comp 0]]!=""} continue
+       if {[llength $comp]==1} {
+           if {[ide::lcontain $dbAvailable $comp]} {
+               set versionList [IDE::ComponentPersistence getVersionsForName $comp]
+              lappend loadList [list $comp [lindex [lindex $versionList 0] 0]]
+           } elseif {[ide::lcontain $tclpackages $comp]} {
+              lappend loadList [list $comp package]
+           } elseif {![ide::lcontain $cloaded $comp]} {
+             IDE::Dialog message "Component $comp can not be found in Database or as tcl package. Operation canceled"
+              return
+           }
+       } else {
+           set name [lindex $comp 0]; set type [lindex $comp 1]
+           if {$type=="package"} {
+                if {![ide::lcontain $tclpackages $name]} {
+                     IDE::Dialog message "Component $comp can not be found as tcl package. Operation canceled"
+                }
+                lappend loadList $comp
+           } else {
+                set versionList [IDE::ComponentPersistence getVersionsForName $name]
+                if {[llength $versionList]==0} {
+                     IDE::Dialog message "Component $comp can not be found in Database. Operation canceled"
+                }
+                if {$type=="newest"} {
+                   lappend loadList [list $name [lindex [lindex $versionList end] 0]]
+                } else {
+                   set versionList [ide::lcollect each $versionList {lindex $each 0}]
+                   if {![ide::lcontain $versionList $type]} {
+                     IDE::Dialog message "Component $comp Version $type can not be found in Database. Operation canceled"
+                   }
+                   lappend loadList [list $name $type]
+                }
+           }
+       }
     }
-    foreach mobj [IDE::TclProcsDescription info instances] {
-        IDE::CommentsContainer searchCommentForMethod $mobj
+    return $loadList
+}
+IDE::SystemConfigMap proc getComponentsList {{ignoreLoaded 1}} {
+    my instvar componentsToLoad
+    if {![info exists componentsToLoad] || $componentsToLoad==""} return
+    return [my getCleanedLoadList $componentsToLoad $ignoreLoaded]
+}
+IDE::SystemConfigMap proc getValueForType type {
+  if {[my exists $type]} {
+     return [my set $type]
+  }
+}
+@ IDE::SystemConfigMap proc initFromSystem {} {
+description {Try to get configuration map list from actual loaded foreign components
+}
+}
+IDE::SystemConfigMap proc initFromSystem {} {
+     my instvar componentsToLoad
+     set coreComps [IDE::System getCoreComponentsAll]
+     set comps {}
+     foreach comp [IDE::Component getComponentNames] {
+          if {![ide::lcontain $coreComps $comp]} {
+               set cobj [IDE::Component getCompObjectForNameIfExist $comp]
+               if {[$cobj isPersistent]} {
+                   append comps "{$comp [$cobj getIdValue]}\n"
+               } else {
+                   append comps "{$comp package}\n"
+               }
+          }
+     }
+     set componentsToLoad $comps
+}
+IDE::SystemConfigMap proc loadComponentFromAny component {
+    if {[IDE::Component getCompObjectForNameIfExist $component]!=""} {
+       return 1
     }
-    my cleanTclProcComments
+    set loadList [my getCleanedLoadList $component]
+    my loadComponentsFromList $loadList
+    return 1
 }
-IDE::CommentsContainer proc objectGetComment object {
-    my instvar objComments
-    if {[info exists objComments($object)]} {
-         return $objComments($object)
+IDE::SystemConfigMap proc loadComponents {} {
+    my instvar componentsToLoad
+    if {![info exists componentsToLoad] || $componentsToLoad==""} {
+         IDE::Dialog message "Nothing to load. Create components list first or load a configuration map file"
+         return
     }
+    set loadList [my getCleanedLoadList $componentsToLoad]
+    my loadComponentsFromList $loadList
 }
-IDE::CommentsContainer proc objectHasComment object {
-    my instvar objComments
-    return [expr {[info exists objComments($object)] && $objComments($object)!=""}]
-}
-IDE::CommentsContainer proc objectMethodGetComment {object type method} {
-    set oc [my getObjectContainer $object]
-    if {$oc==""} return
-    $oc getMethodComment $type $method
-}
-IDE::CommentsContainer proc objectMethodHasComment {object type method} {
-    set oc [my getObjectContainer $object]
-    if {$oc==""} {return 0}
-    $oc hasMethodComment $type $method
-}
-IDE::CommentsContainer proc objectMethodSetComment {object type method comment} {
-    set oc [my getObjectContainerWithCreate $object]
-    $oc setMethodComment $type $method $comment
-}
-IDE::CommentsContainer proc objectSetComment {object comment} {
-    my set objComments($object) $comment
-}
-IDE::CommentsContainer proc parseAndCleanMeta {} {
-   if {![@ exists metaList] || [@ set metaList]==""} return
-   foreach meta [@ set metaList] {
-      my importMeta $meta
-   }
-   @ set metaList {}
-}
-IDE::CommentsContainer proc searchCommentForGroup gobj {
-    my instvar proc_groupcomment
-    set key [$gobj getObjectName]_[[$gobj getComponent] getName]
-    if {[my exists proc_groupcomment($key)]} {
-        $gobj setComment $proc_groupcomment($key)
+IDE::SystemConfigMap proc loadComponentsFromList loadList {
+    if {$loadList==""} return
+    foreach item $loadList {
+         set name [lindex $item 0]; set type [lindex $item 1]
+         if {$type=="package"} {
+             IDE::Component loadPackageIfNone $name
+         } else {
+             if {[Object isobject IDE::ComponentPersistence]} {
+                 IDE::ComponentPersistence loadNameVersionId $name $type {}
+             } else {
+                 IDE::Component loadPackageIfNone $name
+             }
+         }
     }
+    IDE::System signalComponentsChanged
 }
-IDE::CommentsContainer proc searchCommentForMethod method {
-    if {[my exists proc_comment($method)]} {
-        [IDE::TclProcsDescription getMethodFor $method] setComment [my set proc_comment($method)]
+IDE::SystemConfigMap proc loadFromFile {{file {}}} {
+    my instvar configName fileName
+    if {$file==""} {
+      set file [IDE::Dialog getOpenFile {{ConfigMap .cfmap}}]
+    }
+    if {$file==""} {return 0}
+    source $file
+    foreach list {preStartScript startScript componentsToLoad} {
+         if {[info exists $list]} {
+              my set $list [::set $list]
+         }
+    }
+    set fileName $file
+    set configName [file rootname [file tail $file]]
+    return 1
+}
+IDE::SystemConfigMap proc saveAsFile {{file {}}} {
+    my instvar fileName configName
+    if {![my exists fileName]} {
+       my set fileName newconfig.cfmap
+    }
+    if {$file==""} {
+      set file [IDE::Dialog getSaveFile $fileName]
+    }
+    if {$file==""} return
+    set of [open $file w]
+    puts $of [my asScript]
+    close $of
+    set fileName $file
+    set configName [file rootname [file tail $file]]
+}
+IDE::SystemConfigMap proc saveConfigMapComponents {} {
+    my instvar componentsToLoad
+    if {![info exists componentsToLoad] || $componentsToLoad==""} {
+         IDE::Dialog message "Nothing to save. Create components list first or load a configuration map file"
+         return
+    }
+    set saveList {}
+    foreach comp $componentsToLoad {
+        set compName [lindex $comp 0]
+        if {[IDE::Component getCompObjectForNameIfExist $compName]==""} {
+             IDE::Dialog message "Component $compName can not be saved bacause it is not loaded into interpreter"
+             return
+        }
+        lappend saveList $compName
+    }
+    IDE::Component saveComplex $saveList 0 0 [pwd]
+    pkg_mkIndex -direct [pwd] *.xotcl
+    IDE::Dialog message "Components $saveList was saved in acuall dictionary [pwd]. pkgIndex.tcl was updated in this dictionary"
+}
+IDE::SystemConfigMap proc saveDistribution {{dir {}}} {
+    my instvar componentsToLoad
+    if {![info exists componentsToLoad] || $componentsToLoad==""} {
+         IDE::Dialog message "The distribution must have at least on component"
+         return
+    }
+    foreach comp $componentsToLoad {
+        set name [lindex $comp 0]
+        set cobj [IDE::Component getCompObjectForNameIfExist $name]
+        if {$cobj==""} {
+            IDE::Dialog message "$comp is not currently loaded. You can only maka a distribution from loaded components. Operation canceled"
+            return
+        }
+    }
+    IDE::Deployer newBrowser
+}
+IDE::SystemConfigMap proc setValueForType {type value} {
+  my set $type $value
+}
+IDE::SystemConfigMap proc startScripts {} {
+    my instvar preStartScript startScript
+    global progdir xotclidedir
+    set progdir $xotclidedir
+    set run 0
+    if {[info exists preStartScript] && $preStartScript!=""} {
+        namespace eval :: $preStartScript
+        set run 1
+    }
+    if {[info exists startScript] && $startScript!=""} {
+        namespace eval :: $startScript
+        set run 1
+    }
+    if {!$run} {
+         IDE::Dialog message "There are no configuration map scripts to run"
     }
 }
 

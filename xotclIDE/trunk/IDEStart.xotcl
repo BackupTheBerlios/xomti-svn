@@ -13,6 +13,116 @@ package require IDEStart
 IDEStarter startIDEFromDB}
 }
 package provide IDEStart 0.71
+@ Object IDEPreferences {
+description {Hanlde preferences of xotcl
+
+on unix the preferences are saved as hile .xotclide in home dictionary
+on windows the registry are used.
+
+Now the preferences are only used to specify data base
+connection for version system.
+The prefereces can by set by installation tool}
+}
+Object IDEPreferences
+@ ::IDEPreferences idemeta categoriesMethodsProcs {{prefFileName setDefaultPreferences} {windowsRegKey windowsSavePrefs windowsLoadPrefs windowsRegistryKey} getDBLoginParameters}
+@ ::IDEPreferences idemeta categoriesProcs {constans windows db-prefs}
+@ ::IDEPreferences idemeta component IDEStart
+IDEPreferences proc getDBLoginParameters args {
+   my getParameter connection
+}
+IDEPreferences proc getParameter key {
+    if {[my exists preferences($key)]} {
+        return [my set preferences($key)]
+    }
+    return
+}
+IDEPreferences proc loadPreferences {} {
+    global tcl_platform
+    my setDefaultPreferences
+    if {$tcl_platform(platform)=="windows"} {
+        my windowsLoadPrefs
+    } else {
+        set prefFileName [file join ~  [my prefFileName]]
+        if {[file exists $prefFileName]} {
+            my loadPreferencesFromFile $prefFileName
+        }
+    }
+}
+IDEPreferences proc loadPreferencesFromFile file {
+    my instvar preferences
+    set preffile [open $file r]
+    while {[gets $preffile Zeile] >= 0} {
+        if {[string index [string trim $Zeile] 0] eq "#"} continue
+        set preferences([lindex $Zeile 0]) [lindex $Zeile 1]
+    }
+    close $preffile
+}
+IDEPreferences proc prefFileName {} {
+   return .xotclide
+}
+IDEPreferences proc savePreferences {} {
+    global errorInfo tcl_platform
+    my instvar preferences
+    if {$tcl_platform(platform)=="windows"} {
+         my windowsSavePrefs
+    } else {
+        my savePreferencesAsFile [file join ~ [my prefFileName]]
+    }
+}
+IDEPreferences proc savePreferencesAsFile file {
+    my instvar preferences
+    set ret [catch {set preffile [open $file w]} openError]
+    if {$ret != 0} {
+        tk_messageBox -title Error -message "Can not open preference file $openError"  -icon error -type ok
+        return
+    }
+    set indicator [array startsearch preferences]
+    while {[array anymore preferences $indicator]} {
+        set elem [array nextelement preferences $indicator]
+        puts $preffile "$elem [list $preferences($elem)]"
+    }
+    array donesearch preferences $indicator
+    close $preffile
+}
+IDEPreferences proc setDefaultPreferences {} {
+    my array set preferences {
+        textfont {-family Courier -size -14}
+        listboxfont {-family Helvetica -size -12 -weight bold}
+        textcolor {}
+        listboxcolor {}
+    }
+}
+IDEPreferences proc setParameter {key param} {
+   my set preferences($key) $param
+}
+IDEPreferences proc windowsLoadPrefs {} {
+    if {![catch {package require registry}]} {
+        set reg_path [my windowsRegKey]
+        if {![catch {set values [registry values $reg_path]}]} {
+            foreach val $values {
+                set preferences($val) [registry get $reg_path $val]
+            }
+        }
+    }
+}
+IDEPreferences proc windowsRegKey {} {
+   return {HKEY_CURRENT_USER\Software\xotclide}
+}
+IDEPreferences proc windowsRegistryKey {} {
+    return HKEY_CURRENT_USER\Software\xotclide
+}
+IDEPreferences proc windowsSavePrefs {} {
+    if {![catch {package require registry}]} {
+        my instvar preferences
+        set reg_path [my windowsRegKey]
+        set indicator [array startsearch preferences]
+        while {[array anymore preferences $indicator]} {
+            set elem [array nextelement preferences $indicator]
+            registry set $reg_path $elem $preferences($elem)
+        }
+        array donesearch preferences $indicator
+    }
+}
 @ Object IDEStarter {
 description {This object handle starting xotclide from differents context
 It read also the line arguments that can influence starting process or
@@ -30,8 +140,8 @@ Followin Starting options are possibly.
 Test von Umlauten äöüß}
 }
 Object IDEStarter
-@ ::IDEStarter idemeta categoriesProcs {constans loading-vc start-up private starting-intern arguments-prefs dumping}
 @ ::IDEStarter idemeta categoriesMethodsProcs {{coreComponents argumentsDescription} {loadObject loadComponent} {startIDEFromDB startIDEWithDB startIDEOnly startLoader startConfId startIDEFromApp} {initProcWrappersStruct isDevelopingMode} {establishDBConnection getConnectionObject initializeAfterLoad loadIDECoreFromDB startUpIDE closeWaitDialog setWaitDialog} {loadPreferences parseCommandLineArgs showHelpAndExit} {dumpCompId dumpConfId getComponentBody getComponentsForConfigmapId getConfigMapBodyDeep getObjectBody getSubconfigsForId}}
+@ ::IDEStarter idemeta categoriesProcs {constans loading-vc start-up private starting-intern arguments-prefs dumping}
 @ ::IDEStarter idemeta component IDEStart
 IDEStarter proc argumentsDescription {} {
     return {
@@ -548,116 +658,6 @@ IDEStarter proc tkMessage text {
     set parent .
     if {$fwin!={}} { set parent [winfo toplevel $fwin] }
     return [tk_messageBox -title {Message} -message $text -icon warning -type ok -parent $parent]
-}
-@ Object IDEPreferences {
-description {Hanlde preferences of xotcl
-
-on unix the preferences are saved as hile .xotclide in home dictionary
-on windows the registry are used.
-
-Now the preferences are only used to specify data base
-connection for version system.
-The prefereces can by set by installation tool}
-}
-Object IDEPreferences
-@ ::IDEPreferences idemeta categoriesProcs {constans windows db-prefs}
-@ ::IDEPreferences idemeta categoriesMethodsProcs {{prefFileName setDefaultPreferences} {windowsRegKey windowsSavePrefs windowsLoadPrefs windowsRegistryKey} getDBLoginParameters}
-@ ::IDEPreferences idemeta component IDEStart
-IDEPreferences proc getDBLoginParameters args {
-   my getParameter connection
-}
-IDEPreferences proc getParameter key {
-    if {[my exists preferences($key)]} {
-        return [my set preferences($key)]
-    }
-    return
-}
-IDEPreferences proc loadPreferences {} {
-    global tcl_platform
-    my setDefaultPreferences
-    if {$tcl_platform(platform)=="windows"} {
-        my windowsLoadPrefs
-    } else {
-        set prefFileName [file join ~  [my prefFileName]]
-        if {[file exists $prefFileName]} {
-            my loadPreferencesFromFile $prefFileName
-        }
-    }
-}
-IDEPreferences proc loadPreferencesFromFile file {
-    my instvar preferences
-    set preffile [open $file r]
-    while {[gets $preffile Zeile] >= 0} {
-        if {[string index [string trim $Zeile] 0] eq "#"} continue
-        set preferences([lindex $Zeile 0]) [lindex $Zeile 1]
-    }
-    close $preffile
-}
-IDEPreferences proc prefFileName {} {
-   return .xotclide
-}
-IDEPreferences proc savePreferences {} {
-    global errorInfo tcl_platform
-    my instvar preferences
-    if {$tcl_platform(platform)=="windows"} {
-         my windowsSavePrefs
-    } else {
-        my savePreferencesAsFile [file join ~ [my prefFileName]]
-    }
-}
-IDEPreferences proc savePreferencesAsFile file {
-    my instvar preferences
-    set ret [catch {set preffile [open $file w]} openError]
-    if {$ret != 0} {
-        tk_messageBox -title Error -message "Can not open preference file $openError"  -icon error -type ok
-        return
-    }
-    set indicator [array startsearch preferences]
-    while {[array anymore preferences $indicator]} {
-        set elem [array nextelement preferences $indicator]
-        puts $preffile "$elem [list $preferences($elem)]"
-    }
-    array donesearch preferences $indicator
-    close $preffile
-}
-IDEPreferences proc setDefaultPreferences {} {
-    my array set preferences {
-        textfont {-family Courier -size -14}
-        listboxfont {-family Helvetica -size -12 -weight bold}
-        textcolor {}
-        listboxcolor {}
-    }
-}
-IDEPreferences proc setParameter {key param} {
-   my set preferences($key) $param
-}
-IDEPreferences proc windowsLoadPrefs {} {
-    if {![catch {package require registry}]} {
-        set reg_path [my windowsRegKey]
-        if {![catch {set values [registry values $reg_path]}]} {
-            foreach val $values {
-                set preferences($val) [registry get $reg_path $val]
-            }
-        }
-    }
-}
-IDEPreferences proc windowsRegKey {} {
-   return {HKEY_CURRENT_USER\Software\xotclide}
-}
-IDEPreferences proc windowsRegistryKey {} {
-    return HKEY_CURRENT_USER\Software\xotclide
-}
-IDEPreferences proc windowsSavePrefs {} {
-    if {![catch {package require registry}]} {
-        my instvar preferences
-        set reg_path [my windowsRegKey]
-        set indicator [array startsearch preferences]
-        while {[array anymore preferences $indicator]} {
-            set elem [array nextelement preferences $indicator]
-            registry set $reg_path $elem $preferences($elem)
-        }
-        array donesearch preferences $indicator
-    }
 }
 IDEStarter initializeAfterLoad
 

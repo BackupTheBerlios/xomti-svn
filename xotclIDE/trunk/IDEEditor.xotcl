@@ -1,5 +1,5 @@
 # automatically generated from XOTclIDE
-# script require component {IDECore IDEView IDEBaseGUI IDETclParser}
+# script require component {IDETclParser IDECore IDEView IDEBaseGUI}
 @ Component IDEEditor {
 description {Xotcl Text Editing
 
@@ -11,10 +11,31 @@ In the future place for such things as
 3. delegation to syntax checker in IDETclParser component}
 }
 package provide IDEEditor 0.70
+package require IDETclParser
 package require IDECore
 package require IDEView
 package require IDEBaseGUI
-package require IDETclParser
+@ Class PrsSyntaxHighlight {
+description {This Class is special tcl parser context that can be used
+for syntax highlight into IDE::Text (View for parsed method).
+How tokens will be handled is specified in syntaxHighlight method (PrsElem)}
+}
+Class PrsSyntaxHighlight -superclass ::PrsContext  -parameter text
+@ ::PrsSyntaxHighlight idemeta component IDEEditor
+PrsSyntaxHighlight instproc checkObjectSelfCall {command notifier} {
+    my highlightElement [$command getElem 0] xotcl
+}
+PrsSyntaxHighlight instproc checkTclCommand {name command notifier} {
+    if {[next]} {
+        my highlightElement [$command getElem 0] tclproc
+    }
+}
+PrsSyntaxHighlight instproc highlightElement {prsElem tag {shiftLeft 0} {shiftRight 0}} {
+    [my text] tagRange $tag [expr {[$prsElem begin]+$shiftLeft}] [expr {[$prsElem end]+1+$shiftRight}]
+}
+PrsSyntaxHighlight instproc visit prsElem {
+    [my parser] catchParseErrors {$prsElem syntaxHighlight [self]}
+}
 @ Class IDE::TclModeEdit {
 description {Tcl Mode
 
@@ -29,8 +50,8 @@ supports function
 4. Statix Syntax Checking}
 }
 Class IDE::TclModeEdit -superclass {::IDE::MethodEdit ::IDE::EditorPopDown}  -parameter {{editMode none}}
-@ ::IDE::TclModeEdit idemeta categories {edit-helper syntax-highlighting interface tcl-lint initialize context-quick-edit}
 @ ::IDE::TclModeEdit idemeta categoriesMethods {{searchCloseQuote searchCloseBrace doubleButton searchOpenBrace keyReturn getIdent} {setType syntaxHighlightIfWanted simpleSyntaxHighlight syntaxHighlight syntaxHighlightRemove complexSyntaxHighlight} {setText saveValue} {xotclLint lintIfWanted} {initTags init menuInsertions} {getProcSubcommand invokePopDown getInstanceCommand getVariable tabPress}}
+@ ::IDE::TclModeEdit idemeta categories {edit-helper syntax-highlighting interface tcl-lint initialize context-quick-edit}
 @ ::IDE::TclModeEdit idemeta component IDEEditor
 IDE::TclModeEdit instproc addIndent {} {
     set twin [my getTextWindow]
@@ -519,26 +540,5 @@ IDE::TclModeEdit instproc uncommentRegion {} {
 }
 IDE::TclModeEdit instproc xotclLint text {
     
-}
-@ Class PrsSyntaxHighlight {
-description {This Class is special tcl parser context that can be used
-for syntax highlight into IDE::Text (View for parsed method).
-How tokens will be handled is specified in syntaxHighlight method (PrsElem)}
-}
-Class PrsSyntaxHighlight -superclass ::PrsContext  -parameter text
-@ ::PrsSyntaxHighlight idemeta component IDEEditor
-PrsSyntaxHighlight instproc checkObjectSelfCall {command notifier} {
-    my highlightElement [$command getElem 0] xotcl
-}
-PrsSyntaxHighlight instproc checkTclCommand {name command notifier} {
-    if {[next]} {
-        my highlightElement [$command getElem 0] tclproc
-    }
-}
-PrsSyntaxHighlight instproc highlightElement {prsElem tag {shiftLeft 0} {shiftRight 0}} {
-    [my text] tagRange $tag [expr {[$prsElem begin]+$shiftLeft}] [expr {[$prsElem end]+1+$shiftRight}]
-}
-PrsSyntaxHighlight instproc visit prsElem {
-    [my parser] catchParseErrors {$prsElem syntaxHighlight [self]}
 }
 
