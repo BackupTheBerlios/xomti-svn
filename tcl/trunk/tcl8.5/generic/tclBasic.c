@@ -1578,51 +1578,52 @@ Tcl_CreateObjCommand(interp, cmdName, proc, clientData, deleteProc)
 	return (Tcl_Command) NULL;
     }
 
+
     /*
      * Determine where the command should reside. If its name contains 
      * namespace qualifiers, we put it in the specified namespace; 
      * otherwise, we always put it in the global namespace.
      */
-
+    
     if (strstr(cmdName, "::") != NULL) {
-       TclGetNamespaceForQualName(interp, cmdName, (Namespace *) NULL,
-           TCL_CREATE_NS_IF_UNKNOWN, &nsPtr, &dummy1, &dummy2, &tail);
-       if ((nsPtr == NULL) || (tail == NULL)) {
+	TclGetNamespaceForQualName(interp, cmdName, (Namespace *) NULL,
+				   TCL_CREATE_NS_IF_UNKNOWN, &nsPtr, &dummy1, &dummy2, &tail);
+	if ((nsPtr == NULL) || (tail == NULL)) {
 	    return (Tcl_Command) NULL;
 	}
     } else {
 	nsPtr = iPtr->globalNsPtr;
 	tail = cmdName;
     }
-
+    
     hPtr = Tcl_CreateHashEntry(&nsPtr->cmdTable, tail, &new);
     if (!new) {
 	cmdPtr = (Command *) Tcl_GetHashValue(hPtr);
-
+	
 	/*
 	 * Command already exists. If its object-based Tcl_ObjCmdProc is
 	 * TclInvokeStringCommand, we just set its Tcl_ObjCmdProc to the
 	 * argument "proc". Otherwise, we delete the old command. 
 	 */
-
+	
 	if (cmdPtr->objProc == TclInvokeStringCommand) {
 	    cmdPtr->objProc = proc;
 	    cmdPtr->objClientData = clientData;
-            cmdPtr->deleteProc = deleteProc;
-            cmdPtr->deleteData = clientData;
+	    cmdPtr->deleteProc = deleteProc;
+	    cmdPtr->deleteData = clientData;
 	    return (Tcl_Command) cmdPtr;
 	}
-
+	
 	/*
 	 * Otherwise, we delete the old command.  Be careful to preserve
 	 * any existing import links so we can restore them down below.
 	 * That way, you can redefine a command and its import status
 	 * will remain intact.
 	 */
-
+	
 	oldRefPtr = cmdPtr->importRefPtr;
 	cmdPtr->importRefPtr = NULL;
-
+	
 	Tcl_DeleteCommandFromToken(interp, (Tcl_Command) cmdPtr);
 	hPtr = Tcl_CreateHashEntry(&nsPtr->cmdTable, tail, &new);
 	if (!new) {
@@ -1631,8 +1632,8 @@ Tcl_CreateObjCommand(interp, cmdName, proc, clientData, deleteProc)
 	     * away the new command (if we try to delete it again, we
 	     * could get stuck in an infinite loop).
 	     */
-
-	     ckfree((char *) Tcl_GetHashValue(hPtr));
+	    
+	    ckfree((char *) Tcl_GetHashValue(hPtr));
 	}
     } else {
 	/*
@@ -1640,7 +1641,7 @@ Tcl_CreateObjCommand(interp, cmdName, proc, clientData, deleteProc)
 	 * changed.  However, we do not need to recompute this just
 	 * yet; next time we need the info will be soon enough.
 	 */
-
+	
 	TclInvalidateNsCmdLookup(nsPtr);
     }
     cmdPtr = (Command *) ckalloc(sizeof(Command));
@@ -1683,6 +1684,7 @@ Tcl_CreateObjCommand(interp, cmdName, proc, clientData, deleteProc)
      */
     
     TclResetShadowedCmdRefs(interp, cmdPtr);
+
     return (Tcl_Command) cmdPtr;
 }
 

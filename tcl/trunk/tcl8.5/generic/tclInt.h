@@ -1745,6 +1745,7 @@ MODULE_SCOPE Tcl_ObjType tclIntType;
 MODULE_SCOPE Tcl_ObjType tclListType;
 MODULE_SCOPE Tcl_ObjType tclDictType;
 MODULE_SCOPE Tcl_ObjType tclProcBodyType;
+MODULE_SCOPE Tcl_ObjType tclAnonymousCmdType;
 MODULE_SCOPE Tcl_ObjType tclStringType;
 MODULE_SCOPE Tcl_ObjType tclArraySearchType;
 MODULE_SCOPE Tcl_ObjType tclIndexType;
@@ -2009,6 +2010,8 @@ MODULE_SCOPE int	TclpDlopen _ANSI_ARGS_((Tcl_Interp *interp,
 MODULE_SCOPE int	TclpUtime _ANSI_ARGS_((Tcl_Obj *pathPtr,
 			    struct utimbuf *tval));
 MODULE_SCOPE int	TclIsEnsemble _ANSI_ARGS_((Command *cmdPtr));
+MODULE_SCOPE Tcl_Obj *	TclNewAnonymousCmdObj _ANSI_ARGS_((Command *cmdPtr));
+
 
 /*
  *----------------------------------------------------------------

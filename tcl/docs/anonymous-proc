@@ -145,6 +145,7 @@ typedef struct Command {
   - alloue une structure "Proc"
     Commentaire bizarre "Now initialize the new procedure's cmdPtr field"
     alors que ce sera fait dans Tcl_ProcObjCmd
+  - n'utilise procName que pour les messages d'erreur
 - appelle Tcl_CreateCommand pour créer une structure "Command"
   [
    Il faudra s'en passer pour les procédures anonymes

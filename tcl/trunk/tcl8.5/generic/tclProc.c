@@ -20,6 +20,9 @@
  * Prototypes for static functions in this file
  */
 
+static Tcl_Command TclCreateAnonymousObjCommand _ANSI_ARGS_((Tcl_Interp *interp,
+		       Namespace *nsPtr, Tcl_ObjCmdProc *proc, ClientData clientData,
+		       Tcl_CmdDeleteProc *deleteProc));
 static void	ProcBodyDup _ANSI_ARGS_((Tcl_Obj *srcPtr, Tcl_Obj *dupPtr));
 static void	ProcBodyFree _ANSI_ARGS_((Tcl_Obj *objPtr));
 static int	ProcessProcResultCode _ANSI_ARGS_((Tcl_Interp *interp,
@@ -101,25 +104,40 @@ Tcl_ProcObjCmd(dummy, interp, objc, objv)
      */
 
     fullName = TclGetString(objv[1]);
-    TclGetNamespaceForQualName(interp, fullName, (Namespace *) NULL,
-	    0, &nsPtr, &altNsPtr, &cxtNsPtr, &procName);
 
-    if (nsPtr == NULL) {
-	Tcl_AppendResult(interp, "can't create procedure \"", fullName,
-		"\": unknown namespace", (char *) NULL);
-	return TCL_ERROR;
-    }
-    if (procName == NULL) {
-	Tcl_AppendResult(interp, "can't create procedure \"", fullName,
-		"\": bad procedure name", (char *) NULL);
-	return TCL_ERROR;
-    }
-    if ((nsPtr != iPtr->globalNsPtr)
+    if (*fullName == '\0') {
+	Interp *iPtr = (Interp *) interp;
+	if (iPtr->varFramePtr != NULL) {
+	    nsPtr =  iPtr->varFramePtr->nsPtr;
+	    cxtNsPtr = nsPtr;
+	    altNsPtr = iPtr->globalNsPtr;
+	} else {
+	    nsPtr = iPtr->globalNsPtr;
+	    cxtNsPtr = nsPtr;
+	    altNsPtr = NULL;
+	}
+	procName = (char *) NULL;
+    } else {
+	TclGetNamespaceForQualName(interp, fullName, (Namespace *) NULL,
+				   0, &nsPtr, &altNsPtr, &cxtNsPtr, &procName);
+
+	if (nsPtr == NULL) {
+	    Tcl_AppendResult(interp, "can't create procedure \"", fullName,
+			     "\": unknown namespace", (char *) NULL);
+	    return TCL_ERROR;
+	}
+	if (procName == NULL) {
+	    Tcl_AppendResult(interp, "can't create procedure \"", fullName,
+			     "\": bad procedure name", (char *) NULL);
+	    return TCL_ERROR;
+	}
+	if ((nsPtr != iPtr->globalNsPtr)
 	    && (procName != NULL) && (procName[0] == ':')) {
-	Tcl_AppendResult(interp, "can't create procedure \"", procName,
-		"\" in non-global namespace with name starting with \":\"",
-		(char *) NULL);
-	return TCL_ERROR;
+	    Tcl_AppendResult(interp, "can't create procedure \"", procName,
+			     "\" in non-global namespace with name starting with \":\"",
+			     (char *) NULL);
+	    return TCL_ERROR;
+	}
     }
 
     /*
@@ -137,17 +155,23 @@ Tcl_ProcObjCmd(dummy, interp, objc, objv)
      * generate a fully qualified name for it.
      */
 
-    Tcl_DStringInit(&ds);
-    if (nsPtr != iPtr->globalNsPtr) {
-	Tcl_DStringAppend(&ds, nsPtr->fullName, -1);
-	Tcl_DStringAppend(&ds, "::", 2);
+
+    if (procName != NULL) {
+	Tcl_DStringInit(&ds);
+	if (nsPtr != iPtr->globalNsPtr) {
+	    Tcl_DStringAppend(&ds, nsPtr->fullName, -1);
+	    Tcl_DStringAppend(&ds, "::", 2);
+	}
+	Tcl_DStringAppend(&ds, procName, -1);
+	
+	cmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&ds),
+				   TclObjInterpProc, (ClientData) procPtr, TclProcDeleteProc);
+	
+	Tcl_DStringFree(&ds);
+    } else {
+	cmd = TclCreateAnonymousObjCommand(interp, nsPtr,
+					   TclObjInterpProc, (ClientData) procPtr, TclProcDeleteProc);
     }
-    Tcl_DStringAppend(&ds, procName, -1);
-
-    cmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&ds),
-	    TclObjInterpProc, (ClientData) procPtr, TclProcDeleteProc);
-
-    Tcl_DStringFree(&ds);
     /*
      * Now initialize the new procedure's cmdPtr field. This will be used
      * later when the procedure is called to determine what namespace the
@@ -211,8 +235,11 @@ Tcl_ProcObjCmd(dummy, interp, objc, objv)
     }
 
  done:
-    if (procPtr->cmdPtr->hPtr == NULL) {
-	
+    if (((Command *) cmd)->hPtr == NULL) {
+	Tcl_Obj *objPtr = TclNewAnonymousCmdObj((Command *) cmd);
+	Tcl_InvalidateStringRep(objPtr);
+	objPtr->typePtr = &tclAnonymousCmdType;
+	Tcl_SetObjResult(interp, objPtr);
     }
     return TCL_OK;
 }
@@ -335,8 +362,12 @@ TclCreateProc(interp, nsPtr, procName, argsPtr, bodyPtr, procPtrPtr)
 	    char buf[40 + TCL_INTEGER_SPACE + TCL_INTEGER_SPACE];
 	    sprintf(buf, "%d entries, precompiled header expects %d",
 		    numArgs, procPtr->numArgs);
-	    Tcl_AppendResult(interp, "procedure \"", procName,
-		    "\": arg list contains ", buf, NULL);
+	    if (procName != NULL) {
+		Tcl_AppendResult(interp, "procedure \"", procName,
+				 "\": arg list contains ", buf, NULL);
+	    } else {
+		Tcl_AppendResult(interp, "anonymous procedure arg list contains ", buf, NULL);
+	    }
 	    goto procError;
 	}
 	localPtr = procPtr->firstLocalPtr;
@@ -366,8 +397,12 @@ TclCreateProc(interp, nsPtr, procName, argsPtr, bodyPtr, procPtrPtr)
 	}
 	if ((fieldCount == 0) || (*fieldValues[0] == 0)) {
 	    ckfree((char *) fieldValues);
-	    Tcl_AppendResult(interp, "procedure \"", procName,
-		    "\" has argument with no name", (char *) NULL);
+	    if (procName != NULL) {
+		Tcl_AppendResult(interp, "procedure \"", procName,
+				 "\" has argument with no name", (char *) NULL);
+	    } else {
+		Tcl_AppendResult(interp, "anonymous procedure has argument with no name", (char *) NULL);
+	    }
 	    goto procError;
 	}
 
@@ -391,16 +426,26 @@ TclCreateProc(interp, nsPtr, procName, argsPtr, bodyPtr, procPtrPtr)
 		} while (*q != '\0');
 		q--;
 		if (*q == ')') { /* we have an array element */
-		    Tcl_AppendResult(interp, "procedure \"", procName,
-			    "\" has formal parameter \"", fieldValues[0],
-			    "\" that is an array element", (char *) NULL);
+		    if (procName != NULL) {
+			Tcl_AppendResult(interp, "procedure \"", procName,
+					 "\" has formal parameter \"", fieldValues[0],
+					 "\" that is an array element", (char *) NULL);
+		    } else {
+			Tcl_AppendResult(interp, "anoymous procedure has formal parameter \"", fieldValues[0],
+					 "\" that is an array element", (char *) NULL);
+		    }
 		    ckfree((char *) fieldValues);
 		    goto procError;
 		}
 	    } else if ((*p == ':') && (*(p+1) == ':')) {
-		Tcl_AppendResult(interp, "procedure \"", procName,
-			"\" has formal parameter \"", fieldValues[0],
-			"\" that is not a simple name", (char *) NULL);
+		if (procName != NULL) {
+		    Tcl_AppendResult(interp, "procedure \"", procName,
+				     "\" has formal parameter \"", fieldValues[0],
+				     "\" that is not a simple name", (char *) NULL);
+		} else {
+		    Tcl_AppendResult(interp, "anonymous procedure has formal parameter \"", fieldValues[0],
+				     "\" that is not a simple name", (char *) NULL);
+		}
 		ckfree((char *) fieldValues);
 		goto procError;
 	    }
@@ -426,8 +471,12 @@ TclCreateProc(interp, nsPtr, procName, argsPtr, bodyPtr, procPtrPtr)
 
 		ckfree((char *) fieldValues);
 		sprintf(buf, "%d is inconsistent with precompiled body", i);
-		Tcl_AppendResult(interp, "procedure \"", procName,
-			"\": formal parameter ", buf, (char *) NULL);
+		if (procName != NULL) {
+		    Tcl_AppendResult(interp, "procedure \"", procName,
+				     "\": formal parameter ", buf, (char *) NULL);
+		} else {
+		    Tcl_AppendResult(interp, "anonymous procedure formal parameter ", buf, (char *) NULL);
+		}
 		goto procError;
 	    }
 
@@ -441,10 +490,16 @@ TclCreateProc(interp, nsPtr, procName, argsPtr, bodyPtr, procPtrPtr)
 			&tmpLength);
 		if ((valueLength != tmpLength) ||
 			strncmp(fieldValues[1], tmpPtr, (size_t) tmpLength)) {
-		    Tcl_AppendResult(interp, "procedure \"", procName,
-			    "\": formal parameter \"", fieldValues[0],
-			    "\" has default value inconsistent with precompiled body",
-			    (char *) NULL);
+		    if (procName != NULL) {
+			Tcl_AppendResult(interp, "procedure \"", procName,
+					 "\": formal parameter \"", fieldValues[0],
+					 "\" has default value inconsistent with precompiled body",
+					 (char *) NULL);
+		    } else {
+			Tcl_AppendResult(interp, "anonymous procedure: formal parameter \"", fieldValues[0],
+					 "\" has default value inconsistent with precompiled body",
+					 (char *) NULL);
+		    }
 		    ckfree((char *) fieldValues);
 		    goto procError;
 		}
@@ -511,6 +566,79 @@ procError:
 	ckfree((char *) argArray);
     }
     return TCL_ERROR;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Tcl_CreateObjCommand --
+ *
+ *	Define a new object-based command in a command table.
+ *
+ * Results:
+ *	The return value is a token for the command, which can
+ *	be used in future calls to Tcl_GetCommandName.
+ *
+ * Side effects:
+ *	If no command named "cmdName" already exists for interp, one is
+ *	created. Otherwise, if a command does exist, then if the
+ *	object-based Tcl_ObjCmdProc is TclInvokeStringCommand, we assume
+ *	Tcl_CreateCommand was called previously for the same command and
+ *	just set its Tcl_ObjCmdProc to the argument "proc"; otherwise, we
+ *	delete the old command.
+ *
+ *	In the future, during bytecode evaluation when "cmdName" is seen as
+ *	the name of a command by Tcl_EvalObj or Tcl_Eval, the object-based
+ *	Tcl_ObjCmdProc proc will be called. When the command is deleted from
+ *	the table, deleteProc will be called. See the manual entry for
+ *	details on the calling sequence.
+ *
+ *----------------------------------------------------------------------
+ */
+
+static Tcl_Command
+TclCreateAnonymousObjCommand(interp, nsPtr, proc, clientData, deleteProc)
+    Tcl_Interp *interp;		/* Token for command interpreter (returned
+				 * by previous call to Tcl_CreateInterp). */
+    Namespace *nsPtr;	        /**/
+    Tcl_ObjCmdProc *proc;	/* Object-based procedure to associate with
+				 * name. */
+    ClientData clientData;	/* Arbitrary value to pass to object
+    				 * procedure. */
+    Tcl_CmdDeleteProc *deleteProc;
+				/* If not NULL, gives a procedure to call
+				 * when this command is deleted. */
+{
+    Interp *iPtr = (Interp *) interp;
+    Command *cmdPtr;
+
+    if (iPtr->flags & DELETED) {
+	/*
+	 * The interpreter is being deleted.  Don't create any new
+	 * commands;  it's not safe to muck with the interpreter anymore.
+	 */
+
+	return (Tcl_Command) NULL;
+    }
+
+
+    cmdPtr = (Command *) ckalloc(sizeof(Command));
+    cmdPtr->hPtr = NULL;
+    cmdPtr->nsPtr = nsPtr;
+    cmdPtr->refCount = 1;
+    cmdPtr->cmdEpoch = 0;
+    cmdPtr->compileProc = (CompileProc *) NULL;
+    cmdPtr->objProc = proc;
+    cmdPtr->objClientData = clientData;
+    cmdPtr->proc = TclInvokeObjectCommand;
+    cmdPtr->clientData = (ClientData) cmdPtr;
+    cmdPtr->deleteProc = deleteProc;
+    cmdPtr->deleteData = clientData;
+    cmdPtr->flags = 0;
+    cmdPtr->importRefPtr = NULL;
+    cmdPtr->tracePtr = NULL;
+    
+    return (Tcl_Command) cmdPtr;
 }
 
 /*
@@ -925,11 +1053,15 @@ TclObjInterpProc(clientData, interp, objc, objv)
     Var localStorage[NUM_LOCALS];
     Var *compiledLocals = localStorage;
 
-    /*
-     * Get the procedure's name.
-     */
-
-    procName = Tcl_GetStringFromObj(objv[0], &nameLen);
+    if (objv[0]->typePtr != &tclAnonymousCmdType) {
+	/*
+	 * Get the procedure's name.
+	 */
+	
+	procName = Tcl_GetStringFromObj(objv[0], &nameLen);
+    } else {
+	procName = NULL;
+    }
 
     /*
      * If necessary, compile the procedure's body. The compiler will

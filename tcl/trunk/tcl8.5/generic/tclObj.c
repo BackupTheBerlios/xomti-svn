@@ -227,7 +227,7 @@ static Tcl_ObjType tclCmdNameType = {
  *
  */
 
-static Tcl_ObjType tclAnonymousCmdType = {
+Tcl_ObjType tclAnonymousCmdType = {
     "anonymousCmd",			/* name */
     FreeAnonymousCmdInternalRep,	/* freeIntRepProc */
     DupAnonymousCmdInternalRep,		/* dupIntRepProc */
@@ -309,6 +309,7 @@ TclInitObjSubsystem()
     Tcl_RegisterObjType(&tclDictType);
     Tcl_RegisterObjType(&tclByteCodeType);
     Tcl_RegisterObjType(&tclProcBodyType);
+    Tcl_RegisterObjType(&tclAnonymousCmdType);
     Tcl_RegisterObjType(&tclArraySearchType);
     Tcl_RegisterObjType(&tclIndexType);
     Tcl_RegisterObjType(&tclNsNameType);
@@ -3182,6 +3183,10 @@ Tcl_GetCommandFromObj(interp, objPtr)
     CallFrame *savedFramePtr;
     char *name;
 
+    if (objPtr->typePtr == &tclAnonymousCmdType) {
+	return (Tcl_Command)(objPtr->internalRep.otherValuePtr);
+    }
+
     /*
      * If the variable name is fully qualified, do as if the lookup were
      * done from the global namespace; this helps avoid repeated lookups
@@ -3498,6 +3503,39 @@ SetCmdNameFromAny(interp, objPtr)
 /*
  *----------------------------------------------------------------------
  *
+ * TclNewAnonymousCmdObj --
+ *
+ *	Creates a new object, of type "anonymousCmd", whose internal
+ *	representation is the given Ciommand struct.  The newly created
+ *	object's reference count is 0.
+ *
+ * Results:
+ *	Returns a pointer to a newly allocated Tcl_Obj, 0 on error.
+ *
+ * Side effects:
+ *      Increments Comamnd refcount
+ * 
+ *----------------------------------------------------------------------
+ */
+
+Tcl_Obj *
+TclNewAnonymousCmdObj(cmdPtr)
+    Command *cmdPtr;		/* the Command struct to store as the internal
+				 * representation. */
+{
+    Tcl_Obj *objPtr = Tcl_NewObj();
+    if (objPtr) {
+	objPtr->typePtr = &tclAnonymousCmdType;
+	objPtr->internalRep.otherValuePtr = (VOID *) cmdPtr;
+	cmdPtr->refCount++; /* a voir */
+    }
+
+    return objPtr;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
  * FreeAnonymousCmdInternalRep --
  *
  *	Frees the resources associated with an anonymousCmd object's internal
@@ -3517,8 +3555,11 @@ FreeAnonymousCmdInternalRep(objPtr)
     register Tcl_Obj *objPtr;	/* CmdName object with internal
 				 * representation to free. */
 {
-    Proc *procPtr = (Proc *) objPtr->internalRep.otherValuePtr;
-    TclProcCleanupProc(procPtr);
+    Command *cmd = (Command *) objPtr->internalRep.otherValuePtr;
+    cmd->refCount--;
+    if (cmd->refCount <= 0) {
+	Tcl_DeleteCommandFromToken(((Proc *)(cmd->objClientData))->iPtr, cmd);
+    }
 }
 
 /*
