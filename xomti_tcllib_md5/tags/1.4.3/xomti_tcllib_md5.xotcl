@@ -1,7 +1,30 @@
 # automatically generated from XOTclIDE
-package provide xomti_tcllib_md5 20050124.1
+package provide xomti_tcllib_md5 1.2.0
 @ Object Tcllib_md5pure {
-description blabla
+##################################################
+#
+# md5.tcl - MD5 in Tcl
+# Author: Don Libes <libes@nist.gov>, July 1999
+# Version 1.2.0
+#
+# MD5  defined by RFC 1321, "The MD5 Message-Digest Algorithm"
+# HMAC defined by RFC 2104, "Keyed-Hashing for Message Authentication"
+#
+# Most of the comments below come right out of RFC 1321; That's why
+# they have such peculiar numbers.  In addition, I have retained
+# original syntax, bugs in documentation (yes, really), etc. from the
+# RFC.  All remaining bugs are mine.
+#
+# HMAC implementation by D. J. Hagberg <dhagberg@millibits.com> and
+# is based on C code in RFC 2104.
+#
+# For more info, see: http://expect.nist.gov/md5pure
+#
+# - Don
+#
+# Modified by Miguel Sofer to use inlines and simple variables
+# XOTcl version by Fabrice Pardo
+##################################################
 }
 Object Tcllib_md5pure
 @ ::Tcllib_md5pure idemeta component xomti_tcllib_md5
@@ -11,37 +34,6 @@ Tcllib_md5pure proc byte2 i {expr {(0xff0000 & $i) >> 16}}
 Tcllib_md5pure proc byte3 i {expr {((0xff000000 & $i) >> 24) & 0xff}}
 Tcllib_md5pure proc bytes i {
     format %0.2x%0.2x%0.2x%0.2x [my byte0 $i] [my byte1 $i] [my byte2 $i] [my byte3 $i]
-}
-Tcllib_md5pure proc hmac {key text} {
-    # if key is longer than 64 bytes, reset it to MD5(key).  If shorter, 
-    # pad it out with null (\x00) chars.
-    set keyLen [string length $key]
-    if {$keyLen > 64} {
-        set key [binary format H32 [my md5 $key]]
-	set keyLen [string length $key]
-    }
-
-    # ensure the key is padded out to 64 chars with nulls.
-    set padLen [expr {64 - $keyLen}]
-    append key [binary format "a$padLen" {}]
-	
-    # Split apart the key into a list of 16 little-endian words
-    binary scan $key i16 blocks
-
-    # XOR key with ipad and opad values
-    set k_ipad {}
-    set k_opad {}
-    foreach i $blocks {
-        append k_ipad [binary format i [expr {$i ^ 0x36363636}]]
-        append k_opad [binary format i [expr {$i ^ 0x5c5c5c5c}]]
-    }
-    
-    # Perform inner md5, appending its results to the outer key
-    append k_ipad $text
-    append k_opad [binary format H* [my md5 $k_ipad]]
-
-    # Perform outer md5
-    my md5 $k_opad
 }
 Tcllib_md5pure proc md5 msg {
     set bobo [my info body private_md5]
@@ -406,43 +398,12 @@ Tcllib_md5pure proc private_md5body msg {
 Tcllib_md5pure proc private_regsub md5body {
     
     set md5body "\n\n    # Automatically build by \"[self] private_regsub\"\n$md5body"
-    #proc md5pure::F {x y z} {expr {(($x & $y) | ((~$x) & $z))}}
     regsub -all -- {\[ *F +(\$.) +(\$.) +(\$.) *\]} $md5body {((\1 \& \2) | ((~\1) \& \3))} md5body
-
-    #proc md5pure::G {x y z} {expr {(($x & $z) | ($y & (~$z)))}}
     regsub -all -- {\[ *G +(\$.) +(\$.) +(\$.) *\]} $md5body {((\1 \& \3) | (\2 \& (~\3)))} md5body
-
-    #proc md5pure::H {x y z} {expr {$x ^ $y ^ $z}}
     regsub -all -- {\[ *H +(\$.) +(\$.) +(\$.) *\]} $md5body {(\1 ^ \2 ^ \3)} md5body
-
-    #proc md5pure::I {x y z} {expr {$y ^ ($x | (~$z))}}
     regsub -all -- {\[ *I +(\$.) +(\$.) +(\$.) *\]} $md5body {(\2 ^ (\1 | (~\3)))} md5body
 
     # bitwise left-rotate
-    if {0} {
-	proc md5pure::<<< {x i} {
-	    # This works by bitwise-ORing together right piece and left
-	    # piece so that the (original) right piece becomes the left
-	    # piece and vice versa.
-	    #
-	    # The (original) right piece is a simple left shift.
-	    # The (original) left piece should be a simple right shift
-	    # but Tcl does sign extension on right shifts so we
-	    # shift it 1 bit, mask off the sign, and finally shift
-	    # it the rest of the way.
-	    
-	    # expr {($x << $i) | ((($x >> 1) & 0x7fffffff) >> (31-$i))}
-
-	    #
-	    # New version, faster when inlining
-	    # We replace inline (computing at compile time):
-	    #   R$i -> (32 - $i)
-	    #   S$i -> (0x7fffffff >> (31-$i))
-	    #
-
-	    expr { ($x << $i) | (($x >> R$i) & S$i)}
-	}
-    }
     # inline <<<
     regsub -all -- {\[ *<<< +\[ *expr +({[^\}]*})\] +([0-9]+) *\]} $md5body {(([set x [expr \1]] << \2) |  (($x >> R\2) \& S\2))} md5body
 
@@ -535,4 +496,3 @@ Tcllib_md5pure proc time {} {
 	puts "input length ${len}: [expr {$msec/1000}] milliseconds per interation"
     }
 }
-
