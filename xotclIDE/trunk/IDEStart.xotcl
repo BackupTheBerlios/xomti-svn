@@ -13,6 +13,7 @@ package require IDEStart
 IDEStarter startIDEFromDB}
 }
 package provide IDEStart 0.71
+
 @ Object IDEPreferences {
 description {Hanlde preferences of xotcl
 
@@ -123,6 +124,7 @@ IDEPreferences proc windowsSavePrefs {} {
         array donesearch preferences $indicator
     }
 }
+
 @ Object IDEStarter {
 description {This object handle starting xotclide from differents context
 It read also the line arguments that can influence starting process or

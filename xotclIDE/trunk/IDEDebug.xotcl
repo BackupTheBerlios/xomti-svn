@@ -1,5 +1,5 @@
 # automatically generated from XOTclIDE
-# script require component {IDECore IDEView IDEBaseGUI}
+# script require component {IDECore IDEBaseGUI IDEView}
 @ Component IDEDebug {
 description {Contains
 
@@ -19,13 +19,52 @@ To enable tracking
 }
 package provide IDEDebug 0.70
 package require IDECore
-package require IDEView
 package require IDEBaseGUI
+package require IDEView
+
+ ### group idevarstrack###
 namespace eval ::idevarstrack {}
+
 @ tclproc idevarstrack::invokeDebugger idemeta struct IDEDebug idevarstrack
 proc idevarstrack::invokeDebugger {name1 name2 op} {
     IDE::Debugger startDebugging "$op on $name1"
 }
+
+@ Class IDE::CallingCoverBrowser {
+description {It use the same input as Tracker Browser.
+}
+}
+Class IDE::CallingCoverBrowser -superclass ::IDE::Browser 
+@ ::IDE::CallingCoverBrowser idemeta component IDEDebug
+IDE::CallingCoverBrowser instproc getTitle {} {
+  return "Method Coverage Analyse Browser"
+}
+IDE::CallingCoverBrowser instproc specificInit {} {
+    my instvar win
+
+    IDE::CoverClassView [self]::classes $win.classes
+    IDE::TclModeEdit create [self]::methodedit $win.methodedit
+    IDE::MethodCategoryView create [self]::methodcatview $win.methodcatview
+    IDE::CoverMethodView create [self]::methodview $win.methodview
+
+    grid $win.classes -row 0 -column 0 -sticky news
+    grid $win.methodcatview -row 0 -column 1 -sticky news
+    grid $win.methodview -row 0 -column 2 -sticky news
+    grid $win.methodedit -row 1 -column 0 -columnspan 3 -sticky news
+    
+    grid columnconfigure $win 0 -weight 1
+    grid columnconfigure $win 1 -weight 1
+    grid columnconfigure $win 2 -weight 1
+    grid rowconfigure $win 1 -weight 1   
+    
+    IDE::MethodTracker set callingCover 1
+    [self]::classes refreshBaseView
+    next
+}
+IDE::CallingCoverBrowser proc newBrowser {} {
+    return [my new [Object autoname .browser]]
+}
+
 Class IDE::CoverClassView -superclass ::IDE::ClassView 
 @ ::IDE::CoverClassView idemeta component IDEDebug
 IDE::CoverClassView instproc addClass {} {
@@ -96,6 +135,65 @@ IDE::CoverClassView instproc resetResults {} {
 IDE::CoverClassView instproc selectFor dummy {
     my refreshBaseView
 }
+
+Class IDE::CoverMethodView -superclass ::IDE::MethodView 
+@ ::IDE::CoverMethodView idemeta component IDEDebug
+IDE::CoverMethodView instproc changeViewType type {
+    my set cvtype $type
+    my selectFor [my set vclass] [my set vcategories] [my set vtype]
+}
+IDE::CoverMethodView instproc init args {
+    next
+    my instvar win vtype
+    my set treeView 0
+    IDE::StateButton [self]::stateButton $win.tb_class -states {Covered {Not Covered}} -command [list [self] changeViewType]
+    my set vtype Covered
+    pack $win.tb_class -anchor w
+    my set cvtype Covered
+}
+IDE::CoverMethodView instproc selectFor {class categories type} {
+    my instvar vclass vtype vcategories cvtype
+    if {$class==""} {
+        my resetList
+        set vclass {}
+    } elseif {$type=="Tcl Procs"} {
+    } else {
+        if {$categories==""} {
+            set vclass {}
+            my resetList
+        } else {
+            set mlist [IDE::IntroProxy get${type}Methods $class $categories]
+            if {[IDE::MethodTracker exists methodCoverArr($class)]} {
+                set cmethods [IDE::MethodTracker set methodCoverArr($class)]
+                if {$cvtype=="Covered"} {
+                    set ulist {}
+                    foreach m $cmethods {
+                        if {[ide::lcontain $mlist $m]} {
+                            lappend ulist $m
+                        }
+                    }
+                    set mlist $ulist
+                } else {
+                    foreach m $cmethods {
+                        ide::lremove mlist $m
+                    }
+                }
+                my setList $mlist
+            } else {
+                if {$cvtype=="Covered"} {
+                    my resetList
+                } else {
+                    my setList $mlist
+                }
+            }
+            set vclass $class
+        }
+    }
+    set vtype $type
+    set vcategories $categories
+    my selectItem {}
+}
+
 Class IDE::StackMethodListView -superclass ::IDE::MethodListView 
 @ ::IDE::StackMethodListView idemeta component IDEDebug
 IDE::StackMethodListView instproc buttonDoublePush {} {
@@ -163,6 +261,7 @@ IDE::StackMethodListView instproc selectItem item {
    my selectClassTypeMethod $vclass $vtype $method
    ${browser}::methodedit colorizeText $invoke
 }
+
 Class IDE::DebugMethodListView -superclass ::IDE::StackMethodListView 
 @ ::IDE::DebugMethodListView idemeta component IDEDebug
 IDE::DebugMethodListView instproc getMenuStruct {} {
@@ -189,40 +288,7 @@ IDE::DebugMethodListView instproc selectItem item {
     set index [my selectedIndex]
     $browser displayIndex $index
 }
-@ Class IDE::CallingCoverBrowser {
-description {It use the same input as Tracker Browser.
-}
-}
-Class IDE::CallingCoverBrowser -superclass ::IDE::Browser 
-@ ::IDE::CallingCoverBrowser idemeta component IDEDebug
-IDE::CallingCoverBrowser instproc getTitle {} {
-  return "Method Coverage Analyse Browser"
-}
-IDE::CallingCoverBrowser instproc specificInit {} {
-    my instvar win
 
-    IDE::CoverClassView [self]::classes $win.classes
-    IDE::TclModeEdit create [self]::methodedit $win.methodedit
-    IDE::MethodCategoryView create [self]::methodcatview $win.methodcatview
-    IDE::CoverMethodView create [self]::methodview $win.methodview
-
-    grid $win.classes -row 0 -column 0 -sticky news
-    grid $win.methodcatview -row 0 -column 1 -sticky news
-    grid $win.methodview -row 0 -column 2 -sticky news
-    grid $win.methodedit -row 1 -column 0 -columnspan 3 -sticky news
-    
-    grid columnconfigure $win 0 -weight 1
-    grid columnconfigure $win 1 -weight 1
-    grid columnconfigure $win 2 -weight 1
-    grid rowconfigure $win 1 -weight 1   
-    
-    IDE::MethodTracker set callingCover 1
-    [self]::classes refreshBaseView
-    next
-}
-IDE::CallingCoverBrowser proc newBrowser {} {
-    return [my new [Object autoname .browser]]
-}
 Class IDE::DebugSubObjectsView -superclass ::IDE::SubObjectsView 
 @ ::IDE::DebugSubObjectsView idemeta component IDEDebug
 IDE::DebugSubObjectsView instproc fillMenuStruct ms {
@@ -232,38 +298,7 @@ IDE::DebugSubObjectsView instproc fillMenuStruct ms {
 IDE::DebugSubObjectsView instproc inspectCalledObject {} {
      [my info parent] inspectCalledObject
 }
-Class IDE::VariableTraceList -superclass {::IDE::ListView ::IDE::GUICommands} 
-@ ::IDE::VariableTraceList idemeta component IDEDebug
-IDE::VariableTraceList instproc dispatchParentWithSelected procName {
-    set actual [my selectedItemFirst]
-    if {$actual!=""} {
-        [my varsTracker] $procName $actual
-    } else {
-        my upsMessage {you need to select a item for this action}
-    }
-}
-IDE::VariableTraceList instproc fillMenuStruct ms {
-    $ms enablementHandler [self]
-    $ms addCommand2 {Remove Read Trace} [list [self] dispatchParentWithSelected removeReadTrace] isValidSelection
-    $ms addCommand2 {Remove Write Trace} [list [self] dispatchParentWithSelected removeWriteTrace] isValidSelection
-    $ms addCommand2 {Remove Watch} [list [self] dispatchParentWithSelected removeWatch] isValidSelection
-    $ms addCommand2 {Remove All Traces} [list [self] dispatchParentWithSelected removeAllTraces] isValidSelection
-    $ms addSeparator
-    $ms addCommand2 {Remove All Watches} [list [self] removeAllWatches] isAnyWatch
-    next
-}
-IDE::VariableTraceList instproc getMenuStruct {} {
-    return [IDE::MenuStruct [self]::ms Variables 0]
-}
-IDE::VariableTraceList instproc isAnyWatch {} {
-    [my varsTracker] hasAnyWatch
-}
-IDE::VariableTraceList instproc removeAllWatches {} {
-    [my varsTracker] removeAllWatches
-}
-IDE::VariableTraceList instproc varsTracker {} {
-    my info parent
-}
+
 @ Class IDE::Debugger {
 description {The debugger is based on my halt
 procedure by invoke this IDE::Debugger startDebugging is invoked.
@@ -296,7 +331,7 @@ IDE::Debugger instproc displayIndex index {
      my set action [list [self] inspectLevel $index]
 }
 IDE::Debugger instproc editSave value {
-   return
+    return
 }
 IDE::Debugger instproc evalAtLevel string {
     my set action [list [self] evalLevel $string]
@@ -311,9 +346,8 @@ IDE::Debugger instproc evalLevel string {
     }
 }
 IDE::Debugger instproc fillMenuStruct aMenuStruct {
-  $aMenuStruct enablementHandler [self]
- 
-  $aMenuStruct addCommand {Inspect Object At Level} [list [self] inspectCalledObject]
+    $aMenuStruct enablementHandler [self]
+    $aMenuStruct addCommand {Inspect Object At Level} [list [self] inspectCalledObject]
 }
 IDE::Debugger instproc getMenuStruct {} {
     return [IDE::MenuStruct [self]::ms Debugger 0]
@@ -327,16 +361,16 @@ IDE::Debugger instproc inspectCalledObject {} {
      }
 }
 IDE::Debugger instproc inspectLevel level {
-     my instvar objectList entryLevel levelInfo methodList realLevel
-     set realLevel [lindex [lindex $levelInfo $level] 0]
-     [self]::local setList [uplevel #$realLevel {::info locals}]
-     set calledIndex  [expr {$entryLevel-$realLevel-1}]
-     if {$calledIndex<0} { 
-          set callMethod halt 
-     } else {
-          set callMethod [lindex $methodList $calledIndex]
-     }
-     [self]::methodedit colorizeText $callMethod
+    my instvar objectList entryLevel levelInfo methodList realLevel
+    set realLevel [lindex [lindex $levelInfo $level] 0]
+    [self]::local setList [uplevel #$realLevel {::info locals}]
+    set calledIndex [expr {$entryLevel-$realLevel-1}]
+    if {$calledIndex<0} { 
+        set callMethod halt 
+    } else {
+        set callMethod [lindex $methodList $calledIndex]
+    }
+    [self]::methodedit colorizeText $callMethod
 }
 IDE::Debugger instproc inspectLevelVar var {
     my instvar level
@@ -354,45 +388,45 @@ IDE::Debugger instproc setVarValue {value controller} {
     [self]::methodedit setTextControler $value $controller
 }
 IDE::Debugger instproc showArguments {} {
-     my instvar entryLevel argumentList realLevel
-     set calledIndex  [expr {$entryLevel-$realLevel}]
-     [self]::methodedit setTextControler [lindex $argumentList $calledIndex] [self]
+    my instvar entryLevel argumentList realLevel
+    set calledIndex  [expr {$entryLevel-$realLevel}]
+    [self]::methodedit setTextControler [lindex $argumentList $calledIndex] [self]
 }
 IDE::Debugger instproc showLevels {} {
     my instvar objectList entryLevel levelInfo methodList argumentList
     for {set x $entryLevel} {$x>0} {incr x -1} {
-          set level [info level $x]
-          set method [lindex $level 0]
-          set expr "!\[catch self\] && \[self proc\]==\"$method\""
-          set isobject [uplevel #$x [list expr $expr]]
-          if {$isobject} {
-             set object [uplevel #$x {list [self]}]
-             set class [uplevel #$x {list [self class]}]
-             set oclass [uplevel #$x {list [my info class]}]
-             #uts "o $object c $class oclass $oclass"
-             if {[Object isobject $object]} {
-                 if {[$object isclass] || $class=="" || $class=="{}"} {
+        set level [info level $x]
+        set method [lindex $level 0]
+        set expr "!\[catch self\] && \[self proc\]==\"$method\""
+        set isobject [uplevel #$x [list expr $expr]]
+        if {$isobject} {
+            set object [uplevel #$x {list [self]}]
+            set class [uplevel #$x {list [self class]}]
+            set oclass [uplevel #$x {list [my info class]}]
+            #uts "o $object c $class oclass $oclass"
+            if {[Object isobject $object]} {
+                if {[$object isclass] || $class=="" || $class=="{}"} {
                     lappend stackList "[string trimleft $object :] class>$method"
-                 } else {
+                } else {
                     if {$class==$oclass} {
-                       lappend stackList "[string trimleft $class :]>$method"
+                        lappend stackList "[string trimleft $class :]>$method"
                     } else {
-                       lappend stackList "[string trimleft $class :] ([string trimleft $oclass :])>$method"
+                        lappend stackList "[string trimleft $class :] ([string trimleft $oclass :])>$method"
                     }
-                 }
-                 lappend objectList $object
-              }
-          } else {
-              # normal tcl proc
-              lappend stackList $method
-              lappend objectList {}
-          }
-          lappend levelInfo [list $x $method]
-          lappend methodList $method
-          lappend argumentList [lrange $level 1 end]
-     }
-     [self]::methodlist setListUnsorted $stackList
-     [self]::methodlist setSelectedIndex 0
+                }
+                lappend objectList $object
+            }
+        } else {
+            # normal tcl proc
+            lappend stackList $method
+            lappend objectList {}
+        }
+        lappend levelInfo [list $x $method]
+        lappend methodList $method
+        lappend argumentList [lrange $level 1 end]
+    }
+    [self]::methodlist setListUnsorted $stackList
+    [self]::methodlist setSelectedIndex 0
 }
 IDE::Debugger instproc showLocalVar var {
     my instvar realLevel
@@ -471,63 +505,7 @@ IDE::Debugger proc startDebugging {{addInfo {}}} {
        $inst destroy
     }
 }
-Class IDE::CoverMethodView -superclass ::IDE::MethodView 
-@ ::IDE::CoverMethodView idemeta component IDEDebug
-IDE::CoverMethodView instproc changeViewType type {
-    my set cvtype $type
-    my selectFor [my set vclass] [my set vcategories] [my set vtype]
-}
-IDE::CoverMethodView instproc init args {
-    next
-    my instvar win vtype
-    my set treeView 0
-    IDE::StateButton [self]::stateButton $win.tb_class -states {Covered {Not Covered}} -command [list [self] changeViewType]
-    my set vtype Covered
-    pack $win.tb_class -anchor w
-    my set cvtype Covered
-}
-IDE::CoverMethodView instproc selectFor {class categories type} {
-    my instvar vclass vtype vcategories cvtype
-    if {$class==""} {
-        my resetList
-        set vclass {}
-    } elseif {$type=="Tcl Procs"} {
-    } else {
-        if {$categories==""} {
-            set vclass {}
-            my resetList
-        } else {
-            set mlist [IDE::IntroProxy get${type}Methods $class $categories]
-            if {[IDE::MethodTracker exists methodCoverArr($class)]} {
-                set cmethods [IDE::MethodTracker set methodCoverArr($class)]
-                if {$cvtype=="Covered"} {
-                    set ulist {}
-                    foreach m $cmethods {
-                        if {[ide::lcontain $mlist $m]} {
-                            lappend ulist $m
-                        }
-                    }
-                    set mlist $ulist
-                } else {
-                    foreach m $cmethods {
-                        ide::lremove mlist $m
-                    }
-                }
-                my setList $mlist
-            } else {
-                if {$cvtype=="Covered"} {
-                    my resetList
-                } else {
-                    my setList $mlist
-                }
-            }
-            set vclass $class
-        }
-    }
-    set vtype $type
-    set vcategories $categories
-    my selectItem {}
-}
+
 Class IDE::DebuggerMethodEdit -superclass ::IDE::MethodEdit 
 @ ::IDE::DebuggerMethodEdit idemeta component IDEDebug
 IDE::DebuggerMethodEdit instproc evalDisplaySelection {} {
@@ -569,6 +547,164 @@ IDE::DebuggerMethodEdit instproc setEvaluationRet string {
         }
     }
 }
+
+Class IDE::ErrorStack -superclass ::IDE::Browser 
+@ ::IDE::ErrorStack idemeta component IDEDebug
+IDE::ErrorStack instproc editSave value {
+   return
+}
+IDE::ErrorStack instproc inspectObjectFromStack level {
+    my instvar objectsList
+    set obj [lindex $objectsList $level]
+    if {[Object isobject $obj]} {
+        $obj inspect
+    } elseif {$obj!=""} {
+        IDE::Dialog message "$obj is not xotcl Object"
+    }
+}
+IDE::ErrorStack instproc parseErrorInfo pinfo {
+    my instvar objectsList invokeList info
+    set info $pinfo
+    set list {}
+    set last {}
+    set wasProc 0
+    foreach line [split $info \n] {
+        if {!$wasProc} {
+            #uts "regexp $line"
+            if {[regexp -- {\(procedure "(.+)" line (.+)\)} $line _ lproc lline]} {
+               #uts "fond $line"
+               set wasProc 1
+            } elseif {[regexp -- {\(compiling body of proc "(.+)", line (.+)\)} $line _ lproc lline]} {
+               set wasProc 1
+            } else {
+               if {[info complete $last]} {
+                  set last $line
+               }
+            }
+        } else {
+            set line [string trim $line]
+            if {[regexp -- {(.+)->(.+)} $line _ objectstring method]} {
+                #puts "os $objectstring m $method"
+                if {[llength $objectstring]>1} {
+                    set object [lindex $objectstring 0]                    
+                    set class [lindex $objectstring 1]
+                    lappend list "$class>$method"
+                } else {
+                    set object {}
+                    lappend list "$objectstring class>$method"
+                }
+                lappend objectsList $object
+                lappend invokeList [string trim $last \"]
+            } else {
+                # should be normal tcl proc
+                lappend objectsList {}
+                lappend invokeList [string trim $last \"]
+                lappend list $lproc
+            }
+            set last {}
+            set wasProc 0
+        }
+    }
+    if {$list!=""} {
+         [self]::methodlist setListUnsorted $list
+    }
+}
+IDE::ErrorStack instproc showErrorInfo {} {
+    my instvar info
+    
+    [self]::methodedit setTextControler $info [self]
+}
+IDE::ErrorStack instproc specificInit {} {
+    my instvar win
+    
+    if {[IDE::System isTkNotOlderThan84]} {
+        
+        panedwindow $win.panedwindow -orient vertical
+        frame $win.lowerframe
+  
+        IDE::StackMethodListView [self]::methodlist $win.methodlist
+
+        button $win.lowerframe.errorInfo -command [list [self] showErrorInfo] -text errorInfo
+        IDE::TclModeEdit [self]::methodedit $win.lowerframe.methodedit -mixin IDE::CodeController
+        pack $win.lowerframe.errorInfo -anchor w
+        pack $win.lowerframe.methodedit -expand yes -fill both
+        
+        $win.panedwindow add $win.methodlist -sticky news -height 120
+        $win.panedwindow add $win.lowerframe -sticky news -height 300
+        
+        pack $win.panedwindow -expand yes -fill both
+        
+    } else {
+        IDE::StackMethodListView [self]::methodlist $win.methodlist
+        IDE::TclModeEdit [self]::methodedit $win.methodedit -mixin IDE::CodeController
+        button $win.errorInfo -command [list [self] showErrorInfo] -text errorInfo
+
+        grid $win.methodlist -row 0 -column 0 -sticky news
+        grid $win.methodedit -row 2 -column 0 -sticky news
+        grid $win.errorInfo -row 1 -column 0 -sticky w
+
+        grid columnconfigure $win 0 -weight 1
+        grid rowconfigure $win 2 -weight 1
+    }
+
+    bind $win <Alt-n> [list [self]::methodlist next] 
+    bind $win <Alt-p> [list [self]::methodlist prev] 
+
+    next
+}
+IDE::ErrorStack proc activate {} {
+     namespace eval :: {
+         rename bgerror bgerror_old
+         proc bgerror message {
+             global errorInfo
+             IDE::ErorStack newBrowser $errorInfo
+         }
+     }
+}
+IDE::ErrorStack proc deactivate {} {
+     namespace eval :: {
+         rename bgerror_old bgerror
+     }
+}
+IDE::ErrorStack proc newBrowser errorInfo {
+    set inst [my new [Object autoname .errorstack]]
+    $inst parseErrorInfo $errorInfo
+    $inst showErrorInfo
+    return $inst
+}
+
+Class IDE::TrackedMethodList -superclass {::IDE::ListView ::IDE::GUICommands} 
+@ ::IDE::TrackedMethodList idemeta component IDEDebug
+IDE::TrackedMethodList instproc browseSelected item {
+    set first [lindex [split $item] 0]
+    if {[Object isclass $first]} {
+        IDE::HeritageBrowser newBrowser $first
+    } elseif {[Object isobject $first]} {
+        $first inspect
+    } else {
+        error "Unknown item type."
+    }
+}
+IDE::TrackedMethodList instproc buttonDoublePush {} {
+    my browseSelected
+}
+IDE::TrackedMethodList instproc fillMenuStruct ms {
+    $ms enablementHandler [self]
+    $ms addCommand2 {Browse} [list [self] dispatchWithSelected browseSelected] isValidSelection
+    $ms addCommand2 {Remove From List} [list [self] dispatchWithSelected removeTrackItem] isValidSelection
+    next
+}
+IDE::TrackedMethodList instproc getMenuStruct {} {
+    return [IDE::MenuStruct create [self]::ms {Tracked Methods} 0]
+}
+IDE::TrackedMethodList instproc removeTrackItem actual {
+    my removeItem $actual
+    [lindex $actual 0] trackOff
+}
+IDE::TrackedMethodList instproc updateList {} {
+    my setList [IDE::MethodTracker getTrackingList]
+}
+
 @ Class IDE::TrackerBrowser {
 description {Trackerbrowser can show all calls to speciefie object or class
 it work with object IDE::MethodTracker}
@@ -639,6 +775,40 @@ IDE::TrackerBrowser proc removeFromTrackList item {
         ::ide_tracker_browser::objectlist removeItem $item
     }
 }
+
+Class IDE::VariableTraceList -superclass {::IDE::ListView ::IDE::GUICommands} 
+@ ::IDE::VariableTraceList idemeta component IDEDebug
+IDE::VariableTraceList instproc dispatchParentWithSelected procName {
+    set actual [my selectedItemFirst]
+    if {$actual!=""} {
+        [my varsTracker] $procName $actual
+    } else {
+        my upsMessage {you need to select a item for this action}
+    }
+}
+IDE::VariableTraceList instproc fillMenuStruct ms {
+    $ms enablementHandler [self]
+    $ms addCommand2 {Remove Read Trace} [list [self] dispatchParentWithSelected removeReadTrace] isValidSelection
+    $ms addCommand2 {Remove Write Trace} [list [self] dispatchParentWithSelected removeWriteTrace] isValidSelection
+    $ms addCommand2 {Remove Watch} [list [self] dispatchParentWithSelected removeWatch] isValidSelection
+    $ms addCommand2 {Remove All Traces} [list [self] dispatchParentWithSelected removeAllTraces] isValidSelection
+    $ms addSeparator
+    $ms addCommand2 {Remove All Watches} [list [self] removeAllWatches] isAnyWatch
+    next
+}
+IDE::VariableTraceList instproc getMenuStruct {} {
+    return [IDE::MenuStruct [self]::ms Variables 0]
+}
+IDE::VariableTraceList instproc isAnyWatch {} {
+    [my varsTracker] hasAnyWatch
+}
+IDE::VariableTraceList instproc removeAllWatches {} {
+    [my varsTracker] removeAllWatches
+}
+IDE::VariableTraceList instproc varsTracker {} {
+    my info parent
+}
+
 Class IDE::VarsTracker -superclass ::IDE::Browser 
 @ ::IDE::VarsTracker idemeta categoriesMethods {{getTitle specificInit initVarList} hasAnyWatch {removeAllTraces removeAllWatches removeReadTrace removeWatch removeWriteTrace removeWatchOn removeVariable}}
 @ ::IDE::VarsTracker idemeta categories {init-release testing action-remove}
@@ -823,161 +993,7 @@ IDE::VarsTracker proc unsetVariable variable {
         my removeTrace $variable $op
     }
 }
-Class IDE::ErrorStack -superclass ::IDE::Browser 
-@ ::IDE::ErrorStack idemeta component IDEDebug
-IDE::ErrorStack instproc editSave value {
-   return
-}
-IDE::ErrorStack instproc inspectObjectFromStack level {
-    my instvar objectsList
-    set obj [lindex $objectsList $level]
-    if {[Object isobject $obj]} {
-        $obj inspect
-    } elseif {$obj!=""} {
-        IDE::Dialog message "$obj is not xotcl Object"
-    }
-}
-IDE::ErrorStack instproc parseErrorInfo pinfo {
-    my instvar objectsList invokeList info
-    set info $pinfo
-    set list {}
-    set last {}
-    set wasProc 0
-    foreach line [split $info \n] {
-        if {!$wasProc} {
-            #uts "regexp $line"
-            if {[regexp -- {\(procedure "(.+)" line (.+)\)} $line _ lproc lline]} {
-               #uts "fond $line"
-               set wasProc 1
-            } elseif {[regexp -- {\(compiling body of proc "(.+)", line (.+)\)} $line _ lproc lline]} {
-               set wasProc 1
-            } else {
-               if {[info complete $last]} {
-                  set last $line
-               }
-            }
-        } else {
-            set line [string trim $line]
-            if {[regexp -- {(.+)->(.+)} $line _ objectstring method]} {
-                #puts "os $objectstring m $method"
-                if {[llength $objectstring]>1} {
-                    set object [lindex $objectstring 0]                    
-                    set class [lindex $objectstring 1]
-                    lappend list "$class>$method"
-                } else {
-                    set object {}
-                    lappend list "$objectstring class>$method"
-                }
-                lappend objectsList $object
-                lappend invokeList [string trim $last \"]
-            } else {
-                # should be normal tcl proc
-                lappend objectsList {}
-                lappend invokeList [string trim $last \"]
-                lappend list $lproc
-            }
-            set last {}
-            set wasProc 0
-        }
-    }
-    if {$list!=""} {
-         [self]::methodlist setListUnsorted $list
-    }
-}
-IDE::ErrorStack instproc showErrorInfo {} {
-    my instvar info
-    
-    [self]::methodedit setTextControler $info [self]
-}
-IDE::ErrorStack instproc specificInit {} {
-    my instvar win
-    
-    if {[IDE::System isTkNotOlderThan84]} {
-        
-        panedwindow $win.panedwindow -orient vertical
-        frame $win.lowerframe
-  
-        IDE::StackMethodListView [self]::methodlist $win.methodlist
 
-        button $win.lowerframe.errorInfo -command [list [self] showErrorInfo] -text errorInfo
-        IDE::TclModeEdit [self]::methodedit $win.lowerframe.methodedit -mixin IDE::CodeController
-        pack $win.lowerframe.errorInfo -anchor w
-        pack $win.lowerframe.methodedit -expand yes -fill both
-        
-        $win.panedwindow add $win.methodlist -sticky news -height 120
-        $win.panedwindow add $win.lowerframe -sticky news -height 300
-        
-        pack $win.panedwindow -expand yes -fill both
-        
-    } else {
-        IDE::StackMethodListView [self]::methodlist $win.methodlist
-        IDE::TclModeEdit [self]::methodedit $win.methodedit -mixin IDE::CodeController
-        button $win.errorInfo -command [list [self] showErrorInfo] -text errorInfo
-
-        grid $win.methodlist -row 0 -column 0 -sticky news
-        grid $win.methodedit -row 2 -column 0 -sticky news
-        grid $win.errorInfo -row 1 -column 0 -sticky w
-
-        grid columnconfigure $win 0 -weight 1
-        grid rowconfigure $win 2 -weight 1
-    }
-
-    bind $win <Alt-n> [list [self]::methodlist next] 
-    bind $win <Alt-p> [list [self]::methodlist prev] 
-
-    next
-}
-IDE::ErrorStack proc activate {} {
-     namespace eval :: {
-         rename bgerror bgerror_old
-         proc bgerror message {
-             global errorInfo
-             IDE::ErorStack newBrowser $errorInfo
-         }
-     }
-}
-IDE::ErrorStack proc deactivate {} {
-     namespace eval :: {
-         rename bgerror_old bgerror
-     }
-}
-IDE::ErrorStack proc newBrowser errorInfo {
-    set inst [my new [Object autoname .errorstack]]
-    $inst parseErrorInfo $errorInfo
-    $inst showErrorInfo
-    return $inst
-}
-Class IDE::TrackedMethodList -superclass {::IDE::ListView ::IDE::GUICommands} 
-@ ::IDE::TrackedMethodList idemeta component IDEDebug
-IDE::TrackedMethodList instproc browseSelected item {
-    set first [lindex [split $item] 0]
-    if {[Object isclass $first]} {
-        IDE::HeritageBrowser newBrowser $first
-    } elseif {[Object isobject $first]} {
-        $first inspect
-    } else {
-        error "Unknown item type."
-    }
-}
-IDE::TrackedMethodList instproc buttonDoublePush {} {
-    my browseSelected
-}
-IDE::TrackedMethodList instproc fillMenuStruct ms {
-    $ms enablementHandler [self]
-    $ms addCommand2 {Browse} [list [self] dispatchWithSelected browseSelected] isValidSelection
-    $ms addCommand2 {Remove From List} [list [self] dispatchWithSelected removeTrackItem] isValidSelection
-    next
-}
-IDE::TrackedMethodList instproc getMenuStruct {} {
-    return [IDE::MenuStruct create [self]::ms {Tracked Methods} 0]
-}
-IDE::TrackedMethodList instproc removeTrackItem actual {
-    my removeItem $actual
-    [lindex $actual 0] trackOff
-}
-IDE::TrackedMethodList instproc updateList {} {
-    my setList [IDE::MethodTracker getTrackingList]
-}
 @ Object IDE::MethodTracker {
 description {This object manage tracking of classes and objects.
 By initializing it make new filter method to xotc::Object.

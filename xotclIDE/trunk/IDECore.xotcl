@@ -6,9 +6,12 @@ IDE::Component structure Xotcl Classes and Objects in sets.
 It is container for Xotcl Classes and Objects}
 }
 package provide IDECore 0.71
+
+ ### group ide###
 namespace eval ::ide {}
 @ tclgroup ide idemeta comment IDECore {The are some extented list functions based
 on Smalltalk container protocol}
+
 @ tclproc ide::addToValueForKey idemeta struct IDECore ide
 proc ide::addToValueForKey {arr_ref key value} {
     upvar $arr_ref arr
@@ -20,6 +23,7 @@ proc ide::addToValueForKey {arr_ref key value} {
     lappend lvalue $value
     set arr($key) $lvalue
 }
+
 @ tclproc ide::addToValueForKeyAt idemeta struct IDECore ide
 proc ide::addToValueForKeyAt {arr_ref key value index} {
     upvar $arr_ref arr
@@ -30,6 +34,7 @@ proc ide::addToValueForKeyAt {arr_ref key value index} {
     }
     set arr($key) [linsert $lvalue $index $value]
 }
+
 @ tclproc ide::addToValueForKeyIfNone idemeta struct IDECore ide
 proc ide::addToValueForKeyIfNone {arr_ref key value} {
     upvar $arr_ref arr
@@ -41,10 +46,12 @@ proc ide::addToValueForKeyIfNone {arr_ref key value} {
     ide::lappendIfNone lvalue $value
     set arr($key) $lvalue
 }
+
 @ tclproc ide::compare_names idemeta struct IDECore ide
 proc ide::compare_names {pg1 pg2} {
     return [string compare [$pg1 name] [$pg2 name]]
 }
+
 @ tclproc ide::lappendIfNone idemeta struct IDECore ide
 proc ide::lappendIfNone {list_ref elem} {
 	upvar $list_ref list
@@ -54,6 +61,7 @@ proc ide::lappendIfNone {list_ref elem} {
 	}
 	return 0
 }
+
 @ tclproc ide::lcollect idemeta struct IDECore ide
 proc ide::lcollect {var_ref list eval_action} {
 	upvar $var_ref var
@@ -64,10 +72,12 @@ proc ide::lcollect {var_ref list eval_action} {
 	}
         return $ret
 }
+
 @ tclproc ide::lcontain idemeta struct IDECore ide
 proc ide::lcontain {list elem} {
 	return [expr [lsearch -exact $list $elem]>=0]
 }
+
 @ tclproc ide::ldetect idemeta struct IDECore ide
 proc ide::ldetect {var_ref list test} {
 	upvar $var_ref var
@@ -80,6 +90,7 @@ proc ide::ldetect {var_ref list test} {
         }
         return
 }
+
 @ tclproc ide::lremove idemeta struct IDECore ide
 proc ide::lremove {list_ref elem} {
     upvar $list_ref list
@@ -89,6 +100,7 @@ proc ide::lremove {list_ref elem} {
     }
     return 0
 }
+
 @ tclproc ide::lremoveAll idemeta struct IDECore ide
 proc ide::lremoveAll {list_ref listr} {
 	upvar $list_ref list
@@ -96,6 +108,7 @@ proc ide::lremoveAll {list_ref listr} {
             lremove list $elem
         }
 }
+
 @ tclproc ide::lselect idemeta struct IDECore ide
 proc ide::lselect {var_ref list test} {
 	upvar $var_ref var
@@ -109,6 +122,7 @@ proc ide::lselect {var_ref list test} {
         }
         return $ret
 }
+
 Class IDE
 @ ::IDE idemeta component IDECore
 IDE proc initSystem {} {
@@ -127,6 +141,7 @@ IDE proc initSystem {} {
     eval font create textfont [IDEPreferences getParameter textfont]
     eval font create listboxfont [IDEPreferences getParameter listboxfont]
 }
+
 @ Class IDE::CommentHandler {
 description {Designed to use as mixin.
 It has no requirements
@@ -146,300 +161,7 @@ IDE::CommentHandler instproc hasComment {} {
 IDE::CommentHandler instproc setComment text {
     my set comment $text
 }
-@ Class IDE::ProcsGroup {
-description {This Class wrap the interface to normal tcl procedures.
-It enable to use / reuse old tcl code in xotclIDE programming
 
-defbody is used for namespace init method
-
-name is the name of namespace or procs group (no namespace)
-
-namespace eval myNameSpace {
-   namespace export ... ... ...
-    
-   varible myVariable 
-}
-}
-}
-Class IDE::ProcsGroup -superclass ::IDE::CommentHandler  -parameter {name {withNamespace 0}}
-@ ::IDE::ProcsGroup idemeta categoriesMethods {isPersistent {getDescription getComponent getBody getObjectName getComponentName getDefBody setDefBody} {removeMethodObj createProcForName setMethodComment hasMethodComment getProcsObjects getProcsNames getMethodComment deleteMethod getProcObjForName getProcObjForNameIfExist} {rename unload handleDefinitionScript moveToComponent handleScript} init}
-@ ::IDE::ProcsGroup idemeta categories {testing accessing methods actions initialize}
-@ ::IDE::ProcsGroup idemeta component IDECore
-IDE::ProcsGroup instproc createProcForName name {
-    #[self] halt
-    IDE::TclProcsDescription new -childof [self] -name $name
-}
-IDE::ProcsGroup instproc deleteMethod method {
-    set pobj [my getProcObjForNameIfExist $method]
-    if {$pobj==""} { error "no such method $method"}
-    my removeMethodObj $pobj
-}
-IDE::ProcsGroup instproc getBody {{nometa 0}} {
-   set script "[my getDefBody]\n"
-   if {!$nometa && [my hasComment]} {
-       append script "@ tclgroup [my getObjectName] idemeta comment [list [[my getComponent] getName]] [list [my getComment]]\n"
-   }
-   foreach obj [lsort -command ide::compare_names [my getProcsObjects]] {
-       if {!$nometa} {
-           append script [$obj getMetaBody]
-       }
-       append script [$obj getBody]
-   }
-   return $script
-}
-IDE::ProcsGroup instproc getComponent {} {
-   my info parent
-}
-IDE::ProcsGroup instproc getComponentName {} {
-   [my getComponent] getName
-}
-IDE::ProcsGroup instproc getDefBody {} {
-   my set defBody
-}
-IDE::ProcsGroup instproc getDescription {} {
-    return [self]
-}
-IDE::ProcsGroup instproc getMethodComment {type method} {
-    [my getProcObjForNameIfExist $method] getComment
-}
-IDE::ProcsGroup instproc getObjectName {} {
-   my name
-}
-IDE::ProcsGroup instproc getProcObjForName name {
-    set pobj [my getProcObjForNameIfExist $name]
-    if {$pobj==""} {
-        set pobj [my createProcForName $name]
-    }
-    return $pobj
-}
-IDE::ProcsGroup instproc getProcObjForNameIfExist name {
-    foreach sub [my info children] {
-        if {[$sub istype IDE::TclProcsDescription] && [$sub set name] eq $name} {
-            return $sub
-        }
-    }
-    return
-}
-IDE::ProcsGroup instproc getProcsNames {} {
-    set ret {}
-    foreach sub [my info children] {
-        if {[$sub istype IDE::TclProcsDescription]} {
-            lappend ret [$sub getName]
-        }
-    }
-    return $ret    
-}
-IDE::ProcsGroup instproc getProcsObjects {} {
-    ide::lselect each [my info children] {[$each istype IDE::TclProcsDescription]}
-}
-IDE::ProcsGroup instproc handleDefinitionScript skript {
-    if {![my withNamespace]} {
-        IDE::Dialog error "Proc Group have no namespace. No Definition skript is posible"
-        return
-    }
-    if {[llength $skript]!=4 ||
-    [lindex $skript 0]!="namespace" ||
-    [lindex $skript 1]!="eval" ||
-    [lindex $skript 2]!="::[my name]"} {
-        IDE::Dialog error "Definition of Proc Group accept the format: namespace eval ::[my name] skript"
-        return
-    }
-    namespace eval :: $skript
-    my setDefBody $skript    
-}
-IDE::ProcsGroup instproc handleScript skript {
-    if {[llength $skript]!=4 || [lindex $skript 0]!="proc"} {
-        IDE::Dialog error "To define new tcl proc give 4 elements list\n proc ?nameSpace::?procName arguments procBody"
-        return 0
-    }
-
-    set procname [lindex $skript 1]
-    # always compute absolte name
-    if {[string range $procname 0 1] ne "::"} {
-        set procname ::$procname
-    }
-    if {[my withNamespace]} {
-        set err 0
-        set tail [namespace tail $procname]
-        regexp "::(.+)::$tail" $procname _ parent
-        if {$tail==$procname || ![info exists parent]
-             || [my set name]!=$parent} {
-            IDE::Dialog error "$procname is no proper proc name for this namespaced tcl group.\n Await somethink like [my set name]::$tail"
-            return 0
-        }
-    }
-    set pobj [IDE::TclProcsDescription getMethodFor $procname]
-    if {[Object isobject $pobj] && [$pobj istype IDE::TclProcsDescription]} {
-        if {[$pobj getGroupObj]!=[self]} {
-            IDE::Dialog error "$procname is already defined in another tcl group.\n Can not redefine in this way"
-        }
-    } else {
-        set pobj [my getProcObjForName $procname]
-    }
-    $pobj handleScript $skript
-}
-IDE::ProcsGroup instproc hasMethodComment {type method} {
-    [my getProcObjForNameIfExist $method] hasComment
-}
-IDE::ProcsGroup instproc init {} {
-    if {![my exists withNamespace]} return
-    if {[my withNamespace]} {
-        my set defBody "namespace eval [list ::[my name]] {}"
-        namespace eval :: [my set defBody]
-    } else {
-        my set defBody {}
-    }
-}
-IDE::ProcsGroup instproc isPersistent {} {
-    return 0  
-}
-IDE::ProcsGroup instproc moveToComponent component {
-    set cobj [IDE::Component getCompObjectForNameIfExist $component]
-    if {$cobj==""} {error "Component $component does not exists"}
-    set newName ${cobj}::[Object autoname group]
-    my move $newName
-    if {![$newName isPersistent]} {
-        $cobj addProcsGroup $newName
-    }
-}
-IDE::ProcsGroup instproc removeMethodObj pobj {
-    $pobj unload
-    $pobj destroy
-}
-IDE::ProcsGroup instproc rename name {
-    if {[my withNamespace]} {
-        error "Can not rename proc group with Namespace"
-    }
-    my name $name
-}
-IDE::ProcsGroup instproc setDefBody skript {
-    my set defBody $skript
-}
-IDE::ProcsGroup instproc setMethodComment {type method comment} {
-    [my getProcObjForNameIfExist $method] setComment $comment
-}
-IDE::ProcsGroup instproc unload {} {
-    foreach sub [my info children] {
-        if {[$sub istype IDE::TclProcsDescription]} {
-            $sub unload
-        }
-    }
-}
-IDE::ProcsGroup proc buildStuctFromArray arr_ref {
-    upvar $arr_ref arr
-    if {![array exists arr]} return
-    for {set sid [array startsearch arr]} {[array anymore arr $sid]} {} {
-        set key [array nextelement arr $sid]
-        set w $arr($key)
-        set component [lindex $w 0]
-        set group [lindex $w 1]
-        set cobj [IDE::Component getCompObjectForNameIfExist $component]
-        if {$cobj==""} {
-            puts stderr "No component $component by building tcl proc wrappers"
-        }
-        if {[namespace tail $key]!=$key} {
-            set withNamespace 1
-        } else {
-            set withNamespace 0
-        }
-        set gobj [$cobj createTclProcsGroup $group $withNamespace]
-        $gobj createProcForName $key
-    }
-    array donesearch arr $sid
-}
-IDE::ProcsGroup proc unknown args {
-    error "unknown method on [self] $args"
-}
-@ Class IDE::TclProcsDescription {
-description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
-This instaces has similar interface as xotcl class/objects.
-That is comments, getting body
-}
-}
-Class IDE::TclProcsDescription -superclass ::IDE::CommentHandler  -parameter name
-@ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
-@ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
-@ ::IDE::TclProcsDescription idemeta component IDECore
-IDE::TclProcsDescription instproc getBody {} {
-    # ??? Vielleicht durch IntroProxy
-    IDE::IntroProxy getProcBody [my set name]
-}
-IDE::TclProcsDescription instproc getGroupObj {} {
-    return [my info parent]
-}
-IDE::TclProcsDescription instproc getMetaBody {} {
-    set group [my getGroupObj]
-    set script "@ tclproc [my getName] idemeta struct [list [[$group getComponent] getName] [$group getObjectName]]\n"
-    if {[my hasComment]} {
-        append script "@ tclproc [my getName] idemeta comment [list [my getComment]]\n"
-    }
-    return $script
-}
-IDE::TclProcsDescription instproc getName {} {
-    my name
-}
-IDE::TclProcsDescription instproc handleScript script {
-    # Warning! no check for syntax at this level 
-    # see handleScript in IDE::ProcsGroup
-    # TODO namespace handling
-    namespace eval :: $script
-}
-IDE::TclProcsDescription instproc import {} {
-
-}
-IDE::TclProcsDescription instproc init {} {
-    [self class] registerMethod [my name] [self]
-}
-IDE::TclProcsDescription instproc isPersistent {} {
-    return 0  
-}
-IDE::TclProcsDescription instproc unload {} {
-    # TODO namespace proc handling
-    if {[info procs [my getName]]!=""} {
-	rename [my getName] {}
-        [self class] unregisterMethod [my getName]
-    } else {
-	puts stderr "no proc [my getName] in interpreter"
-    }
-}
-IDE::TclProcsDescription proc getAllMethodsFromNamespace namespace {
-    if {$namespace eq "::xotcl"} return
-    set res [namespace eval $namespace info procs]
-    set res [ide::lcollect each $res {namespace eval $namespace [list namespace which -command $each]}]
-    foreach chns [namespace children $namespace] {
-        if {[Object isobject $chns]} continue
-        set res [concat $res [my getAllMethodsFromNamespace $chns]]
-    }
-    return $res
-}
-IDE::TclProcsDescription proc getAllRegisteredMethods {} {
-    if {[my array exists methodArr]} {
-        return [my array names methodArr]
-    }
-    return
-}
-IDE::TclProcsDescription proc getAllUnRegisteredMethods {} {
-    set allMethods [my getAllMethodsFromNamespace ::]
-    ide::lremoveAll allMethods [my getAllRegisteredMethods]
-    return $allMethods
-}
-IDE::TclProcsDescription proc getMethodFor method {
-    if {[my exists methodArr($method)]} {
-        return [my set methodArr($method)]
-    }
-    return
-}
-IDE::TclProcsDescription proc registerMethod {method wrapper} {
-   my set methodArr($method) $wrapper
-}
-IDE::TclProcsDescription proc unknown args {
-    error "unknown method on [self] $args"
-}
-IDE::TclProcsDescription proc unregisterMethod method {
-    if {[my exists methodArr($method)]} {
-        my unset methodArr($method)
-    }
-}
 @ Class IDE::Component {
 description {IDE::Component is base class for handling components.
 Components are currently sets or Xotcl classes and objects
@@ -503,13 +225,15 @@ IDE::Component instproc asScript {{nometa 0} {norequire 0}} {
         }
     }
     foreach pgobj [my getProcsGroupsObjects] {
+        append script "\n ### group [$pgobj name]###\n"
         append script [$pgobj getBody $nometa]
     }
     foreach object $defList {
-         append script [IDE::Component getObjectBody $object $nometa]
-         if {[$object info procs initializeAfterLoad]!=""} {
-                append initscript "$object initializeAfterLoad\n"
-         }
+        append script "\n"
+        append script [IDE::Component getObjectBody $object $nometa]
+        if {[$object info procs initializeAfterLoad]!=""} {
+               append initscript "$object initializeAfterLoad\n"
+        }
     }
     append script $initscript
     return $script
@@ -695,7 +419,7 @@ child classes.}
 }
 IDE::Component instproc getObjectDefineList {} {
     set defList [list]
-    foreach class [concat [my getClasses] [my getObjects]] {
+    foreach class [concat [lsort [my getClasses]] [lsort [my getObjects]]] {
         set res [my rekBuildDefList $class $defList]
         if {[llength $res]>0} {
             set defList [concat $defList $res]
@@ -705,6 +429,9 @@ IDE::Component instproc getObjectDefineList {} {
 }
 IDE::Component instproc getObjects {} {
     my set objects
+}
+IDE::Component instproc getObjectsSorted {} {
+    return [lsort [my getObjects]]
 }
 IDE::Component instproc getProcsGroupWithName name {
     foreach sub [my info children] {
@@ -830,22 +557,22 @@ IDE::Component instproc rekBuildDefList {object objectList} {
     # search for parent object
     set parent [$object info parent]
     if {$parent!="::"} {
-       set reqObject [my rekBuildDefList [string trimleft $parent :] $objectList]
+        set reqObject [my rekBuildDefList [string trimleft $parent :] $objectList]
     } else {
-       set reqObject [list]
+        set reqObject [list]
     }
     set cl [concat $objectList $reqObject]
     # search if based on own metaclass
     if {[Object isclass $object] && [Object ismetaclass [$object info class]]} {
-        set reqObject  [concat $reqObject [my rekBuildDefList [string trimleft [$object info class]] $objectList] ]
+        set reqObject [concat $reqObject [my rekBuildDefList [string trimleft [$object info class]] $objectList]]
     } 
     # search for superclasses
     if {[Object isclass $object]} {
-       foreach sclass [$object info superclass] {
-           if {$sclass=="::Object"} continue
-           set sclass [string trimleft $sclass :]
-           set reqObject [concat $reqObject [my rekBuildDefList $sclass $cl] ]
-       }
+        foreach sclass [lsort [$object info superclass]] {
+            if {$sclass=="::Object"} continue
+            set sclass [string trimleft $sclass :]
+            set reqObject [concat $reqObject [my rekBuildDefList $sclass $cl] ]
+        }
     }
     return [concat $reqObject $object]
 }
@@ -1078,6 +805,7 @@ IDE::Component proc saveComplex {comps nometa onefile target} {
         close $of
     }
 }
+
 @ Class IDE::Component::Tracker {
 description {Helper class for tracking new classes
 by package loading
@@ -1169,6 +897,7 @@ IDE::Component::Tracker proc trackProc args {
     set name [lindex $args 0]
     my set methodsArr($name) $component
 }
+
 @ Class IDE::ObjectCommentsContainer {
 description {Helper class for hanlde methods comments.
 It will be used for not persistent classes}
@@ -1189,6 +918,304 @@ IDE::ObjectCommentsContainer instproc hasMethodComment {type method} {
 IDE::ObjectCommentsContainer instproc setMethodComment {type method text} {
     my set comment_${type}($method) $text
 }
+
+@ Class IDE::ProcsGroup {
+description {This Class wrap the interface to normal tcl procedures.
+It enable to use / reuse old tcl code in xotclIDE programming
+
+defbody is used for namespace init method
+
+name is the name of namespace or procs group (no namespace)
+
+namespace eval myNameSpace {
+   namespace export ... ... ...
+    
+   varible myVariable 
+}
+}
+}
+Class IDE::ProcsGroup -superclass ::IDE::CommentHandler  -parameter {name {withNamespace 0}}
+@ ::IDE::ProcsGroup idemeta categoriesMethods {isPersistent {getDescription getComponent getBody getObjectName getComponentName getDefBody setDefBody} {removeMethodObj createProcForName setMethodComment hasMethodComment getProcsObjects getProcsNames getMethodComment deleteMethod getProcObjForName getProcObjForNameIfExist} {rename unload handleDefinitionScript moveToComponent handleScript} init}
+@ ::IDE::ProcsGroup idemeta categories {testing accessing methods actions initialize}
+@ ::IDE::ProcsGroup idemeta component IDECore
+IDE::ProcsGroup instproc createProcForName name {
+    #[self] halt
+    IDE::TclProcsDescription new -childof [self] -name $name
+}
+IDE::ProcsGroup instproc deleteMethod method {
+    set pobj [my getProcObjForNameIfExist $method]
+    if {$pobj==""} { error "no such method $method"}
+    my removeMethodObj $pobj
+}
+IDE::ProcsGroup instproc getBody {{nometa 0}} {
+   set script "[my getDefBody]\n"
+   if {!$nometa && [my hasComment]} {
+       append script "@ tclgroup [my getObjectName] idemeta comment [list [[my getComponent] getName]] [list [my getComment]]\n"
+   }
+   foreach obj [lsort -command ide::compare_names [my getProcsObjects]] {
+       append script "\n"
+       if {!$nometa} {
+           append script [$obj getMetaBody]
+       }
+       append script [$obj getBody]
+   }
+   return $script
+}
+IDE::ProcsGroup instproc getComponent {} {
+   my info parent
+}
+IDE::ProcsGroup instproc getComponentName {} {
+   [my getComponent] getName
+}
+IDE::ProcsGroup instproc getDefBody {} {
+   my set defBody
+}
+IDE::ProcsGroup instproc getDescription {} {
+    return [self]
+}
+IDE::ProcsGroup instproc getMethodComment {type method} {
+    [my getProcObjForNameIfExist $method] getComment
+}
+IDE::ProcsGroup instproc getObjectName {} {
+   my name
+}
+IDE::ProcsGroup instproc getProcObjForName name {
+    set pobj [my getProcObjForNameIfExist $name]
+    if {$pobj==""} {
+        set pobj [my createProcForName $name]
+    }
+    return $pobj
+}
+IDE::ProcsGroup instproc getProcObjForNameIfExist name {
+    foreach sub [my info children] {
+        if {[$sub istype IDE::TclProcsDescription] && [$sub set name] eq $name} {
+            return $sub
+        }
+    }
+    return
+}
+IDE::ProcsGroup instproc getProcsNames {} {
+    set ret {}
+    foreach sub [my info children] {
+        if {[$sub istype IDE::TclProcsDescription]} {
+            lappend ret [$sub getName]
+        }
+    }
+    return $ret    
+}
+IDE::ProcsGroup instproc getProcsObjects {} {
+    ide::lselect each [my info children] {[$each istype IDE::TclProcsDescription]}
+}
+IDE::ProcsGroup instproc handleDefinitionScript skript {
+    if {![my withNamespace]} {
+        IDE::Dialog error "Proc Group have no namespace. No Definition skript is posible"
+        return
+    }
+    if {[llength $skript]!=4 ||
+    [lindex $skript 0]!="namespace" ||
+    [lindex $skript 1]!="eval" ||
+    [lindex $skript 2]!="::[my name]"} {
+        IDE::Dialog error "Definition of Proc Group accept the format: namespace eval ::[my name] skript"
+        return
+    }
+    namespace eval :: $skript
+    my setDefBody $skript    
+}
+IDE::ProcsGroup instproc handleScript skript {
+    if {[llength $skript]!=4 || [lindex $skript 0]!="proc"} {
+        IDE::Dialog error "To define new tcl proc give 4 elements list\n proc ?nameSpace::?procName arguments procBody"
+        return 0
+    }
+
+    set procname [lindex $skript 1]
+    # always compute absolte name
+    if {[string range $procname 0 1] ne "::"} {
+        set procname ::$procname
+    }
+    if {[my withNamespace]} {
+        set err 0
+        set tail [namespace tail $procname]
+        regexp "::(.+)::$tail" $procname _ parent
+        if {$tail==$procname || ![info exists parent]
+             || [my set name]!=$parent} {
+            IDE::Dialog error "$procname is no proper proc name for this namespaced tcl group.\n Await somethink like [my set name]::$tail"
+            return 0
+        }
+    }
+    set pobj [IDE::TclProcsDescription getMethodFor $procname]
+    if {[Object isobject $pobj] && [$pobj istype IDE::TclProcsDescription]} {
+        if {[$pobj getGroupObj]!=[self]} {
+            IDE::Dialog error "$procname is already defined in another tcl group.\n Can not redefine in this way"
+        }
+    } else {
+        set pobj [my getProcObjForName $procname]
+    }
+    $pobj handleScript $skript
+}
+IDE::ProcsGroup instproc hasMethodComment {type method} {
+    [my getProcObjForNameIfExist $method] hasComment
+}
+IDE::ProcsGroup instproc init {} {
+    if {![my exists withNamespace]} return
+    if {[my withNamespace]} {
+        my set defBody "namespace eval [list ::[my name]] {}"
+        namespace eval :: [my set defBody]
+    } else {
+        my set defBody {}
+    }
+}
+IDE::ProcsGroup instproc isPersistent {} {
+    return 0  
+}
+IDE::ProcsGroup instproc moveToComponent component {
+    set cobj [IDE::Component getCompObjectForNameIfExist $component]
+    if {$cobj==""} {error "Component $component does not exists"}
+    set newName ${cobj}::[Object autoname group]
+    my move $newName
+    if {![$newName isPersistent]} {
+        $cobj addProcsGroup $newName
+    }
+}
+IDE::ProcsGroup instproc removeMethodObj pobj {
+    $pobj unload
+    $pobj destroy
+}
+IDE::ProcsGroup instproc rename name {
+    if {[my withNamespace]} {
+        error "Can not rename proc group with Namespace"
+    }
+    my name $name
+}
+IDE::ProcsGroup instproc setDefBody skript {
+    my set defBody $skript
+}
+IDE::ProcsGroup instproc setMethodComment {type method comment} {
+    [my getProcObjForNameIfExist $method] setComment $comment
+}
+IDE::ProcsGroup instproc unload {} {
+    foreach sub [my info children] {
+        if {[$sub istype IDE::TclProcsDescription]} {
+            $sub unload
+        }
+    }
+}
+IDE::ProcsGroup proc buildStuctFromArray arr_ref {
+    upvar $arr_ref arr
+    if {![array exists arr]} return
+    for {set sid [array startsearch arr]} {[array anymore arr $sid]} {} {
+        set key [array nextelement arr $sid]
+        set w $arr($key)
+        set component [lindex $w 0]
+        set group [lindex $w 1]
+        set cobj [IDE::Component getCompObjectForNameIfExist $component]
+        if {$cobj==""} {
+            puts stderr "No component $component by building tcl proc wrappers"
+        }
+        if {[namespace tail $key]!=$key} {
+            set withNamespace 1
+        } else {
+            set withNamespace 0
+        }
+        set gobj [$cobj createTclProcsGroup $group $withNamespace]
+        $gobj createProcForName $key
+    }
+    array donesearch arr $sid
+}
+IDE::ProcsGroup proc unknown args {
+    error "unknown method on [self] $args"
+}
+
+@ Class IDE::TclProcsDescription {
+description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
+This instaces has similar interface as xotcl class/objects.
+That is comments, getting body
+}
+}
+Class IDE::TclProcsDescription -superclass ::IDE::CommentHandler  -parameter name
+@ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
+@ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
+@ ::IDE::TclProcsDescription idemeta component IDECore
+IDE::TclProcsDescription instproc getBody {} {
+    # ??? Vielleicht durch IntroProxy
+    IDE::IntroProxy getProcBody [my set name]
+}
+IDE::TclProcsDescription instproc getGroupObj {} {
+    return [my info parent]
+}
+IDE::TclProcsDescription instproc getMetaBody {} {
+    set group [my getGroupObj]
+    set script "@ tclproc [my getName] idemeta struct [list [[$group getComponent] getName] [$group getObjectName]]\n"
+    if {[my hasComment]} {
+        append script "@ tclproc [my getName] idemeta comment [list [my getComment]]\n"
+    }
+    return $script
+}
+IDE::TclProcsDescription instproc getName {} {
+    my name
+}
+IDE::TclProcsDescription instproc handleScript script {
+    # Warning! no check for syntax at this level 
+    # see handleScript in IDE::ProcsGroup
+    # TODO namespace handling
+    namespace eval :: $script
+}
+IDE::TclProcsDescription instproc import {} {
+
+}
+IDE::TclProcsDescription instproc init {} {
+    [self class] registerMethod [my name] [self]
+}
+IDE::TclProcsDescription instproc isPersistent {} {
+    return 0  
+}
+IDE::TclProcsDescription instproc unload {} {
+    # TODO namespace proc handling
+    if {[info procs [my getName]]!=""} {
+	rename [my getName] {}
+        [self class] unregisterMethod [my getName]
+    } else {
+	puts stderr "no proc [my getName] in interpreter"
+    }
+}
+IDE::TclProcsDescription proc getAllMethodsFromNamespace namespace {
+    if {$namespace eq "::xotcl"} return
+    set res [namespace eval $namespace info procs]
+    set res [ide::lcollect each $res {namespace eval $namespace [list namespace which -command $each]}]
+    foreach chns [namespace children $namespace] {
+        if {[Object isobject $chns]} continue
+        set res [concat $res [my getAllMethodsFromNamespace $chns]]
+    }
+    return $res
+}
+IDE::TclProcsDescription proc getAllRegisteredMethods {} {
+    if {[my array exists methodArr]} {
+        return [my array names methodArr]
+    }
+    return
+}
+IDE::TclProcsDescription proc getAllUnRegisteredMethods {} {
+    set allMethods [my getAllMethodsFromNamespace ::]
+    ide::lremoveAll allMethods [my getAllRegisteredMethods]
+    return $allMethods
+}
+IDE::TclProcsDescription proc getMethodFor method {
+    if {[my exists methodArr($method)]} {
+        return [my set methodArr($method)]
+    }
+    return
+}
+IDE::TclProcsDescription proc registerMethod {method wrapper} {
+   my set methodArr($method) $wrapper
+}
+IDE::TclProcsDescription proc unknown args {
+    error "unknown method on [self] $args"
+}
+IDE::TclProcsDescription proc unregisterMethod method {
+    if {[my exists methodArr($method)]} {
+        my unset methodArr($method)
+    }
+}
+
 @ Object IDE::CommentsContainer {
 description {Hanlde objects comments and is parent object for methods comments
 (class IDE::ObjectsCommentsContainer)
@@ -1401,6 +1428,7 @@ IDE::CommentsContainer proc searchCommentForMethod method {
         [IDE::TclProcsDescription getMethodFor $method] setComment [my set proc_comment($method)]
     }
 }
+
 @ Object IDE::IntroProxy {
 description {Fasade for xotcl introspection.}
 }
@@ -1681,6 +1709,7 @@ IDE::IntroProxy proc stripNamespace name {
         string trimleft $name  :
     }
 }
+
 Object IDE::SystemConfigMap
 @ ::IDE::SystemConfigMap idemeta component IDECore
 IDE::SystemConfigMap proc asScript {} {

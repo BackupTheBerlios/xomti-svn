@@ -6,6 +6,7 @@ It is independent from other XOTclIDE Components.
 So it can be used separatly in all XOTcl programms}
 }
 package provide IDEErrorReporter 0.57
+
 Class ErrorReporter
 @ ::ErrorReporter idemeta categoriesMethodsProcs report
 @ ::ErrorReporter idemeta categoriesProcs interface

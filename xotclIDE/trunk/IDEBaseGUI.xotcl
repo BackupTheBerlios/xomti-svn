@@ -8,6 +8,102 @@ This component contains the base GUI Elements needed in IDEXotclIDE
 }
 package provide IDEBaseGUI 0.71
 package require IDECore
+
+@ Class IDE::Browser {
+description {This is the base class for all IDE Browser
+
+It can buid the system menu and status info bar.
+
+Please overwrite method specificInit for your own GUI.}
+}
+Class IDE::Browser
+@ ::IDE::Browser idemeta categoriesMethods {{specificInit buildTopLevel init initStatusBar}}
+@ ::IDE::Browser idemeta categories initialize
+@ ::IDE::Browser idemeta component IDEBaseGUI
+IDE::Browser instproc buildTopLevel {} {
+    my instvar win
+    ::toplevel $win
+}
+IDE::Browser instproc closeWindow {} {
+    my destroy
+}
+IDE::Browser instproc createSystemMenu {} {
+    my instvar win
+    set ms [IDE::System getMenuStruct]
+    if {[winfo toplevel $win]=="."} {
+        set twin {}
+    } else {
+        set twin $win
+    }
+    $ms createTkMenu $twin.mb.idesystem $twin
+    $twin.mb add cascade -label [$ms set name] -menu $twin.mb.idesystem -underline 0
+
+    [winfo toplevel $win] configure -menu $twin.mb
+}
+IDE::Browser instproc destroy {} {
+    my instvar win
+    if {[info exists win]} {
+       ::destroy $win
+    }
+    next
+}
+IDE::Browser instproc getTitle {} {
+    return [namespace tail [my info class]]
+}
+IDE::Browser instproc init {window args} {
+    my instvar win
+    set win $window
+    if {![winfo exists $win]} {
+        my buildTopLevel
+        wm withdraw $win
+        menu $win.mb -tearoff 0
+    } else {
+        menu .mb -tearoff 0
+    }
+    wm protocol [winfo toplevel $win] WM_DELETE_WINDOW [list [self] closeWindow]
+    wm title [winfo toplevel $win] [my getTitle]
+    
+    my specificInit
+    my createSystemMenu
+
+    wm deiconify [winfo toplevel $win]
+    focus $win
+
+    # debug helper
+    bind [winfo toplevel $win] <Control-I> [list [self] inspect]
+    next
+}
+IDE::Browser instproc initStatusBar {y {columns -1}} {
+    my instvar win
+    my initStatusBarWin $win.statusbar
+    if { ($y == -1) || ([IDE::System isTkNotOlderThan84] && [winfo exists $win.panedwindow]) } {
+        pack $win.statusbar -expand no -fill x
+    } else {
+        grid $win.statusbar -row $y -columnspan $columns -column 0 -sticky we
+    }
+}
+IDE::Browser instproc initStatusBarWin win {
+   my instvar statusBarTextWin
+   label $win -anchor w
+   set statusBarTextWin $win
+
+}
+IDE::Browser instproc setStatusBarText text {
+    if {![my exists statusBarTextWin]} return
+    [my set statusBarTextWin] configure -text $text
+    
+}
+IDE::Browser instproc setTitleAddition add {
+    my instvar win
+    wm title [winfo toplevel $win] "[my getTitle] : $add"
+}
+@ IDE::Browser instproc specificInit {} {
+description {Overwrite this method to build your own GUI}
+}
+IDE::Browser instproc specificInit {} {
+    # shoul be overwritten
+}
+
 @ Class IDE::DialogHelper {
 description {Handle waiting for GUI events by using vwait command
 see suspendUntilSignal method
@@ -104,6 +200,7 @@ IDE::DialogHelper instproc suspendUntilSignal {} {
 IDE::DialogHelper proc create args {
   error "Class [self] is abstract"
 }
+
 @ Class IDE::Dialog {
 description {Class methods are fasade to tk_message}
 }
@@ -238,71 +335,78 @@ IDE::Dialog proc yesNo message {
     if {$fwin!={}} { set parent [winfo toplevel $fwin] }
     return [tk_messageBox -title {Choose} -message $message -icon question -type yesno -parent $parent]
 }
-Class IDE::IDialogListChooser -superclass ::IDE::Dialog  -parameter {listin listout {type okcancel}}
-@ ::IDE::IDialogListChooser idemeta component IDEBaseGUI
-IDE::IDialogListChooser instproc addToList {} {
-    set sitem [[self]::listin selectedItem]
-    if {$sitem!=""} {
-	[self]::listout addItem $sitem
-    }
-}
-IDE::IDialogListChooser instproc createBaseSubwidgets {} {
-   my instvar win
-   frame $win.lframe
-   IDE::ListView [self]::listin $win.lframe.listin
-   IDE::ListView [self]::listout $win.lframe.listout
-   button $win.lframe.delfromlist -text del -command [list [self] delFromList]
-}
-IDE::IDialogListChooser instproc createGUI {} {
-    my instvar win
 
-    my createBaseSubwidgets
-     
-    button $win.lframe.addtolist -text >> -command [list [self] addToList]
+@ Class IDE::GUICommands {
+description {A Class that can build menues to toplevel.
+Await window in win instance
+and menu window in [$win toplevel].mb
+The menus will be specified by tcl list.
 
-    pack $win.lframe.listin -side left -expand yes -fill both
-    pack $win.lframe.listout -side right -expand yes -fill both
-    pack $win.lframe.addtolist -anchor s
-    pack $win.lframe.delfromlist -anchor n
- 
-    pack $win.lframe -fill both -expand yes -before $win.buttons
-
+you can specify parametr atHead to add menue at first position}
 }
-IDE::IDialogListChooser instproc delFromList {} {
-    set sitem [[self]::listout selectedItem]
-    if {$sitem!=""} {
-	[self]::listout removeItem $sitem
-    }
+Class IDE::GUICommands -parameter {{atHead 0}}
+@ ::IDE::GUICommands idemeta component IDEBaseGUI
+IDE::GUICommands instproc fillMenuStruct ms {
+     next
 }
-IDE::IDialogListChooser instproc getvalue {} {
-    my instvar entry selectedItem
-    if {$entry==""} {
-        return $selectedItem
-    }
-    return $entry
+IDE::GUICommands instproc getMenuStruct {} {
+    set ms [IDE::MenuStruct create [self]::ms [namespace tail [self class]]]
+    return $ms
 }
-IDE::IDialogListChooser instproc init {} {
-    my instvar win listin listout
-    if {![info exists listin]} {
-       error {no listin parameter}
+IDE::GUICommands instproc init args {
+    my instvar win atHead
+    set ms [my getMenuStruct]
+    if {$ms!=""} { [self] fillMenuStruct $ms }
+    if {$ms!="" && ![$ms isEmpty]} {
+        if {[winfo toplevel $win]=="."} {
+                set mainmenu .mb
+        } else {
+                set mainmenu [winfo toplevel $win].mb
+        }
+        set menuwin $mainmenu.[Object autoname menu]
+        $ms createTkMenu $menuwin [winfo toplevel $win]
+        if {$atHead} {
+          if {[$ms set underline]!=""} {
+             $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
+          } else {
+             $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin
+          }
+        } else {
+          if {[$ms set underline]!=""} {
+             $mainmenu add cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
+          } else {
+             $mainmenu add cascade -label [$ms set name] -menu $menuwin
+          }
+        }
+        # The menu struct is needed to compute enablement
+        # $ms destroy
+        set pwin [my popMenuWindow]
+        if {$pwin!="" && [$ms hasPopdownMenu]} {
+            $ms buildPopDownMenu $win.popdown [winfo toplevel $win]
+            bind $pwin <ButtonPress-3> [list $ms showPopMenu $win.popdown %X %Y]
+        }
     }
     next
-    
-    my createGUI
- 
-    if {![info exists listout]} {
-        set listout {}
-    }
-    [self]::listout setList $listout
-    [self]::listin setList $listin
- 
-    wm deiconify $win
 }
-IDE::IDialogListChooser instproc postOk {} {
-    my instvar listout
-    set listout [[self]::listout getList]
+@ IDE::GUICommands instproc menuInsertions {} {
+description {This method let you specify the additional menus entry point 
+for overwritting or mixins objects/classes
+it can be in the middle of menu structure
+call this from fillMenuStruct}
+}
+IDE::GUICommands instproc menuInsertions aMenuStruct {
     next
 }
+IDE::GUICommands instproc popMenuWindow {} {
+    return
+}
+IDE::GUICommands instproc upsMessage text {
+     set p [my info parent]
+     if {[Object isobject $p] && [$p istype IDE::Browser]} {
+         $p setStatusBarText $text
+     }
+}
+
 @ Class IDE::Text {
 description {Fasade for tk widget text}
 }
@@ -475,76 +579,7 @@ IDE::Text proc setColor color {
         }
     }
 }
-@ Class IDE::GUICommands {
-description {A Class that can build menues to toplevel.
-Await window in win instance
-and menu window in [$win toplevel].mb
-The menus will be specified by tcl list.
 
-you can specify parametr atHead to add menue at first position}
-}
-Class IDE::GUICommands -parameter {{atHead 0}}
-@ ::IDE::GUICommands idemeta component IDEBaseGUI
-IDE::GUICommands instproc fillMenuStruct ms {
-     next
-}
-IDE::GUICommands instproc getMenuStruct {} {
-    set ms [IDE::MenuStruct create [self]::ms [namespace tail [self class]]]
-    return $ms
-}
-IDE::GUICommands instproc init args {
-    my instvar win atHead
-    set ms [my getMenuStruct]
-    if {$ms!=""} { [self] fillMenuStruct $ms }
-    if {$ms!="" && ![$ms isEmpty]} {
-        if {[winfo toplevel $win]=="."} {
-                set mainmenu .mb
-        } else {
-                set mainmenu [winfo toplevel $win].mb
-        }
-        set menuwin $mainmenu.[Object autoname menu]
-        $ms createTkMenu $menuwin [winfo toplevel $win]
-        if {$atHead} {
-          if {[$ms set underline]!=""} {
-             $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
-          } else {
-             $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin
-          }
-        } else {
-          if {[$ms set underline]!=""} {
-             $mainmenu add cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
-          } else {
-             $mainmenu add cascade -label [$ms set name] -menu $menuwin
-          }
-        }
-        # The menu struct is needed to compute enablement
-        # $ms destroy
-        set pwin [my popMenuWindow]
-        if {$pwin!="" && [$ms hasPopdownMenu]} {
-            $ms buildPopDownMenu $win.popdown [winfo toplevel $win]
-            bind $pwin <ButtonPress-3> [list $ms showPopMenu $win.popdown %X %Y]
-        }
-    }
-    next
-}
-@ IDE::GUICommands instproc menuInsertions {} {
-description {This method let you specify the additional menus entry point 
-for overwritting or mixins objects/classes
-it can be in the middle of menu structure
-call this from fillMenuStruct}
-}
-IDE::GUICommands instproc menuInsertions aMenuStruct {
-    next
-}
-IDE::GUICommands instproc popMenuWindow {} {
-    return
-}
-IDE::GUICommands instproc upsMessage text {
-     set p [my info parent]
-     if {[Object isobject $p] && [$p istype IDE::Browser]} {
-         $p setStatusBarText $text
-     }
-}
 Class IDE::Editor -superclass {::IDE::Text ::IDE::GUICommands}  -parameter {{height 24} {width 80}}
 @ ::IDE::Editor idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {fileAppend fileIn fileOut} {browseSelection evalInspectSelection evalSelection evalDisplaySelection evalSubstituteSelection} getWordUnderCursor setTypedText}
 @ ::IDE::Editor idemeta categories {initialize user-action selection-action private service}
@@ -686,147 +721,285 @@ IDE::Editor proc initializeAfterLoad {} {
   bind Text <Control-v> {}
   event add <<Paste>> <Control-v>
 }
-Class IDE::ProtocolText -superclass ::IDE::Editor 
-@ ::IDE::ProtocolText idemeta component IDEBaseGUI
-IDE::ProtocolText instproc append text {
-    my instvar odd itemsNumber regexpr inverseMatch count protocolOn itemLines itemsNumber
-    if {!$protocolOn} return
-    if {$regexpr!=""} {
-         if {[regexp -- $regexpr $text]} {
-             if {$inverseMatch} return
-         } else {
-             if {!$inverseMatch} return
-         }
-    }
-    set twin [my getTextWindow]
-    set end [$twin index "end - 1 c"]
-    $twin insert end $text\n
-    set newEnd [$twin index "end - 1 l"]
-    set lines [expr [lindex [split $newEnd .] 0]-[lindex [split $end .] 0]]
-    if {$odd} {
-       $twin tag add odditem $end $newEnd
-    }
-    set odd [expr !$odd]
-    $twin see end
-    incr count
-    lappend itemLines $lines
-    if {$itemsNumber!=""} {
-       if {[catch {expr {$itemsNumber+1}}] || $itemsNumber<=0} {
-           set itemsNumber ""
-       } else {
-          if {$count>$itemsNumber} {
-              set linesToDelete [expr $count-$itemsNumber]
-              set range [lrange $itemLines 0 [expr {$linesToDelete-1}]]
-              set itemLines [lrange $itemLines $linesToDelete end]
-              set allLines 1
-              foreach lc $range {
-                  incr allLines $lc
-              }
-              $twin delete 1.0 $allLines.0
-              set count $itemsNumber
-          }
-       }
-    }
-}
-IDE::ProtocolText instproc clearProtocol {} {
-   my instvar odd protokolOn count itemLines state
-   set odd 0
-   set count 0
-   set itemLines {}   
-   set state full
-   my makeEmpty
-}
-IDE::ProtocolText instproc init win {
-   next
-   my instvar odd protocolOn count itemLines
-   $win.text tag configure odditem -background cornsilk3
 
-   frame $win.wbox
-   button $win.wbox.clear -text Clear -command [list [self] clearProtocol]
-   checkbutton $win.wbox.protocolon -text "Protocol on" -variable [self]::protocolOn
-   entry $win.wbox.eitems -width 5 -textvariable [self]::itemsNumber
-   entry $win.wbox.regexpr -width 20 -textvariable [self]::regexpr
-   checkbutton $win.wbox.reinverse -text "inverse match" -variable [self]::inverseMatch
-   label $win.wbox.lregexpr -text "Regular expresion match"
-   label $win.wbox.litems -text "Number of items to hold"
-
-   grid $win.wbox.clear -row 0 -column 0 -sticky ew 
-   grid $win.wbox.protocolon -row 1 -column 0 -padx 4 -pady 4
-   grid $win.wbox.eitems -row 0 -column 1 -sticky e  -padx 4
-   grid $win.wbox.regexpr -row 1 -column 1  -padx 4
-   grid $win.wbox.litems -row 0 -column 2 -columnspan 2 -sticky w 
-   grid $win.wbox.lregexpr -row 1 -column 2 -sticky w
-   grid $win.wbox.reinverse -row 1 -column 3
-
-   pack $win.wbox -side bottom -before $win.scroll -anchor w
-   set odd 0
-   set protocolOn 1
-   set count 0
-   set itemLines {}
+@ Class IDE::EditorPopDown {
+description {This class can be used with all classes derived from IDE::Editor
+it provide popdown menues that can be used for code completion future}
 }
-Class IDE::StateButton -parameter {state states command}
-@ ::IDE::StateButton idemeta component IDEBaseGUI
-IDE::StateButton instproc changeState {} {
-   my instvar states state
-   if {[set pos [lsearch -exact $states $state]]==[llength $states]-1} {
-        set newState [lindex $states 0]
-   } else {
-        set newState [lindex $states [expr $pos+1]]
+Class IDE::EditorPopDown
+@ ::IDE::EditorPopDown idemeta component IDEBaseGUI
+IDE::EditorPopDown instproc getPopdown {} {
+    my instvar dropWin
+    if {![my exists dropWin]} {
+        set win [my getTextWindow]
+        set dropWin $win.dropshell
+        menu $dropWin -bd 2 -relief raised -tearoff 0
+        wm overrideredirect $dropWin 1
+        scrollbar $dropWin.scroll -command "$dropWin.listbox yview" -takefocus 0
+        listbox $dropWin.listbox -height 10 -width 24  -yscrollcommand "$dropWin.scroll set"  -exportselection no -selectmode browse
+        bind $dropWin.listbox <<ListboxSelect>> [list [self] selectDropDown]
+        bind $dropWin.listbox <Key-Escape> [list [self] hidePopdown]
+        pack $dropWin.listbox -expand yes  -fill both -side left
+        pack $dropWin.scroll -expand yes  -fill y -side left
+        wm withdraw $dropWin
+    }
+    return $dropWin
+}
+IDE::EditorPopDown instproc hidePopdown {} {
+   wm withdraw [my set dropWin]
+   focus [my getTextWindow]
+}
+IDE::EditorPopDown instproc invokePopDown {mlist pattern} {
+   if {$mlist==""} return
+   my instvar compPattern
+   set compPattern $pattern
+   if {[llength $mlist]==1} {
+       set sindex [expr {[string length $compPattern] + [string first [string range $compPattern 0 end-1] $mlist] -1}]
+       my appendToCursor "[string range $mlist $sindex end]"
+       return
    }
-   my setState $newState
-   my notifyChange
+   set twin [my getTextWindow]
+   set popWin [my getPopdown]
+   $popWin.listbox delete 0 end
+   eval $popWin.listbox insert 0 $mlist
+   set height [winfo reqheight $popWin.listbox]
+   set width [expr {[winfo reqwidth $popWin.listbox]+[winfo reqwidth $popWin.scroll]}]
+   set bb [$twin bbox insert]
+   set x [expr {[lindex $bb 0]+[winfo rootx $twin]}]
+   set y [expr {[lindex $bb 1]+[winfo rooty $twin]}]
+   wm geometry $popWin $width\x$height+$x+$y
+   wm deiconify $popWin
+   raise $popWin
+   ::focus $popWin.listbox
 }
-IDE::StateButton instproc changeStateTo {newState {notify 1}} {
-   my instvar states state
-   if {[lsearch -exact $states $newState]>=0 && $newState!=$state} {
-        my setState $newState
-        if {$notify} {
-            my notifyChange
+IDE::EditorPopDown instproc isPopdownVisible {} {
+    my instvar dropWin
+    if {![my exists dropWin]} {
+         return [wm ismapped $dropWin]
+    }
+    return 0
+}
+IDE::EditorPopDown instproc selectDropDown {} {
+    my instvar dropWin compPattern
+    set currsel [lindex [$dropWin.listbox curselection] 0]
+    if {$currsel!=""} {
+        set item [$dropWin.listbox get $currsel]
+        set sindex [expr {[string length $compPattern] + [string first [string range $compPattern 0 end-1] $item] -1}]
+        my appendToCursor "[string range $item $sindex end]"
+    }
+    my hidePopdown
+}
+
+@ Class IDE::EventHandlerMix {
+description {This class privede simple event handler.
+There are two methodes.
+1) Register event
+senderObject addEventInteres reciverObject method eventName ?addParamConst?
+2) Invoke Event in Sender Object
+senderObject signalEvent eventName addParam
+
+The invoked methode will be call with 0 1 or 2 arguments
+dependent of addParam.
+reciver method ?addParamConst? ?addParam?
+
+Warning: if addParam of addParamConst are empty they are ignored.}
+}
+Class IDE::EventHandlerMix
+@ ::IDE::EventHandlerMix idemeta component IDEBaseGUI
+IDE::EventHandlerMix instproc addEventInteres {reciverObj reciverMethode eventName {addParameter {}}} {
+    if {[my exists _events($eventName)]} {
+        set eventList [my set _events($eventName)]
+    }
+    lappend eventList [list $reciverObj $reciverMethode $addParameter]
+    my set _events($eventName) $eventList
+}
+IDE::EventHandlerMix instproc removeInterestFrom obj {
+    if {[my array exists _events]} {
+        my instvar _events
+        set indicator [array startsearch _events]
+        while {[array anymore _events $indicator]} {
+            set elem [array nextelement _events $indicator]
+            set _events($elem) [ide::lselect each $_events($elem) {[lindex $each 0]!=$obj}]
         }
-  }
+        array donesearch _events $indicator
+    }
 }
-IDE::StateButton instproc init window {
-   my instvar win states state
-   set win $window
-   if {![info exists state]} { 
-        set state [lindex $states 0]
-   }
-   button $win -text $state -command [list [self] changeState]
+IDE::EventHandlerMix instproc signalEvent {eventName {addParameter {}}} {
+    if {[my exists _events($eventName)]} {
+        foreach elist [my set _events($eventName)] {
+            foreach {obj methode params} $elist {
+                if {[Object isobject $obj]} {
+                    if {$params=="" && $addParameter==""} {
+                        $obj $methode
+                    } elseif {$addParameter!="" && $params==""} {
+                        $obj $methode $addParameter
+                    } elseif {$params!="" && $addParameter==""} {
+                        $obj $methode $params
+                    } else {
+                        $obj $methode $params $addParameter
+                    }
+                }
+                # try to implement garbage removing from events
+            }
+        }
+    }
 }
-IDE::StateButton instproc notifyChange {} {
-   my instvar command state
-   if {[info exists command]} {
-        eval $command [list $state]
-   } 
 
+@ Class IDE::FindReplaceDestroyHelper {
+description {This class is using for mixin with IDE::Text for
+recognize destroying of based window. In this case (destroy)
+also Find/Replace dialog will be closed}
 }
-IDE::StateButton instproc setState newState {
-     my instvar state win
-     set state $newState
-     $win configure -text $state
+Class IDE::FindReplaceDestroyHelper
+@ ::IDE::FindReplaceDestroyHelper idemeta component IDEBaseGUI
+IDE::FindReplaceDestroyHelper instproc destroy {} {
+     IDE::FindReplace destroySignalFromView [my info parent]
 }
-IDE::StateButton instproc setStates newStates {
-     my instvar states state
-     set states $newStates
-     if {![::ide::lcontain $newStates $state]} {
-          my setState [lindex $states 0]
-     }
+
+@ Class IDE::FocusPerKey {
+description {To used only whith GUI Klasses as Subklass by Multiheritage
+
+use parameter focusKey to speciefi Key binding to get focus to widget
+
+The main class must understand
+getFocusKey}
 }
-Class IDE::StateButtonActivity -superclass ::IDE::StateButton 
-@ ::IDE::StateButtonActivity idemeta component IDEBaseGUI
-IDE::StateButtonActivity instproc init window {
+Class IDE::FocusPerKey -parameter {focusKey nextFocus prevFocus}
+@ ::IDE::FocusPerKey idemeta component IDEBaseGUI
+IDE::FocusPerKey instproc getFocus {} {
+    ::focus [my getFocusWin]
+}
+IDE::FocusPerKey instproc getFocusWin {} {
+   next
+}
+IDE::FocusPerKey instproc init args {
+   next
+   my instvar win focusKey nextFocus prevFocus
+   if {[info exists focusKey]} {
+      bind [winfo toplevel $win] <$focusKey> [list [self] getFocus]
+   }
+   if {[info exists nextFocus]} {
+      bind [my getFocusWin] <Tab> "focus $nextFocus; break"
+   }
+   if {[info exists prevFocus]} {
+      bind [my getFocusWin] <<PrevWindow>> "focus $prevFocus; break"
+   }
+}
+
+Class IDE::FontChooser -superclass ::IDE::Dialog  -parameter {{font {}} {type okcancel} {title {Font Chooser}}}
+@ ::IDE::FontChooser idemeta component IDEBaseGUI
+IDE::FontChooser instproc changeFamiliesVisibility {} {
+    my instvar onlytk
+    if {$onlytk} {
+       [self]::fontfamily setList [list Courier Times Helvetica] 
+    } else {
+       [self]::fontfamily setList [font families] 
+    }
+}
+IDE::FontChooser instproc changeOption type {
+    font configure fontchooser -$type [my set $type]
+}
+IDE::FontChooser instproc changeSize {} {
+    my instvar win fontSize
+    set fontSize [$win.f.size get]
+    font configure fontchooser -size $fontSize
+}
+IDE::FontChooser instproc extractFontParameters {} {
+    my instvar fontSize fontFamily slant weight font
+    array set fontArrgs [font actual fontchooser]
+    array set fontArrgs $font
+    eval font configure fontchooser [array get fontArrgs]
+    foreach k [array names fontArrgs] {
+        switch -exact -- $k {
+           -weight {
+               set weight $fontArrgs($k)
+           }
+           -family {
+               set fontFamily $fontArrgs($k)
+           }
+           -size {
+               set fontSize $fontArrgs($k)
+           }
+           -slant {
+               set slant $fontArrgs($k)
+           }
+        }
+    }
+}
+IDE::FontChooser instproc init {} {
     next
-    my instvar win unactiveColor
-    set unactiveColor [$win cget -bg]
+
+    my instvar win entry width font fontSize
+    my requireNamespace
+    if {[lsearch [font names] fontchooser]==-1} {
+        font create fontchooser
+    }
+    my extractFontParameters
+
+    frame $win.f
+    label $win.f.lfamily -text "Font Family:"
+    IDE::NListView create [self]::fontfamily $win.f.fontfamily  -notify [self] -notifyProc selectFontFamily
+    label $win.f.lsize -text "Size:"
+    spinbox $win.f.size -from -30 -to 30 -increment 1 -command [list [self] changeSize] -validate focusout  -validatecommand [list [self] validateSize %s] -invalidcommand [list [self] invalidSize]
+    $win.f.size set $fontSize
+    
+    checkbutton $win.f.bold -text "Bold" -variable [self]::weight -onvalue bold -offvalue normal -command [list [self] changeOption weight]
+    checkbutton $win.f.italian -text "Italian" -variable [self]::slant -onvalue italic -offvalue roman -command [list [self] changeOption slant]
+    checkbutton $win.f.onlytk -text "Only Tk system fonts"  -variable [self]::onlytk  -command [list [self] changeFamiliesVisibility]
+    
+    
+    labelframe $win.f.preview -text "Preview" -height 80 -width 300
+    label $win.f.preview.text -text {AaBbCc123 \{([?} -font fontchooser
+    pack $win.f.preview.text -fill x -expand yes
+    pack propagate $win.f.preview 0
+    
+    grid $win.f.lfamily -column 0 -row 0 -sticky w
+    grid $win.f.fontfamily -column 0 -row 1 -sticky news -rowspan 4
+    grid $win.f.lsize -column 1 -row 0 -sticky w
+    grid $win.f.size -column 1 -row 1 -sticky wne -padx 5
+    grid $win.f.bold -column 1 -row 2 -sticky w
+    grid $win.f.italian -column 1 -row 3 -sticky w
+    grid $win.f.onlytk -column 1 -row 4 -columnspan 2 -sticky wn
+    grid $win.f.preview -column 0 -row 5 -columnspan 2 -sticky news
+    grid rowconfigure $win.f 4 -weight 1
+    grid columnconfigure $win.f 0 -weight 1
+    
+    pack $win.f -fill both -expand yes -before $win.buttons
+    my initView
+    wm deiconify $win
 }
-IDE::StateButtonActivity instproc setActivity bool {
-     my instvar state win unactiveColor
-     if {$bool} {
-        $win configure -bg blue
-     } else {
-        $win configure -bg $unactiveColor
-     }
+IDE::FontChooser instproc initView {} {
+    [self]::fontfamily setList [font families]
+    [self]::fontfamily setSelectedItem [my set fontFamily] 0
 }
+IDE::FontChooser instproc invalidSize {} {
+    my instvar fontSize win
+    $win.f.size set $fontSize
+    $win.f.size configure -validate focusout
+}
+IDE::FontChooser instproc postOk {} {
+    my set font [font actual fontchooser]
+    next
+}
+IDE::FontChooser instproc selectFontFamily family {
+    font configure fontchooser -family $family
+}
+IDE::FontChooser instproc validateSize value {
+   set ret [expr {![catch {expr {$value+0}}]}]
+   if {$ret} {
+       my changeSize
+   }
+   return $ret
+}
+IDE::FontChooser proc getFont {{font {}}} {
+  set entry [my new -volatile [list -font $font]]
+  set ret {}
+  if {[$entry prompt]=="ok"} {
+        set ret [$entry font]
+  }
+  return $ret
+}
+
 Class IDE::ListView -parameter {{multiselect 0} label {height 10} width}
 @ ::IDE::ListView idemeta categoriesMethods {{selectedItem setSelectedItem reorderSelected unselect renameItem removeItemAt addItemAt setList addItem markItem removeItem} isValidSelection}
 @ ::IDE::ListView idemeta categories {service test-service}
@@ -1147,6 +1320,283 @@ IDE::ListView proc setColor color {
         }
     }
 }
+
+@ Class IDE::HListView {
+description {Simple Hierarch List Browser.}
+}
+Class IDE::HListView -superclass ::IDE::ListView  -parameter {{multiselect 0} label}
+@ ::IDE::HListView idemeta component IDEBaseGUI
+IDE::HListView instproc rekListInit {hlist deep} {
+   my instvar listItems
+   #[self] halt
+   lappend listItems "$deep[lindex $hlist 0]"
+   foreach subtree [lrange $hlist 1 end] {
+       my rekListInit $subtree "$deep  "
+   }
+}
+IDE::HListView instproc removeItem item {
+    set index 0
+    foreach elem [my set listItems] {
+        if {[string trimleft $elem] eq $item} {
+            my removeItemAt $index
+            return
+        }
+        incr index
+    }
+}
+IDE::HListView instproc selectedItem {} {
+    string trimleft [next]
+}
+IDE::HListView instproc selectedItemFirst {} {
+    string trimleft [next]
+}
+IDE::HListView instproc setHList hl {
+   my instvar hlist listItems
+   set hlist $hl
+   set listItems {}
+   foreach tree $hlist {
+      my rekListInit $tree ""
+   }
+   my setList $listItems
+}
+IDE::HListView instproc setList list {
+    my instvar win listItems selectedIndex 
+    $win.listbox delete 0 end
+    set listItems $list
+    set selectedIndex -1
+    eval $win.listbox insert 0 $listItems
+}
+
+Class IDE::IDialogEntry -superclass ::IDE::Dialog  -parameter {entry {type okcancel} {width 20}}
+@ ::IDE::IDialogEntry idemeta component IDEBaseGUI
+IDE::IDialogEntry instproc init {} {
+    my instvar win entry width
+    next
+    ::entry $win.entry -width $width
+    if {![info exists entry]} {
+        set entry {}
+    } else {
+        $win.entry insert 0 $entry 
+    }
+    pack $win.entry -fill both -expand yes -before $win.buttons -padx 10 -pady 5
+    focus $win.entry
+    wm deiconify $win
+}
+IDE::IDialogEntry instproc postOk {} {
+    my instvar win entry
+    set entry [$win.entry get]
+    next
+}
+IDE::IDialogEntry proc getValue {mes {text {}}} {
+  set entry [my new -volatile [list -message $mes] [list -entry $text]]
+  set ret {}
+  if {[$entry prompt]=="ok"} {
+        set ret [$entry entry]
+  }
+  return $ret
+}
+IDE::IDialogEntry proc getValueWithCancel {mes {text {}}} {
+  set entry [my new -volatile [list -message $mes] [list -entry $text]]
+  set ret {}
+  if {[$entry prompt]=="ok"} {
+        set ret [$entry entry]
+  } else {
+        return _cancel
+  }
+  return $ret
+}
+
+Class IDE::IDialogList -superclass ::IDE::Dialog  -parameter {list {selectedItem {}} {type okcancel}}
+@ ::IDE::IDialogList idemeta component IDEBaseGUI
+IDE::IDialogList instproc init {} {
+    my instvar win list selectedItem selectPattern patternIndex
+    next
+    my requireNamespace
+    frame $win.lframe
+    set selectPattern ""
+    set patternIndex 0
+    ::scrollbar $win.lframe.scroll -command "$win.lframe.listbox yview" -takefocus 0
+    ::listbox $win.lframe.listbox -yscroll "$win.lframe.scroll set"   -exportselection no
+    ::label $win.pattern -textvariable [self]::selectPattern
+    bind $win.lframe.listbox <Double-Button-1> [list [self] actionOk]
+    bind $win.lframe.listbox <Key> [list [self] keyEvent %K %A]
+ 
+    pack $win.lframe.scroll -side right -fill y
+    pack $win.lframe.listbox -expand yes -fill both
+ 
+    pack $win.pattern -fill x -expand yes -before $win.buttons
+    pack $win.lframe -fill both -expand yes -before $win.buttons
+    if {![info exists list]} {
+        set list {}
+    } else {
+        eval $win.lframe.listbox insert 0 $list
+        
+    }
+    if {$selectedItem!=""} {
+        my setSelectedItem $selectedItem
+    }
+    wm deiconify $win
+    focus $win.lframe.listbox
+}
+IDE::IDialogList instproc keyEvent {key keyCode} {
+    my instvar list selectPattern win patternIndex
+    update idletasks
+    if {$key eq "BackSpace"} {
+        set selectPattern  [string range $selectPattern 0 end-1]
+    } elseif {$key eq "F4"} {
+        incr patternIndex
+    } else {
+        if {$keyCode eq ""} return
+        append selectPattern $keyCode
+        set patternIndex 0
+    }
+    set sindex [lsearch -all -regexp $list (?i)^$selectPattern]
+    if {[llength $sindex]==0} {
+        set sindex [lsearch -all -regexp $list (?i)$selectPattern]
+    }
+    set sindex [lindex $sindex $patternIndex]
+    if {$sindex!=""} {
+        $win.lframe.listbox selection clear 0 end
+        $win.lframe.listbox selection set $sindex $sindex
+        $win.lframe.listbox see $sindex
+    }   
+}
+IDE::IDialogList instproc postOk {} {
+    my instvar win selectedItem list
+    if {[set cur [$win.lframe.listbox curselection]]!=""} {
+        set selectedItem [lindex $list $cur]
+    }
+    next
+}
+IDE::IDialogList instproc setSelectedItem item {
+    my instvar win list
+    if {[set cur [lsearch -exact $list $item]]>=0} {
+        $win.lframe.listbox selection set $cur $cur
+        $win.lframe.listbox see $cur
+    }
+}
+IDE::IDialogList proc getListItem {message list {default {}}} {
+    set listdialog [my new -volatile [list -message $message] [list -list $list] [list -selectedItem $default]]
+    if {[$listdialog prompt]!="ok"} {
+        return {}
+    }
+    set result [$listdialog selectedItem]
+    return $result
+}
+
+Class IDE::IDialogListChooser -superclass ::IDE::Dialog  -parameter {listin listout {type okcancel}}
+@ ::IDE::IDialogListChooser idemeta component IDEBaseGUI
+IDE::IDialogListChooser instproc addToList {} {
+    set sitem [[self]::listin selectedItem]
+    if {$sitem!=""} {
+	[self]::listout addItem $sitem
+    }
+}
+IDE::IDialogListChooser instproc createBaseSubwidgets {} {
+   my instvar win
+   frame $win.lframe
+   IDE::ListView [self]::listin $win.lframe.listin
+   IDE::ListView [self]::listout $win.lframe.listout
+   button $win.lframe.delfromlist -text del -command [list [self] delFromList]
+}
+IDE::IDialogListChooser instproc createGUI {} {
+    my instvar win
+
+    my createBaseSubwidgets
+     
+    button $win.lframe.addtolist -text >> -command [list [self] addToList]
+
+    pack $win.lframe.listin -side left -expand yes -fill both
+    pack $win.lframe.listout -side right -expand yes -fill both
+    pack $win.lframe.addtolist -anchor s
+    pack $win.lframe.delfromlist -anchor n
+ 
+    pack $win.lframe -fill both -expand yes -before $win.buttons
+
+}
+IDE::IDialogListChooser instproc delFromList {} {
+    set sitem [[self]::listout selectedItem]
+    if {$sitem!=""} {
+	[self]::listout removeItem $sitem
+    }
+}
+IDE::IDialogListChooser instproc getvalue {} {
+    my instvar entry selectedItem
+    if {$entry==""} {
+        return $selectedItem
+    }
+    return $entry
+}
+IDE::IDialogListChooser instproc init {} {
+    my instvar win listin listout
+    if {![info exists listin]} {
+       error {no listin parameter}
+    }
+    next
+    
+    my createGUI
+ 
+    if {![info exists listout]} {
+        set listout {}
+    }
+    [self]::listout setList $listout
+    [self]::listin setList $listin
+ 
+    wm deiconify $win
+}
+IDE::IDialogListChooser instproc postOk {} {
+    my instvar listout
+    set listout [[self]::listout getList]
+    next
+}
+
+Class IDE::IDialogListEntry -superclass ::IDE::Dialog  -parameter {entry list {type okcancel} {selectedItem {}}}
+@ ::IDE::IDialogListEntry idemeta component IDEBaseGUI
+IDE::IDialogListEntry instproc getvalue {} {
+    my instvar entry selectedItem
+    if {$entry==""} {
+        return $selectedItem
+    }
+    return $entry
+}
+IDE::IDialogListEntry instproc init {} {
+    my instvar win list entry selectedItem
+    next
+    frame $win.lframe
+    ::scrollbar $win.lframe.scroll -command "$win.lframe.listbox yview"
+    ::listbox $win.lframe.listbox -yscroll "$win.lframe.scroll set"   -exportselection no
+    bind $win.lframe.listbox <Double-Button-1> [list [self] actionOk]
+ 
+    pack $win.lframe.scroll -side right -fill y
+    pack $win.lframe.listbox -expand yes -fill both
+ 
+    if {![info exists list]} {
+        set list {}
+    } else {
+        eval $win.lframe.listbox insert 0 $list
+    }
+    ::entry $win.entry
+    if {![info exists entry]} {
+        set entry {}
+    } else {
+        $win.entry insert 0 $entry 
+    }
+
+    pack $win.lframe -fill both -expand yes -before $win.buttons
+    pack $win.entry -fill both -expand yes -before $win.buttons -padx 10 -pady 5
+ 
+    wm deiconify $win
+
+}
+IDE::IDialogListEntry instproc postOk {} {
+    my instvar win selectedItem list entry
+    if {[set cur [$win.lframe.listbox curselection]]!=""} {
+        set selectedItem [lindex $list $cur]
+    }
+    set entry [$win.entry get]
+    next
+}
+
 Class IDE::IDialogListOrderChooser -superclass ::IDE::IDialogListChooser  -parameter {listin listout {type okcancel}}
 @ ::IDE::IDialogListOrderChooser idemeta component IDEBaseGUI
 IDE::IDialogListOrderChooser instproc addToList {} {
@@ -1180,6 +1630,7 @@ IDE::IDialogListOrderChooser instproc downItem {} {
 IDE::IDialogListOrderChooser instproc upItem {} {
    [self]::listout reorderSelected -1 
 }
+
 @ Class IDE::IDialogWithCheck {
 description {Prompter with additional check box
 addiational paramer -checktext -check}
@@ -1194,60 +1645,7 @@ IDE::IDialogWithCheck instproc init {} {
     pack $win.check -fill both -expand yes -before $win.buttons -padx 10 -pady 5
     wm deiconify $win
 }
-@ Class IDE::EventHandlerMix {
-description {This class privede simple event handler.
-There are two methodes.
-1) Register event
-senderObject addEventInteres reciverObject method eventName ?addParamConst?
-2) Invoke Event in Sender Object
-senderObject signalEvent eventName addParam
 
-The invoked methode will be call with 0 1 or 2 arguments
-dependent of addParam.
-reciver method ?addParamConst? ?addParam?
-
-Warning: if addParam of addParamConst are empty they are ignored.}
-}
-Class IDE::EventHandlerMix
-@ ::IDE::EventHandlerMix idemeta component IDEBaseGUI
-IDE::EventHandlerMix instproc addEventInteres {reciverObj reciverMethode eventName {addParameter {}}} {
-    if {[my exists _events($eventName)]} {
-        set eventList [my set _events($eventName)]
-    }
-    lappend eventList [list $reciverObj $reciverMethode $addParameter]
-    my set _events($eventName) $eventList
-}
-IDE::EventHandlerMix instproc removeInterestFrom obj {
-    if {[my array exists _events]} {
-        my instvar _events
-        set indicator [array startsearch _events]
-        while {[array anymore _events $indicator]} {
-            set elem [array nextelement _events $indicator]
-            set _events($elem) [ide::lselect each $_events($elem) {[lindex $each 0]!=$obj}]
-        }
-        array donesearch _events $indicator
-    }
-}
-IDE::EventHandlerMix instproc signalEvent {eventName {addParameter {}}} {
-    if {[my exists _events($eventName)]} {
-        foreach elist [my set _events($eventName)] {
-            foreach {obj methode params} $elist {
-                if {[Object isobject $obj]} {
-                    if {$params=="" && $addParameter==""} {
-                        $obj $methode
-                    } elseif {$addParameter!="" && $params==""} {
-                        $obj $methode $addParameter
-                    } elseif {$params!="" && $addParameter==""} {
-                        $obj $methode $params
-                    } else {
-                        $obj $methode $params $addParameter
-                    }
-                }
-                # try to implement garbage removing from events
-            }
-        }
-    }
-}
 @ Class IDE::MenuItem {
 description {This is the abstract root class for buildung menu stucture.
 
@@ -1281,6 +1679,30 @@ IDE::MenuItem instproc migrateTkMenu {} {
     }
     puts $add
 }
+
+Class IDE::MenuCheckbox -superclass ::IDE::MenuItem  -parameter {name {command {}} {variable {}} {accelerator {}} {underline {}}}
+@ ::IDE::MenuCheckbox idemeta component IDEBaseGUI
+IDE::MenuCheckbox instproc createItemTkMenu {win tl_win} {
+    my instvar accelerator name command variable underline
+    set par {}
+    if {$accelerator!="" && $tl_win!=""} {
+       if {[string index $accelerator 0]=="_"} {
+           set par "-accelerator [string range $accelerator 1 end]"
+       } else {
+           set par "-accelerator $accelerator"
+       }
+    }
+    if {$underline!=""} {
+        append par " -underline $underline"
+    }
+    eval $win add checkbutton -label [list $name] -command [list $command] -variable $variable $par
+    if {$accelerator!="" && $tl_win!=""} {
+       if {[string index $accelerator 0]!="_"} {
+           bind $tl_win <$accelerator> [list $win invoke $name]
+       }
+    }
+}
+
 Class IDE::MenuCommand -superclass ::IDE::MenuItem  -parameter {{accelerator {}} {underline {}} name command}
 @ ::IDE::MenuCommand idemeta component IDEBaseGUI
 IDE::MenuCommand instproc createItemTkMenu {win tl_win} {
@@ -1299,39 +1721,7 @@ IDE::MenuCommand instproc createItemTkMenu {win tl_win} {
     }
     eval $win add command  -label [list $name] -command [list $command] $par
 }
-Class IDE::NListView -superclass ::IDE::ListView  -parameter {notify notifyProc doubleNotifyProc}
-@ ::IDE::NListView idemeta component IDEBaseGUI
-IDE::NListView instproc buttonDoublePush {} {
-    my instvar notify doubleNotifyProc
-    if {[info exists notify] && [info exists doubleNotifyProc]} {
-       $notify $doubleNotifyProc [my selectedItemFirst]
-    } else {
-        next
-    }
-}
-IDE::NListView instproc selectItem item {
-    # !! I am not very happy about this
-    # this should be changed in the future than
-    # an application modell is available 
-    my instvar notify notifyProc
-    if {[info exists notify]} {
-       if {[info exists notifyProc]} {
-          $notify $notifyProc $item
-       } else {
-          $notify selectItem $item
-       }
-    }
-}
-@ Class IDE::FindReplaceDestroyHelper {
-description {This class is using for mixin with IDE::Text for
-recognize destroying of based window. In this case (destroy)
-also Find/Replace dialog will be closed}
-}
-Class IDE::FindReplaceDestroyHelper
-@ ::IDE::FindReplaceDestroyHelper idemeta component IDEBaseGUI
-IDE::FindReplaceDestroyHelper instproc destroy {} {
-     IDE::FindReplace destroySignalFromView [my info parent]
-}
+
 Class IDE::MenuRadiobutton -superclass ::IDE::MenuItem  -parameter {name command {value {}} {variable {}} {accelerator {}} {underline {}}}
 @ ::IDE::MenuRadiobutton idemeta component IDEBaseGUI
 IDE::MenuRadiobutton instproc createItemTkMenu {win tl_win} {
@@ -1354,100 +1744,13 @@ IDE::MenuRadiobutton instproc createItemTkMenu {win tl_win} {
        }
     }
 }
-@ Class IDE::Browser {
-description {This is the base class for all IDE Browser
 
-It can buid the system menu and status info bar.
+Class IDE::MenuSeparator -superclass ::IDE::MenuItem 
+@ ::IDE::MenuSeparator idemeta component IDEBaseGUI
+IDE::MenuSeparator instproc createItemTkMenu {win tl_win} {
+   $win add separator
+}
 
-Please overwrite method specificInit for your own GUI.}
-}
-Class IDE::Browser
-@ ::IDE::Browser idemeta categoriesMethods {{specificInit buildTopLevel init initStatusBar}}
-@ ::IDE::Browser idemeta categories initialize
-@ ::IDE::Browser idemeta component IDEBaseGUI
-IDE::Browser instproc buildTopLevel {} {
-    my instvar win
-    ::toplevel $win
-}
-IDE::Browser instproc closeWindow {} {
-    my destroy
-}
-IDE::Browser instproc createSystemMenu {} {
-    my instvar win
-    set ms [IDE::System getMenuStruct]
-    if {[winfo toplevel $win]=="."} {
-        set twin {}
-    } else {
-        set twin $win
-    }
-    $ms createTkMenu $twin.mb.idesystem $twin
-    $twin.mb add cascade -label [$ms set name] -menu $twin.mb.idesystem -underline 0
-
-    [winfo toplevel $win] configure -menu $twin.mb
-}
-IDE::Browser instproc destroy {} {
-    my instvar win
-    if {[info exists win]} {
-       ::destroy $win
-    }
-    next
-}
-IDE::Browser instproc getTitle {} {
-    return [namespace tail [my info class]]
-}
-IDE::Browser instproc init {window args} {
-    my instvar win
-    set win $window
-    if {![winfo exists $win]} {
-        my buildTopLevel
-        wm withdraw $win
-        menu $win.mb -tearoff 0
-    } else {
-        menu .mb -tearoff 0
-    }
-    wm protocol [winfo toplevel $win] WM_DELETE_WINDOW [list [self] closeWindow]
-    wm title [winfo toplevel $win] [my getTitle]
-    
-    my specificInit
-    my createSystemMenu
-
-    wm deiconify [winfo toplevel $win]
-    focus $win
-
-    # debug helper
-    bind [winfo toplevel $win] <Control-I> [list [self] inspect]
-    next
-}
-IDE::Browser instproc initStatusBar {y {columns -1}} {
-    my instvar win
-    my initStatusBarWin $win.statusbar
-    if { ($y == -1) || ([IDE::System isTkNotOlderThan84] && [winfo exists $win.panedwindow]) } {
-        pack $win.statusbar -expand no -fill x
-    } else {
-        grid $win.statusbar -row $y -columnspan $columns -column 0 -sticky we
-    }
-}
-IDE::Browser instproc initStatusBarWin win {
-   my instvar statusBarTextWin
-   label $win -anchor w
-   set statusBarTextWin $win
-
-}
-IDE::Browser instproc setStatusBarText text {
-    if {![my exists statusBarTextWin]} return
-    [my set statusBarTextWin] configure -text $text
-    
-}
-IDE::Browser instproc setTitleAddition add {
-    my instvar win
-    wm title [winfo toplevel $win] "[my getTitle] : $add"
-}
-@ IDE::Browser instproc specificInit {} {
-description {Overwrite this method to build your own GUI}
-}
-IDE::Browser instproc specificInit {} {
-    # shoul be overwritten
-}
 @ Class IDE::MenuStruct {
 description {This Class represent normall und popdown menus.
 It is used from IDE::GUICommand classes.
@@ -1635,448 +1938,175 @@ IDE::MenuStruct instproc showPopMenu {win x y} {
     my checkPopDownEnablement $win
     tk_popup $win $x $y
 }
-Class IDE::IDialogListEntry -superclass ::IDE::Dialog  -parameter {entry list {type okcancel} {selectedItem {}}}
-@ ::IDE::IDialogListEntry idemeta component IDEBaseGUI
-IDE::IDialogListEntry instproc getvalue {} {
-    my instvar entry selectedItem
-    if {$entry==""} {
-        return $selectedItem
-    }
-    return $entry
-}
-IDE::IDialogListEntry instproc init {} {
-    my instvar win list entry selectedItem
-    next
-    frame $win.lframe
-    ::scrollbar $win.lframe.scroll -command "$win.lframe.listbox yview"
-    ::listbox $win.lframe.listbox -yscroll "$win.lframe.scroll set"   -exportselection no
-    bind $win.lframe.listbox <Double-Button-1> [list [self] actionOk]
- 
-    pack $win.lframe.scroll -side right -fill y
-    pack $win.lframe.listbox -expand yes -fill both
- 
-    if {![info exists list]} {
-        set list {}
-    } else {
-        eval $win.lframe.listbox insert 0 $list
-    }
-    ::entry $win.entry
-    if {![info exists entry]} {
-        set entry {}
-    } else {
-        $win.entry insert 0 $entry 
-    }
 
-    pack $win.lframe -fill both -expand yes -before $win.buttons
-    pack $win.entry -fill both -expand yes -before $win.buttons -padx 10 -pady 5
- 
-    wm deiconify $win
-
-}
-IDE::IDialogListEntry instproc postOk {} {
-    my instvar win selectedItem list entry
-    if {[set cur [$win.lframe.listbox curselection]]!=""} {
-        set selectedItem [lindex $list $cur]
-    }
-    set entry [$win.entry get]
-    next
-}
-Class IDE::IDialogEntry -superclass ::IDE::Dialog  -parameter {entry {type okcancel} {width 20}}
-@ ::IDE::IDialogEntry idemeta component IDEBaseGUI
-IDE::IDialogEntry instproc init {} {
-    my instvar win entry width
-    next
-    ::entry $win.entry -width $width
-    if {![info exists entry]} {
-        set entry {}
+Class IDE::NListView -superclass ::IDE::ListView  -parameter {notify notifyProc doubleNotifyProc}
+@ ::IDE::NListView idemeta component IDEBaseGUI
+IDE::NListView instproc buttonDoublePush {} {
+    my instvar notify doubleNotifyProc
+    if {[info exists notify] && [info exists doubleNotifyProc]} {
+       $notify $doubleNotifyProc [my selectedItemFirst]
     } else {
-        $win.entry insert 0 $entry 
-    }
-    pack $win.entry -fill both -expand yes -before $win.buttons -padx 10 -pady 5
-    focus $win.entry
-    wm deiconify $win
-}
-IDE::IDialogEntry instproc postOk {} {
-    my instvar win entry
-    set entry [$win.entry get]
-    next
-}
-IDE::IDialogEntry proc getValue {mes {text {}}} {
-  set entry [my new -volatile [list -message $mes] [list -entry $text]]
-  set ret {}
-  if {[$entry prompt]=="ok"} {
-        set ret [$entry entry]
-  }
-  return $ret
-}
-IDE::IDialogEntry proc getValueWithCancel {mes {text {}}} {
-  set entry [my new -volatile [list -message $mes] [list -entry $text]]
-  set ret {}
-  if {[$entry prompt]=="ok"} {
-        set ret [$entry entry]
-  } else {
-        return _cancel
-  }
-  return $ret
-}
-@ Class IDE::FocusPerKey {
-description {To used only whith GUI Klasses as Subklass by Multiheritage
-
-use parameter focusKey to speciefi Key binding to get focus to widget
-
-The main class must understand
-getFocusKey}
-}
-Class IDE::FocusPerKey -parameter {focusKey nextFocus prevFocus}
-@ ::IDE::FocusPerKey idemeta component IDEBaseGUI
-IDE::FocusPerKey instproc getFocus {} {
-    ::focus [my getFocusWin]
-}
-IDE::FocusPerKey instproc getFocusWin {} {
-   next
-}
-IDE::FocusPerKey instproc init args {
-   next
-   my instvar win focusKey nextFocus prevFocus
-   if {[info exists focusKey]} {
-      bind [winfo toplevel $win] <$focusKey> [list [self] getFocus]
-   }
-   if {[info exists nextFocus]} {
-      bind [my getFocusWin] <Tab> "focus $nextFocus; break"
-   }
-   if {[info exists prevFocus]} {
-      bind [my getFocusWin] <<PrevWindow>> "focus $prevFocus; break"
-   }
-}
-Class IDE::FontChooser -superclass ::IDE::Dialog  -parameter {{font {}} {type okcancel} {title {Font Chooser}}}
-@ ::IDE::FontChooser idemeta component IDEBaseGUI
-IDE::FontChooser instproc changeFamiliesVisibility {} {
-    my instvar onlytk
-    if {$onlytk} {
-       [self]::fontfamily setList [list Courier Times Helvetica] 
-    } else {
-       [self]::fontfamily setList [font families] 
+        next
     }
 }
-IDE::FontChooser instproc changeOption type {
-    font configure fontchooser -$type [my set $type]
-}
-IDE::FontChooser instproc changeSize {} {
-    my instvar win fontSize
-    set fontSize [$win.f.size get]
-    font configure fontchooser -size $fontSize
-}
-IDE::FontChooser instproc extractFontParameters {} {
-    my instvar fontSize fontFamily slant weight font
-    array set fontArrgs [font actual fontchooser]
-    array set fontArrgs $font
-    eval font configure fontchooser [array get fontArrgs]
-    foreach k [array names fontArrgs] {
-        switch -exact -- $k {
-           -weight {
-               set weight $fontArrgs($k)
-           }
-           -family {
-               set fontFamily $fontArrgs($k)
-           }
-           -size {
-               set fontSize $fontArrgs($k)
-           }
-           -slant {
-               set slant $fontArrgs($k)
-           }
-        }
-    }
-}
-IDE::FontChooser instproc init {} {
-    next
-
-    my instvar win entry width font fontSize
-    my requireNamespace
-    if {[lsearch [font names] fontchooser]==-1} {
-        font create fontchooser
-    }
-    my extractFontParameters
-
-    frame $win.f
-    label $win.f.lfamily -text "Font Family:"
-    IDE::NListView create [self]::fontfamily $win.f.fontfamily  -notify [self] -notifyProc selectFontFamily
-    label $win.f.lsize -text "Size:"
-    spinbox $win.f.size -from -30 -to 30 -increment 1 -command [list [self] changeSize] -validate focusout  -validatecommand [list [self] validateSize %s] -invalidcommand [list [self] invalidSize]
-    $win.f.size set $fontSize
-    
-    checkbutton $win.f.bold -text "Bold" -variable [self]::weight -onvalue bold -offvalue normal -command [list [self] changeOption weight]
-    checkbutton $win.f.italian -text "Italian" -variable [self]::slant -onvalue italic -offvalue roman -command [list [self] changeOption slant]
-    checkbutton $win.f.onlytk -text "Only Tk system fonts"  -variable [self]::onlytk  -command [list [self] changeFamiliesVisibility]
-    
-    
-    labelframe $win.f.preview -text "Preview" -height 80 -width 300
-    label $win.f.preview.text -text {AaBbCc123 \{([?} -font fontchooser
-    pack $win.f.preview.text -fill x -expand yes
-    pack propagate $win.f.preview 0
-    
-    grid $win.f.lfamily -column 0 -row 0 -sticky w
-    grid $win.f.fontfamily -column 0 -row 1 -sticky news -rowspan 4
-    grid $win.f.lsize -column 1 -row 0 -sticky w
-    grid $win.f.size -column 1 -row 1 -sticky wne -padx 5
-    grid $win.f.bold -column 1 -row 2 -sticky w
-    grid $win.f.italian -column 1 -row 3 -sticky w
-    grid $win.f.onlytk -column 1 -row 4 -columnspan 2 -sticky wn
-    grid $win.f.preview -column 0 -row 5 -columnspan 2 -sticky news
-    grid rowconfigure $win.f 4 -weight 1
-    grid columnconfigure $win.f 0 -weight 1
-    
-    pack $win.f -fill both -expand yes -before $win.buttons
-    my initView
-    wm deiconify $win
-}
-IDE::FontChooser instproc initView {} {
-    [self]::fontfamily setList [font families]
-    [self]::fontfamily setSelectedItem [my set fontFamily] 0
-}
-IDE::FontChooser instproc invalidSize {} {
-    my instvar fontSize win
-    $win.f.size set $fontSize
-    $win.f.size configure -validate focusout
-}
-IDE::FontChooser instproc postOk {} {
-    my set font [font actual fontchooser]
-    next
-}
-IDE::FontChooser instproc selectFontFamily family {
-    font configure fontchooser -family $family
-}
-IDE::FontChooser instproc validateSize value {
-   set ret [expr {![catch {expr {$value+0}}]}]
-   if {$ret} {
-       my changeSize
-   }
-   return $ret
-}
-IDE::FontChooser proc getFont {{font {}}} {
-  set entry [my new -volatile [list -font $font]]
-  set ret {}
-  if {[$entry prompt]=="ok"} {
-        set ret [$entry font]
-  }
-  return $ret
-}
-Class IDE::IDialogList -superclass ::IDE::Dialog  -parameter {list {selectedItem {}} {type okcancel}}
-@ ::IDE::IDialogList idemeta component IDEBaseGUI
-IDE::IDialogList instproc init {} {
-    my instvar win list selectedItem selectPattern patternIndex
-    next
-    my requireNamespace
-    frame $win.lframe
-    set selectPattern ""
-    set patternIndex 0
-    ::scrollbar $win.lframe.scroll -command "$win.lframe.listbox yview" -takefocus 0
-    ::listbox $win.lframe.listbox -yscroll "$win.lframe.scroll set"   -exportselection no
-    ::label $win.pattern -textvariable [self]::selectPattern
-    bind $win.lframe.listbox <Double-Button-1> [list [self] actionOk]
-    bind $win.lframe.listbox <Key> [list [self] keyEvent %K %A]
- 
-    pack $win.lframe.scroll -side right -fill y
-    pack $win.lframe.listbox -expand yes -fill both
- 
-    pack $win.pattern -fill x -expand yes -before $win.buttons
-    pack $win.lframe -fill both -expand yes -before $win.buttons
-    if {![info exists list]} {
-        set list {}
-    } else {
-        eval $win.lframe.listbox insert 0 $list
-        
-    }
-    if {$selectedItem!=""} {
-        my setSelectedItem $selectedItem
-    }
-    wm deiconify $win
-    focus $win.lframe.listbox
-}
-IDE::IDialogList instproc keyEvent {key keyCode} {
-    my instvar list selectPattern win patternIndex
-    update idletasks
-    if {$key eq "BackSpace"} {
-        set selectPattern  [string range $selectPattern 0 end-1]
-    } elseif {$key eq "F4"} {
-        incr patternIndex
-    } else {
-        if {$keyCode eq ""} return
-        append selectPattern $keyCode
-        set patternIndex 0
-    }
-    set sindex [lsearch -all -regexp $list (?i)^$selectPattern]
-    if {[llength $sindex]==0} {
-        set sindex [lsearch -all -regexp $list (?i)$selectPattern]
-    }
-    set sindex [lindex $sindex $patternIndex]
-    if {$sindex!=""} {
-        $win.lframe.listbox selection clear 0 end
-        $win.lframe.listbox selection set $sindex $sindex
-        $win.lframe.listbox see $sindex
-    }   
-}
-IDE::IDialogList instproc postOk {} {
-    my instvar win selectedItem list
-    if {[set cur [$win.lframe.listbox curselection]]!=""} {
-        set selectedItem [lindex $list $cur]
-    }
-    next
-}
-IDE::IDialogList instproc setSelectedItem item {
-    my instvar win list
-    if {[set cur [lsearch -exact $list $item]]>=0} {
-        $win.lframe.listbox selection set $cur $cur
-        $win.lframe.listbox see $cur
-    }
-}
-IDE::IDialogList proc getListItem {message list {default {}}} {
-    set listdialog [my new -volatile [list -message $message] [list -list $list] [list -selectedItem $default]]
-    if {[$listdialog prompt]!="ok"} {
-        return {}
-    }
-    set result [$listdialog selectedItem]
-    return $result
-}
-Class IDE::MenuSeparator -superclass ::IDE::MenuItem 
-@ ::IDE::MenuSeparator idemeta component IDEBaseGUI
-IDE::MenuSeparator instproc createItemTkMenu {win tl_win} {
-   $win add separator
-}
-@ Class IDE::HListView {
-description {Simple Hierarch List Browser.}
-}
-Class IDE::HListView -superclass ::IDE::ListView  -parameter {{multiselect 0} label}
-@ ::IDE::HListView idemeta component IDEBaseGUI
-IDE::HListView instproc rekListInit {hlist deep} {
-   my instvar listItems
-   #[self] halt
-   lappend listItems "$deep[lindex $hlist 0]"
-   foreach subtree [lrange $hlist 1 end] {
-       my rekListInit $subtree "$deep  "
-   }
-}
-IDE::HListView instproc removeItem item {
-    set index 0
-    foreach elem [my set listItems] {
-        if {[string trimleft $elem] eq $item} {
-            my removeItemAt $index
-            return
-        }
-        incr index
-    }
-}
-IDE::HListView instproc selectedItem {} {
-    string trimleft [next]
-}
-IDE::HListView instproc selectedItemFirst {} {
-    string trimleft [next]
-}
-IDE::HListView instproc setHList hl {
-   my instvar hlist listItems
-   set hlist $hl
-   set listItems {}
-   foreach tree $hlist {
-      my rekListInit $tree ""
-   }
-   my setList $listItems
-}
-IDE::HListView instproc setList list {
-    my instvar win listItems selectedIndex 
-    $win.listbox delete 0 end
-    set listItems $list
-    set selectedIndex -1
-    eval $win.listbox insert 0 $listItems
-}
-Class IDE::MenuCheckbox -superclass ::IDE::MenuItem  -parameter {name {command {}} {variable {}} {accelerator {}} {underline {}}}
-@ ::IDE::MenuCheckbox idemeta component IDEBaseGUI
-IDE::MenuCheckbox instproc createItemTkMenu {win tl_win} {
-    my instvar accelerator name command variable underline
-    set par {}
-    if {$accelerator!="" && $tl_win!=""} {
-       if {[string index $accelerator 0]=="_"} {
-           set par "-accelerator [string range $accelerator 1 end]"
+IDE::NListView instproc selectItem item {
+    # !! I am not very happy about this
+    # this should be changed in the future than
+    # an application modell is available 
+    my instvar notify notifyProc
+    if {[info exists notify]} {
+       if {[info exists notifyProc]} {
+          $notify $notifyProc $item
        } else {
-           set par "-accelerator $accelerator"
-       }
-    }
-    if {$underline!=""} {
-        append par " -underline $underline"
-    }
-    eval $win add checkbutton -label [list $name] -command [list $command] -variable $variable $par
-    if {$accelerator!="" && $tl_win!=""} {
-       if {[string index $accelerator 0]!="_"} {
-           bind $tl_win <$accelerator> [list $win invoke $name]
+          $notify selectItem $item
        }
     }
 }
-@ Class IDE::EditorPopDown {
-description {This class can be used with all classes derived from IDE::Editor
-it provide popdown menues that can be used for code completion future}
-}
-Class IDE::EditorPopDown
-@ ::IDE::EditorPopDown idemeta component IDEBaseGUI
-IDE::EditorPopDown instproc getPopdown {} {
-    my instvar dropWin
-    if {![my exists dropWin]} {
-        set win [my getTextWindow]
-        set dropWin $win.dropshell
-        menu $dropWin -bd 2 -relief raised -tearoff 0
-        wm overrideredirect $dropWin 1
-        scrollbar $dropWin.scroll -command "$dropWin.listbox yview" -takefocus 0
-        listbox $dropWin.listbox -height 10 -width 24  -yscrollcommand "$dropWin.scroll set"  -exportselection no -selectmode browse
-        bind $dropWin.listbox <<ListboxSelect>> [list [self] selectDropDown]
-        bind $dropWin.listbox <Key-Escape> [list [self] hidePopdown]
-        pack $dropWin.listbox -expand yes  -fill both -side left
-        pack $dropWin.scroll -expand yes  -fill y -side left
-        wm withdraw $dropWin
+
+Class IDE::ProtocolText -superclass ::IDE::Editor 
+@ ::IDE::ProtocolText idemeta component IDEBaseGUI
+IDE::ProtocolText instproc append text {
+    my instvar odd itemsNumber regexpr inverseMatch count protocolOn itemLines itemsNumber
+    if {!$protocolOn} return
+    if {$regexpr!=""} {
+         if {[regexp -- $regexpr $text]} {
+             if {$inverseMatch} return
+         } else {
+             if {!$inverseMatch} return
+         }
     }
-    return $dropWin
+    set twin [my getTextWindow]
+    set end [$twin index "end - 1 c"]
+    $twin insert end $text\n
+    set newEnd [$twin index "end - 1 l"]
+    set lines [expr [lindex [split $newEnd .] 0]-[lindex [split $end .] 0]]
+    if {$odd} {
+       $twin tag add odditem $end $newEnd
+    }
+    set odd [expr !$odd]
+    $twin see end
+    incr count
+    lappend itemLines $lines
+    if {$itemsNumber!=""} {
+       if {[catch {expr {$itemsNumber+1}}] || $itemsNumber<=0} {
+           set itemsNumber ""
+       } else {
+          if {$count>$itemsNumber} {
+              set linesToDelete [expr $count-$itemsNumber]
+              set range [lrange $itemLines 0 [expr {$linesToDelete-1}]]
+              set itemLines [lrange $itemLines $linesToDelete end]
+              set allLines 1
+              foreach lc $range {
+                  incr allLines $lc
+              }
+              $twin delete 1.0 $allLines.0
+              set count $itemsNumber
+          }
+       }
+    }
 }
-IDE::EditorPopDown instproc hidePopdown {} {
-   wm withdraw [my set dropWin]
-   focus [my getTextWindow]
+IDE::ProtocolText instproc clearProtocol {} {
+   my instvar odd protokolOn count itemLines state
+   set odd 0
+   set count 0
+   set itemLines {}   
+   set state full
+   my makeEmpty
 }
-IDE::EditorPopDown instproc invokePopDown {mlist pattern} {
-   if {$mlist==""} return
-   my instvar compPattern
-   set compPattern $pattern
-   if {[llength $mlist]==1} {
-       set sindex [expr {[string length $compPattern] + [string first [string range $compPattern 0 end-1] $mlist] -1}]
-       my appendToCursor "[string range $mlist $sindex end]"
-       return
+IDE::ProtocolText instproc init win {
+   next
+   my instvar odd protocolOn count itemLines
+   $win.text tag configure odditem -background cornsilk3
+
+   frame $win.wbox
+   button $win.wbox.clear -text Clear -command [list [self] clearProtocol]
+   checkbutton $win.wbox.protocolon -text "Protocol on" -variable [self]::protocolOn
+   entry $win.wbox.eitems -width 5 -textvariable [self]::itemsNumber
+   entry $win.wbox.regexpr -width 20 -textvariable [self]::regexpr
+   checkbutton $win.wbox.reinverse -text "inverse match" -variable [self]::inverseMatch
+   label $win.wbox.lregexpr -text "Regular expresion match"
+   label $win.wbox.litems -text "Number of items to hold"
+
+   grid $win.wbox.clear -row 0 -column 0 -sticky ew 
+   grid $win.wbox.protocolon -row 1 -column 0 -padx 4 -pady 4
+   grid $win.wbox.eitems -row 0 -column 1 -sticky e  -padx 4
+   grid $win.wbox.regexpr -row 1 -column 1  -padx 4
+   grid $win.wbox.litems -row 0 -column 2 -columnspan 2 -sticky w 
+   grid $win.wbox.lregexpr -row 1 -column 2 -sticky w
+   grid $win.wbox.reinverse -row 1 -column 3
+
+   pack $win.wbox -side bottom -before $win.scroll -anchor w
+   set odd 0
+   set protocolOn 1
+   set count 0
+   set itemLines {}
+}
+
+Class IDE::StateButton -parameter {state states command}
+@ ::IDE::StateButton idemeta component IDEBaseGUI
+IDE::StateButton instproc changeState {} {
+   my instvar states state
+   if {[set pos [lsearch -exact $states $state]]==[llength $states]-1} {
+        set newState [lindex $states 0]
+   } else {
+        set newState [lindex $states [expr $pos+1]]
    }
-   set twin [my getTextWindow]
-   set popWin [my getPopdown]
-   $popWin.listbox delete 0 end
-   eval $popWin.listbox insert 0 $mlist
-   set height [winfo reqheight $popWin.listbox]
-   set width [expr {[winfo reqwidth $popWin.listbox]+[winfo reqwidth $popWin.scroll]}]
-   set bb [$twin bbox insert]
-   set x [expr {[lindex $bb 0]+[winfo rootx $twin]}]
-   set y [expr {[lindex $bb 1]+[winfo rooty $twin]}]
-   wm geometry $popWin $width\x$height+$x+$y
-   wm deiconify $popWin
-   raise $popWin
-   ::focus $popWin.listbox
+   my setState $newState
+   my notifyChange
 }
-IDE::EditorPopDown instproc isPopdownVisible {} {
-    my instvar dropWin
-    if {![my exists dropWin]} {
-         return [wm ismapped $dropWin]
-    }
-    return 0
+IDE::StateButton instproc changeStateTo {newState {notify 1}} {
+   my instvar states state
+   if {[lsearch -exact $states $newState]>=0 && $newState!=$state} {
+        my setState $newState
+        if {$notify} {
+            my notifyChange
+        }
+  }
 }
-IDE::EditorPopDown instproc selectDropDown {} {
-    my instvar dropWin compPattern
-    set currsel [lindex [$dropWin.listbox curselection] 0]
-    if {$currsel!=""} {
-        set item [$dropWin.listbox get $currsel]
-        set sindex [expr {[string length $compPattern] + [string first [string range $compPattern 0 end-1] $item] -1}]
-        my appendToCursor "[string range $item $sindex end]"
-    }
-    my hidePopdown
+IDE::StateButton instproc init window {
+   my instvar win states state
+   set win $window
+   if {![info exists state]} { 
+        set state [lindex $states 0]
+   }
+   button $win -text $state -command [list [self] changeState]
 }
+IDE::StateButton instproc notifyChange {} {
+   my instvar command state
+   if {[info exists command]} {
+        eval $command [list $state]
+   } 
+
+}
+IDE::StateButton instproc setState newState {
+     my instvar state win
+     set state $newState
+     $win configure -text $state
+}
+IDE::StateButton instproc setStates newStates {
+     my instvar states state
+     set states $newStates
+     if {![::ide::lcontain $newStates $state]} {
+          my setState [lindex $states 0]
+     }
+}
+
+Class IDE::StateButtonActivity -superclass ::IDE::StateButton 
+@ ::IDE::StateButtonActivity idemeta component IDEBaseGUI
+IDE::StateButtonActivity instproc init window {
+    next
+    my instvar win unactiveColor
+    set unactiveColor [$win cget -bg]
+}
+IDE::StateButtonActivity instproc setActivity bool {
+     my instvar state win unactiveColor
+     if {$bool} {
+        $win configure -bg blue
+     } else {
+        $win configure -bg $unactiveColor
+     }
+}
+
 Object IDE::FindReplace
 @ ::IDE::FindReplace idemeta component IDEBaseGUI
 IDE::FindReplace proc actionClear {} {
