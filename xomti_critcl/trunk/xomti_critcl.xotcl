@@ -1,6 +1,5 @@
 # automatically generated from XOTclIDE
 package provide xomti_critcl 99991231.2
-package requuire xomti_tcllib_md5 20050124.1
 
 @ tclproc ::loadvfs idemeta struct xomti_critcl default
 proc ::loadvfs dir {
@@ -10,6 +9,29 @@ proc ::loadvfs dir {
 }
 Class Xomti_Crixotcl
 @ ::Xomti_Crixotcl idemeta component xomti_critcl
+Xomti_Crixotcl proc get_prefix module {
+    set prefix [my get_xomti_critcl_dir]/c_code/$module[info patchlevel]
+    if {![file exists $prefix]} {
+        error "Directory \"$prefix\" doesn't exists"
+    } else {
+        return $prefix
+    }
+}
+@ Xomti_Crixotcl proc get_xomti_critcl_dir {} {
+description {return tipically ..../xomti_critcl}
+}
+Xomti_Crixotcl proc get_xomti_critcl_dir {} {
+    set didi [file dirname [[Xomti_Packages_Manager::main get_package_managers xomti_critcl] get_file]]
+    set original_didi $didi
+    while {[file tail $didi] ne "xomti_critcl"} {
+        set old_didi $didi
+        set didi [file dirname $didi]
+        if {$didi eq $old_didi} {
+            error "no xomti_critcl found in \"$original_didi\""
+        }
+    }
+    return $didi
+}
 Xomti_Crixotcl proc test {} {
     catch {destroy .test}
     toplevel .test
@@ -55,7 +77,7 @@ Xomti_Crixotcl proc test {} {
     }
     $t insert end "sqr_c 3 -> [sqr_c 3]\n"
 
-    mama cdata hi "hi there!"
+    mama cdata hi "hi there 2! \u00ee end"
     $t insert end [hi]\n
     
     Xomti_Crixotcl_builder create cricon
@@ -81,8 +103,8 @@ Xomti_Crixotcl proc test {} {
     Xomti_Crixotcl_builder create tkt
     tkt tk
     tkt option_set keepsrc 1
-    set tcl_prefix [file normalize /home/p10admin/prog/Tcl/distrib/tcl8.4.1]
-    set tk_prefix [file normalize /home/p10admin/prog/Tcl/distrib/tk8.4.1]
+    set tcl_prefix [Xomti_Crixotcl get_prefix tcl]
+    set tk_prefix [Xomti_Crixotcl get_prefix tk]
     tkt cheaders -I$tk_prefix/generic -I$tk_prefix -I$tcl_prefix/generic -I$tcl_prefix
     #
     # platform specific declarations #
@@ -109,38 +131,73 @@ Xomti_Crixotcl proc test {} {
             exit 1
         }
     }
-    tkt ccode {
-        #define Tkspline_Init ns_Tkspline_Init
-        #include "/home/fab/A/xomti/Y/config.h"
-        #include "/home/fab/A/xomti/Y/tkspline.c"
-    }
+    set ccode ""
+    set didi [Xomti_Crixotcl get_xomti_critcl_dir]/c_code/tkspline
+    append ccode "#define Tkspline_Init ns_Tkspline_Init\n"
+    append ccode "#include \"$didi/config.h\" \n"
+    append ccode "#include \"$didi/tkspline.c\"\n"
+        
+    tkt ccode $ccode
     tkt cinit {
         Tk_CreateSmoothMethod(ip, &splineSmoothMethod);
     }
     tkt cbuild
     $c create line {0 200 00 50 100 100} -smooth spline
 }
+@ Class Xomti_Crixotcl_builder {
+description {The purpose of a ::Xomti_Crixotcl_builder is to build and load a machine-code library.
+
+As children of __private__ child of a ::Xomti_Crixotcl_builder instance (API [my private]),
+there is
+    - ccommands,        a set of ::Xomti_Crixotcl_ccommand's
+    - cprocs,           a set of ::Xomti_Crixotcl_cproc's
+    - ccodes,           a set of ::Xomti_Crixotcl_ccode's
+    - ext and init,          two ::Xomti_Crixotcl_code_fragment's
+    - hdrs, libs and srcs, three ::Xomti_Crixotcl_param's
+
+As instance variables of a ::Xomti_Crixotcl_builder instance, there is
+
+    - proc_obj_list     ordering of "ccommands" and "cprocs" sets
+    - ccode_obj_list    ordering of "ccodes" set
+    - code_obj_list     global ordering of reunion of "ccommands", "cprocs" and "cccode" sets
+    - compile_string   
+    - defines
+    - hdrdir
+    - loaded_file
+    - options
+    - v_failed
+    - v_sharedlibext
+
+API
+
+    $o cproc    _name_ {_type1_ _var1_ _type2_ _var2_ ...} _type_of_return {...ccode...}
+                        creates a new "::Xomti_Crixotcl_cproc" object                    
+    $o ccommand _name_ {data interp objc objv} {...ccode...} ...
+                        creates a new "::Xomti_Crixotcl_ccommand" object
+    $o ccode    $text  
+                        creates a new "::Xomti_Crixotcl_ccode" object from $text
+    $o cdata    _name_ "blabla"
+
+    $o cbuild           builds and load lib}
+}
 Class Xomti_Crixotcl_builder
-@ ::Xomti_Crixotcl_builder idemeta categories {public private_cbuild info private}
-@ ::Xomti_Crixotcl_builder idemeta categoriesMethods {{cproc ccommand check cheaders cdata tk clibraries ccode cinit cdefines} {cbuild cbuild_emit_code setup_tk_stubs cbuild_compile code_ext_get code_init_get} {get_cache_dir get_compile_string get_hdrdir get_platform get_sharedlibext} {init emulate_file_normalize file_normalize}}
+@ ::Xomti_Crixotcl_builder idemeta categories {public private_cbuild info private private_defines}
+@ ::Xomti_Crixotcl_builder idemeta categoriesMethods {{cproc ccommand check cheaders cdata tk clibraries ccode cinit cdefines cbuild option_get option_set} {cbuild_emit_code setup_tk_stubs cbuild_compile code_ext_get code_init_get} {get_cache_dir get_compile_string get_hdrdir get_platform get_sharedlibext} {init private failed_count_get failed_count_incr failed_count_reset} {defines_append defines_build defines_get defines_reset}}
 @ ::Xomti_Crixotcl_builder idemeta component xomti_critcl
 Xomti_Crixotcl_builder instproc cbuild {{load 1} {prefix {}} {silent {}}} {
 
-    # set procs [my info children [self]::procs]
     set procs [my set proc_obj_list]
-    puts stderr $procs
     
     set digest_string "[self]"
     foreach p $procs {
         append digest_string [$p digest_get]
     }
-
-    # each unique set of cmds is compiled into a separate extension
     set digest [Xomti_Crixotcl_builder md5_hex $digest_string]
+    unset digest_string
 
     set cache_dir [my get_cache_dir]
     regsub {^~} $cache_dir "$::env(HOME)/" cache_dir
-    set cache_dir [my file_normalize $cache_dir]
+    set cache_dir [[my info class] file_normalize $cache_dir]
 
     set base [file join $cache_dir $digest]
     set libfile $base
@@ -150,7 +207,7 @@ Xomti_Crixotcl_builder instproc cbuild {{load 1} {prefix {}} {silent {}}} {
     if {[my option_get outdir] != ""} {
         set odir [file join [file dirname [self]] [my option_get outdir]]
         set oroot [file root [file tail [self]]]
-        set libfile [my file_normalize [file join $odir $oroot]]
+        set libfile [[my info class] file_normalize [file join $odir $oroot]]
         file mkdir $odir
     }
 
@@ -159,10 +216,10 @@ Xomti_Crixotcl_builder instproc cbuild {{load 1} {prefix {}} {silent {}}} {
 
     # choose distinct suffix so switching between them causes a rebuild
     switch -- [my option_get combine] {
-        ""         { append libfile [my get_sharedlibext] }
-        dynamic    { append libfile _pic.o }
-        static     { append libfile _stub.o }
-        standalone { append libfile .o }
+        ""         {append libfile [my get_sharedlibext]}
+        dynamic    {append libfile _pic.o}
+        static     {append libfile _stub.o}
+        standalone {append libfile .o}
     }
 
     # the init proc name takes a capitalized prefix from the package name
@@ -190,11 +247,6 @@ Xomti_Crixotcl_builder instproc cbuild {{load 1} {prefix {}} {silent {}}} {
         load $libfile $ininame
         my set loaded_file $libfile
     }
-
-
-    #[self]::hdrs end [self]
-    #[self]::srcs end [self]
-    #my unset v_code_init([self])
 
     return [list $libfile $ininame]
 }
@@ -239,14 +291,14 @@ Xomti_Crixotcl_builder instproc cbuild_compile {cache_dir base libfile ininame} 
         }
     }
 
-    set cmdline "[my get_compile_string] $copts -o $libfile ${base}.c [[self]::srcs param_get]"
+    set cmdline "[my get_compile_string] $copts -o $libfile ${base}.c [[my private]::srcs param_get]"
     if {[my option_get language] != ""} {
         # Allow the compiler to determine the type of file
         # otherwise it will try to compile the libs
         append cmdline " -x none"
     }
 
-    append cmdline " " [[self]::libs param_get]
+    append cmdline " " [[my private]::libs param_get]
 
     if {[my option_get combine] == ""} {
         if {![regexp { -g } $cmdline]} {
@@ -329,7 +381,6 @@ Xomti_Crixotcl_builder instproc cbuild_emit_code {fd libfile ininame} {
     }
     puts $fd "/* [string repeat - 70] */"
 
-    puts $fd "{"
     puts $fd "#if USE_TCL_STUBS"
     puts $fd ""
     puts $fd "TclStubs *tclStubsPtr;"
@@ -338,37 +389,36 @@ Xomti_Crixotcl_builder instproc cbuild_emit_code {fd libfile ininame} {
     puts $fd "struct TclIntPlatStubs *tclIntPlatStubsPtr;"
     puts $fd "static int"
     puts $fd "MyInitTclStubs (Tcl_Interp *ip)"
-    puts $fd "{"
-    puts $fd "    typedef struct {"
+    puts $fd "\{"
+    puts $fd "    typedef struct \{"
     puts $fd "    char *result;"
     puts $fd "    Tcl_FreeProc *freeProc;"
     puts $fd "    int errorLine;"
     puts $fd "    TclStubs *stubTable;"
-    puts $fd "} HeadOfInterp;"
+    puts $fd "\} HeadOfInterp;"
     puts $fd "HeadOfInterp *hoi = (HeadOfInterp*) ip;"
-    puts $fd "if (hoi->stubTable == NULL || hoi->stubTable->magic != TCL_STUB_MAGIC) {"
+    puts $fd "if (hoi->stubTable == NULL || hoi->stubTable->magic != TCL_STUB_MAGIC) \{"
     puts $fd {    ip->result = "This extension requires stubs-support.";}
     puts $fd "    ip->freeProc = TCL_STATIC;"
     puts $fd "    return 0;"
-    puts $fd "}"
+    puts $fd "\}"
     puts $fd ""
     puts $fd "tclStubsPtr = hoi->stubTable;"
     puts $fd ""
-    puts $fd "if (Tcl_PkgRequire(ip, \"Tcl\", \"8.1\", 0) == NULL) {"
+    puts $fd "if (Tcl_PkgRequire(ip, \"Tcl\", \"8.1\", 0) == NULL) \{"
     puts $fd "    tclStubsPtr = NULL;"
     puts $fd "    return 0;"
-    puts $fd "}"
+    puts $fd "\}"
     puts $fd ""
-    puts $fd "if (tclStubsPtr->hooks != NULL) {"
+    puts $fd "if (tclStubsPtr->hooks != NULL) \{"
     puts $fd "    tclPlatStubsPtr = tclStubsPtr->hooks->tclPlatStubs;"
     puts $fd "    tclIntStubsPtr = tclStubsPtr->hooks->tclIntStubs;"
     puts $fd "    tclIntPlatStubsPtr = tclStubsPtr->hooks->tclIntPlatStubs;"
-    puts $fd "}"
+    puts $fd "\}"
     puts $fd ""
     puts $fd "return 1;"
-    puts $fd "}"
+    puts $fd "\}"
     puts $fd "#endif"
-    puts $fd "    }"
     # now do the Tk stuff
     if {[my option_get tk]} {
         my setup_tk_stubs $fd
@@ -376,13 +426,13 @@ Xomti_Crixotcl_builder instproc cbuild_emit_code {fd libfile ininame} {
     }
 
     puts $fd "#ifdef __cplusplus"
-    puts $fd "extern \"C\" {"
+    puts $fd "extern \"C\" \{"
     puts $fd "#endif"
     puts $fd "[my code_ext_get]"
     puts $fd "DLLEXPORT int"
     puts $fd "${ininame}_Init(Tcl_Interp *ip)"
-    puts $fd "{"
-    puts $fd "    #if USE_TCL_STUBS"
+    puts $fd "\{"
+    puts $fd "#if USE_TCL_STUBS"
     puts $fd "if (!MyInitTclStubs(ip)) return TCL_ERROR;"
     puts $fd "#endif"
     if {[my option_get tk]} {
@@ -410,30 +460,28 @@ Xomti_Crixotcl_builder instproc cbuild_emit_code {fd libfile ininame} {
         puts $fd "  Tcl_CreateObjCommand(ip, ns_$x, tcl_$x, $cd, $dp);"
     }
     puts $fd "  return TCL_OK;"
-    puts $fd "}"
+    puts $fd "\}"
     if {[info tclversion] >= 8.5} {
         puts $fd "DLLEXPORT int"
         puts $fd "${ininame}_Unload(Tcl_Interp *ip)"
-        puts $fd "{"
+        puts $fd "\{"
         foreach x [lsort $names] {
             puts $fd "  Tcl_DeleteCommand(ip, ns_$x);"
         }
-        puts $fd "  return TCL_OK;\n}\n"
+        puts $fd "  return TCL_OK;\n\}\n"
     }
-    puts $fd "#ifdef __cplusplus\n}\n#endif"
+    puts $fd "#ifdef __cplusplus\n\}\n#endif"
 }
 Xomti_Crixotcl_builder instproc ccode text {
-    set ccode [Xomti_Crixotcl_ccode new -childof [self]::ccodes $text [my option_get lines]]
-    my lappend  code_obj_list $ccode
-    puts stderr "code_obj_list = [my set code_obj_list]"
+    set ccode [Xomti_Crixotcl_ccode new -childof [my private]::ccodes $text [my option_get lines]]
+    my lappend code_obj_list $ccode
     my lappend ccode_obj_list $ccode
     return $ccode
 }
 Xomti_Crixotcl_builder instproc ccommand {name arg_defs args} {
-    set cproc [Xomti_Crixotcl_ccommand new -childof [self]::ccommands $name $arg_defs $args]
-puts $cproc
-    my lappend code_obj_list $cproc
+    set cproc [Xomti_Crixotcl_ccommand new -childof [my private]::ccommands $name $arg_defs $args]
     my lappend proc_obj_list $cproc
+    my lappend code_obj_list $cproc
     return $cproc
 }
 Xomti_Crixotcl_builder instproc cdata {name data} {
@@ -453,13 +501,14 @@ Xomti_Crixotcl_builder instproc cdata {name data} {
 
     set count [llength $bytes]
 
-    uplevel [list [self] ccommand $name {dummy ip objc objv} "
-  static char script\[$count\] = {
-    $inittext
-  };
-  Tcl_SetByteArrayObj(Tcl_GetObjResult(ip), (unsigned char*) script, $count);
-  return TCL_OK;
-"]
+    set txt "\n"
+    append txt "static char script\[$count\] = \{\n"
+    append txt "$inittext\n"
+    append txt "\};\n"
+    append txt "Tcl_SetByteArrayObj(Tcl_GetObjResult(ip), (unsigned char*) script, $count);\n"
+    append txt "return TCL_OK;\n"
+         
+    my ccommand $name {dummy ip objc objv} $txt]
     return $name
 }
 Xomti_Crixotcl_builder instproc cdefines {defines {namespace ::}} {
@@ -468,16 +517,16 @@ Xomti_Crixotcl_builder instproc cdefines {defines {namespace ::}} {
     }
 }
 Xomti_Crixotcl_builder instproc cheaders args {
-    return [[self]::hdrs param_set $args]
+    return [[my private]::hdrs param_set $args]
 }
 Xomti_Crixotcl_builder instproc check code {
     set cache_dir [my get_cache_dir]
     file mkdir $cache_dir ;# just in case
-    set pref [my file_normalize [file join $cache_dir check_[pid]]]
+    set pref [[my info class] file_normalize [file join $cache_dir check_[pid]]]
     set fd [open $pref.c w]
     puts $fd $code
     close $fd
-    exec ls -lrt [my file_normalize $cache_dir]
+    exec ls -lrt [[my info class] file_normalize $cache_dir]
     set copts [list]
     if {[my option_get I] != ""} {
         lappend copts -I[my option_get I]
@@ -496,14 +545,14 @@ Xomti_Crixotcl_builder instproc check code {
     return $result
 }
 Xomti_Crixotcl_builder instproc cinit {text {exts {}}} {
-    [self]::init set code $text
-    [self]::ext  set code $exts
-
-    [self]::init compute_digest
-    [self]::ext  compute_digest
+    [my private]::init code_set $text
+    [my private]::ext  code_set $exts
 }
 Xomti_Crixotcl_builder instproc clibraries args {
-    return [[self]::libs param_set $args]
+    return [[my private]::libs param_set $args]
+}
+@ Xomti_Crixotcl_builder instproc code_ccode_get {} {
+description {callers defines_build}
 }
 Xomti_Crixotcl_builder instproc code_ccode_get {} {
     set ret ""
@@ -513,22 +562,28 @@ Xomti_Crixotcl_builder instproc code_ccode_get {} {
     return $ret
 }
 Xomti_Crixotcl_builder instproc code_ext_get {} {
-    return [[self]::ext code_get]
+    return [[my private]::ext code_get]
 }
 Xomti_Crixotcl_builder instproc code_init_get {} {
-    return [[self]::init code_get]
+    return [[my private]::init code_get]
 }
 Xomti_Crixotcl_builder instproc cproc {name arg_defs return_type {body #}} {
-    set cproc [Xomti_Crixotcl_cproc new -childof [self]::cprocs $name $arg_defs $return_type $body]
-    my lappend code_obj_list $cproc
+    set cproc [Xomti_Crixotcl_cproc new -childof [my private]::cprocs $name $arg_defs $return_type $body]
     my lappend proc_obj_list $cproc
+    my lappend code_obj_list $cproc
     return $cproc
 }
 Xomti_Crixotcl_builder instproc csources args {
-    return [[self]::srcs set $args]
+    return [[my private]::srcs set $args]
+}
+@ Xomti_Crixotcl_builder instproc defines_append {} {
+description {callers cdefines}
 }
 Xomti_Crixotcl_builder instproc defines_append {ns def} {
     my lappend defines $ns $def
+}
+@ Xomti_Crixotcl_builder instproc defines_build {} {
+description {callers cbuild_emit_code}
 }
 Xomti_Crixotcl_builder instproc defines_build fd {
     # we process the cdefines in three steps
@@ -537,9 +592,9 @@ Xomti_Crixotcl_builder instproc defines_build fd {
     #   - extract the list of enums using regular expressions (not perfect,
     #     but will do for now)
     #   - generate Tcl_ObjSetVar2 commands to initialise Tcl variables
-    set def [my file_normalize [file join [my get_cache_dir] define_[pid]]]
+    set def [[my info class] file_normalize [file join [my get_cache_dir] define_[pid]]]
     # first step - get list of matching defines
-    set cmd "[my get_compile_string] [[self]::hdrs param_get] -E"
+    set cmd "[my get_compile_string] [[my private]::hdrs param_get] -E"
     set dfd [open $def.c w]
     puts $dfd [my code_ccode_get]
     close $dfd
@@ -604,26 +659,6 @@ Xomti_Crixotcl_builder instproc defines_get {} {
 Xomti_Crixotcl_builder instproc defines_reset {} {
     my set defines {}
 }
-Xomti_Crixotcl_builder instproc emulate_file_normalize script_file {
-    set sp [file split $script_file]
-    if {[file pathtype [lindex $sp 0]] == "relative"} {
-        set sp [file split [eval [list file join [pwd]] $sp]]
-    }
-    if {[lindex $sp 0] == "~"} {
-        set sp [lreplace $sp 0 0 $::env(HOME)]
-    }
-    set np {}
-    foreach ele $sp {
-        if {$ele != ".."} {
-            if {$ele != "."} { lappend np $ele }
-        } elseif {[llength $np]> 1} {
-            set np [lrange $np 0 [expr {[llength $np] - 2}]]
-        }
-    }
-    if {[llength $np] > 0} {
-        return [eval file join $np]
-    }
-}
 Xomti_Crixotcl_builder instproc failed_count_get {} {
     return [my set v_failed]
 }
@@ -632,9 +667,6 @@ Xomti_Crixotcl_builder instproc failed_count_incr {} {
 }
 Xomti_Crixotcl_builder instproc failed_count_reset {} {
     my set v_failed 0
-}
-Xomti_Crixotcl_builder instproc file_normalize file {
-    return [my emulate_file_normalize $file]
 }
 Xomti_Crixotcl_builder instproc get_cache_dir {} {
     return [file join ~ .critcl [my get_platform]]
@@ -661,6 +693,28 @@ Xomti_Crixotcl_builder instproc get_platform {} {
     }
     return "$plat-$mach"
 }
+@ Xomti_Crixotcl_builder instproc get_sharedlibext {} {
+description {Xomti_Crixotcl_builder correspond to
+  - a library
+  - a list of ::Xomti_Crixotcl_ccode
+  - a list of ::Xomti_Crixotcl_ccommand
+  - a list of ::Xomti_Crixotcl_cproc 
+  
+  
+Internal infos:
+
+ccode_obj_list
+code_obj_list
+compile_string
+defines
+hdrdir
+loaded_file    The name loaded of the machine-code library, if there.
+options
+proc_obj_list
+v_failed
+v_sharedlibext
+}
+}
 Xomti_Crixotcl_builder instproc get_sharedlibext {} {
     my instvar v_sharedlibext
 
@@ -670,7 +724,7 @@ Xomti_Crixotcl_builder instproc get_sharedlibext {} {
     return $v_sharedlibext
 }
 Xomti_Crixotcl_builder instproc hdrs_get {} {
-    return [[self]::hdrs param_get]
+    return [[my private]::hdrs param_get]
 }
 Xomti_Crixotcl_builder instproc init {} {
 
@@ -708,20 +762,22 @@ Xomti_Crixotcl_builder instproc init {} {
     set libfile ""
     }
     
-    my set  code_obj_list [list] ;# cumule les suivants
     my set  proc_obj_list [list] ;# cproc et ccommand
     my set ccode_obj_list [list]
+    my set  code_obj_list [list] ;# cumule les précédents
     
-    Xomti_Crixotcl_param         create [self]::hdrs
-    Xomti_Crixotcl_param         create [self]::libs
-    Xomti_Crixotcl_param         create [self]::srcs
+    Object create [my private] ;# only a namespace node
+
+    Xomti_Crixotcl_param         create [my private]::hdrs
+    Xomti_Crixotcl_param         create [my private]::libs
+    Xomti_Crixotcl_param         create [my private]::srcs
     
-    Object                 create [self]::cprocs
-    Object                 create [self]::ccommands
-    Object                 create [self]::ccodes
+    Object                 create [my private]::cprocs
+    Object                 create [my private]::ccommands
+    Object                 create [my private]::ccodes
     
-    Xomti_Crixotcl_code_fragment create [self]::init
-    Xomti_Crixotcl_code_fragment create [self]::ext
+    Xomti_Crixotcl_code_fragment create [my private]::init
+    Xomti_Crixotcl_code_fragment create [my private]::ext
     
 
 }
@@ -739,6 +795,9 @@ Xomti_Crixotcl_builder instproc option_set {option args} {
     } else {
         set options($option) [lindex $args 0]
     }
+}
+Xomti_Crixotcl_builder instproc private {} {
+    return "[self]::__private__"
 }
 Xomti_Crixotcl_builder instproc setup_tk_stubs fd {
     puts -nonewline $fd {
@@ -770,36 +829,107 @@ Xomti_Crixotcl_builder instproc setup_tk_stubs fd {
 Xomti_Crixotcl_builder instproc tk {} {
     my option_set tk 1
 }
+Xomti_Crixotcl_builder proc emulate_file_normalize script_file {
+    set sp [file split $script_file]
+    if {[file pathtype [lindex $sp 0]] == "relative"} {
+        set sp [file split [eval [list file join [pwd]] $sp]]
+    }
+    if {[lindex $sp 0] == "~"} {
+        set sp [lreplace $sp 0 0 $::env(HOME)]
+    }
+    set np {}
+    foreach ele $sp {
+        if {$ele != ".."} {
+            if {$ele != "."} { lappend np $ele }
+        } elseif {[llength $np]> 1} {
+            set np [lrange $np 0 [expr {[llength $np] - 2}]]
+        }
+    }
+    if {[llength $np] > 0} {
+        return [eval file join $np]
+    }
+}
+Xomti_Crixotcl_builder proc file_normalize file {
+    return [my emulate_file_normalize $file]
+}
+@ Xomti_Crixotcl_builder proc md5_hex {} {
+description {Returns the 32 lowercase hexadecimal characters md5 string of $txt}
+}
 Xomti_Crixotcl_builder proc md5_hex msg {
     set s [Tcllib_md5pure md5 $msg]
-    binary scan $s H* md
-    return $md
+    # binary scan $s H* md
+    # return $md
+    return $s
+}
+@ Class Xomti_Crixotcl_code_and_digest {
+description {Xomti_Crixotcl_code_and_digest maintains a text (code) and his md5 digest.
+
+Public API
+
+    code_reset     no code, digest is {}
+    code_append    code modified, digest is {}
+    compute_digest computes digest
+    code_set       code defined, digest computed
+
+    code_get       returns code
+    digest_get     return digest
+
+Superclass of
+
+    Xomti_Crixotcl_proc
+    Xomti_Crixotcl_ccode
+    Xomti_Crixotcl_code_fragment
+        Xomti_Crixotcl_ccommand
+        Xomti_Crixotcl_cproc
+}
 }
 Class Xomti_Crixotcl_code_and_digest
+@ ::Xomti_Crixotcl_code_and_digest idemeta categories {private public}
+@ ::Xomti_Crixotcl_code_and_digest idemeta categoriesMethods {{compute_digest init} {code_append code_get code_reset code_set digest_get}}
 @ ::Xomti_Crixotcl_code_and_digest idemeta component xomti_critcl
+Xomti_Crixotcl_code_and_digest instproc code_append code {
+    if {[my set digest] ne {}} {
+        my set digest {}
+    }
+    my append code $code
+}
 Xomti_Crixotcl_code_and_digest instproc code_get {} {
     return [my set code]
+}
+Xomti_Crixotcl_code_and_digest instproc code_reset {} {
+    my set digest {}
+    my set code {}
+}
+Xomti_Crixotcl_code_and_digest instproc code_set code {
+    my set code $code
+    my compute_digest
 }
 Xomti_Crixotcl_code_and_digest instproc compute_digest {} {
     my set digest [Xomti_Crixotcl_builder md5_hex [my set code]]
 }
 Xomti_Crixotcl_code_and_digest instproc digest_get {} {
-    return [my set digest]
+    if {[my set digest] == ""} {
+        error "digest was never computed"
+    } else {
+        return [my set digest]
+    }
+}
+Xomti_Crixotcl_code_and_digest instproc init {} {
+    if {![my exists digest]} {set digest {}}
 }
 Class Xomti_Crixotcl_ccode -superclass ::Xomti_Crixotcl_code_and_digest
 @ ::Xomti_Crixotcl_ccode idemeta component xomti_critcl
 Xomti_Crixotcl_ccode instproc init {text with_lines} {
-    my set code ""
+    set code ""
     if {$with_lines} {
-        my append code "#line 1 \"[my info parent]\"\n"
+        append code "#line 1 \"[my info parent]\"\n"
     }
-    my append code "$text\n"
-    my compute_digest
+    append code "$text\n"
+    my code_set $code
 }
 Class Xomti_Crixotcl_proc -superclass ::Xomti_Crixotcl_code_and_digest
 @ ::Xomti_Crixotcl_proc idemeta component xomti_critcl
 Xomti_Crixotcl_proc instproc define_proc {name args} {
-
     set ns [namespace qualifiers $name]
     if {$ns eq "::" || $ns eq ""} {
         set ns ""
@@ -809,7 +939,7 @@ Xomti_Crixotcl_proc instproc define_proc {name args} {
     set tail_name [namespace tail $name]
     my set name $tail_name
 
-    set ::auto_index(${ns}$tail_name) [list [[my info parent] info parent] cbuild]
+    set ::auto_index(${ns}$tail_name) [list [my grandgrandparent] cbuild]
 
     my emit "#define ns_$tail_name \"${ns}::$tail_name\"\n"
     if {[my option_get lines]} {
@@ -818,20 +948,24 @@ Xomti_Crixotcl_proc instproc define_proc {name args} {
     return $tail_name
 }
 Xomti_Crixotcl_proc instproc emit s {
-    my append code $s
+    my code_append $s
 }
 Xomti_Crixotcl_proc instproc emitln {{s {}}} {
     my emit "$s\n"
+}
+Xomti_Crixotcl_proc instproc grandgrandparent {} {
+    return [[[my info parent] info parent] info parent]
 }
 Xomti_Crixotcl_proc instproc name_get {} {
     return [my set name]
 }
 Xomti_Crixotcl_proc instproc option_get key {
-    return [[[my info parent] info parent] set options($key)]
+    return [[my grandgrandparent] set options($key)]
 }
 Class Xomti_Crixotcl_ccommand -superclass ::Xomti_Crixotcl_proc
 @ ::Xomti_Crixotcl_ccommand idemeta component xomti_critcl
 Xomti_Crixotcl_ccommand instproc init {name anames args} {
+    my code_reset
     my instvar v_clientdata v_delproc
 puts stderr "A REFAIRE"
     set tail_name [my define_proc $name $anames $args]
@@ -873,12 +1007,13 @@ puts stderr "A REFAIRE"
 Class Xomti_Crixotcl_code_fragment -superclass ::Xomti_Crixotcl_code_and_digest
 @ ::Xomti_Crixotcl_code_fragment idemeta component xomti_critcl
 Xomti_Crixotcl_code_fragment instproc init {} {
-    my set code {}
-    my compute_digest
+    my code_set {}
 }
 Class Xomti_Crixotcl_cproc -superclass ::Xomti_Crixotcl_proc
 @ ::Xomti_Crixotcl_cproc idemeta component xomti_critcl
 Xomti_Crixotcl_cproc instproc init {name arg_defs return_type body} {
+    my code_reset
+
     set tail_name [my define_proc $name $arg_defs $return_type $body]
 
     set cname c_$tail_name
@@ -1003,6 +1138,9 @@ Xomti_Crixotcl_cproc instproc init {name arg_defs return_type body} {
     my emitln \}
 
     my compute_digest
+}
+@ Class Xomti_Crixotcl_martyr {
+description {This is code from original critcl, not (yet) used here}
 }
 Class Xomti_Crixotcl_martyr
 @ ::Xomti_Crixotcl_martyr idemeta component xomti_critcl
@@ -1256,8 +1394,6 @@ Xomti_Crixotcl_param instproc param_get {} {
 }
 Xomti_Crixotcl_param instproc param_set list {
 
-    # pas utile, on a le digest : [my info parent] lappend code_obj_list [self] ;# add so we can detect changes
-
     if {[llength $list] > 0} {
         # set base [file dirname $script_file]
         set base "A_FAIRE"
@@ -1267,7 +1403,7 @@ Xomti_Crixotcl_param instproc param_set list {
             } else {
                 return -code error "A FAIRE : $base"
                 foreach y [glob [file join $base $x]] {
-                    set z [[my info parent] file_normalize $y]
+                    set z [Xomti_Crixotcl_builder file_normalize $y]
                     if {![file exists $z]} {
                         error "${z}: not found"
                     }
