@@ -584,7 +584,7 @@ IDEStarter proc startIDEFromApp {} {
     IDE::CompBrowser newBrowser
 }
 @ IDEStarter proc startIDEFromDB {} {
-    description {Start Up System with Database loaded from Database (selfdevelop mode)}
+description {Start Up System with Database loaded from Database (selfdevelop mode)}
 }
 IDEStarter proc startIDEFromDB {} {
     my setWaitDialog

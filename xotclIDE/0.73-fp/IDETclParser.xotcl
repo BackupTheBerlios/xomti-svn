@@ -20,7 +20,7 @@ The Checking funktionality is programed in Class PrsContext
 package provide IDETclParser 0.70
 Class MixPrsList -parameter list
 @ ::MixPrsList idemeta component IDETclParser
-MixPrsList instproc addElem elem  {
+MixPrsList instproc addElem elem {
     my lappend list $elem
 }
 MixPrsList instproc getElem index {
@@ -93,7 +93,7 @@ PrsElement instproc visit visitor {
     $visitor visit [self]
     next
 }
-Class PrsCommand -superclass {::PrsElement ::MixPrsList}
+Class PrsCommand -superclass {::PrsElement ::MixPrsList} 
 @ ::PrsCommand idemeta component IDETclParser
 PrsCommand instproc argsCount {} {
     expr {[llength [my list]]-1}
@@ -104,12 +104,12 @@ PrsCommand instproc checkSyntax {context notifier} {
 PrsCommand instproc syntaxHightlight context {
     $context checkCommand [self] $context
 }
-Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList}
+Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList} 
 @ ::PrsCommandSubst idemeta component IDETclParser
 PrsCommandSubst instproc evalContents {} {
     my basicEvalContents
 }
-Class PrsComment -superclass ::PrsElement
+Class PrsComment -superclass ::PrsElement 
 @ ::PrsComment idemeta component IDETclParser
 PrsComment instproc syntaxHightlight context {
     $context hightlightElement [self] comment
@@ -490,7 +490,7 @@ PrsContext instproc hasErrors {} {
     expr {[my exists errors] && [llength [my set errors]]>0}
 }
 @ PrsContext instproc parse {} {
-    description {This Method parse a text and build a parse tree
+description {This Method parse a text and build a parse tree
         It return 1 on success}
 }
 PrsContext instproc parse script {
@@ -820,9 +820,9 @@ PrsContext proc initializeAfterLoad {} {
         }
     }
 }
-Class PrsLiteral -superclass ::PrsElement
+Class PrsLiteral -superclass ::PrsElement 
 @ ::PrsLiteral idemeta component IDETclParser
-Class PrsNoSubst -superclass {::PrsElement ::MixPrsList}
+Class PrsNoSubst -superclass {::PrsElement ::MixPrsList} 
 @ ::PrsNoSubst idemeta component IDETclParser
 PrsNoSubst instproc evalContents {} {
     my basicEvalContents
@@ -851,7 +851,7 @@ PrsQuoted instproc syntaxHightlight context {
         $context hightlightElement [self] quoted
     }
 }
-Class PrsVariable -superclass ::PrsElement
+Class PrsVariable -superclass ::PrsElement 
 @ ::PrsVariable idemeta component IDETclParser
 PrsVariable instproc checkSyntax {context notifier} {
     set name [my prsString]
@@ -869,7 +869,7 @@ PrsVariable instproc visit visitor {
     }
 }
 @ Class ReadStringStream {
-    description {This class wrap a string to use it as a stream.
+description {This class wrap a string to use it as a stream.
         Additional you can set the last position (end of stream)}
 }
 Class ReadStringStream -parameter {string pos lastpos}

@@ -204,7 +204,7 @@ IDE::DialogHelper proc create args {
     error "Class [self] is abstract"
 }
 @ Class IDE::Dialog {
-    description {Class methods are fasade to tk_message}
+description {Class methods are fasade to tk_message}
 }
 Class IDE::Dialog -superclass ::IDE::DialogHelper  -parameter {{title Dialog} message {type ok}}
 @ ::IDE::Dialog idemeta component IDEBaseGUI
@@ -1724,7 +1724,7 @@ IDE::MenuRadiobutton instproc createItemTkMenu {win tl_win} {
         }
     }
 }
-Class IDE::MenuSeparator -superclass ::IDE::MenuItem
+Class IDE::MenuSeparator -superclass ::IDE::MenuItem 
 @ ::IDE::MenuSeparator idemeta component IDEBaseGUI
 IDE::MenuSeparator instproc createItemTkMenu {win tl_win} {
     $win add separator
@@ -1939,7 +1939,7 @@ IDE::NListView instproc selectItem item {
         }
     }
 }
-Class IDE::ProtocolText -superclass ::IDE::Editor
+Class IDE::ProtocolText -superclass ::IDE::Editor 
 @ ::IDE::ProtocolText idemeta component IDEBaseGUI
 IDE::ProtocolText instproc append text {
     my instvar odd itemsNumber regexpr inverseMatch count protocolOn itemLines itemsNumber
@@ -2065,7 +2065,7 @@ IDE::StateButton instproc setStates newStates {
         my setState [lindex $states 0]
     }
 }
-Class IDE::StateButtonActivity -superclass ::IDE::StateButton
+Class IDE::StateButtonActivity -superclass ::IDE::StateButton 
 @ ::IDE::StateButtonActivity idemeta component IDEBaseGUI
 IDE::StateButtonActivity instproc init window {
     next

@@ -10,7 +10,7 @@ namespace eval ::ide {}
 @ tclgroup ide idemeta comment IDECore {The are some extented list functions based
 on Smalltalk container protocol}
 @ tclproc ::ide::compare_names idemeta struct IDECore ide
-proc ide::compare_names {pg1 pg2} {
+proc ::ide::compare_names {pg1 pg2} {
     return [string compare [$pg1 name] [$pg2 name]]
 }
 @ tclproc ide::addToValueForKey idemeta struct IDECore ide
