@@ -197,14 +197,14 @@ IDEStarter proc establishDBConnection {} {
     my instvar sqlhandle
     if {[my set nodialog]} {
         set sqlhandle [my getConnectionObject]
-        if {$sqlhandle==""} {
+        if {$sqlhandle eq ""} {
             error "no interface specified"
         }
         $sqlhandle connect [IDEPreferences getParameter connection]
     } else {
         set sqlhandle [IDEDBConnectDialog setConnectionOn [my getConnectionObject] [IDEPreferences getParameter connection]]
     }
-    if {$sqlhandle=="" || ![$sqlhandle isConnected]} {error "no connection to Database"}
+    if {$sqlhandle eq "" || ![$sqlhandle isConnected]} {error "no connection to Database"}
 }
 IDEStarter proc getComponentBody componentid {
     [self] instvar sqlhandle initializeList
@@ -218,7 +218,7 @@ IDEStarter proc getComponentBody componentid {
         set objName [lindex $row 3]
         # defbody eval return the object name
         append body $defbody
-        if {$metadata!=""} {
+        if {$metadata ne ""} {
            append body $metadata
         }
         append body [my getObjectBody $id $objName]
@@ -338,7 +338,7 @@ IDEStarter proc isDevelopingMode {} {
 IDEStarter proc loadComponent {name {componentid newest}} {
     [self] instvar sqlhandle IDEdeveloping initializeList
     set initializeList {}
-    if {$componentid=="newest"} {
+    if {$componentid eq "newest"} {
         set componentid [lindex [$sqlhandle queryList "select max(componentid) from Component where name='$name'"] 0]
         puts "newest component $name is $componentid"
     }
@@ -352,11 +352,11 @@ IDEStarter proc loadComponent {name {componentid newest}} {
         set objName [lindex $row 3]
         # defbody eval return the object name
         set object [namespace eval :: $defbody]
-        if {[my isDevelopingMode] && $object!=""} {
+        if {[my isDevelopingMode] && $object ne ""} {
             $object setMetadata component $name
         }
-        if {$metadata!=""} {
-           eval $metadata
+        if {$metadata ne ""} {
+            eval $metadata
         }
         my loadObject $id $objName $name
     }
@@ -365,14 +365,14 @@ IDEStarter proc loadComponent {name {componentid newest}} {
     package provide $name 1
     foreach imethod $initializeList {
         if {[catch {$imethod initializeAfterLoad}]} {
-           global errorInfo
-           puts "Error by calling $imethod initializeAfterLoad $errorInfo" 
+             global errorInfo
+             puts "Error by calling $imethod initializeAfterLoad $errorInfo" 
 	}
     }
 }
 IDEStarter proc loadComponentFromAny name {
     if {[my exists sqlhandle]} {
-        if {[IDE::Component getCompObjectForNameIfExist $name]==""} {
+        if {[IDE::Component getCompObjectForNameIfExist $name] eq ""} {
             my loadComponent $name
         }
     } else {
@@ -405,7 +405,7 @@ IDEStarter proc loadConfigMap {} {
         puts "loading component $comp"
         if {[llength $comp]>1 || !$hasDB} {
             set version [lindex $comp 1]
-            if {$comp=="package" || !$hasDB} {
+            if {$comp eq "package" || !$hasDB} {
                 package require [lindex $comp 0]
             } else {
                 my loadComponent [lindex $comp 0] [lindex $comp 1]
@@ -414,7 +414,7 @@ IDEStarter proc loadConfigMap {} {
             my loadComponent $comp
         }
     }
-    if {[info exists startScript] && $startScript!={}} {
+    if {[info exists startScript] && $startScript ne ""} {
         namespace eval :: $startScript
     }
     my set loaded 1

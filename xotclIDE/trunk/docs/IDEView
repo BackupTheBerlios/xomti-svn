@@ -1,0 +1,10 @@
+2005-02-04
+
+Tentative de verrouiller l'affichage de IDE::VarsViews
+
+Il faut examiner IDE::VarsView>selectFor
+
+Le Tk frame est .browser0.upperarea.varsview
+Il est créé dans IDE::ObjectBrowser>specificInit
+par "instance_of_IDE::ObjectsView [self]::objectsview $win.objectsview"
+qui appelle "instance_of_IDE::ListView init $win.objectsview"

@@ -611,7 +611,7 @@ IDE::Editor instproc browseSelection {} {
 IDE::Editor instproc evalDisplaySelection {} {
     my instvar win
     set sel [my getSelection]
-    if {$sel!=""} {
+    if {$sel ne ""} {
        my appendToCursorAndSelect [my evalString $sel]
     }
 }
@@ -624,7 +624,7 @@ IDE::Editor instproc evalInspectSelection {} {
 }
 IDE::Editor instproc evalSelection {} {
     set sel [my getSelection]
-    if {$sel!=""} {
+    if {$sel ne ""} {
         my evalString $sel
     }
 }
@@ -1164,7 +1164,6 @@ IDE::ListView instproc lock_here {} {
     my instvar selectedIndex listItems
     if {[my has_lock]} {
         my set lock_on [lindex $listItems $selectedIndex]
-        puts stderr "lock on [my set lock_on]"
     }
 }
 IDE::ListView instproc markItem item {
@@ -1332,7 +1331,7 @@ IDE::ListView instproc setListUnsorted list {
 }
 IDE::ListView instproc setSelectedIndex {cur {notify 1}} {
     my instvar win listItems
-    if {$cur<[llength $listItems]} {
+    if {$cur < [llength $listItems]} {
       my unselect 
       $win.listbox selection set $cur $cur
       $win.listbox see $cur
@@ -1343,11 +1342,11 @@ IDE::ListView instproc setSelectedIndex {cur {notify 1}} {
 }
 IDE::ListView instproc setSelectedItem {item {notify 1}} {
     my instvar win listItems
-    if {[set cur [lsearch -exact $listItems $item]]>=0} {
+    if {[set cur [lsearch -exact $listItems $item]] >= 0} {
         my unselect 
         $win.listbox selection set $cur $cur
         $win.listbox see $cur
-        if {$notify==1} {
+        if {$notify == 1} {
            my selectItem $item
         }
     }
