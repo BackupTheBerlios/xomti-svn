@@ -1,6 +1,9 @@
 # automatically generated from XOTclIDE
 package provide xomti_critcl 0.3
 
+package require xomti 0.1
+package require xomti_tcllib_md5 1.2
+
 @ tclproc ::loadvfs idemeta struct xomti_critcl default
 proc ::loadvfs dir {
   load {} vfs
@@ -10,29 +13,24 @@ proc ::loadvfs dir {
 Class Xomti_Crixotcl
 @ ::Xomti_Crixotcl idemeta component xomti_critcl
 Xomti_Crixotcl proc get_prefix module {
-    set prefix [my get_xomti_critcl_dir]/c_code/$module[info patchlevel]
+    set prefix [file join [my get_xomti_critcl_c_code_dir] $module[info patchlevel]]
     if {![file exists $prefix]} {
         error "Directory \"$prefix\" doesn't exists"
     } else {
         return $prefix
     }
 }
-@ Xomti_Crixotcl proc get_xomti_critcl_dir {} {
-description {return tipically ..../xomti_critcl}
+@ Xomti_Crixotcl proc get_xomti_critcl_c_code_dir {} {
+description {return tipically ..../xomti_critcl/c_code}
 }
-Xomti_Crixotcl proc get_xomti_critcl_dir {} {
-    set didi [file dirname [[Xomti_Packages_Manager::main get_package_managers xomti_critcl] get_file]]
-    set original_didi $didi
-    while {[file tail $didi] ne "xomti_critcl"} {
-        set old_didi $didi
-        set didi [file dirname $didi]
-        if {$didi eq $old_didi} {
-            error "no xomti_critcl found in \"$original_didi\""
-        }
+Xomti_Crixotcl proc get_xomti_critcl_c_code_dir {} {
+    if {![my exists c_code_dir]} {
+        my set c_code_dir [file join [Xomti get_package_root_of_script] c_code]
     }
-    return $didi
+    return [my set c_code_dir]
 }
 Xomti_Crixotcl proc test {} {
+    package require Tk
     catch {destroy .test}
     toplevel .test
     set t [text .test.t -height 10]
@@ -41,6 +39,7 @@ Xomti_Crixotcl proc test {} {
     Xomti_Crixotcl_builder create mama
     mama option_set keepsrc 1
     mama option_set force 1  
+    mama option_set lines 0
 
     mama cproc sqr {double x} double {return x*x;}
     set x [sqr 2]
@@ -77,21 +76,21 @@ Xomti_Crixotcl proc test {} {
     }
     $t insert end "sqr_c 3 -> [sqr_c 3]\n"
 
-    mama cdata hi "hi there 2! \u00ee end"
+    mama cdata hi "hi there 2! \u00ee\u0381\u0382\u0383..."
     $t insert end [hi]\n
     
     Xomti_Crixotcl_builder create cricon
-    cricon cheaders "-I/home/p10admin/prog/Tcl/ "
+    cricon cheaders -I[Xomti_Crixotcl get_prefix tcl]/generic
     cricon ccode "#include <tcl.h>\n#include <math.h>"
     namespace eval ::concon {}
     cricon cdefines {
-        NULL
-        TRUE
-        FALSE
         TCL_OK
         TCL_ERROR
         M_PI
     } ::concon
+#        NULL TRUE FALSE
+    cricon option_set keepsrc 1
+    cricon option_set force 1  
     cricon cbuild
     foreach v [info vars ::concon::*] {
         $t insert end [list $v [set $v]]\n
@@ -105,7 +104,7 @@ Xomti_Crixotcl proc test {} {
     tkt option_set keepsrc 1
     set tcl_prefix [Xomti_Crixotcl get_prefix tcl]
     set tk_prefix [Xomti_Crixotcl get_prefix tk]
-    tkt cheaders -I$tk_prefix/generic -I$tk_prefix -I$tcl_prefix/generic -I$tcl_prefix
+    tkt cheaders -I$tk_prefix/generic -I$tk_prefix/unix -I$tcl_prefix/generic -I$tcl_prefix/unix
     #
     # platform specific declarations #
     switch $::tcl_platform(platform) {
@@ -132,7 +131,7 @@ Xomti_Crixotcl proc test {} {
         }
     }
     set ccode ""
-    set didi [Xomti_Crixotcl get_xomti_critcl_dir]/c_code/tkspline
+    set didi [file join [Xomti_Crixotcl get_xomti_critcl_c_code_dir] tkspline]
     append ccode "#define Tkspline_Init ns_Tkspline_Init\n"
     append ccode "#include \"$didi/config.h\" \n"
     append ccode "#include \"$didi/tkspline.c\"\n"
@@ -162,7 +161,7 @@ As instance variables of a ::Xomti_Crixotcl_builder instance, there is
     - code_obj_list     global ordering of reunion of "ccommands", "cprocs" and "cccode" sets
     - compile_string   
     - defines
-    - hdrdir
+    - hdrdirs
     - loaded_file
     - options
     - v_failed
@@ -182,7 +181,7 @@ API
 }
 Class Xomti_Crixotcl_builder
 @ ::Xomti_Crixotcl_builder idemeta categories {public private_cbuild info private private_defines}
-@ ::Xomti_Crixotcl_builder idemeta categoriesMethods {{cproc ccommand check cheaders cdata tk clibraries ccode cinit cdefines cbuild option_get option_set} {cbuild_emit_code setup_tk_stubs cbuild_compile code_ext_get code_init_get} {get_cache_dir get_compile_string get_hdrdir get_platform get_sharedlibext} {init private failed_count_get failed_count_incr failed_count_reset} {defines_append defines_build defines_get defines_reset}}
+@ ::Xomti_Crixotcl_builder idemeta categoriesMethods {{cproc ccommand check cheaders cdata tk clibraries ccode cinit cdefines cbuild option_get option_set} {cbuild_emit_code setup_tk_stubs cbuild_compile code_ext_get code_init_get} {get_cache_dir get_compile_string get_hdrdirs get_platform get_sharedlibext} {init private failed_count_get failed_count_incr failed_count_reset} {defines_append defines_build defines_get defines_reset}}
 @ ::Xomti_Crixotcl_builder idemeta component xomti_critcl
 Xomti_Crixotcl_builder instproc cbuild {{load 1} {prefix {}} {silent {}}} {
 
@@ -263,10 +262,12 @@ Xomti_Crixotcl_builder instproc cbuild_compile {cache_dir base libfile ininame} 
     ###################
     close $fd
 
-    foreach x [glob -directory [my get_hdrdir] *.h] {
-        set fn [file join $cache_dir [file tail $x]]
-        if {![file exists $fn]} {
-            file copy $x $fn
+    foreach d [my get_hdrdirs] {
+        foreach x [glob -directory $d *.h] {
+            set fn [file join $cache_dir [file tail $x]]
+            if {![file exists $fn]} {
+                file copy $x $fn
+            }
         }
     }
 
@@ -508,7 +509,7 @@ Xomti_Crixotcl_builder instproc cdata {name data} {
     append txt "Tcl_SetByteArrayObj(Tcl_GetObjResult(ip), (unsigned char*) script, $count);\n"
     append txt "return TCL_OK;\n"
          
-    my ccommand $name {dummy ip objc objv} $txt]
+    my ccommand $name {dummy ip objc objv} $txt
     return $name
 }
 Xomti_Crixotcl_builder instproc cdefines {defines {namespace ::}} {
@@ -674,8 +675,8 @@ Xomti_Crixotcl_builder instproc get_cache_dir {} {
 Xomti_Crixotcl_builder instproc get_compile_string {} {
     return [my set compile_string]
 }
-Xomti_Crixotcl_builder instproc get_hdrdir {} {
-    return [my set hdrdir]
+Xomti_Crixotcl_builder instproc get_hdrdirs {} {
+    return [my set hdrdirs]
 }
 Xomti_Crixotcl_builder instproc get_platform {} {
     global tcl_platform
@@ -707,7 +708,7 @@ ccode_obj_list
 code_obj_list
 compile_string
 defines
-hdrdir
+hdrdirs
 loaded_file    The name loaded of the machine-code library, if there.
 options
 proc_obj_list
@@ -728,10 +729,8 @@ Xomti_Crixotcl_builder instproc hdrs_get {} {
 }
 Xomti_Crixotcl_builder instproc init {} {
 
-    # my set hdrdir [file join [file dirname [info script]] critcl_c]
-    puts stderr "hdrdir a revoir"
-    # my set hdrdir ~/Z/critcl.vfs/lib/critcl/critcl_c
-    my set hdrdir /home/p10admin/prog/Tcl/distrib/tcl8.4.1/generic/
+    set root [Xomti_Crixotcl get_xomti_critcl_c_code_dir]
+    my set hdrdirs [list [file join $root tcl[info patchlevel] generic] [file join $root tk[info patchlevel] generic]]
 
     my set compile_string {gcc -shared -DUSE_TCL_STUBS}
 
@@ -1176,9 +1175,6 @@ Xomti_Crixotcl_martyr instproc failed {{silent {}}} {
         exit 1
     }
     return $v_failed
-}
-Xomti_Crixotcl_martyr instproc get_prefix {} {
-    return [my set v_prefix]
 }
 Xomti_Crixotcl_martyr instproc scripting {} {
     my instvar can_compile

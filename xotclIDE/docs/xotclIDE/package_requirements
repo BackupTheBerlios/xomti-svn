@@ -1,0 +1,54 @@
+2005-02-20
+
+Suppose I have worked on two packages, under subversion control:
+
+  myPackageA/tags/3.2/myPackageA.xotcl
+  myPackageB/tags/2.1/myPackageB.xotcl
+
+with "myPackageB 2.1" requiring "myPackageA 3.2".
+I begin to develop, requiring "myPackageA 3.2" and some external packages
+
+  myPackageC/trunk/myPackageC.xotcl
+
+What should be loaded in xotclIDE ?
+
+  xotclIDE and external packages, read-only
+  "myPackageA 3.2", read-only
+  "myPackageC 0.1", read-write
+
+Now, I see that I need to write a new, enhanced version of myPackageA
+in order to fulfill myPackageC requirements. How to do ?
+I do a svn copy of "myPackageA 3.2" as
+
+  myPackageA/trunk/myPackageA.xotcl
+
+using "svn copy myPackageA/tags/3.2 myPackageA/trunk".
+Then I change code and version to 4.0. When code based on
+
+  myPackageA/trunk/myPackageA.xotcl (4.0)
+  myPackageC/trunk/myPackageC.xotcl (0.1)
+
+works well, I tag them as new files
+
+  myPackageA/tags/4.0/myPackageA.xotcl
+  myPackageC/tags/0.1/myPackageC.xotcl
+
+using "svn move myPackageA/trunk myPackageA/tags/4.0"
+and   "svn move myPackageB/trunk myPackageB/tags/0.1"
+
+Later, I want to work on code using "myPackageB 2.1". Then I have to load also
+
+  myPackageA/tags/3.2/myPackageA.xotcl
+
+If I want to work on code using "myPackageC 0.1", I have to load newer version
+  
+  myPackageA/tags/4.0/myPackageA.xotcl
+
+Of course, if I have time, I will upgrade "myPackageB" to version 2.2,
+in order to use "myPackageA 4.0" instead of "myPackageA 3.2",
+but before that, it's essential that xotclIDE loads exactly what package
+I need, and saves only data marked as write, in package/trunk directories.
+
+Writing package/tags/_version_ directory_ will be done
+by "svn move trunk tags/_version_ directory_".
+

@@ -1,4 +1,3 @@
-set ici [file dirname [info script]]
-set auto_path [concat [file normalize [pwd]/../..] $auto_path]
-source $ici/fidev_critcl.xotcl
-package require fidev_tcllib_md5 20050124
+set auto_path [concat [file normalize [file dirname [info script]]/../..] $auto_path]
+package require xomti_critcl
+Xomti_Crixotcl test

@@ -65,6 +65,9 @@ Xomti_Packages_Manager instproc get_package_managers {{name {}} {version {}}} {
     }
 }
 Xomti_Packages_Manager instproc init {} {
+    # force to read index files
+    catch {package require _not_existing_package_}
+
     set names [lsort [package names]]
     set pvs [list]
     foreach p $names {
