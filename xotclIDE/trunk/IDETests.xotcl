@@ -1296,7 +1296,7 @@ IDE::TParser instproc testBBasePrs {} {
 IDE::TParser instproc testCSimple {} {
     set sample {
         proc1 arg1 arg2; proc2 arg2
-        # hier is my comment
+        # here is my comment
         proc3 "rrr rerwer" $variable
         proc4 {ewewewewe ewew weqweq}
     }

@@ -18,64 +18,38 @@ The Checking functionality is programed in Class PrsContext
 }
 }
 package provide IDETclParser 0.70
-Class PrsElement -parameter {begin end}
-@ ::PrsElement idemeta component IDETclParser
-PrsElement instproc basicEvalContents {} {
-   set parser [my getParser]
-   set stream [$parser stream]
-   set opos [$stream pos]
-   set olastpos [$stream lastpos]
-   $stream pos [my begin]
-   $stream lastpos [my end]
-   $parser parseScriptTo [self]
-   $stream pos $opos
-   $stream lastpos $olastpos
+@ Class ReadStringStream {
+description {This class wrap a string to use it as a stream.
+Additional you can set the last position (end of stream)}
 }
-PrsElement instproc basicSubstituteContents {} {
-   set parser [my getParser]
-   set stream [$parser stream]
-   set opos [$stream pos]
-   set olastpos [$stream lastpos]
-   $stream pos [my begin]
-   $stream lastpos [my end]
-   $parser substituteTo [self]
-   $stream pos $opos
-   $stream lastpos $olastpos
+Class ReadStringStream -parameter {string pos lastpos}
+@ ::ReadStringStream idemeta component IDETclParser
+ReadStringStream instproc addPos add {
+    my incr pos $add
 }
-PrsElement instproc checkAsList {context notifier} {
-    next
+ReadStringStream instproc atEnd {} {
+   expr {[my pos]>[my lastpos]}
 }
-PrsElement instproc checkSyntax {context notifier} {
-    next
+ReadStringStream instproc copyFromTo {from to} {
+   string range [my string] $from $to
 }
-PrsElement instproc evalContents {} {
+ReadStringStream instproc getChar {} {
+   my instvar pos string
+   #[self] halt
+   string index $string $pos
 }
-PrsElement instproc extractList {} {
-    next
+ReadStringStream instproc init {} {
+   my pos 0
+   my lastpos [expr {[my length]-1}]
 }
-PrsElement instproc getParser {} {
-   set i [self]
-   while {[Object isobject $i] && [$i info class]!="::TclParser"} {
-       set i [$i info parent]
-   }
-   return $i
+ReadStringStream instproc length {} {
+   string length [my string]
 }
-PrsElement instproc printString {} {
-    if {[my exists begin] && [my exists end]} {
-        return "[my info class] ([my begin],[my end]) [[[my getParser] stream] copyFromTo [my begin] [my end]]"
-    }
-    next
-}
-PrsElement instproc prsString {} {
-    [[my getParser] stream] copyFromTo [my begin] [my end]
-}
-PrsElement instproc substituteContents {} {
-}
-PrsElement instproc syntaxHighlight context {
-}
-PrsElement instproc visit visitor {
-   $visitor visit [self]
-   next
+ReadStringStream instproc nextChar {} {
+   my instvar pos string
+   set ret [string index $string $pos]
+   incr pos
+   return $ret
 }
 Class MixPrsList -parameter list
 @ ::MixPrsList idemeta component IDETclParser
@@ -93,462 +67,6 @@ MixPrsList instproc visit visitor {
        }
    }
 }
-Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList} 
-@ ::PrsCommandSubst idemeta component IDETclParser
-PrsCommandSubst instproc evalContents {} {
-    my basicEvalContents
-}
-Class PrsLiteral -superclass ::PrsElement 
-@ ::PrsLiteral idemeta component IDETclParser
-Class PrsVariable -superclass ::PrsElement 
-@ ::PrsVariable idemeta component IDETclParser
-PrsVariable instproc checkSyntax {context notifier} {
-    set name [my prsString]
-    if {![$context checkVariable $name]} {
-        $notifier addError "unknown variable $name" [self]
-    }
-}
-PrsVariable instproc syntaxHighlight context {
-    $context highlightElement [self] variable -1
-}
-PrsVariable instproc visit visitor {
-   next 
-   if {[my exists key]} {
-           [my set key] visit $visitor
-   }
-}
-Class PrsComment -superclass ::PrsElement 
-@ ::PrsComment idemeta component IDETclParser
-PrsComment instproc syntaxHighlight context {
-    $context highlightElement [self] comment
-}
-@ Class TclParser {
-description {This class can parse tcl code from stream parameter
-that consists ReadStringStream object or compatible and produce parse tree.
-
-The parsing can be startet this prs-structure category commands.
-getList try to parse string as list element.
-parseScriptTo parse stream as command contents to and build parse tree.
-substituteTo parse stream as quoted string for command and variable substitution.
-
-The parser is used normaly from PrsContext.
-
-Parser has a special handling of parser errors.
-You should use the paraser in this way
-set ret [$parser catchParseErrors {$parser parseScriptTo $parser}]
-if {$ret} {
-   puts "parsing was ok"
-} else {
-   puts "parsing has errors"
-}
-}
-}
-Class TclParser -parameter {stream root}
-@ ::TclParser idemeta categoriesMethods {{getChar skipCharacters skipSeparators skipBlanks skipUpToCharacters searchCloseBrace searchCloseQuote getCharWithMasking skipToWordEnd skipUpTo} {getNoSubst getCommandSubst getQuoted getBeginingVariable getCharKeySequence getBeginingCommandSubst getCharSequence getVariable} {getList getComment substituteTo extractListTo parseScriptTo getCommandOrComment getCommand getArrayKey} {hasParseErrors parseError catchParseErrors} init}
-@ ::TclParser idemeta categories {stream-delegation list-elems prs-structure prs-errors initialize}
-@ ::TclParser idemeta component IDETclParser
-TclParser instproc catchParseErrors eval {
-    if {[[self class] isDevelMode]} {
-       uplevel $eval
-       return 1
-    }
-    set ret [catch {uplevel $eval} errinfo]
-    if {$ret==0} {
-        return 1
-    } elseif {$ret==1020} {
-        return 0
-    } else {
-        return -code error -errorinfo $errinfo
-    }
-}
-TclParser instproc extractListTo parent {
-    my instvar stream
-    my skipCharacters "\t \n"
-    while {![$stream atEnd]} {
-        $parent addElem [my getList $parent]
-        my skipCharacters "\t \n"
-    }
-}
-TclParser instproc getArrayKey parent {
-    my instvar stream
-    if {[$stream getChar]!="("} return
-    $stream addPos 1
-    set char [$stream getChar]
-    my set terminalChar )
-    switch -- $char {
-        \[ {
-           set key [my getBeginingCommandSubst $parent]
-        }
-        \$ {
-           set key [my getBeginingVariable $parent]
-        }
-        default {
-	   set key [my getCharKeySequence $parent]
-        }
-    }
-    my set terminalChar {}
-    if {[$stream atEnd] || [$stream getChar] ne ")"} {
-        my parseError "Can not parse array key"
-        return
-    }
-    $parent set key $key
-    $stream addPos 1
-}
-TclParser instproc getBeginingCommandSubst parent {
-    my instvar stream
-    set begin [expr [$stream pos]+ 1]
-    my searchCloseBrace \[ \]
-    set end [expr {[$stream pos]-1}]
-    $stream addPos 1
-    set char [$stream getChar]
-    if {[my isEndList]} {
-        set commandsubst [PrsCommandSubst new -childof $parent -begin $begin -end $end]
-        $commandsubst evalContents
-        return $commandsubst
-    } else {
-        set quote [PrsQuoted new -childof $parent -begin [expr {$begin-1}]]
-        set commandsubst [PrsCommandSubst new -childof $quote -begin $begin -end $end]
-        $commandsubst evalContents
-        $quote addElem $commandsubst
-        while {![my isEndList]} {
-            switch -- $char {
-                \$ {
-                    $quote addElem [my getVariable $quote]
-                }
-                \[ {
-                    $quote addElem [my getCommandSubst $quote]
-                }
-            }
-            my skipUpToCharacters ";\[\$\t \n"
-            set char [$stream getChar]
-        }
-        $quote end [expr {[$stream pos]-1}]
-        return $quote
-    }
-}
-TclParser instproc getBeginingVariable parent {
-    my instvar stream
-    set pbegin [$stream pos]
-    set variable [my getVariable $parent]
-    set char [$stream getChar]
-    if {[my isEndList]} {
-        return $variable  
-    } else {
-        # ther are another characters after variable parse it as char sequence
-        # $a.ew $a[set b] $a(e)ewr
-        $variable destroy
-        $stream pos $pbegin
-        return [my getCharSequence $parent]
-    }
-}
-TclParser instproc getChar {} {
-    [my stream] getChar
-}
-TclParser instproc getCharKeySequence parent {
-    my instvar stream
-    set begin [$stream pos]
-    my skipUpToCharacters ";\[\$\t \n)"
-    set char [$stream getChar]
-    if {[my isEndList]} {
-        set charseq [PrsLiteral new -childof $parent -begin $begin]
-        $charseq end [expr {[$stream pos]-1}]
-        return $charseq       
-    } else {
-        set quote [PrsQuoted new -childof $parent -begin $begin]
-        while {![my isEndList]} {
-            switch -- $char {
-                \$ {
-                    $quote addElem [my getVariable $quote]
-                }
-                \[ {
-                    $quote addElem [my getCommandSubst $quote]
-                }
-            }
-            my skipUpToCharacters ";\[\$\t \n)"
-            set char [$stream getChar]
-        }
-        $quote end [expr {[$stream pos]-1}]
-        return $quote
-    }
- 
-}
-@ TclParser instproc getCharSequence {} {
-description {This procedure parse string that not begin with special tcl
-control characters.
-
-It can return an PrsLitaral when it is normal string with no special
-characters or PrsQuoted if they consists tcl substitutions elements as
-$variable or [command]}
-}
-TclParser instproc getCharSequence parent {
-    my instvar stream
-    set begin [$stream pos]
-    my skipUpToCharacters ";\[\$\t \n"
-    set char [$stream getChar]
-    if {[my isEndList]} {
-        set charseq [PrsLiteral new -childof $parent -begin $begin]
-        $charseq end [expr {[$stream pos]-1}]
-        return $charseq       
-    } else {
-        set quote [PrsQuoted new -childof $parent -begin $begin]
-        while {![my isEndList]} {
-            switch -- $char {
-                \$ {
-                    $quote addElem [my getVariable $quote]
-                }
-                \[ {
-                    $quote addElem [my getCommandSubst $quote]
-                }
-            }
-            my skipUpToCharacters ";\[\$\t \n"
-            set char [$stream getChar]
-        }
-        $quote end [expr {[$stream pos]-1}]
-        return $quote
-    }
- 
-}
-TclParser instproc getCharWithMasking {} {
-   my instvar stream
-   set c [$stream getChar]
-   while {$c eq "\\" && ![$stream atEnd]} {
-       $stream addPos 2
-       set c [$stream getChar]
-   }
-   return $c
-}
-TclParser instproc getCommand parent {
-    my instvar stream
-    set command [PrsCommand new -childof $parent -begin [$stream pos]]
-    while 1 {
-        $command addElem [my getList $command]
-        my skipSeparators
-        set char [$stream getChar]
-        if {[$stream atEnd] || $char eq "\n"} {
-            $command end [expr {[$stream pos]-1}]
-            return $command
-        }
-        if {$char eq ";"} {
-            $command end [expr {[$stream pos]-1}]
-            $stream addPos 1
-            return $command
-        }
-    }
-}
-TclParser instproc getCommandOrComment parent {
-    if {[my getChar] eq "#"} {
-        return [my getComment $parent]
-    } else {
-        return [my getCommand $parent]
-    }
-}
-TclParser instproc getCommandSubst parent {
-    my instvar stream
-    set commandsubst [PrsCommandSubst new -childof $parent -begin [expr [$stream pos]+ 1]]
-    my searchCloseBrace \[ \]
-    $commandsubst end [expr {[$stream pos]-1}]
-    $stream addPos 1
-    $commandsubst evalContents
-    return $commandsubst
-}
-TclParser instproc getComment parent {
-    my instvar stream
-    set begin [$stream pos]
-    my skipUpTo \n
-    PrsComment new -childof $parent -begin $begin -end [expr {[$stream pos]-1}]
-}
-TclParser instproc getList parent {
-   my instvar stream
-   my skipCharacters "\t "
-   set char [$stream getChar]
-   switch -- $char {
-       \[ {
-           return [my getBeginingCommandSubst $parent]
-       }
-       \{ {
-           return [my getNoSubst $parent]
-       }
-       \" {
-           return [my getQuoted $parent]
-       }
-       \$ {
-           return [my getBeginingVariable $parent]
-       }
-       default {
-	   return [my getCharSequence $parent]
-       }
-   }
-}
-TclParser instproc getNoSubst parent {
-    my instvar stream
-    set commandsubst [PrsNoSubst new -childof $parent -begin [expr [$stream pos]+ 1]]
-    my searchCloseBrace \{ \}
-    $commandsubst end [expr {[$stream pos]-1}]
-    $stream addPos 1
-    return $commandsubst
-}
-TclParser instproc getQuoted parent {
-    my instvar stream
-    $stream addPos 1
-    set quote [PrsQuoted new -childof $parent -begin [$stream pos] -hasQuote 1]
-    my searchCloseQuote
-    $quote end [expr {[$stream pos]-1}]
-    $stream addPos 1
-    $quote substituteContents
-    return $quote
-}
-@ TclParser instproc getVariable {} {
-description {This can parse following expresions
-$a $a(2) ${a} ${a(3)} $a([set b])
-}
-}
-TclParser instproc getVariable parent {
-    my instvar stream
-    $stream addPos 1
-    set variable [PrsVariable new -childof $parent -begin [$stream pos]]
-    if {[$stream getChar] eq "\{"} {
-        $variable begin [expr {[$stream pos]+1}]
-        my searchCloseBrace \{ \}
-        $variable end [expr {[$stream pos]-1}]
-        $stream addPos 1
-    } else {
-        my skipToWordEnd
-        $variable end [expr {[$stream pos]-1}]
-        my getArrayKey $variable
-    }
-    return $variable  
-}
-TclParser instproc hasParseErrors {} {
-    expr {[my exists parseErrors] && [llength [my set parseErrors]]>0}
-}
-TclParser instproc init args {
-   my set terminalChar {}
-}
-TclParser instproc isEndList {} {
-    set char [[my stream] getChar]
-    expr {[[my stream] atEnd] || [string is space $char] || $char eq ";" || $char eq [my set terminalChar]}
-}
-TclParser instproc parseError text {
-    my instvar stream
-    my lappend parseErrors [list [$stream pos] [$stream pos] $text]
-    if {[[self class] isDevelMode]} {
-        error $text
-    } else {
-        # return code 20 as internal error
-        return -code 1020
-    }
-}
-TclParser instproc parseScriptTo parent {
-    my instvar stream
-    my skipBlanks
-    while {![$stream atEnd]} {
-        $parent addElem [my getCommandOrComment $parent]
-        my skipBlanks
-    }
-}
-TclParser instproc searchCloseBrace {obrace cbrace} {
-   my instvar stream
-   set open 0
-   # search closing parenthesis until and of stream
-   while {![$stream atEnd]} {
-      set c [my getCharWithMasking]
-      if {$c eq $obrace} {
-         incr open
-      } elseif {$c eq $cbrace} {
-         incr open -1
-         if {$open==0} {
-             return 1
-         }
-      }
-      $stream addPos 1
-   }
-   my parseError "Parse Error: can not find closing $cbrace"
-}
-TclParser instproc searchCloseQuote {} {
-   my instvar stream
-   while {![$stream atEnd]} {
-      set c [my getCharWithMasking]
-      if {$c eq "\""} {
-          return 1
-      }
-      if {$c eq "\["} {
-          my searchCloseBrace \[ \]
-      }
-      $stream addPos 1
-   }
-   my parseError "Parse Error: can not find closing \""
-}
-TclParser instproc skipBlanks {} {
-    my instvar stream
-    set char [my getCharWithMasking]
-    while {![$stream atEnd] && ([string is control $char] || [string is space $char])} {
-        $stream addPos 1
-        set char [my getCharWithMasking]
-    }
-}
-TclParser instproc skipCharacters string {
-    my instvar stream
-    set char [$stream getChar]
-    while {![$stream atEnd] && [string first $char $string]!=-1} {
-        $stream addPos 1
-        set char [$stream getChar]
-    }
-}
-TclParser instproc skipSeparators {} {
-    my skipCharacters "\t "
-}
-TclParser instproc skipToWordEnd {} {
-    my instvar stream
-    set char [$stream getChar]
-    while {![$stream atEnd] && ([string is wordchar $char] || $char eq ":")} {
-        $stream addPos 1
-        set char [$stream getChar]
-    }
-}
-TclParser instproc skipUpTo echar {
-    my instvar stream
-    set char [my getCharWithMasking]
-    while {![$stream atEnd] && $char ne $echar} {
-        $stream addPos 1
-        set char [my getCharWithMasking]
-    }
-}
-TclParser instproc skipUpToCharacters string {
-    my instvar stream
-    set char [my getCharWithMasking]
-    while {![$stream atEnd] && [string first $char $string]==-1} {
-        $stream addPos 1
-        set char [my getCharWithMasking]
-    }
-}
-TclParser instproc substituteTo parent {
-    my instvar stream
-    my skipBlanks
-    while {![$stream atEnd]} {
-        set char [my getCharWithMasking]
-        switch -- $char {
-            \[ {
-                $parent addElem [my getCommandSubst $parent]
-            }
-            \$ {
-                set obj [my getVariable $parent]
-                if {$obj!=""} {
-                    $parent addElem $obj
-                }
-            }
-        }
-        $stream addPos 1
-    }
-}
-TclParser proc isDevelMode {} {
-    if {[my exists develMode]} {
-        return [my set develMode]
-    }
-    return 0
-}
-TclParser proc setDevelMode {{mode 1}} {
-    my set develMode $mode
-}
 @ Class PrsContext {
 description {The class has very important rolle by parsing xotcl/tcl sources.
 In this methods are coded the meaning (syntax) of all build-in tcl functions
@@ -559,8 +77,8 @@ The context handle/store such context information
 2. know variables}
 }
 Class PrsContext -parameter {{variables {}} parser errors warnings}
-@ ::PrsContext idemeta categoriesMethods {{addError visit checkProcArgsCount checkObjectMethodArgsCount} {checkObjectCall checkDirectObjectCall checkCommand checkTclCommand checkObjectSelfCall} {hasErrors parseAndVisit parseAndCheck parse} {checkVariableFrom addVariableFromList addVariableFrom checkVariable} {check_set check_instvar check_for check_foreach check_regexp check_switch check_incr check_append check_catch check_lappend check_unset check_global check_while check_gets check_array check_keylset check_upvar check_if}}
 @ ::PrsContext idemeta categories {private checking-command interface check-variables complex-command}
+@ ::PrsContext idemeta categoriesMethods {{addError visit checkProcArgsCount checkObjectMethodArgsCount} {checkObjectCall checkDirectObjectCall checkCommand checkTclCommand checkObjectSelfCall} {hasErrors parseAndVisit parseAndCheck parse} {checkVariableFrom addVariableFromList addVariableFrom checkVariable} {check_set check_instvar check_for check_foreach check_regexp check_switch check_incr check_append check_catch check_lappend check_unset check_global check_while check_gets check_array check_keylset check_upvar check_if}}
 @ ::PrsContext idemeta component IDETclParser
 PrsContext instproc addError {text elem} {
     my lappend errors [list [$elem begin] [$elem end] $text]
@@ -1255,6 +773,542 @@ PrsContext proc initializeAfterLoad {} {
         }
     }
 }
+@ Class TclParser {
+description {This class can parse tcl code from stream parameter
+that consists ReadStringStream object or compatible and produce parse tree.
+
+The parsing can be startet this prs-structure category commands.
+getList try to parse string as list element.
+parseScriptTo parse stream as command contents to and build parse tree.
+substituteTo parse stream as quoted string for command and variable substitution.
+
+The parser is used normaly from PrsContext.
+
+Parser has a special handling of parser errors.
+You should use the paraser in this way
+set ret [$parser catchParseErrors {$parser parseScriptTo $parser}]
+if {$ret} {
+   puts "parsing was ok"
+} else {
+   puts "parsing has errors"
+}
+}
+}
+Class TclParser -parameter {stream root}
+@ ::TclParser idemeta categories {stream-delegation list-elems prs-structure prs-errors initialize}
+@ ::TclParser idemeta categoriesMethods {{getChar skipCharacters skipSeparators skipBlanks skipUpToCharacters searchCloseBrace searchCloseQuote getCharWithMasking skipToWordEnd skipUpTo} {getNoSubst getCommandSubst getQuoted getBeginingVariable getCharKeySequence getBeginingCommandSubst getCharSequence getVariable} {getList getComment substituteTo extractListTo parseScriptTo getCommandOrComment getCommand getArrayKey} {hasParseErrors parseError catchParseErrors} init}
+@ ::TclParser idemeta component IDETclParser
+TclParser instproc catchParseErrors eval {
+    if {[[self class] isDevelMode]} {
+       uplevel $eval
+       return 1
+    }
+    set ret [catch {uplevel $eval} errinfo]
+    if {$ret==0} {
+        return 1
+    } elseif {$ret==1020} {
+        return 0
+    } else {
+        return -code error -errorinfo $errinfo
+    }
+}
+TclParser instproc extractListTo parent {
+    my instvar stream
+    my skipCharacters "\t \n"
+    while {![$stream atEnd]} {
+        $parent addElem [my getList $parent]
+        my skipCharacters "\t \n"
+    }
+}
+TclParser instproc getArrayKey parent {
+    my instvar stream
+    if {[$stream getChar]!="("} return
+    $stream addPos 1
+    set char [$stream getChar]
+    my set terminalChar )
+    switch -- $char {
+        \[ {
+           set key [my getBeginingCommandSubst $parent]
+        }
+        \$ {
+           set key [my getBeginingVariable $parent]
+        }
+        default {
+	   set key [my getCharKeySequence $parent]
+        }
+    }
+    my set terminalChar {}
+    if {[$stream atEnd] || [$stream getChar] ne ")"} {
+        my parseError "Can not parse array key"
+        return
+    }
+    $parent set key $key
+    $stream addPos 1
+}
+TclParser instproc getBeginingCommandSubst parent {
+    my instvar stream
+    set begin [expr [$stream pos]+ 1]
+    my searchCloseBrace \[ \]
+    set end [expr {[$stream pos]-1}]
+    $stream addPos 1
+    set char [$stream getChar]
+    if {[my isEndList]} {
+        set commandsubst [PrsCommandSubst new -childof $parent -begin $begin -end $end]
+        $commandsubst evalContents
+        return $commandsubst
+    } else {
+        set quote [PrsQuoted new -childof $parent -begin [expr {$begin-1}]]
+        set commandsubst [PrsCommandSubst new -childof $quote -begin $begin -end $end]
+        $commandsubst evalContents
+        $quote addElem $commandsubst
+        while {![my isEndList]} {
+            switch -- $char {
+                \$ {
+                    $quote addElem [my getVariable $quote]
+                }
+                \[ {
+                    $quote addElem [my getCommandSubst $quote]
+                }
+            }
+            my skipUpToCharacters ";\[\$\t \n"
+            set char [$stream getChar]
+        }
+        $quote end [expr {[$stream pos]-1}]
+        return $quote
+    }
+}
+TclParser instproc getBeginingVariable parent {
+    my instvar stream
+    set pbegin [$stream pos]
+    set variable [my getVariable $parent]
+    set char [$stream getChar]
+    if {[my isEndList]} {
+        return $variable  
+    } else {
+        # ther are another characters after variable parse it as char sequence
+        # $a.ew $a[set b] $a(e)ewr
+        $variable destroy
+        $stream pos $pbegin
+        return [my getCharSequence $parent]
+    }
+}
+TclParser instproc getChar {} {
+    [my stream] getChar
+}
+TclParser instproc getCharKeySequence parent {
+    my instvar stream
+    set begin [$stream pos]
+    my skipUpToCharacters ";\[\$\t \n)"
+    set char [$stream getChar]
+    if {[my isEndList]} {
+        set charseq [PrsLiteral new -childof $parent -begin $begin]
+        $charseq end [expr {[$stream pos]-1}]
+        return $charseq       
+    } else {
+        set quote [PrsQuoted new -childof $parent -begin $begin]
+        while {![my isEndList]} {
+            switch -- $char {
+                \$ {
+                    $quote addElem [my getVariable $quote]
+                }
+                \[ {
+                    $quote addElem [my getCommandSubst $quote]
+                }
+            }
+            my skipUpToCharacters ";\[\$\t \n)"
+            set char [$stream getChar]
+        }
+        $quote end [expr {[$stream pos]-1}]
+        return $quote
+    }
+ 
+}
+@ TclParser instproc getCharSequence {} {
+description {This procedure parse string that not begin with special tcl
+control characters.
+
+It can return an PrsLitaral when it is normal string with no special
+characters or PrsQuoted if they consists tcl substitutions elements as
+$variable or [command]}
+}
+TclParser instproc getCharSequence parent {
+    my instvar stream
+    set begin [$stream pos]
+    my skipUpToCharacters ";\[\$\t \n"
+    set char [$stream getChar]
+    if {[my isEndList]} {
+        set charseq [PrsLiteral new -childof $parent -begin $begin]
+        $charseq end [expr {[$stream pos]-1}]
+        return $charseq       
+    } else {
+        set quote [PrsQuoted new -childof $parent -begin $begin]
+        while {![my isEndList]} {
+            switch -- $char {
+                \$ {
+                    $quote addElem [my getVariable $quote]
+                }
+                \[ {
+                    $quote addElem [my getCommandSubst $quote]
+                }
+            }
+            my skipUpToCharacters ";\[\$\t \n"
+            set char [$stream getChar]
+        }
+        $quote end [expr {[$stream pos]-1}]
+        return $quote
+    }
+ 
+}
+TclParser instproc getCharWithMasking {} {
+   my instvar stream
+   set c [$stream getChar]
+   while {$c eq "\\" && ![$stream atEnd]} {
+       $stream addPos 2
+       set c [$stream getChar]
+   }
+   return $c
+}
+TclParser instproc getCommand parent {
+    my instvar stream
+    set command [PrsCommand new -childof $parent -begin [$stream pos]]
+    while 1 {
+        $command addElem [my getList $command]
+        my skipSeparators
+        set char [$stream getChar]
+        if {[$stream atEnd] || $char eq "\n"} {
+            $command end [expr {[$stream pos]-1}]
+            return $command
+        }
+        if {$char eq ";"} {
+            $command end [expr {[$stream pos]-1}]
+            $stream addPos 1
+            return $command
+        }
+    }
+}
+TclParser instproc getCommandOrComment parent {
+    if {[my getChar] eq "#"} {
+        return [my getComment $parent]
+    } else {
+        return [my getCommand $parent]
+    }
+}
+TclParser instproc getCommandSubst parent {
+    my instvar stream
+    set commandsubst [PrsCommandSubst new -childof $parent -begin [expr [$stream pos]+ 1]]
+    my searchCloseBrace \[ \]
+    $commandsubst end [expr {[$stream pos]-1}]
+    $stream addPos 1
+    $commandsubst evalContents
+    return $commandsubst
+}
+TclParser instproc getComment parent {
+    my instvar stream
+    set begin [$stream pos]
+    my skipUpTo \n
+    PrsComment new -childof $parent -begin $begin -end [expr {[$stream pos]-1}]
+}
+TclParser instproc getList parent {
+   my instvar stream
+   my skipCharacters "\t "
+   set char [$stream getChar]
+   switch -- $char {
+       \[ {
+           return [my getBeginingCommandSubst $parent]
+       }
+       \{ {
+           return [my getNoSubst $parent]
+       }
+       \" {
+           return [my getQuoted $parent]
+       }
+       \$ {
+           return [my getBeginingVariable $parent]
+       }
+       default {
+	   return [my getCharSequence $parent]
+       }
+   }
+}
+TclParser instproc getNoSubst parent {
+    my instvar stream
+    set commandsubst [PrsNoSubst new -childof $parent -begin [expr [$stream pos]+ 1]]
+    my searchCloseBrace \{ \}
+    $commandsubst end [expr {[$stream pos]-1}]
+    $stream addPos 1
+    return $commandsubst
+}
+TclParser instproc getQuoted parent {
+    my instvar stream
+    $stream addPos 1
+    set quote [PrsQuoted new -childof $parent -begin [$stream pos] -hasQuote 1]
+    my searchCloseQuote
+    $quote end [expr {[$stream pos]-1}]
+    $stream addPos 1
+    $quote substituteContents
+    return $quote
+}
+@ TclParser instproc getVariable {} {
+description {This can parse following expresions
+$a $a(2) ${a} ${a(3)} $a([set b])
+}
+}
+TclParser instproc getVariable parent {
+    my instvar stream
+    $stream addPos 1
+    set variable [PrsVariable new -childof $parent -begin [$stream pos]]
+    if {[$stream getChar] eq "\{"} {
+        $variable begin [expr {[$stream pos]+1}]
+        my searchCloseBrace \{ \}
+        $variable end [expr {[$stream pos]-1}]
+        $stream addPos 1
+    } else {
+        my skipToWordEnd
+        $variable end [expr {[$stream pos]-1}]
+        my getArrayKey $variable
+    }
+    return $variable  
+}
+TclParser instproc hasParseErrors {} {
+    expr {[my exists parseErrors] && [llength [my set parseErrors]]>0}
+}
+TclParser instproc init args {
+   my set terminalChar {}
+}
+TclParser instproc isEndList {} {
+    set char [[my stream] getChar]
+    expr {[[my stream] atEnd] || [string is space $char] || $char eq ";" || $char eq [my set terminalChar]}
+}
+TclParser instproc parseError text {
+    my instvar stream
+    my lappend parseErrors [list [$stream pos] [$stream pos] $text]
+    if {[[self class] isDevelMode]} {
+        error $text
+    } else {
+        # return code 20 as internal error
+        return -code 1020
+    }
+}
+TclParser instproc parseScriptTo parent {
+    my instvar stream
+    my skipBlanks
+    while {![$stream atEnd]} {
+        $parent addElem [my getCommandOrComment $parent]
+        my skipBlanks
+    }
+}
+TclParser instproc searchCloseBrace {obrace cbrace} {
+   my instvar stream
+   set open 0
+   # search closing parenthesis until and of stream
+   while {![$stream atEnd]} {
+      set c [my getCharWithMasking]
+      if {$c eq $obrace} {
+         incr open
+      } elseif {$c eq $cbrace} {
+         incr open -1
+         if {$open==0} {
+             return 1
+         }
+      }
+      $stream addPos 1
+   }
+   my parseError "Parse Error: can not find closing $cbrace"
+}
+TclParser instproc searchCloseQuote {} {
+   my instvar stream
+   while {![$stream atEnd]} {
+      set c [my getCharWithMasking]
+      if {$c eq "\""} {
+          return 1
+      }
+      if {$c eq "\["} {
+          my searchCloseBrace \[ \]
+      }
+      $stream addPos 1
+   }
+   my parseError "Parse Error: can not find closing \""
+}
+TclParser instproc skipBlanks {} {
+    my instvar stream
+    set char [my getCharWithMasking]
+    while {![$stream atEnd] && ([string is control $char] || [string is space $char])} {
+        $stream addPos 1
+        set char [my getCharWithMasking]
+    }
+}
+TclParser instproc skipCharacters string {
+    my instvar stream
+    set char [$stream getChar]
+    while {![$stream atEnd] && [string first $char $string]!=-1} {
+        $stream addPos 1
+        set char [$stream getChar]
+    }
+}
+TclParser instproc skipSeparators {} {
+    my skipCharacters "\t "
+}
+TclParser instproc skipToWordEnd {} {
+    my instvar stream
+    set char [$stream getChar]
+    while {![$stream atEnd] && ([string is wordchar $char] || $char eq ":")} {
+        $stream addPos 1
+        set char [$stream getChar]
+    }
+}
+TclParser instproc skipUpTo echar {
+    my instvar stream
+    set char [my getCharWithMasking]
+    while {![$stream atEnd] && $char ne $echar} {
+        $stream addPos 1
+        set char [my getCharWithMasking]
+    }
+}
+TclParser instproc skipUpToCharacters string {
+    my instvar stream
+    set char [my getCharWithMasking]
+    while {![$stream atEnd] && [string first $char $string]==-1} {
+        $stream addPos 1
+        set char [my getCharWithMasking]
+    }
+}
+TclParser instproc substituteTo parent {
+    my instvar stream
+    my skipBlanks
+    while {![$stream atEnd]} {
+        set char [my getCharWithMasking]
+        switch -- $char {
+            \[ {
+                $parent addElem [my getCommandSubst $parent]
+            }
+            \$ {
+                set obj [my getVariable $parent]
+                if {$obj!=""} {
+                    $parent addElem $obj
+                }
+            }
+        }
+        $stream addPos 1
+    }
+}
+TclParser proc isDevelMode {} {
+    if {[my exists develMode]} {
+        return [my set develMode]
+    }
+    return 0
+}
+TclParser proc setDevelMode {{mode 1}} {
+    my set develMode $mode
+}
+Class PrsElement -parameter {begin end}
+@ ::PrsElement idemeta component IDETclParser
+PrsElement instproc basicEvalContents {} {
+   set parser [my getParser]
+   set stream [$parser stream]
+   set opos [$stream pos]
+   set olastpos [$stream lastpos]
+   $stream pos [my begin]
+   $stream lastpos [my end]
+   $parser parseScriptTo [self]
+   $stream pos $opos
+   $stream lastpos $olastpos
+}
+PrsElement instproc basicSubstituteContents {} {
+   set parser [my getParser]
+   set stream [$parser stream]
+   set opos [$stream pos]
+   set olastpos [$stream lastpos]
+   $stream pos [my begin]
+   $stream lastpos [my end]
+   $parser substituteTo [self]
+   $stream pos $opos
+   $stream lastpos $olastpos
+}
+PrsElement instproc checkAsList {context notifier} {
+    next
+}
+PrsElement instproc checkSyntax {context notifier} {
+    next
+}
+PrsElement instproc evalContents {} {
+}
+PrsElement instproc extractList {} {
+    next
+}
+PrsElement instproc getParser {} {
+   set i [self]
+   while {[Object isobject $i] && [$i info class]!="::TclParser"} {
+       set i [$i info parent]
+   }
+   return $i
+}
+PrsElement instproc printString {} {
+    if {[my exists begin] && [my exists end]} {
+        return "[my info class] ([my begin],[my end]) [[[my getParser] stream] copyFromTo [my begin] [my end]]"
+    }
+    next
+}
+PrsElement instproc prsString {} {
+    [[my getParser] stream] copyFromTo [my begin] [my end]
+}
+PrsElement instproc substituteContents {} {
+}
+PrsElement instproc syntaxHighlight context {
+}
+PrsElement instproc visit visitor {
+   $visitor visit [self]
+   next
+}
+Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList} 
+@ ::PrsCommandSubst idemeta component IDETclParser
+PrsCommandSubst instproc evalContents {} {
+    my basicEvalContents
+}
+Class PrsComment -superclass ::PrsElement 
+@ ::PrsComment idemeta component IDETclParser
+PrsComment instproc syntaxHighlight context {
+    $context highlightElement [self] comment
+}
+Class PrsLiteral -superclass ::PrsElement 
+@ ::PrsLiteral idemeta component IDETclParser
+Class PrsCommand -superclass {::PrsElement ::MixPrsList} 
+@ ::PrsCommand idemeta component IDETclParser
+PrsCommand instproc argsCount {} {
+   expr {[llength [my list]]-1}
+}
+PrsCommand instproc checkSyntax {context notifier} {
+    $context checkCommand [self] $notifier
+}
+PrsCommand instproc syntaxHighlight context {
+    $context checkCommand [self] $context
+}
+Class PrsVariable -superclass ::PrsElement 
+@ ::PrsVariable idemeta component IDETclParser
+PrsVariable instproc checkSyntax {context notifier} {
+    set name [my prsString]
+    if {![$context checkVariable $name]} {
+        $notifier addError "unknown variable $name" [self]
+    }
+}
+PrsVariable instproc syntaxHighlight context {
+    $context highlightElement [self] variable -1
+}
+PrsVariable instproc visit visitor {
+   next 
+   if {[my exists key]} {
+           [my set key] visit $visitor
+   }
+}
+Class PrsQuoted -superclass {::PrsElement ::MixPrsList}  -parameter {{hasQuote 0}}
+@ ::PrsQuoted idemeta component IDETclParser
+PrsQuoted instproc substituteContents {} {
+   my basicSubstituteContents
+}
+PrsQuoted instproc syntaxHighlight context {
+    if {[my hasQuote]} {
+        $context highlightElement [self] quoted
+    }
+}
 Class PrsNoSubst -superclass {::PrsElement ::MixPrsList} 
 @ ::PrsNoSubst idemeta component IDETclParser
 PrsNoSubst instproc evalContents {} {
@@ -1273,60 +1327,6 @@ PrsNoSubst instproc extractList {} {
 }
 PrsNoSubst instproc substituteContents {} {
    my basicSubstituteContents
-}
-@ Class ReadStringStream {
-description {This class wrap a string to use it as a stream.
-Additional you can set the last position (end of stream)}
-}
-Class ReadStringStream -parameter {string pos lastpos}
-@ ::ReadStringStream idemeta component IDETclParser
-ReadStringStream instproc addPos add {
-    my incr pos $add
-}
-ReadStringStream instproc atEnd {} {
-   expr {[my pos]>[my lastpos]}
-}
-ReadStringStream instproc copyFromTo {from to} {
-   string range [my string] $from $to
-}
-ReadStringStream instproc getChar {} {
-   my instvar pos string
-   #[self] halt
-   string index $string $pos
-}
-ReadStringStream instproc init {} {
-   my pos 0
-   my lastpos [expr {[my length]-1}]
-}
-ReadStringStream instproc length {} {
-   string length [my string]
-}
-ReadStringStream instproc nextChar {} {
-   my instvar pos string
-   set ret [string index $string $pos]
-   incr pos
-   return $ret
-}
-Class PrsCommand -superclass {::PrsElement ::MixPrsList} 
-@ ::PrsCommand idemeta component IDETclParser
-PrsCommand instproc argsCount {} {
-   expr {[llength [my list]]-1}
-}
-PrsCommand instproc checkSyntax {context notifier} {
-    $context checkCommand [self] $notifier
-}
-PrsCommand instproc syntaxHighlight context {
-    $context checkCommand [self] $context
-}
-Class PrsQuoted -superclass {::PrsElement ::MixPrsList}  -parameter {{hasQuote 0}}
-@ ::PrsQuoted idemeta component IDETclParser
-PrsQuoted instproc substituteContents {} {
-   my basicSubstituteContents
-}
-PrsQuoted instproc syntaxHighlight context {
-    if {[my hasQuote]} {
-        $context highlightElement [self] quoted
-    }
 }
 PrsContext initializeAfterLoad
 
