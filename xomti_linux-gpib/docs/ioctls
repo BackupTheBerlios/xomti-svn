@@ -1,0 +1,93 @@
+IBRD               _IOWR GPIB_CODE 0 read_write_ioctl_t
+IBWRT		   _IOWR GPIB_CODE 1 read_write_ioctl_t
+IBCMD		   _IOWR GPIB_CODE 2 read_write_ioctl_t
+IBOPENDEV	   _IOWR GPIB_CODE 3 open_dev_ioctl_t
+IBCLOSEDEV	   _IOW  GPIB_CODE 4 close_dev_ioctl_t
+IBWAIT		   _IOWR GPIB_CODE 5 wait_ioctl_t
+IBRPP		   _IOWR GPIB_CODE 6 uint8_t
+IBSIC		   _IOW  GPIB_CODE 9 unsigned int
+IBSRE		   _IOW  GPIB_CODE 10 int
+IBGTS		   _IO   GPIB_CODE 11
+IBCAC		   _IOW  GPIB_CODE 12 int
+IBLINES		   _IOR  GPIB_CODE 14 short
+IBPAD		   _IOW  GPIB_CODE 15 pad_ioctl_t
+IBSAD		   _IOW  GPIB_CODE 16 sad_ioctl_t
+IBTMO		   _IOW  GPIB_CODE 17 unsigned int
+IBRSP		   _IOWR GPIB_CODE 18 serial_poll_ioctl_t
+IBEOS		   _IOW  GPIB_CODE 19 eos_ioctl_t
+IBRSV		   _IOW  GPIB_CODE 20 uint8_t
+CFCBASE		   _IOW  GPIB_CODE 21 unsigned long
+CFCIRQ		   _IOW  GPIB_CODE 22 unsigned int
+CFCDMA		   _IOW  GPIB_CODE 23 unsigned int
+CFCBOARDTYPE	   _IOW  GPIB_CODE 24 board_type_ioctl_t
+IBMUTEX		   _IOW  GPIB_CODE 26 int
+IBSPOLL_BYTES	   _IOWR GPIB_CODE 27 spoll_bytes_ioctl_t
+IBPPC		   _IOW  GPIB_CODE 28 ppoll_config_ioctl_t
+IBBOARD_INFO       _IOR  GPIB_CODE 29 board_info_ioctl_t
+IBQUERY_BOARD_RSV  _IOR  GPIB_CODE 31 int
+IBSELECT_PCI	   _IOWR GPIB_CODE 32 select_pci_ioctl_t
+IBEVENT		   _IOR  GPIB_CODE 33 event_ioctl_t
+IBRSC		   _IOW  GPIB_CODE 34 rsc_ioctl_t
+IB_T1_DELAY	   _IOW  GPIB_CODE 35 t1_delay_ioctl_t
+IBLOC		   _IO   GPIB_CODE 36
+IBONL		   _IOW  GPIB_CODE 37 online_ioctl_t
+IBAUTOSPOLL	   _IOW  GPIB_CODE 38 autospoll_ioctl_t
+
+
+
+
+
+	autospoll_ioctl_t spoll_enable = enable != 0;
+		retval = ioctl(interfaceBoard(conf)->fileno, IBAUTOSPOLL, &spoll_enable);
+
+	board_info_ioctl_t info;
+	retval = ioctl( board->fileno, IBBOARD_INFO, &info );
+
+
+	board_info_ioctl_t info;
+	retval = ioctl( board->fileno, IBBOARD_INFO, &info );
+
+
+	int status;
+	retval = ioctl( board->fileno, IBQUERY_BOARD_RSV, &status );
+
+	board_info_ioctl_t info;
+	retval = ioctl( board->fileno, IBBOARD_INFO, &info );
+	*pad = info.pad;
+
+	board_info_ioctl_t info;
+	retval = ioctl( board->fileno, IBBOARD_INFO, &info );
+	*sad = info.sad;
+
+		retval = ioctl(interfaceBoard(conf)->fileno, IBAUTOSPOLL, &spoll_enable);
+
+
+        int synchronous
+	retval = ioctl( board->fileno, IBCAC, &synchronous );
+
+	retval = ioctl( board->fileno, IBCMD, &cmd );
+	retval = ioctl( board->fileno, IB_T1_DELAY, &nano_sec );
+	retval = ioctl( board->fileno, IBEOS, &eos_cmd );
+	retval = ioctl( board->fileno, IBEVENT, &user_event );
+	retval = ioctl( board->fileno, IBGTS, &shadow_handshake );
+	retval = ioctl( board->fileno, IBLINES, line_status );
+		retval = ioctl( board->fileno, IBLOC );
+	retval = ioctl( board->fileno, IBPPC, &cmd );
+	retval = ioctl( interfaceBoard( conf )->fileno, IBPPC, &cmd );
+	retval = ioctl( board->fileno, IBRD, &read_cmd );
+	retval = ioctl( board->fileno, IBRSP, &poll_cmd );
+	retval = ioctl( board->fileno, IBRSV, &status_byte );
+	retval = ioctl( board->fileno, IBSIC, &usec_duration );
+	retval = ioctl( board->fileno, IBRSC, &rsc_cmd );
+	retval = ioctl( board->fileno, IBSRE, &enable );
+       return ioctl( board->fileno, IBTMO, &usec_timeout);
+	retval = ioctl( board->fileno, IBOPENDEV, &open_cmd );
+	retval = ioctl( board->fileno, IBCLOSEDEV, &close_cmd );
+	retval = ioctl( board->fileno, IBPAD, &pad_cmd );
+	retval = ioctl( board->fileno, IBSAD, &sad_cmd );
+	retval = ioctl( board->fileno, IBMUTEX, &lock );
+	retval = ioctl( board->fileno, IBMUTEX, &unlock );
+	retval = ioctl( board->fileno, IBWAIT, &cmd );
+	retval = ioctl( board->fileno, IBBOARD_INFO, &info );
+	retval = ioctl(board->fileno, IBWAIT, &cmd);
+	if( ioctl( board->fileno, IBWRT, &write_cmd) < 0)
