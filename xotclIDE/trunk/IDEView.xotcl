@@ -1038,9 +1038,9 @@ IDE::CompBrowser proc newBrowser {} {
 }
 Class IDE::AbstractClassView -superclass ::IDE::HListView 
 @ ::IDE::AbstractClassView idemeta component IDEView
-IDE::AbstractClassView instproc browseChildren actual {
+IDE::AbstractClassView instproc browseSubclasses actual {
      if {[Object isclass $actual]} {
-         IDE::HeritageBrowser newBrowserChild $actual
+         IDE::HeritageBrowser newBrowserSubclass $actual
      } else {
          my upsMessage "$actual is not a class"
      }
@@ -1080,7 +1080,7 @@ IDE::AbstractClassView instproc exportToFile actual {
 IDE::AbstractClassView instproc fillMenuStruct ms {
     $ms enablementHandler [self]
     $ms addCommand2 {Heritage Browser} [list [self] dispatchWithSelected browseHeritage] isValidSelection
-    $ms addCommand2 {Children Browser} [list [self] dispatchWithSelected browseChildren] isValidSelection
+    $ms addCommand2 {Subclasses Browser} [list [self] dispatchWithSelected browseSubclasses] isValidSelection
     $ms addCommand2 {Search References} [list [self] dispatchWithSelected searchUsage] isValidSelection
     $ms addCommand2 {Track This Class} [list [self] dispatchWithSelected trackClass] isValidSelection
     $ms addCommand2 {Create Instance} [list [self] dispatchWithSelected createInstance] isValidSelection
@@ -1131,8 +1131,10 @@ IDE::HeritageClassView instproc selectFor class {
     my instvar hlist vclass vtype
     if {$vtype=="heritage"} {
        my setHList [list [$class getHeritage]]
-    } elseif {$vtype=="children"} {
-       my setHList [list [$class getChildrenHierarchy]]
+    } elseif {$vtype=="subclasses"} {
+       my setHList [list [$class getSubclassesHierarchy]]
+    } else {
+       return -code error "vtype = $vtype"
     }
     set vclass $class
 }
@@ -2014,11 +2016,11 @@ IDE::VarsView instproc varAction args {
 }
 Class IDE::MethodListView -superclass {::IDE::ListView ::IDE::GUICommands} 
 @ ::IDE::MethodListView idemeta component IDEView
-IDE::MethodListView instproc browseChildren actual {
+IDE::MethodListView instproc browseSubclasses actual {
      set item [split $actual >]
      set vclass [lindex [lindex $item 0] 0]
      if {[Object isclass $vclass]} {
-         IDE::HeritageBrowser newBrowserChild $vclass
+         IDE::HeritageBrowser newBrowserSubclass $vclass
      } else {
          my upsMessage "$vclass is not a class"
      }
@@ -2039,7 +2041,7 @@ IDE::MethodListView instproc fillMenuStruct ms {
     $ms enablementHandler [self]
     $ms addCommand2 {Remove form List} [list [self] dispatchWithSelected removeMethod] isValidSelection
     $ms addCommand2 {Heritage Browser} [list [self] dispatchWithSelected browseHeritage] isValidSelection
-    $ms addCommand2 {Children Browser} [list [self] dispatchWithSelected browseChildren] isValidSelection
+    $ms addCommand2 {Subclasses Browser} [list [self] dispatchWithSelected browseSubclass] isValidSelection
     $ms addCommand2 {Search Senders} [list [self] dispatchWithSelected searchSenders] isValidSelection
     $ms addCommand2 {Search Implementors} [list [self] dispatchWithSelected searchImplementors] isValidSelection
     my menuInsertions $ms
@@ -2139,9 +2141,9 @@ IDE::ClassView instproc classWizard mode {
             my setViewType {Classes}
             IDE::ClassDefinition newClass [self]
         }
-        newChild {
+        newSubclass {
           if {$actual==""} return
-          IDE::ClassDefinition newChildClass $actual [self]
+          IDE::ClassDefinition newSubclassClass $actual [self]
         }
         redefine {
           if {$actual==""} return
@@ -2268,7 +2270,7 @@ IDE::ClassView instproc fillMenuStruct ms {
 
     $ms addSeparator
     $ms addMenuItem [IDE::MenuCommand new -childof $ms -name {New Class Wizard} -command [list [self] classWizard new] -popdownMenu 1]
-    $ms addMenuItem [IDE::MenuCommand new -childof $ms -name {New Child Class Wizard} -command [list [self] classWizard newChild] -enableList [list isValidSelection isSelectionClass] -popdownMenu 1]
+    $ms addMenuItem [IDE::MenuCommand new -childof $ms -name {New Subclass Wizard} -command [list [self] classWizard newSubclass] -enableList [list isValidSelection isSelectionClass] -popdownMenu 1]
     $ms addMenuItem [IDE::MenuCommand new -childof $ms -name {Redefine Class Wizard} -command [list [self] classWizard redefine] -enableList [list isValidSelection isSelectionClass] -popdownMenu 1]
     $ms addMenuItem [IDE::MenuCommand new -childof $ms -name {New Object Wizard} -command [list [self] newObjectWizard] -popdownMenu 1]
 
@@ -3292,7 +3294,7 @@ IDE::ClassDefinition instproc specificInit {} {
 IDE::ClassDefinition instproc upListElem {} {
     [self]::superclass reorderSelected -1
 }
-IDE::ClassDefinition proc newChildClass {superclass view} {
+IDE::ClassDefinition proc newSubclassClass {superclass view} {
    return [my new [Object autoname .cdbrowser] -classView $view -superclassList $superclass]    
 }
 IDE::ClassDefinition proc newClass view {
@@ -3921,7 +3923,7 @@ IDE::HeritageBrowser instproc getTitle {} {
     if {$vtype=="heritage"} {
          return {Heritage Browser}
     } else {
-         return {Children Browser}
+         return {Subclasses Browser}
     }
 }
 IDE::HeritageBrowser instproc initStatusBarWin win {
@@ -3982,13 +3984,13 @@ IDE::HeritageBrowser proc newBrowser {{tclass {}}} {
     $newinst browse $class
     return $newinst
 }
-IDE::HeritageBrowser proc newBrowserChild {{tclass {}}} {
+IDE::HeritageBrowser proc newBrowserSubclass {{tclass {}}} {
     set class $tclass
     if {$class==""} {
         set class [IDE::ClassSelector getClass]
         if {$class==""} return 
     }
-    set newinst [my create [Object autoname browser] [Object autoname .browser] -vtype children]
+    set newinst [my create [Object autoname browser] [Object autoname .browser] -vtype subclasses]
     $newinst browse $class
     return $newinst
 }
@@ -4384,7 +4386,7 @@ IDE::MethodBrowser proc searchImplementorsAll {implementor {nocomplain 0}} {
 IDE::MethodBrowser proc searchImplementorsClass {implementor class} {
     set list {}
     if {[Object isclass $class]} {
-        foreach obj [concat $class [$class info heritage] [$class getDeepChildren]] {
+        foreach obj [concat $class [$class info heritage] [$class getDeepSubclasses]] {
             if {[$obj info procs $implementor]!=""} {
                 lappend list "$obj class>$implementor"
             }
@@ -4681,11 +4683,11 @@ IDE::MethodSelector proc getMethodsForPattern patern {
 }
 Class IDE::SyntaxCheckMethodList -superclass {::IDE::NListView ::IDE::GUICommands} 
 @ ::IDE::SyntaxCheckMethodList idemeta component IDEView
-IDE::SyntaxCheckMethodList instproc browseChildren actual {
+IDE::SyntaxCheckMethodList instproc browseSubclasses actual {
      set item [split $actual >]
      set vclass [lindex [lindex $item 0] 0]
      if {[Object isclass $vclass]} {
-         IDE::HeritageBrowser newBrowserChild $vclass
+         IDE::HeritageBrowser newBrowserSubclass $vclass
      } else {
          my upsMessage "$vclass is not a class"
      }
@@ -4703,7 +4705,7 @@ IDE::SyntaxCheckMethodList instproc fillMenuStruct ms {
     $ms enablementHandler [self]
     $ms addCommand2 {Remove from List} [list [self] dispatchWithSelected removeMethod] isValidSelection
     $ms addCommand2 {Heritage Browser} [list [self] dispatchWithSelected browseHeritage] isValidSelection
-    $ms addCommand2 {Children Browser} [list [self] dispatchWithSelected browseChildren] isValidSelection
+    $ms addCommand2 {Subclasses Browser} [list [self] dispatchWithSelected browseSubclass] isValidSelection
     $ms addCommand2 {Search Senders} [list [self] dispatchWithSelected searchSenders] isValidSelection
     my menuInsertions $ms
     next

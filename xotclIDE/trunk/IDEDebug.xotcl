@@ -355,7 +355,7 @@ IDE::StackMethodListView instproc buttonDoublePush {} {
 IDE::StackMethodListView instproc fillMenuStruct ms {
     $ms addCommand2 {Try inspect Object} [list [self] inspectObject]
     $ms addCommand2 {Heritage Browser} [list [self] dispatchWithSelected browseHeritage]
-    $ms addCommand2 {Children Browser} [list [self] dispatchWithSelected browseChildren]
+    $ms addCommand2 {Subclasses Browser} [list [self] dispatchWithSelected browseSubclasses]
 }
 IDE::StackMethodListView instproc findNextMethodPlace {method index} {
     set browser [my info parent]

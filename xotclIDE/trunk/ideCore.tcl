@@ -63,10 +63,10 @@ Class instproc getHeritage {} {
     }
     return $hlist
 }
-Class instproc getChildrenHierarchy {} {
+Class instproc getSubclassesHierarchy {} {
     set hlist [self]
     foreach sclass [my info subclass] {
-	lappend hlist [$sclass getChildrenHierarchy]
+	lappend hlist [$sclass getSubclassesHierarchy]
     }
     return $hlist
 }
@@ -79,10 +79,10 @@ Class instproc getHeritageFlat {} {
     }
     return $hlist
 }
-Class instproc getDeepChildren {} {
+Class instproc getDeepSubclass {} {
     set list [my info subclass]
     foreach sclass [my info subclass] {
-        set list [concat $list [$sclass getDeepChildren]]
+        set list [concat $list [$sclass getDeepSubclasses]]
     }
     return $list 
 }
