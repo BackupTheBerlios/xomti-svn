@@ -848,7 +848,7 @@ IDE::CodeController instproc editSave skript {
         IDE::Dialog message {This is not complete Tcl-Script. Check the paratness}
         return
    }
-   if {[lindex $skript 0]=="proc"} {
+   if {[lindex $skript 0] eq "proc"} {
        my handleProc $skript
    } else {
        namespace eval :: $skript
@@ -862,13 +862,13 @@ IDE::CodeController instproc editSaveComment comment {
    $vclass setMethodComment $vtype $method $comment  
 }
 IDE::CodeController instproc handleProc script {
-    if {[llength $script]!=4 || [lindex $script 0]!="proc"} {
+    if {[llength $script] != 4 || [lindex $script 0] ne "proc"} {
         IDE::Dialog error "To define new tcl proc give 4 elements list\n proc ?nameSpace::?procName arguments procBody"
         return
     }
     set procname [lindex $script 1]
     set pobj [IDE::TclProcsDescription getMethodFor $procname]
-    if {$pobj=="" || ![Object isobject $pobj]} {
+    if {$pobj eq "" || ![Object isobject $pobj]} {
         IDE::Dialog error "It is not good place to define procs. Use component browser instead"
         return
         
@@ -881,15 +881,15 @@ IDE::CodeController instproc refreshView {} {
     set type [lindex $actitem 1]
     set method [lindex $actitem 2]
     set v [my info parent]::methodedit
-    if {[$v set vtype]=="Comment"} {
+    if {[$v set vtype] eq "Comment"} {
         set comment [$class getMethodComment $type $method]
         my setTextControler $comment [self]
-    } elseif {[$v set vtype]=="Source"} {
+    } elseif {[$v set vtype] eq "Source"} {
         my setBodyTextControler $class $type $method [self]
         set sb [my info parent]::stateButton
         if {[Object isobject $sb]} {
-           set hasComment [$class hasMethodComment $type $method]
-   	   $sb  setActivity $hasComment
+            set hasComment [$class hasMethodComment $type $method]
+   	    $sb setActivity $hasComment
         }
     }
 }

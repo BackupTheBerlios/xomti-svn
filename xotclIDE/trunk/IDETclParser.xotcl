@@ -376,7 +376,7 @@ PrsContext instproc check_array {count command notifier} {
     }
 }
 PrsContext instproc check_catch {count command notifier} {
-    if {$count = =2} {
+    if {$count == 2} {
         my addVariableFrom [$command getElem 2]
     }
     [$command getElem 1] evalContents
@@ -928,7 +928,7 @@ ReadStringStream instproc length {} {
     string length [my string]
 }
 ReadStringStream instproc nextChar {} {
-    set ret [string index [my string] [my set pos]]
+    set ret [string index [my string] [my pos]]
     my incr pos
     return $ret
 }

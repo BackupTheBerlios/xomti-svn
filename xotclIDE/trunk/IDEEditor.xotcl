@@ -53,7 +53,7 @@ IDE::TclModeEdit instproc autoIndent {} {
     }
     for {set x [expr {$startline+1}]} {$x<=[lindex $lines 1]} {incr x} {
         set wordbeginn [$tw search -regexp {\S} $x.0 $x.end]
-        if {$wordbeginn!=""} {
+        if {$wordbeginn ne ""} {
             set indentString [$tw get $x.0 $wordbeginn]
             if {$indentString ne ""} {
                 $tw delete $x.0 $x.[string length $indentString]
@@ -61,7 +61,7 @@ IDE::TclModeEdit instproc autoIndent {} {
             if {[$tw get $x.0] eq "\}"} {
                 incr indent -4
             }
-            if {$indent<0} {set indent 0}
+            if {$indent < 0} {set indent 0}
             $tw insert $x.0 [string repeat " " $indent]
             set pos [$tw search -regexp -backward {\S} $x.end $x.0]
             if {$pos ne "" && [$tw get $pos] eq "\{"} {
@@ -91,7 +91,7 @@ IDE::TclModeEdit instproc commentRegion {} {
 IDE::TclModeEdit instproc complexSyntaxHighlight {} {
     set prs [PrsSyntaxHighlight new -volatile -text [self]]
     set text [my getText]
-    if {$text!=""} {
+    if {$text ne ""} {
         $prs parseAndVisit [my getText]
     }
 }
@@ -105,14 +105,14 @@ IDE::TclModeEdit instproc doubleButton {} {
     if {$bindex >= 0} {
         set cb [string index "\}\]\"" $bindex]
         if {$bc eq "\""} {
-           set endindex [my searchCloseQuote [$tw get $index end]]
+            set endindex [my searchCloseQuote [$tw get $index end]]
         } else {
-           set endindex [my searchCloseBrace [$tw get $index end] $bc $cb]
+            set endindex [my searchCloseBrace [$tw get $index end] $bc $cb]
         }
         if {$endindex != -1} {
-           $tw tag remove sel 1.0 end
-           $tw tag add sel $index "$iindex + $endindex c"
-           return -code break
+            $tw tag remove sel 1.0 end
+            $tw tag add sel $index "$iindex + $endindex c"
+            return -code break
         }
     }
     set bindex [string first $bc "\}\]" 0]
@@ -120,9 +120,9 @@ IDE::TclModeEdit instproc doubleButton {} {
         set cb [string index "\{\[" $bindex]
         set endindex [my searchOpenBrace [$tw get 1.0 $iindex] $bc $cb]
         if {$endindex != -1} {
-           $tw tag remove sel 1.0 end
-           $tw tag add sel "$iindex - $endindex c" $iindex 
-           return -code break
+            $tw tag remove sel 1.0 end
+            $tw tag add sel "$iindex - $endindex c" $iindex 
+            return -code break
         }
     }
 }
@@ -258,14 +258,14 @@ IDE::TclModeEdit instproc init args {
     bind $tw <Double-Button-1> [list [self] doubleButton]
 }
 IDE::TclModeEdit instproc initTags {} {
-   set tw [my getTextWidget]    
-   $tw tag configure comment -foreground red
-   $tw tag configure quoted -foreground SpringGreen3
-   # full highlighting
-   $tw tag configure variable -foreground blue
-   $tw tag configure tclproc -foreground brown
-   $tw tag configure xotcl -foreground orange
-   next
+    set tw [my getTextWidget]    
+    $tw tag configure comment -foreground red
+    $tw tag configure quoted -foreground SpringGreen3
+    # full highlighting
+    $tw tag configure variable -foreground blue
+    $tw tag configure tclproc -foreground brown
+    $tw tag configure xotcl -foreground orange
+    next
 }
 IDE::TclModeEdit instproc invokePopDown {mlist pattern} {
    if {$mlist eq ""} return
@@ -313,46 +313,46 @@ IDE::TclModeEdit instproc keyReturn {} {
     }
 }
 IDE::TclModeEdit instproc lintIfWanted text {
-    if {[my set xotclLint] && [my set editMode]=="xotcl"} {
+    if {[my set xotclLint] && [my set editMode] eq "xotcl"} {
         return [[my set controler] syntaxCheck $text [self]]
     }
     return 1
 }
 IDE::TclModeEdit instproc menuInsertions ms {
-   $ms addCheckButton {Xotcl Edit Mode} [self]::useEditMode
+    $ms addCheckButton {Xotcl Edit Mode} [self]::useEditMode
 
-   set m ${ms}::codeoperation
-   IDE::MenuStruct $m {Code Operation}
-   $ms addCascadeMenu $m
-   $m addCommand {Add Indent} [list [self] addIndent]
-   $m addCommand {Minus Indent} [list [self] minusIndent]
-   $m addCommand {Auto Indent} [list [self] autoIndent] {} {Control-T}
-   $m addCommand {Comment} [list [self] commentRegion]
-   $m addCommand {Uncomment} [list [self] uncommentRegion]
+    set m ${ms}::codeoperation
+    IDE::MenuStruct $m {Code Operation}
+    $ms addCascadeMenu $m
+    $m addCommand {Add Indent} [list [self] addIndent]
+    $m addCommand {Minus Indent} [list [self] minusIndent]
+    $m addCommand {Auto Indent} [list [self] autoIndent] {} {Control-T}
+    $m addCommand {Comment} [list [self] commentRegion]
+    $m addCommand {Uncomment} [list [self] uncommentRegion]
 
-   set m ${ms}::vcontrol
-   IDE::MenuStruct $m {Syntax Highlight}
-   $ms addCascadeMenu $m
-   $m addRadioButton {No Syntax Highlight} [self]::syntaxHighlight {} 0
-   $m addRadioButton {Simple Syntax Highlight} [self]::syntaxHighlight {} 1
-   $m addRadioButton {Complext Syntax Highlight} [self]::syntaxHighlight {} 2
-   $m addSeparator
-   $m addCommand {Force Syntax Highlight} [list [self] syntaxHighlight]
-   $m addCommand {Force Syntax Check} [list [self] syntaxCheck]
-   $m addCommand {Drop Syntax Highlight} [list [self] syntaxHighlightRemove]
+    set m ${ms}::vcontrol
+    IDE::MenuStruct $m {Syntax Highlight}
+    $ms addCascadeMenu $m
+    $m addRadioButton {No Syntax Highlight} [self]::syntaxHighlight {} 0
+    $m addRadioButton {Simple Syntax Highlight} [self]::syntaxHighlight {} 1
+    $m addRadioButton {Complext Syntax Highlight} [self]::syntaxHighlight {} 2
+    $m addSeparator
+    $m addCommand {Force Syntax Highlight} [list [self] syntaxHighlight]
+    $m addCommand {Force Syntax Check} [list [self] syntaxCheck]
+    $m addCommand {Drop Syntax Highlight} [list [self] syntaxHighlightRemove]
 
-   $ms addCheckButton {Syntaxcheck on Save} [self]::xotclLint
+    $ms addCheckButton {Syntaxcheck on Save} [self]::xotclLint
 }
 IDE::TclModeEdit instproc minusIndent {} {
     set tw [my getTextWidget]
     set lines [my getSelectedLines]
-    for {set x [lindex $lines 0]} {$x<=[lindex $lines 1]} {incr x} {
+    for {set x [lindex $lines 0]} {$x <= [lindex $lines 1]} {incr x} {
         set wordbeginn [$tw search -regexp {\S} $x.0 $x.end]
-        if {$wordbeginn!=""} {
+        if {$wordbeginn ne ""} {
             set indentString [$tw get $x.0 $wordbeginn]
             for {set cuts 0} {$cuts<4 && $cuts<[string length $indentString]} {incr cuts} {
-                 if {[string index $indentString $cuts]=="\t"} break
-                 if {[string index $indentString $cuts]!=" "} break
+                if {[string index $indentString $cuts] eq "\t"} break
+                if {[string index $indentString $cuts] ne " "} break
             }
             $tw delete $x.0 $x.$cuts
         }
@@ -362,64 +362,68 @@ IDE::TclModeEdit instproc saveSource text {
     if {[my lintIfWanted $text]} next
 }
 IDE::TclModeEdit instproc saveValue value {
-   next
-   my syntaxHighlightIfWanted
+    next
+    my syntaxHighlightIfWanted
 }
 IDE::TclModeEdit instproc searchCloseBrace {text obrace cbrace} {
    set len [string length $text]
    set open 0
    for {set x 0} {$x<$len} {incr x} {
       set c [string index $text $x]
-      if {$c=="\\"} {
+      if {$c eq "\\"} {
           incr x
           continue
       }
-      if {$c==$obrace} {
+      if {$c eq $obrace} {
          incr open
-      } elseif {$c==$cbrace} {
+      } elseif {$c eq $cbrace} {
          incr open -1
-         if {$open==0} {return $x}
+         if {$open == 0} {
+             return $x
+         }
       }
    }
    return -1
 }
 IDE::TclModeEdit instproc searchCloseQuote text {
-   set len [string length $text]
-   for {set x 1} {$x<$len} {incr x} {
-      set c [string index $text $x]
-      if {$c=="\\"} {
-          incr x
-          continue
-      }
-      if {$c=="\""} {
-          return $x
-      }
-   }
+    set len [string length $text]
+    for {set x 1} {$x<$len} {incr x} {
+        set c [string index $text $x]
+        if {$c eq "\\"} {
+            incr x
+            continue
+        }
+        if {$c eq "\""} {
+            return $x
+        }
+    }
 }
 IDE::TclModeEdit instproc searchOpenBrace {text obrace cbrace} {
-   set len [string length $text]
-   set open 0
-   for {set x $len} {$x>0} {incr x -1} {
-      set c [string index $text $x]
-      if {[string index $text [expr {$x-1}]]=="\\"} {
-          incr x -1
-          continue
-      }
-      if {$c==$obrace} {
-         incr open
-      } elseif {$c==$cbrace} {
-         incr open -1
-         if {$open==0} {return [expr {$len-$x}]}
-      }
+    set len [string length $text]
+    set open 0
+    for {set x $len} {$x>0} {incr x -1} {
+        set c [string index $text $x]
+        if {[string index $text [expr {$x-1}]] eq "\\"} {
+            incr x -1
+            continue
+        }
+        if {$c eq $obrace} {
+            incr open
+        } elseif {$c eq $cbrace} {
+            incr open -1
+            if {$open==0} {
+                return [expr {$len-$x}]
+            }
+       }
    }
    return -1
 }
 IDE::TclModeEdit instproc setText text {
-   next
-   my syntaxHighlightIfWanted
+    next
+    my syntaxHighlightIfWanted
 }
 IDE::TclModeEdit instproc setType type {
-   my set editMode $type
+    my set editMode $type
 }
 IDE::TclModeEdit instproc simpleSyntaxHighlight {} {
     my tagRegExprTextAll comment {(?n)^\s*[^\\]#.+$}
@@ -427,9 +431,9 @@ IDE::TclModeEdit instproc simpleSyntaxHighlight {} {
     set cur 1.0
     while 1 {
         set cur [$tw search -regexp -count count -- {[^\\]"} $cur end]
-        if {$cur!=""} {
+        if {$cur ne ""} {
             set qend [$tw search -regexp -- {[^\\]"} "$cur + 1 char" end]
-            if {$qend!=""} {
+            if {$qend ne ""} {
                 set qend [$tw index "$qend + 1 char"]
                 $tw tag add quoted "$cur + $count char" $qend
                 set cur $qend
@@ -442,7 +446,7 @@ IDE::TclModeEdit instproc simpleSyntaxHighlight {} {
     }
 }
 IDE::TclModeEdit instproc syntaxCheck {} {
-    if  {[my set editMode]=="xotcl"} {
+    if  {[my set editMode] eq "xotcl"} {
         return [[my set controler] syntaxCheck [my getText] [self]]
     }
 }
@@ -454,9 +458,9 @@ IDE::TclModeEdit instproc syntaxHighlight {} {
     }
 }
 IDE::TclModeEdit instproc syntaxHighlightIfWanted {} {
-   if {[my set syntaxHighlight] && [my set editMode]=="xotcl" && [my set vtype]=="Source"} {
-       my syntaxHighlight
-   }
+    if {[my set syntaxHighlight] && [my set editMode] eq "xotcl" && [my set vtype] eq "Source"} {
+        my syntaxHighlight
+    }
 }
 IDE::TclModeEdit instproc syntaxHighlightRemove {} {
     set tw [my getTextWidget]
@@ -542,7 +546,7 @@ PrsSyntaxHighlight instproc checkTclCommand {name command notifier} {
     }
 }
 PrsSyntaxHighlight instproc highlightElement {prsElem tag {shiftLeft 0} {shiftRight 0}} {
-    [my text] tagRange $tag [expr {[$prsElem begin]+$shiftLeft}] [expr {[$prsElem end]+1+$shiftRight}]
+    [my text] tagRange $tag [expr {[$prsElem begin] + $shiftLeft}] [expr {[$prsElem end] + 1 + $shiftRight}]
 }
 PrsSyntaxHighlight instproc visit prsElem {
     [my parser] catchParseErrors {$prsElem syntaxHighlight [self]}
