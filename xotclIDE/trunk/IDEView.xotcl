@@ -19,35 +19,35 @@ package require IDEBaseGUI
 Class create IDE::AbstractClassView -superclass ::IDE::HListView
 @ ::IDE::AbstractClassView idemeta component IDEView
 IDE::AbstractClassView instproc browseHeritage actual {
-     if {[Object isclass $actual]} {
-         IDE::HeritageBrowser newBrowser $actual
-     } else {
-         my upsMessage "$actual is not a class"
-     }
+    if {[Object isclass $actual]} {
+        IDE::HeritageBrowser newBrowser $actual
+    } else {
+        my upsMessage "$actual is not a class"
+    }
 }
 IDE::AbstractClassView instproc browseSubclasses actual {
-     if {[Object isclass $actual]} {
-         IDE::HeritageBrowser newBrowserSubclass $actual
-     } else {
-         my upsMessage "$actual is not a class"
-     }
+    if {[Object isclass $actual]} {
+        IDE::HeritageBrowser newBrowserSubclass $actual
+    } else {
+        my upsMessage "$actual is not a class"
+    }
 }
 IDE::AbstractClassView instproc createInstance actual {
-     if {[$actual istype Class]} {
-         set obj [IDE::System createInstance $actual]
-         if {$obj!=""} {$obj inspect}
-     }
+    if {[$actual istype Class]} {
+        set obj [IDE::System createInstance $actual]
+        if {$obj!=""} {$obj inspect}
+    }
 }
 IDE::AbstractClassView instproc exportToFile actual {
     global tcl_platform
     my instvar vclass
-    if {$tcl_platform(platform)=="windows"} {
+    if {$tcl_platform(platform) eq "windows"} {
         regsub -all :: $actual _ name
     } else {
         set name $actual
     }
     set file [IDE::Dialog getSaveFile $name.xotcl]
-    if {$file==""} return
+    if {$file eq ""} return
     set fh [open $file w]
     if {[$vclass istype IDE::ProcsGroup]} {
         set body [$vclass getBody]
@@ -76,11 +76,11 @@ IDE::AbstractClassView instproc inspectAllInstances actual {
      }
 }
 IDE::AbstractClassView instproc searchUsage actual {
-     if {[Object isclass $actual]} {
-         IDE::MethodBrowser searchClassUsage $actual
-     } else {
-         my upsMessage "$actual is not a class"
-     }
+    if {[Object isclass $actual]} {
+        IDE::MethodBrowser searchClassUsage $actual
+    } else {
+        my upsMessage "$actual is not a class"
+    }
 }
 IDE::AbstractClassView instproc trackClass actual {
     if {[Object isclass $actual]} {
@@ -198,12 +198,12 @@ IDE::ArrayBrowser instproc varAction args {
    }
 }
 IDE::ArrayBrowser proc inspectArray {object array} {
-   set br [my create [Object autoname abrowser] [Object autoname .abrowser] -vobject $object -varray $array]
-   return $br
+    set br [my create [Object autoname abrowser] [Object autoname .abrowser] -vobject $object -varray $array]
+    return $br
 }
 IDE::ArrayBrowser proc inspectGlobalArray array {
-   set br [my create [Object autoname abrowser] [Object autoname .abrowser] -vobject {} -varray $array]
-   return $br
+    set br [my create [Object autoname abrowser] [Object autoname .abrowser] -vobject {} -varray $array]
+    return $br
 }
 
                               ##########
@@ -418,10 +418,10 @@ IDE::ClassDefinition proc newSubclassClass {superclass view} {
    return [my new [Object autoname .cdbrowser] -classView $view -superclassList $superclass]    
 }
 IDE::ClassDefinition proc redefineClass {class view} {
-   set superclass [$class info superclass]
-   set parameter [$class info parameter]
-   if {$superclass=="::Object" || $superclass=="::xotcl::Object"} { set superclass ""}
-   return [my create [Object autoname changeBrowser] [Object autoname .cdbrowser] -classView $view -superclassList $superclass -mode redefine -parameter $parameter -className $class]    
+    set superclass [$class info superclass]
+    set parameter [$class info parameter]
+    if {$superclass eq "::Object" || $superclass eq "::xotcl::Object"} { set superclass ""}
+    return [my create [Object autoname changeBrowser] [Object autoname .cdbrowser] -classView $view -superclassList $superclass -mode redefine -parameter $parameter -className $class]    
 }
 IDE::ClassDefinition proc unknown args {
     error "unknown method on [self] $args"
@@ -439,17 +439,17 @@ Class create IDE::ClassSelector
 @ ::IDE::ClassSelector idemeta component IDEView
 IDE::ClassSelector proc getClass {} {
     set d [IDE::IDialogEntry new -volatile -message {Give class name or glob patern} -entry *]
-    if {[$d prompt]!="ok"} {
+    if {[$d prompt] ne "ok"} {
          return {}
     }
     set result [$d entry]
 
-    if {[Object isobject $result] && ([$result istype Class] || [IDE::System info class]=="::xotcl::Object")} {
+    if {[Object isobject $result] && ([$result istype Class] || [IDE::System info class] eq "::xotcl::Object")} {
         return $result
     }
     set resultl [list]
     set clist [ide::lcollect each [IDE::IntroProxy getClasses] {string trimleft $each :}]
-    if {$result=="*"} {
+    if {$result eq "*"} {
         set resultl $clist
     } else {
         foreach elem $clist {
@@ -458,12 +458,12 @@ IDE::ClassSelector proc getClass {} {
             }
         }
     }
-    if {[llength $resultl]==0} {
+    if {[llength $resultl] eq 0} {
         IDE::Dialog message "Class or Object with name \"$result\" can not be found"
         return
     }
     set d2 [IDE::IDialogList new -volatile -message {Choose the class} -list [lsort $resultl]]
-    if {[$d2 prompt]!="ok"} {
+    if {[$d2 prompt] ne "ok"} {
         return {}
     }
     set result [$d2 selectedItem]
@@ -471,12 +471,12 @@ IDE::ClassSelector proc getClass {} {
 }
 IDE::ClassSelector proc getUnregisteredClass {} {
     set result [IDE::IntroProxy getUnregisteredClasses]
-    if {$result==""} {
+    if {$result eq ""} {
         IDE::Dialog message "There are no unknown xotcl classes for XOTclIDE"
         return
     }
     set d [IDE::IDialogList new -volatile -message {Choose the class} -list [lsort $result]]
-    if {[$d prompt]!="ok"} {
+    if {[$d prompt] ne "ok"} {
         return {}
     }
     set result [$d selectedItem]
@@ -1255,7 +1255,7 @@ Class create IDE::ComponentSaveWizard -superclass ::IDE::Browser
 IDE::ComponentSaveWizard instproc actionSave {} {
     my instvar nometa onefile targetDir createPkgIndex
     set comps [[self]::savecomp getList]
-    if {$comps==""} {
+    if {$comps eq ""} {
         IDE::Dialog message "No components to save were selected"
         return
     }
@@ -2407,21 +2407,21 @@ IDE::MethodBrowser proc newBrowser {} {
     return [my new [Object autoname .methodbrowser]]
 }
 IDE::MethodBrowser proc newBrowserList {list title} {
-   set inst [my newBrowser]
-   $inst setMethodList $list
-   $inst setTitleAddition $title 
-   return $inst
+    set inst [my newBrowser]
+    $inst setMethodList $list
+    $inst setTitleAddition $title 
+    return $inst
 }
 IDE::MethodBrowser proc obsoleteMatchList {text mlist} {
-   foreach item $mlist {
-       set expr "(?n)^\s*$item\[\[:>:\]\]"
-       if {[regexp $expr $text]} {return 1}
-   }
-   return 0
+    foreach item $mlist {
+        set expr "(?n)^\s*$item\[\[:>:\]\]"
+        if {[regexp $expr $text]} {return 1}
+    }
+    return 0
 }
 IDE::MethodBrowser proc searchAndConvertObsoleteSelfCall {} {
     foreach comp [IDE::Component getComponentNames] {
-        if {$comp=="core" || $comp=="default"} continue
+        if {$comp eq "core" || $comp eq "default"} continue
         if {![string match xdobry::* $comp]} continue
         set cobj [IDE::Component getCompObjectForName $comp]
         foreach class [$cobj getClasses] {
@@ -2460,39 +2460,39 @@ IDE::MethodBrowser proc searchClassUsage class {
     my searchTextAll "$class\[\[:>:\]\]"
 }
 IDE::MethodBrowser proc searchImplementorsAll {implementor {nocomplain 0}} {
-     set list {}
-     if {[info procs $implementor]!=""} {
-         lappend list "proc $implementor"
-     }
-     foreach obj [IDE::IntroProxy getObjects] {
-         if {[$obj info procs $implementor]!=""} {
-               lappend list "$obj class>$implementor"
-         }
-     }
-     foreach obj [IDE::IntroProxy getClasses] {
-         if {[$obj info procs $implementor]!=""} {
-             lappend list "$obj class>$implementor"
-         }
-         if {[$obj info instprocs $implementor]!=""} {
-             lappend list "$obj>$implementor"
-         }
-     }
-     if {$list!={}} {
-         my newBrowserList $list $implementor
-     } else {
-         if {!$nocomplain} {
+    set list [list]
+    if {[info procs $implementor] ne ""} {
+        lappend list "proc $implementor"
+    }
+    foreach obj [IDE::IntroProxy getObjects] {
+        if {[$obj info procs $implementor] ne ""} {
+            lappend list "$obj class>$implementor"
+        }
+    }
+    foreach obj [IDE::IntroProxy getClasses] {
+        if {[$obj info procs $implementor] ne ""} {
+            lappend list "$obj class>$implementor"
+        }
+        if {[$obj info instprocs $implementor] ne ""} {
+            lappend list "$obj>$implementor"
+        }
+    }
+    if {[llength $list] != 0} {
+        my newBrowserList $list $implementor
+    } else {
+        if {!$nocomplain} {
             my emptySearchResult
-         } else {
+        } else {
 	    return 0
-         }
-     }
-     return 1
+        }
+    }
+    return 1
 }
 IDE::MethodBrowser proc searchImplementorsClass {implementor class} {
-    set list {}
+    set list [list]
     if {[Object isclass $class]} {
         foreach obj [concat $class [$class info heritage] [$class getDeepSubclasses]] {
-            if {[$obj info procs $implementor]!=""} {
+            if {[$obj info procs $implementor] ne ""} {
                 lappend list "$obj class>$implementor"
             }
             if {[$obj info instprocs $implementor]!=""} {
@@ -2501,38 +2501,38 @@ IDE::MethodBrowser proc searchImplementorsClass {implementor class} {
         }
     }
 
-    if {$list!={}} {
-       my newBrowserList $list $implementor
+    if {[llength $list] != 0} {
+        my newBrowserList $list $implementor
     } else {
-       my emptySearchResult
+        my emptySearchResult
     }
 }
 IDE::MethodBrowser proc searchImplementorsComponent {implementor component} {
-     set list {}
-     set cobj [IDE::Component getCompObjectForNameIfExist $component]
-     if {$cobj==""} return
-     foreach obj [$cobj getObjects] {
-          if {[$obj info procs $implementor]!=""} {
-               lappend list "$obj class>$implementor"
-          }
-     }
-     foreach obj [$cobj getClasses] {
-         if {[$obj info procs $implementor]!=""} {
-             lappend list "$obj class>$implementor"
-         }
-         if {[$obj info instprocs $implementor]!=""} {
-             lappend list "$obj>$implementor"
-         }
-     }
-     if {$list!={}} {
-       my newBrowserList $list $implementor
-     } else {
+    set list [list]
+    set cobj [IDE::Component getCompObjectForNameIfExist $component]
+    if {$cobj eq ""} return
+    foreach obj [$cobj getObjects] {
+        if {[$obj info procs $implementor] ne ""} {
+            lappend list "$obj class>$implementor"
+        }
+    }
+    foreach obj [$cobj getClasses] {
+        if {[$obj info procs $implementor] ne ""} {
+            lappend list "$obj class>$implementor"
+        }
+        if {[$obj info instprocs $implementor] ne ""} {
+            lappend list "$obj>$implementor"
+        }
+    }
+    if {[llength $list] != 0} {
+        my newBrowserList $list $implementor
+    } else {
         my emptySearchResult
-     }
+    }
 }
 IDE::MethodBrowser proc searchImplementorsDialog {} {
      set ret [IDE::MethodSelector getMethod]
-     if {$ret==""} return
+     if {$ret eq ""} return
      my searchImplementorsAll $ret
 }
 IDE::MethodBrowser proc searchObsoleteCall {} {
@@ -2545,7 +2545,7 @@ IDE::MethodBrowser proc searchObsoleteCall {} {
         if {[string match *IDE* $class]} continue
         set mlist [concat $mlist [$class info procs]]
     }
-    set list {}
+    set list [list]
     set nlist [lsort -unique $mlist]
     set mlist {}
     foreach method $nlist {
@@ -2582,13 +2582,13 @@ IDE::MethodBrowser proc searchObsoleteCall {} {
     }
 }
 IDE::MethodBrowser proc searchSendersAll method {
-   my searchTextAll \[\[:<:\]\]${method}\[\[:>:\]\] $method
+    my searchTextAll \[\[:<:\]\]${method}\[\[:>:\]\] $method
 }
 IDE::MethodBrowser proc searchTextAll {text {title {}}} {
-    if { $title == {} } {
+    if {$title eq {}} {
         set title $text
     }
-    set list {}
+    set list [list]
     if {![my checkRegExprWithDialog $text]} return
     # search in registered/managed tcl procs
     foreach proc [IDE::TclProcsDescription getAllRegisteredMethods] {
@@ -2615,7 +2615,7 @@ IDE::MethodBrowser proc searchTextAll {text {title {}}} {
             }
         }
     }
-    if {$list!={}} {
+    if {[llength $list] != 0} {
         set obj [my newBrowserList $list [string range $title 0 15]]
         $obj setSearchString $text
     } else {
@@ -2623,10 +2623,10 @@ IDE::MethodBrowser proc searchTextAll {text {title {}}} {
     }
 }
 IDE::MethodBrowser proc searchTextClass {text class {title {}}} {
-    if { $title == {} } {
+    if {$title eq {}} {
         set title $text
     }
-    set list {}
+    set list [list]
     if {![my checkRegExprWithDialog $text]} return
     foreach proc [$class info procs] {
         if {[regexp -- $text [$class info body $proc]]} {
@@ -2640,7 +2640,7 @@ IDE::MethodBrowser proc searchTextClass {text class {title {}}} {
             }
         }
     }
-    if {$list!={}} {
+    if {[llength $list] != 0} {
         set obj [my newBrowserList $list [string range $title 0 15]]
         $obj setSearchString $text
     } else {
@@ -2648,13 +2648,13 @@ IDE::MethodBrowser proc searchTextClass {text class {title {}}} {
     }
 }
 IDE::MethodBrowser proc searchTextComponent {text component {title {}}} {
-    if { $title == {} } {
+    if {$title eq {}} {
         set title $text
     }
-    set list {}
+    set list [list]
     if {![my checkRegExprWithDialog $text]} return
     set cobj [IDE::Component getCompObjectForNameIfExist $component]
-    if {$cobj==""} return
+    if {$cobj eq ""} return
     foreach pobj [$cobj getProcsGroupsObjects] {
         foreach proc [$pobj getProcsNames] {
             if {[regexp -- $text [info body $proc]]} {
@@ -2681,7 +2681,7 @@ IDE::MethodBrowser proc searchTextComponent {text component {title {}}} {
             }
         }
     }
-    if {$list!={}} {
+    if {[llength $list] != 0} {
         my newBrowserList $list [string range $title 0 15]
     } else {
         my emptySearchResult
@@ -2985,9 +2985,9 @@ Class create IDE::MethodSelector
 @ ::IDE::MethodSelector idemeta component IDEView
 IDE::MethodSelector proc getMethod {} {
     IDE::IDialogEntry [self]::classentry -message {Give method name or glob patern} -entry *
-    if {[[self]::classentry prompt]!="ok"} {
+    if {[[self]::classentry prompt] ne "ok"} {
         [self]::classentry destroy
-         return {}
+        return {}
     }
     set result [[self]::classentry entry]
     [self]::classentry destroy
@@ -2995,11 +2995,11 @@ IDE::MethodSelector proc getMethod {} {
         return $result
     }
     set mlist [my getMethodsForPattern $result]
-    if {[llength $mlist]==0} {
+    if {[llength $mlist] == 0} {
         return {}
     }
     IDE::IDialogList [self]::classlist -message {Choose the class} -list [lsort -unique $mlist]
-    if {[[self]::classlist prompt]!="ok"} {
+    if {[[self]::classlist prompt] ne "ok"} {
         [self]::classlist destroy
         return {}
     }
@@ -3009,14 +3009,13 @@ IDE::MethodSelector proc getMethod {} {
     
 }
 IDE::MethodSelector proc getMethodsForPattern patern {
-    set mlist {}
+    set mlist [list]
     foreach class [::IDE::IntroProxy getClasses]  {
         set mlist [concat $mlist [$class info instprocs $patern] [$class info procs $patern]]
     }
     foreach class [IDE::IntroProxy getObjects] {
         set mlist [concat $mlist [$class info procs $patern]]
     }
-     
     return $mlist
 }
 
@@ -3752,36 +3751,36 @@ IDE::ObjectBrowser proc browseAllInstances class {
         return
     }
     set objectList [lsort [$class info instances]]
-    if {$objectList==""} {
+    if {$objectList eq ""} {
         IDE::Dialog message "$class has no instances"
-    } elseif {[llength $objectList]==1} {
-       my newBrowser $objectList
+    } elseif {[llength $objectList] == 1} {
+        my newBrowser $objectList
     } else {
-       my browseObjectsList $objectList
+        my browseObjectsList $objectList
     }
 }
 IDE::ObjectBrowser proc browseAllObjectInstances {} {
-  set instances {}
-  foreach instance [Object info instances] {
-      if {![Object isobject [$instance info parent]] || [Object isclass [$instance info parent]]} {
-         lappend instances $instance
-      }
-  }
-  my browseObjectsList [lsort $instances]
+    set instances {}
+    foreach instance [Object info instances] {
+        if {![Object isobject [$instance info parent]] || [Object isclass [$instance info parent]]} {
+            lappend instances $instance
+        }
+    }
+    my browseObjectsList [lsort $instances]
 }
 IDE::ObjectBrowser proc browseAllObjects {} {
- set instances {}
- set ignoreClasses(::Class) 1
- set ignoreClasses(::Object) 1
- foreach class [lsort [::Class info instances]] {
-      if {[info exists ignoreClasses($class)]} continue
-      foreach instance [$class info instances] {
-          if {![Object isobject [$instance info parent]] || [Object isclass [$instance info parent]]} {
-               lappend instances $instance
-          }
-      }
-  }
-  my browseObjectsList [lsort $instances]
+    set instances {}
+    set ignoreClasses(::Class) 1
+    set ignoreClasses(::Object) 1
+    foreach class [lsort [::Class info instances]] {
+        if {[info exists ignoreClasses($class)]} continue
+        foreach instance [$class info instances] {
+            if {![Object isobject [$instance info parent]] || [Object isclass [$instance info parent]]} {
+                lappend instances $instance
+            }
+        }
+    }
+    my browseObjectsList [lsort $instances]
 }
 IDE::ObjectBrowser proc browseObjectsList list {
     set newinst [my create [Object autoname browser] [Object autoname .browser] -type list]
@@ -3795,7 +3794,7 @@ IDE::ObjectBrowser proc browseObjectsListCheck list {
           lappend olist $elem   
         }
     }
-    if {$olist==""} {
+    if {$olist eq ""} {
         IDE::Dialog message {The list contains no Xotcl Objects}
     } else {
         my browseObjectsList $list
@@ -4801,7 +4800,7 @@ IDE::TclGroupDefinition instproc specificInit {} {
     next
 }
 IDE::TclGroupDefinition proc newGroup view {
-  return [my new [Object autoname .tgdbrowser] -classView $view]
+    return [my new [Object autoname .tgdbrowser] -classView $view]
 }
 IDE::TclGroupDefinition proc unknown args {
     error "unknown method on [self] $args"
@@ -4838,20 +4837,20 @@ IDE::Transcript instproc warning string {
      [self]::editor appendToCursor "\n$string"
 }
 IDE::Transcript proc buildMain {} {
-     if {[Object isobject ::transcript]} {
-         return
-     }
-     frame .f
-     pack .f -fill both -expand yes
-     my create ::transcript .f
+    if {[Object isobject ::transcript]} {
+        return
+    }
+    frame .f
+    pack .f -fill both -expand yes
+    my create ::transcript .f
 }
 IDE::Transcript proc newBrowser {} {
-     return [my new [Object autoname .workspace]]
+    return [my new [Object autoname .workspace]]
 }
 IDE::Transcript proc warning string {
-     if {[Object isobject ::transcript]} {
-         ::transcript warning $string
-     }
+    if {[Object isobject ::transcript]} {
+        ::transcript warning $string
+    }
 }
 
                               ##########
@@ -4875,24 +4874,24 @@ IDE::PlugInsManager proc getMenuStruct ms {
     }
 }
 IDE::PlugInsManager proc loadExtras extra {
-   my instvar plugInsArr plugInsList
-   if {![ide::lcontain $plugInsList $extra]} {
-       error "$extra is not registered plug in"
-   }
-   foreach {Name Label Component Startscript DepPlugInsList} $plugInsArr($extra) {}
-   foreach dep $DepPlugInsList {my loadExtras $dep}
-   IDE::SystemConfigMap loadComponentFromAny $Component
-   namespace eval :: $Startscript
+    my instvar plugInsArr plugInsList
+    if {![ide::lcontain $plugInsList $extra]} {
+        error "$extra is not registered plug in"
+    }
+    foreach {Name Label Component Startscript DepPlugInsList} $plugInsArr($extra) {}
+    foreach dep $DepPlugInsList {my loadExtras $dep}
+    IDE::SystemConfigMap loadComponentFromAny $Component
+    namespace eval :: $Startscript
 }
 IDE::PlugInsManager proc readPlugInsList {{file {}}} {
     my instvar plugInsArr plugInsList
-    if {$file==""} {
+    if {$file eq ""} {
         set file [file join [IDE::System getSystemDir] pluginslist.txt]
     }
     if {![file exists $file]} return
     set fh [open $file r]
-    while {[gets $fh line]>=0} {
-        if {[string match #* $line] || $line==""} continue
+    while {[gets $fh line] >= 0} {
+        if {[string match #* $line] || $line eq ""} continue
         lappend plugInsList [lindex $line 0]
         set plugInsArr([lindex $line 0]) $line
     }
@@ -4926,27 +4925,29 @@ IDE::System proc browseString string {
     }
 }
 IDE::System proc createInstance class {
-    if {![Object isclass $class]} { error "$class is not Xotcl Class"}
+    if {![Object isclass $class]} {
+        error "$class is not Xotcl Class"
+    }
     set arguments {}
-    if {[$class info instprocs init]!=""} {
+    if {[$class info instprocs init] ne ""} {
         foreach arg [$class info instargs init] {
-           if {[$class info instdefault init $arg val]} {
-              lappend arguments [list $arg $val]
-              } else {
-              lappend arguments $arg 
-           }
+            if {[$class info instdefault init $arg val]} {
+                lappend arguments [list $arg $val]
+            } else {
+                lappend arguments $arg 
+            }
         }
     }
     set parameters {}
     foreach par [$class info parameter] {
-         lappend parameters [lindex $par 0]
+        lappend parameters [lindex $par 0]
     }
     set ret [IDE::IDialogEntry getValueWithCancel "Create instance of $class\n$arguments\n$parameters"]
-    if {$ret=="_cancel"} return
-    if {$ret!=""} {
-       return [namespace eval :: $class create [Object autoname sample] $ret]
+    if {$ret eq "_cancel"} return
+    if {$ret ne ""} {
+        return [namespace eval :: $class create [Object autoname sample] $ret]
     } else {
-       return [namespace eval :: [list $class create [Object autoname sample]]]
+        return [namespace eval :: [list $class create [Object autoname sample]]]
     }
 }
 IDE::System proc evalInspectString string {
@@ -4958,17 +4959,17 @@ IDE::System proc evalString string {
 }
 IDE::System proc exitIDEGUI {} {
     if {[IDE::Dialog yesNo {Do you want to exit XOTclIDE?}]} {
-         exit
+        exit
     }
 }
 IDE::System proc getCoreComponents {} {
-  list IDEStart IDECore IDEBaseGUI IDEPersistenceGUI IDEView xdobry::mysql xdobry::sql xdobry::pgsql xdobry::odbc xdobry::sqlite xdobry::access xdobry::mssql xdobry::oratcl IDEPersistence IDEEditor IDEDebug IDEPersistenceAdd IDEErrorReporter IDETclParser
+    list IDEStart IDECore IDEBaseGUI IDEPersistenceGUI IDEView xdobry::mysql xdobry::sql xdobry::pgsql xdobry::odbc xdobry::sqlite xdobry::access xdobry::mssql xdobry::oratcl IDEPersistence IDEEditor IDEDebug IDEPersistenceAdd IDEErrorReporter IDETclParser
 }
 IDE::System proc getCoreComponentsAll {} {
-  return [concat [my getCoreComponents] core default]
+    return [concat [my getCoreComponents] core default]
 }
 IDE::System proc getExtraComponents {} {
-  list IDETestFramework IDETests IDEVCInstaller IDEDocumentation IDEConfiguration IDEPersistenceTests xdobry::sqlDebug IDEExtendedDebugger IDEWikiReaper IDEKitDeployer IDEScriptEditor IDERepositoryImporter IDETkWinInspector IDESQLBrowser IDEFileBrowser IDERegexpBrowser IDEInternationalizationHelper
+    list IDETestFramework IDETests IDEVCInstaller IDEDocumentation IDEConfiguration IDEPersistenceTests xdobry::sqlDebug IDEExtendedDebugger IDEWikiReaper IDEKitDeployer IDEScriptEditor IDERepositoryImporter IDETkWinInspector IDESQLBrowser IDEFileBrowser IDERegexpBrowser IDEInternationalizationHelper
 }
 IDE::System proc getMenuStruct {} {
     set mobj [self]::ms
@@ -5016,19 +5017,19 @@ IDE::System proc getMenuStruct {} {
     }
     IDE::PlugInsManager getMenuStruct $ms
     if {[my isDatabase]} {
-       IDE::MenuStruct ${ms}::vcontrol {Version Control}
-       $ms addCascadeMenu ${ms}::vcontrol
-       ${ms}::vcontrol addCommand {Show Fresh Methods} [list [self] showFreshMethods]
-       ${ms}::vcontrol addCommand {Sql Monitor} [list [self] loadExtras sqlDebuger]
-       ${ms}::vcontrol addCommand {Configuration Browser} [list [self] loadExtras Configuration]
+        IDE::MenuStruct ${ms}::vcontrol {Version Control}
+        $ms addCascadeMenu ${ms}::vcontrol
+        ${ms}::vcontrol addCommand {Show Fresh Methods} [list [self] showFreshMethods]
+        ${ms}::vcontrol addCommand {Sql Monitor} [list [self] loadExtras sqlDebuger]
+        ${ms}::vcontrol addCommand {Configuration Browser} [list [self] loadExtras Configuration]
     }
     $ms addSeparator
     $ms addCommand "Quit XOTclIDE" [list IDE::System exitIDEGUI]
     return $ms                
 }
 IDE::System proc getSystemDir {} {
-      global xotclidedir
-      return $xotclidedir
+    global xotclidedir
+    return $xotclidedir
 }
 IDE::System proc getUserId {} {
     IDE::User getDefaultUserId
@@ -5100,36 +5101,36 @@ xotcl::xml::recreatorVisitor
 xotcl::xodoc}]
 }
 IDE::System proc handleResult result {
-   IDE::ResultBrowser newBrowser $result
+    IDE::ResultBrowser newBrowser $result
 }
 IDE::System proc ignoreIDEComponents switch {
     my set ignoreIDE $switch
 }
 IDE::System proc initDatabase {} {
-   my instvar isDatabase
-   IDEPreferences loadPreferences
-   IDE::DBPersistence connect
-   IDE::User initDefault
-   set isDatabase 1
+    my instvar isDatabase
+    IDEPreferences loadPreferences
+    IDE::DBPersistence connect
+    IDE::User initDefault
+    set isDatabase 1
 }
 IDE::System proc initDatabaseNoConnect {} {
-   my instvar isDatabase
-   IDE::DBPersistence initSchema
-   IDE::User initDefault
-   set isDatabase 1
+    my instvar isDatabase
+    IDE::DBPersistence initSchema
+    IDE::User initDefault
+    set isDatabase 1
 }
 IDE::System proc initializeAfterLoad {} {
-     my set ignoreIDE 0
-     my requireNamespace
+    my set ignoreIDE 0
+    my requireNamespace
 }
 IDE::System proc inspectString res {
-    if {$res==""} {
-         IDE::Dialog message "No result"
+    if {$res eq ""} {
+        IDE::Dialog message "No result"
     } elseif {[Object isobject $res]} {
         $res inspect
     } else {
-       if {[my tryBrowseAsObjectList $res]} return
-       my handleResult $res
+        if {[my tryBrowseAsObjectList $res]} return
+        my handleResult $res
     }
 }
 IDE::System proc invokeInstproc {object instproc} {
@@ -5146,7 +5147,7 @@ IDE::System proc invokeInstproc {object instproc} {
             lappend arguments $arg 
         }
     }
-    if {$::xotcl::version>=1.3} {
+    if {$::xotcl::version >= 1.3} {
        my invokeProcWithArg $object $instproc $arguments $defcount [$class info instnonposargs $instproc]
     } else {
        my invokeProcWithArg $object $instproc $arguments $defcount
@@ -5167,65 +5168,65 @@ IDE::System proc invokeProc {object proc} {
     my invokeProcWithArg $object $proc $arguments $defarguments
 }
 IDE::System proc invokeProcWithArg {object proc arg {defargumentsCount 0} {noposarg {}}} {
-    if {$arg==""} {
-       set r [$object $proc]
+    if {$arg eq ""} {
+        set r [$object $proc]
     } else {
-       while 1 {
-          set ret [IDE::IDialogEntry getValueWithCancel "$object $proc\ngive the parameter list\n$arg"]
-          if {$ret=="_cancel"} return
-          # no check by nopos arguments TODO
-          if {$noposarg!=""} break
-          if {[lindex $arg end]=="args" && [llength $ret]>=[llength $arg]-1-$defargumentsCount} break
-          if {[llength $ret]<=[llength $arg] && [llength $ret]>=[llength $arg]-$defargumentsCount} break
-          IDE::Dialog message {Wrong length of param list}
-       }
-       set r [namespace eval :: $object $proc $ret]
+        while 1 {
+            set ret [IDE::IDialogEntry getValueWithCancel "$object $proc\ngive the parameter list\n$arg"]
+            if {$ret eq "_cancel"} return
+            # no check by nopos arguments TODO
+            if {$noposarg ne ""} break
+            if {[lindex $arg end] eq "args" && [llength $ret] >= [llength $arg] - 1 - $defargumentsCount} break
+            if {[llength $ret] <= [llength $arg] && [llength $ret] >= [llength $arg] - $defargumentsCount} break
+            IDE::Dialog message {Wrong length of param list}
+        }
+        set r [namespace eval :: $object $proc $ret]
     }
-    if {$r==""} {
+    if {$r eq ""} {
         IDE::Dialog message "empty result from $object $proc \n args :[string range $r 0 30]"
-     } else {
+    } else {
         my inspectString $r
-     }
+    }
 }
 IDE::System proc invokeTclProc proc {
     set arguments [list]
     set defargCount 0
     foreach arg [::info args $proc] {
-         if {[::info default $proc $arg val]} {
+        if {[::info default $proc $arg val]} {
             lappend arguments [list $arg $val]
             incr defargCount
-         } else {
+        } else {
             lappend arguments $arg 
-         }
+        }
     }
     my invokeTclProcWithArg $proc $arguments $defargCount
 }
 IDE::System proc invokeTclProcWithArg {proc arg {defargumentsCount 0}} {
-    if {$arg==""} {
-       set r [$proc]
+    if {$arg eq ""} {
+        set r [$proc]
     } else {
-       while 1 {
-          set ret [IDE::IDialogEntry getValueWithCancel "$proc\ngive the parameter list\n$arg"]
-          if {$ret=="_cancel"} return
-                   if {[lindex $arg end]=="args" && [llength $ret]>=[llength $arg]-1-$defargumentsCount} break
-          if {[llength $ret]<=[llength $arg] && [llength $ret]>=[llength $arg]-$defargumentsCount} break
-          IDE::Dialog message {Wrong length of param list}
-       }
-       set r [namespace eval :: $proc $ret]
+        while 1 {
+            set ret [IDE::IDialogEntry getValueWithCancel "$proc\ngive the parameter list\n$arg"]
+            if {$ret eq "_cancel"} return
+                if {[lindex $arg end] eq "args" && [llength $ret] >= [llength $arg] - 1 - $defargumentsCount} break
+            if {[llength $ret] <= [llength $arg] && [llength $ret] >= [llength $arg] - $defargumentsCount} break
+            IDE::Dialog message {Wrong length of param list}
+        }
+        set r [namespace eval :: $proc $ret]
     }
-    if {$r==""} {
+    if {$r eq ""} {
         IDE::Dialog message "empty result from $proc \n args :[string range $r 0 30]"
      } else {
         my inspectString $r
      }
 }
 IDE::System proc isDatabase {} {
-   my instvar isDatabase
-   if {[info exists isDatabase]} {
-      return 1
-   } else {
-      return 0
-   }
+    my instvar isDatabase
+    if {[info exists isDatabase]} {
+       return 1
+    } else {
+       return 0
+    }
 }
 IDE::System proc isIgnoreIDEComponents {} {
     my set ignoreIDE
@@ -5238,15 +5239,15 @@ IDE::System proc isWindowsPlatform {} {
     expr {$tcl_platform(platform)=="windows"}
 }
 IDE::System proc loadExtras extra {
-   if {$extra=="sqlDebuger"} {
+   if {$extra eq "sqlDebuger"} {
        if {[IDE::SystemConfigMap loadComponentFromAny xdobry::sqlDebug]} { 
-          SqlDebugger debug
+           SqlDebugger debug
        }
-   } elseif {$extra=="Configuration"} {
+   } elseif {$extra eq "Configuration"} {
        if {[IDE::SystemConfigMap loadComponentFromAny IDEConfiguration]} {
            IDE::ConfigmapBrowser newBrowser
        }
-   } elseif {$extra=="ExtendedDebugger"} {
+   } elseif {$extra eq "ExtendedDebugger"} {
        IDE::SystemConfigMap loadComponentFromAny IDEExtendedDebugger
        IDE::ExtendedDebugger initializeDebugger
        IDE::Dialog message "Please restart your code browsers to get breakpoint support and extended System menu"
@@ -5312,10 +5313,10 @@ IDE::System proc resetMenuStruct {} {
 IDE::System proc showBusyWhile script {
     update idletasks
     set win [focus]
-    if {$win!=""} {
+    if {$win ne ""} {
         set win [winfo toplevel $win]
     }
-    if {$win==""} { 
+    if {$win eq ""} { 
         set win .
     }
     set alt [$win cget -cursor]
@@ -5324,22 +5325,22 @@ IDE::System proc showBusyWhile script {
     $win configure -cursor $alt
 }
 IDE::System proc showFreshMethods {} {
-   set list [ide::lcollect each [IDE::MethodDescription getFreshInserted] {
+    set list [ide::lcollect each [IDE::MethodDescription getFreshInserted] {
         $each printStringShort}]
-   if {[llength $list]==0} {
-       IDE::Dialog message "No fresh-inserted methods"
-   }
-   IDE::MethodBrowser newBrowserList $list fresh-inserted
+    if {[llength $list] == 0} {
+        IDE::Dialog message "No fresh-inserted methods"
+    }
+    IDE::MethodBrowser newBrowserList $list fresh-inserted
 }
 IDE::System proc signalComponentsChanged {} {
-  if {[Object isobject IDE::CompViewDB]} {
-       set nclass IDE::CompViewDB
-  } else {
-       set nclass IDE::CompView
-  }
-  foreach obj [$nclass info instances] {
-       $obj showComponents
-  }
+    if {[Object isobject IDE::CompViewDB]} {
+        set nclass IDE::CompViewDB
+    } else {
+        set nclass IDE::CompView
+    }
+    foreach obj [$nclass info instances] {
+        $obj showComponents
+    }
 }
 IDE::System proc substituteString string {
      namespace eval :: subst [list $string]
@@ -5347,11 +5348,11 @@ IDE::System proc substituteString string {
 IDE::System proc tryBrowseAsObjectList string {
     if {![info complete $string]} {return 0}
     if {[catch {set len [llength $string]}]} {return 0}
-    if {[llength $string]==1} {return 0}
+    if {[llength $string] == 1} {return 0}
     foreach obj $string {
-       if {![Object isobject $obj]} {
+        if {![Object isobject $obj]} {
            return 0
-       }
+        }
     }
     IDE::ObjectBrowser browseObjectsList $string
     return 1
@@ -5363,15 +5364,15 @@ IDE::System proc unknown args {
 description {IDE::SystemConfigMap loadComponentsFromList [IDE::SystemConfigMap getCleanedLoadList [concat [my getExtraComponents] [my getCoreComponents]]]}
 }
 IDE::System proc versionAllCoreComponents {{versionInfo {}}} {
-   foreach cname [concat [my getExtraComponents] [my getCoreComponents]] {
+    foreach cname [concat [my getExtraComponents] [my getCoreComponents]] {
         set cobj [IDE::Component getCompObjectForNameIfExist $cname]
-        if {$cobj!="" && [$cobj isPersistent] && ![$cobj isclosed]} {
-            if {$versionInfo!=""} {
-               $cobj setVersionInfo $versionInfo
+        if {$cobj ne "" && [$cobj isPersistent] && ![$cobj isclosed]} {
+            if {$versionInfo ne ""} {
+                $cobj setVersionInfo $versionInfo
             }
             $cobj versionEdition
         }
-   }
+    }
 }
 
                     ########## initializations ##########

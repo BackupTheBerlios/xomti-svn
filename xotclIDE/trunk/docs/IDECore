@@ -1,0 +1,70 @@
+Composant IDECore
+
+Classe IDE
+
+méthode IDE>initsystem
+
+appelée par :
+
+    IDEStarter startIDEFromApp
+    IDEStarter startIDEFromDB
+    IDEStarter startIDEOnly
+    IDEStarter startIDEWithDB
+
+
+Classe IDE::CommentHandler
+
+superclasse de :
+
+    IDE::TclProcsDescription
+    IDE::ProcsGroup
+    IDE::Component
+
+Ne possède que les trois méthodes de gestion la variable "comment"
+Un commentaire vide est équivalent à une absence de commentaire
+
+    if {[my hasComment]} ...
+    set le_commentaire [my getComment]
+    my setComment $le_commentaire
+
+Les trois sous-classes possèdent la variable "name"
+
+
+Sous-Classe IDE::Component
+
+Variables des instances
+
+    classes
+    comment
+    name
+    objects
+    requiredComp
+    version
+
+Variables de l'objet IDE::Component
+
+    _idemeta   (key-value)  (variable commune à tous les "xotcl::Object")
+    components (key-value)  component_name -> instance_of_IDE::Component
+
+méthodes de l'objet "IDE::Component", catégorie "api", appelées dans de nombreux contextes.
+
+    set list_of_component_names   [IDE::Component getComponentNames]
+    set list_of_component_objects [[IDE::Component getAllComponents]
+    
+    set null_or_component_object [IDE::Component getCompObjectForNameIfExists $component_name]
+    set component_object [IDE::Component getCompObjectForName $component_name]
+
+Cette dernière méthode crée une instance de "IDE::Component" s'il n'en existe pas une de même nom.
+Dans ce cas, la version de l'instance est positionnée à 0.1
+
+
+
+
+    
+
+
+
+Classe IDE::ObjectCommentsContainer
+
+Classe IDE::Component::Tracker
+

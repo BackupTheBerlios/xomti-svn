@@ -74,7 +74,7 @@ Class create IDE::CoverClassView -superclass ::IDE::ClassView
 @ ::IDE::CoverClassView idemeta component IDEDebug
 IDE::CoverClassView instproc addClass {} {
     set class [IDE::ClassSelector getClass]
-    if {$class==""} return
+    if {$class eq ""} return
     IDE::MethodTracker registerClassForTracking $class
     my refreshBaseView
 }

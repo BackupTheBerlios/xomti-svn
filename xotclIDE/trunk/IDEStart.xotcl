@@ -31,7 +31,7 @@ Object create IDEPreferences
 @ ::IDEPreferences idemeta categoriesProcs {constans windows db-prefs}
 @ ::IDEPreferences idemeta component IDEStart
 IDEPreferences proc getDBLoginParameters args {
-    my getParameter connection
+   my getParameter connection
 }
 IDEPreferences proc getParameter key {
     if {[my exists preferences($key)]} {
@@ -61,13 +61,13 @@ IDEPreferences proc loadPreferencesFromFile file {
     close $preffile
 }
 IDEPreferences proc prefFileName {} {
-    return .xotclide
+   return .xotclide
 }
 IDEPreferences proc savePreferences {} {
     global errorInfo tcl_platform
     my instvar preferences
-    if {$tcl_platform(platform) == "windows"} {
-        my windowsSavePrefs
+    if {$tcl_platform(platform)=="windows"} {
+         my windowsSavePrefs
     } else {
         my savePreferencesAsFile [file join ~ [my prefFileName]]
     }
@@ -96,7 +96,7 @@ IDEPreferences proc setDefaultPreferences {} {
     }
 }
 IDEPreferences proc setParameter {key param} {
-    my set preferences($key) $param
+   my set preferences($key) $param
 }
 IDEPreferences proc windowsLoadPrefs {} {
     if {![catch {package require registry}]} {
@@ -109,7 +109,7 @@ IDEPreferences proc windowsLoadPrefs {} {
     }
 }
 IDEPreferences proc windowsRegKey {} {
-    return {HKEY_CURRENT_USER\Software\xotclide}
+   return {HKEY_CURRENT_USER\Software\xotclide}
 }
 IDEPreferences proc windowsRegistryKey {} {
     return HKEY_CURRENT_USER\Software\xotclide

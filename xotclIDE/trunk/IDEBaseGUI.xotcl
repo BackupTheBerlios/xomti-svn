@@ -306,7 +306,7 @@ IDE::Dialog proc getOpenFile {{fileTypes {{{All files} *}}}} {
     set fwin [focus]
     set parent .
     set olddir [pwd]
-    if {$fwin!={}} { set parent [winfo toplevel $fwin] }
+    if {$fwin ne {}} { set parent [winfo toplevel $fwin] }
     set file [tk_getOpenFile -parent $parent -filetypes $fileTypes]
     cd $olddir
     return $file
@@ -604,7 +604,7 @@ IDE::Editor instproc appendToCursorAndSelect text {
 }
 IDE::Editor instproc browseSelection {} {
     set sel [my getSelection]
-    if {$sel!=""} {
+    if {$sel ne ""} {
         IDE::System browseString $sel
     }
 }
@@ -953,14 +953,14 @@ IDE::FontChooser instproc init {} {
 
     my instvar win entry width font fontSize
     my requireNamespace
-    if {[lsearch [font names] fontchooser]==-1} {
+    if {[lsearch [font names] fontchooser] == -1} {
         font create fontchooser
     }
     my extractFontParameters
 
     frame $win.f
     label $win.f.lfamily -text "Font Family:"
-    IDE::NListView create [self]::fontfamily $win.f.fontfamily  -notify [self] -notifyProc selectFontFamily
+    IDE::NListView create [self]::fontfamily $win.f.fontfamily -notify [self] -notifyProc selectFontFamily
     label $win.f.lsize -text "Size:"
     spinbox $win.f.size -from -30 -to 30 -increment 1 -command [list [self] changeSize] -validate focusout  -validatecommand [list [self] validateSize %s] -invalidcommand [list [self] invalidSize]
     $win.f.size set $fontSize
