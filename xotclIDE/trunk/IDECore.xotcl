@@ -147,7 +147,7 @@ IDE proc initSystem {} {
 
                               ##########
 
-@ Class create IDE::CommentHandler {
+@ Class IDE::CommentHandler {
 description {Designed to use as mixin.
 It has no requirements
 It add functionality for hanlding comments.
@@ -169,7 +169,7 @@ IDE::CommentHandler instproc setComment text {
 
                               ##########
 
-@ Class create IDE::Component {
+@ Class IDE::Component {
 description {IDE::Component is base class for handling components.
 Components are currently sets or Xotcl classes and objects
 that can be loaded and saved as tcl packages}
@@ -825,7 +825,7 @@ IDE::Component proc saveComplex {comps nometa onefile target} {
 
                               ##########
 
-@ Class create IDE::Component::Tracker {
+@ Class IDE::Component::Tracker {
 description {Helper class for tracking new classes
 by package loading
 
@@ -919,7 +919,7 @@ IDE::Component::Tracker proc trackProc args {
 
                               ##########
 
-@ Class create IDE::ObjectCommentsContainer {
+@ Class IDE::ObjectCommentsContainer {
 description {Helper class for hanlde methods comments.
 It will be used for not persistent classes}
 }
@@ -942,7 +942,7 @@ IDE::ObjectCommentsContainer instproc setMethodComment {type method text} {
 
                               ##########
 
-@ Class create IDE::ProcsGroup {
+@ Class IDE::ProcsGroup {
 description {This Class wrap the interface to normal tcl procedures.
 It enable to use / reuse old tcl code in xotclIDE programming
 
@@ -1150,7 +1150,7 @@ IDE::ProcsGroup proc unknown args {
 
                               ##########
 
-@ Class create IDE::TclProcsDescription {
+@ Class IDE::TclProcsDescription {
 description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
 This instaces has similar interface as xotcl class/objects.
 That is comments, getting body
@@ -1243,7 +1243,7 @@ IDE::TclProcsDescription proc unregisterMethod method {
 
                               ##########
 
-@ Object create IDE::CommentsContainer {
+@ Object IDE::CommentsContainer {
 description {Hanlde objects comments and is parent object for methods comments
 (class IDE::ObjectsCommentsContainer)
 
@@ -1458,7 +1458,7 @@ IDE::CommentsContainer proc searchCommentForMethod method {
 
                               ##########
 
-@ Object create IDE::IntroProxy {
+@ Object IDE::IntroProxy {
 description {Fasade for xotcl introspection.}
 }
 Object create IDE::IntroProxy
@@ -1470,7 +1470,7 @@ IDE::IntroProxy proc asDescriptionList comment {
 }
 IDE::IntroProxy proc getBaseObjDef name {
     set cname [my stripNamespace [$name info class]]
-    return "$cname create [string trimleft $name :]"
+    return [list $cname [string trimleft $name :]]
 }
 IDE::IntroProxy proc getBodyClassMethod {obj p} {
     set arguments {}
@@ -1644,7 +1644,9 @@ IDE::IntroProxy proc getInstanceMethods {class categories} {
     return $methods
 }
 IDE::IntroProxy proc getObjDef name {
-    set script [my getBaseObjDef $name]
+    set bod [my getBaseObjDef $name]
+    set script "[lindex $bod 0] create [lindex $bod 1]"
+    unset bod
     if {[Object isclass $name]} {
         set sl [$name info superclass]
         if {$sl != "" && $sl != "::Object" && $sl!="::xotcl::Object"} {

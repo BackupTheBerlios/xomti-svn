@@ -132,7 +132,7 @@ PrsComment instproc syntaxHighlight context {
 
                               ##########
 
-@ Class create PrsContext {
+@ Class PrsContext {
 description {The class has very important rolle by parsing xotcl/tcl sources.
 	In this methods are coded the meaning (syntax) of all build-in tcl functions
 	as loops and conditional.
@@ -901,7 +901,7 @@ PrsVariable instproc visit visitor {
 
                               ##########
 
-@ Class create ReadStringStream {
+@ Class ReadStringStream {
 description {This class wrap a string to use it as a stream.
 	Additional you can set the last position (end of stream)}
 }
@@ -937,7 +937,7 @@ ReadStringStream instproc nextChar {} {
 
                               ##########
 
-@ Class create TclParser {
+@ Class TclParser {
 description {This class can parse tcl code from stream parameter
 	that consists ReadStringStream object or compatible and produce parse tree.
 

@@ -429,7 +429,7 @@ IDE::ClassDefinition proc unknown args {
 
                               ##########
 
-@ Class create IDE::ClassSelector {
+@ Class IDE::ClassSelector {
 description {A dialog for selecting classes
 interafec is
 IDE::ClassSelector getClass
@@ -485,7 +485,7 @@ IDE::ClassSelector proc getUnregisteredClass {} {
 
                               ##########
 
-@ Class create IDE::ClassView {
+@ Class IDE::ClassView {
 description {Warning 
 
 vclass varible hold an actual displayed object
@@ -836,7 +836,7 @@ IDE::ClassView instproc setViewType type {
 
                               ##########
 
-@ Class create IDE::CodeController {
+@ Class IDE::CodeController {
 description {This class is designed as mixin for IDE::TclModeEdit it can accept the
 code from the edit directly.}
 }
@@ -914,7 +914,7 @@ IDE::CodeController instproc syntaxCheck {text editor} {
 
                               ##########
 
-@ Class create IDE::CompBrowser {
+@ Class IDE::CompBrowser {
 description {Build the main work tool for an XOTclIDE programmer
 
 If there is Version Control available it
@@ -1589,7 +1589,7 @@ IDE::ConfigurationBrowser proc showBrowser {} {
 
                               ##########
 
-@ Class create IDE::ContextEval {
+@ Class IDE::ContextEval {
 description {This class is used for mixins to overwrite the string
 evalution from selected text.
 
@@ -1915,7 +1915,7 @@ IDE::GlobalVarsInspector proc startBrowser {} {
 
                               ##########
 
-@ Class create IDE::VarsView {
+@ Class IDE::VarsView {
 description {The parent object must understand the messages
 
 [my info parent] setVarValue $value [self]
@@ -2324,7 +2324,7 @@ IDE::ImportMethodView proc startBrowserForComponent component {
 
                               ##########
 
-@ Class create IDE::MethodBrowser {
+@ Class IDE::MethodBrowser {
 description {Method Prowser implements View for all tcl/xotcl Methods
 It is used as result view for several method based search function.
 
@@ -4856,7 +4856,7 @@ IDE::Transcript proc warning string {
 
                               ##########
 
-@ Object create IDE::PlugInsManager {
+@ Object IDE::PlugInsManager {
 description {# PlugIns List Format
 
 Name Label Component Startscript DepComponent}
@@ -4901,7 +4901,7 @@ IDE::PlugInsManager proc readPlugInsList {{file {}}} {
 
                               ##########
 
-@ Object create IDE::System {
+@ Object IDE::System {
 description {This object held the system generic methods as
 1. quering envirorments parameters (directory, user)
 2. specify systems menu

@@ -33,7 +33,7 @@ proc idevarstrack::invokeDebugger {name1 name2 op} {
 
                     ########## Classes and Objects ##########
 
-@ Class create IDE::CallingCoverBrowser {
+@ Class IDE::CallingCoverBrowser {
 description {It use the same input as Tracker Browser.
 }
 }
@@ -314,7 +314,7 @@ IDE::DebugSubObjectsView instproc inspectCalledObject {} {
 
                               ##########
 
-@ Class create IDE::Debugger {
+@ Class IDE::Debugger {
 description {The debugger is based on my halt
 procedure by invoke this IDE::Debugger startDebugging is invoked.
 This build debugger window an let user to view state of procedure call
@@ -728,7 +728,7 @@ IDE::TrackedMethodList instproc updateList {} {
 
                               ##########
 
-@ Class create IDE::TrackerBrowser {
+@ Class IDE::TrackerBrowser {
 description {Trackerbrowser can show all calls to speciefie object or class
 it work with object IDE::MethodTracker}
 }
@@ -1023,7 +1023,7 @@ IDE::VarsTracker proc unsetVariable variable {
 
                               ##########
 
-@ Object create IDE::MethodTracker {
+@ Object IDE::MethodTracker {
 description {This object manage tracking of classes and objects.
 By initializing it make new filter method to xotc::Object.
 This method is used to redirect all call to IDE::MethodTracker.

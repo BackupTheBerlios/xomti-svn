@@ -18,7 +18,7 @@ package require IDETclParser
 
                     ########## Classes and Objects ##########
 
-@ Class create IDE::TclModeEdit {
+@ Class IDE::TclModeEdit {
 description {Tcl Mode
 
 supports function
@@ -526,7 +526,7 @@ IDE::TclModeEdit instproc xotclLint text {
 
                               ##########
 
-@ Class create PrsSyntaxHighlight {
+@ Class PrsSyntaxHighlight {
 description {This Class is special tcl parser context that can be used
 for syntax highlight into IDE::Text (View for parsed method).
 How tokens will be handled is specified in syntaxHighlight method (PrsElem)}

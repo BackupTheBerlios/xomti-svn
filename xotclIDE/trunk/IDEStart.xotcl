@@ -16,7 +16,7 @@ package provide IDEStart 0.71
 
                     ########## Classes and Objects ##########
 
-@ Object create IDEPreferences {
+@ Object IDEPreferences {
 description {Hanlde preferences of xotcl
 
 on unix the preferences are saved as hile .xotclide in home dictionary
@@ -129,7 +129,7 @@ IDEPreferences proc windowsSavePrefs {} {
 
                               ##########
 
-@ Object create IDEStarter {
+@ Object IDEStarter {
 description {This object handle starting xotclide from differents context
 It read also the line arguments that can influence starting process or
 cause specified actions.

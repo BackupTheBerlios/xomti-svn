@@ -11,7 +11,7 @@ package require IDECore
 
                     ########## Classes and Objects ##########
 
-@ Class create IDE::Browser {
+@ Class IDE::Browser {
 description {This is the base class for all IDE Browser
 
 It can buid the system menu and status info bar.
@@ -108,7 +108,7 @@ IDE::Browser instproc specificInit {} {
 
                               ##########
 
-@ Class create IDE::DialogHelper {
+@ Class IDE::DialogHelper {
 description {Handle waiting for GUI events by using vwait command
 see suspendUntilSignal method
 
@@ -207,7 +207,7 @@ IDE::DialogHelper proc create args {
 
                               ##########
 
-@ Class create IDE::Dialog {
+@ Class IDE::Dialog {
 description {Class methods are fasade to tk_message}
 }
 Class create IDE::Dialog -superclass ::IDE::DialogHelper -parameter {{title Dialog} message {type ok}}
@@ -344,7 +344,7 @@ IDE::Dialog proc yesNo message {
 
                               ##########
 
-@ Class create IDE::GUICommands {
+@ Class IDE::GUICommands {
 description {A Class that can build menues to toplevel.
 Await window in win instance
 and menu window in [$win toplevel].mb
@@ -417,7 +417,7 @@ IDE::GUICommands instproc upsMessage text {
 
                               ##########
 
-@ Class create IDE::Text {
+@ Class IDE::Text {
 description {Fasade for tk widget text}
 }
 Class create IDE::Text -parameter {{height 24} {width 80}}
@@ -736,7 +736,7 @@ IDE::Editor proc initializeAfterLoad {} {
 
                               ##########
 
-@ Class create IDE::EditorPopDown {
+@ Class IDE::EditorPopDown {
 description {This class can be used with all classes derived from IDE::Editor
 it provide popdown menues that can be used for code completion future}
 }
@@ -806,7 +806,7 @@ IDE::EditorPopDown instproc selectDropDown {} {
 
                               ##########
 
-@ Class create IDE::EventHandlerMix {
+@ Class IDE::EventHandlerMix {
 description {This class privede simple event handler.
 There are two methodes.
 1) Register event
@@ -863,7 +863,7 @@ IDE::EventHandlerMix instproc signalEvent {eventName {addParameter {}}} {
 
                               ##########
 
-@ Class create IDE::FindReplaceDestroyHelper {
+@ Class IDE::FindReplaceDestroyHelper {
 description {This class is using for mixin with IDE::Text for
 recognize destroying of based window. In this case (destroy)
 also Find/Replace dialog will be closed}
@@ -876,7 +876,7 @@ IDE::FindReplaceDestroyHelper instproc destroy {} {
 
                               ##########
 
-@ Class create IDE::FocusPerKey {
+@ Class IDE::FocusPerKey {
 description {To used only whith GUI Klasses as Subklass by Multiheritage
 
 use parameter focusKey to speciefi Key binding to get focus to widget
@@ -1347,7 +1347,7 @@ IDE::ListView proc setColor color {
 
                               ##########
 
-@ Class create IDE::HListView {
+@ Class IDE::HListView {
 description {Simple Hierarch List Browser.}
 }
 Class create IDE::HListView -superclass ::IDE::ListView -parameter {{multiselect 0} label}
@@ -1669,7 +1669,7 @@ IDE::IDialogListOrderChooser instproc upItem {} {
 
                               ##########
 
-@ Class create IDE::IDialogWithCheck {
+@ Class IDE::IDialogWithCheck {
 description {Prompter with additional check box
 addiational paramer -checktext -check}
 }
@@ -1686,7 +1686,7 @@ IDE::IDialogWithCheck instproc init {} {
 
                               ##########
 
-@ Class create IDE::MenuItem {
+@ Class IDE::MenuItem {
 description {This is the abstract root class for buildung menu stucture.
 
 enableList is a list of method that determinate the enablement of item.
@@ -1801,7 +1801,7 @@ IDE::MenuSeparator instproc createItemTkMenu {win tl_win} {
 
                               ##########
 
-@ Class create IDE::MenuStruct {
+@ Class IDE::MenuStruct {
 description {This Class represent normall und popdown menus.
 It is used from IDE::GUICommand classes.
 
