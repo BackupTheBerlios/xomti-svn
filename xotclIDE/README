@@ -3,6 +3,7 @@ xomti/xotclIDE/README 2005-02-15
 tags/0.72/
 tags/0.73/  Correspond to official releases from Artur Trzewik (http://www.xdobry.de/xotclIDE/)
 	    No more, no less.
+tags/0.74/
 
 0.73-fp/    Is the current Artur version with some of my enhancements.
             I will be glad if you test it.
@@ -14,6 +15,12 @@ trunk/      Incorporates my last changes.
 
 trunk-0.72/ Previous experimental "trunk/"
             To be avoided.
+
+
+Comparision 0.73-fp/ -> tags/0.74/
+
+idemeta categoriesMethods ... well sorted
+
 
 -- 
 Fabrice_DOT_Pardo_AT_Lpn_DOT_Cnrs_DOT_fr
