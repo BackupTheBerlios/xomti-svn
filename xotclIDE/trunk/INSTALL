@@ -3,18 +3,14 @@ First you need tcl tk  (tix optional)
 
 and Xotcl (see. http://www.xotcl.org)
 
-Than adapt the file
-XotclIDE
+then start invoking
 
-first line 
-
-#!/usr/local/bin/xowish
-
+    ./XotclIDE.tcl
 
  
 You can also start the application by
 
->$ xowish XotclIDE
+    xowish XotclIDE.tcl
 
 if you are tcl programer you know what to do
 see the short docu in docs directory
