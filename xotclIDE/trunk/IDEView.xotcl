@@ -2291,8 +2291,8 @@ It is used as result view for several method based search function.
 The search functions are implemented as class methods}
 }
 Class IDE::MethodBrowser -superclass ::IDE::Browser
-@ ::IDE::MethodBrowser idemeta categoriesProcs {private actions api obsolete}
 @ ::IDE::MethodBrowser idemeta categoriesMethodsProcs {{emptySearchResult unknown newBrowserList newBrowser} searchImplementorsDialog {searchImplementorsClass searchImplementorsComponent searchImplementorsAll searchSendersAll searchTextAll searchTextComponent searchTextClass} {searchObsoleteCall searchAndConvertObsoleteSelfCall obsoleteMatchList}}
+@ ::IDE::MethodBrowser idemeta categoriesProcs {private actions api obsolete}
 @ ::IDE::MethodBrowser idemeta component IDEView
 IDE::MethodBrowser instproc colorizeSearchString {} {
     my instvar regexpr_string
@@ -4828,8 +4828,8 @@ description {This object held the system generic methods as
 }
 }
 Object IDE::System
-@ ::IDE::System idemeta categoriesProcs {actions system-constans invoke-action eval-action service initializing}
 @ ::IDE::System idemeta categoriesMethodsProcs {{signalComponentsChanged versionAllCoreComponents showFreshMethods inspectString loadExtras exitIDEGUI} {getUserId getSystemDir getCoreComponentsAll getXotclPackages getExtraComponents getCoreComponents getMenuStruct getVersion} {handleResult tryBrowseAsObjectList createInstance invokeProc invokeTclProc invokeInstproc invokeProcWithArg} {evalString evalInspectString substituteString browseString invokeTclProcWithArg} {showBusyWhile isDatabase} {initDatabase initDatabaseNoConnect initializeAfterLoad}}
+@ ::IDE::System idemeta categoriesProcs {actions system-constans invoke-action eval-action service initializing}
 @ ::IDE::System idemeta component IDEView
 IDE::System proc browseString string {
     if {[Object isclass $string]} {

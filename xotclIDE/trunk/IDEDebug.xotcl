@@ -1002,8 +1002,8 @@ It handle adding and deleting tracking by settings filters and
 redirect the calls to IDE::TrackerBrowser.}
 }
 Object IDE::MethodTracker
-@ ::IDE::MethodTracker idemeta categoriesProcs {api filter-dispatch}
 @ ::IDE::MethodTracker idemeta categoriesMethodsProcs {{unregisterClassForTracking unregisterObjectForTracking registerClassForTracking registerObjectForTracking getTrackingList} {methodExit methodEntry}}
+@ ::IDE::MethodTracker idemeta categoriesProcs {api filter-dispatch}
 @ ::IDE::MethodTracker idemeta component IDEDebug
 IDE::MethodTracker proc getTrackingList {} {
     my instvar trackedArr
