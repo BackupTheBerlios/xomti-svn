@@ -6,5 +6,6 @@ package ifneeded xomti_critcl     0.3 [list source [file join $dir        xomti_
 package ifneeded xomti_gsl        0.1 [list source [file join $dir           xomti_gsl/trunk/xomti_gsl.xotcl]]
 package ifneeded xomti_gsl_math   0.1 [list source [file join $dir           xomti_gsl/trunk/xomti_gsl_math.xotcl]]
 package ifneeded xomti_memory     0.1 [list source [file join $dir        xomti_memory/trunk/xomti_memory.xotcl]]
+package ifneeded xomti_refobj     0.1 [list source [file join $dir        xomti_refobj/trunk/xomti_refobj.xotcl]]
 package ifneeded xomti_tcllib_md5 1.2 [list source [file join $dir xomti_tcllib_md5/tags/1.2/xomti_tcllib_md5.xotcl]]
 package ifneeded xomti_types      0.1 [list source [file join $dir         xomti_types/trunk/xomti_types.xotcl]]

@@ -10,6 +10,7 @@ antirez_tclref ccode "#include \"[file normalize [file join [file dirname [info 
 antirez_tclref option_set keepsrc 1
 antirez_tclref option_set force 0
 lassign [antirez_tclref cbuild] lib init
+
 # workaround xomti_critcl 0.3
 unload $lib
 load $lib References

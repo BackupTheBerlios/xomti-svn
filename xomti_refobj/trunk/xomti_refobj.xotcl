@@ -1,0 +1,96 @@
+package require xomti 0.1
+package require xomti_critcl 0.3
+
+Xomti_Critcl_builder create xomti_refobj
+xomti_refobj option_set keepsrc 1
+xomti_refobj option_set force 1
+xomti_refobj option_set lines 0
+
+xomti_refobj cheaders -g -I[Xomti_Critcl get_prefix tcl]/generic
+
+xomti_refobj ccode {
+#include <tcl.h>
+#include <stdlib.h>
+
+static void  DupRefObjInternalRep(Tcl_Obj *srcPtr, Tcl_Obj *copyPtr);
+static void FreeRefObjInternalRep(Tcl_Obj *objPtr);
+static int       SetRefObjFromAny(Tcl_Interp *interp, Tcl_Obj *objPtr);
+static void  UpdateStringOfRefObj(Tcl_Obj *objPtr);
+
+Tcl_ObjType tclRefObjType = {
+    "refObj",
+    FreeRefObjInternalRep,
+    DupRefObjInternalRep,
+    UpdateStringOfRefObj,
+    SetRefObjFromAny
+};
+
+static void FreeRefObjInternalRep(Tcl_Obj *objPtr) {
+    Tcl_Obj *referencedPtr = (Tcl_Obj *) objPtr->internalRep.otherValuePtr;
+    Tcl_DecrRefCount(referencedPtr);
+    fprintf(stderr, "bye\n");
+}
+
+static void DupRefObjInternalRep(Tcl_Obj *srcPtr, Tcl_Obj *copyPtr) {
+    Tcl_Obj *referencedPtr = (Tcl_Obj *) srcPtr->internalRep.otherValuePtr;
+    Tcl_IncrRefCount(referencedPtr);
+    copyPtr->internalRep.otherValuePtr = (void *) referencedPtr;
+    copyPtr->typePtr = &tclRefObjType;
+}
+
+static void UpdateStringOfRefObj(Tcl_Obj *objPtr) { 
+    Tcl_Obj *referencedPtr = (Tcl_Obj *) objPtr->internalRep.otherValuePtr;
+    char buf[30];
+    sprintf(buf, "0x%08x (read-only)", (unsigned long) referencedPtr);
+    objPtr->length = strlen(buf);
+    objPtr->bytes = ckalloc(objPtr->length + 1);    
+    strcpy(objPtr->bytes, buf);
+}
+
+static int SetRefObjFromAny(Tcl_Interp *interp, Tcl_Obj *objPtr) {
+    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                           "Cannot construct an ObjRef from a string",
+                           (char *) NULL);
+    return TCL_ERROR;
+}
+}
+
+xomti_refobj ccommand ::xomti::refcreate {dummy interp objc objv} {
+    Tcl_Obj *objPtr;
+    Tcl_Obj *referencedPtr;
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "something");
+	return TCL_ERROR;
+    }
+    objPtr = Tcl_NewObj();
+    referencedPtr = objv[1];
+    objPtr->internalRep.otherValuePtr = (void *) referencedPtr;
+    Tcl_IncrRefCount(referencedPtr);
+    objPtr->typePtr = &tclRefObjType;
+    Tcl_InvalidateStringRep(objPtr);
+    Tcl_SetObjResult(interp, objPtr);
+    return TCL_OK;
+}
+
+xomti_refobj ccommand ::xomti::refget {dummy interp objc objv} {
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "reference");
+	return TCL_ERROR;
+    }
+    if (objv[1]->typePtr != &tclRefObjType) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                           "Argument is not an ObjRef",
+                           (char *) NULL);
+        return TCL_ERROR;
+    }   
+    Tcl_SetObjResult(interp, objv[1]->internalRep.otherValuePtr);
+    return TCL_OK;
+}
+
+xomti_refobj cinit {
+    Tcl_RegisterObjType(&tclRefObjType);
+}
+
+puts stderr [xomti_refobj cbuild]
+
+package provide xomti_refobj 0.1
