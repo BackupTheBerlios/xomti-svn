@@ -1,4 +1,4 @@
-@ Component Xomti_Combobox {
+@ Component xomti_combobox {
     description {
 XOTcl porting of Bryan Oakley pure Tcl code
 
@@ -52,7 +52,7 @@ package provide xomti_combobox 2.3
 
 Class create Combobox
 
-@ Combobox instproc combobox {
+@ Combobox instproc combobox {} {
     description {combobox --
 #
 #     This is the command that gets exported. It creates a new
@@ -91,8 +91,8 @@ Combobox instproc combobox {w args} {
 }
 
 
-@  {
-description {Init --
+@ Combobox instproc Init {} {
+    description {Init --
 #
 #     Initialize the namespace variables. This should only be called
 #     once, immediately prior to creating the first instance of the
@@ -110,8 +110,10 @@ description {Init --
 # Returns:
 # 
 #     empty string
+    }
+}
 
-Combobox intproc Init {} {
+Combobox instproc Init {} {
     instvar widgetOptions widgetCommands scanCommands listCommands defaultEntryCursor
 
     array set widgetOptions [list \
@@ -265,8 +267,8 @@ Combobox intproc Init {} {
     my SetClassBindings
 }
 
-@ Component Xomti_Combobox {
-description {SetClassBindings --
+@ Combobox instproc SetClassBindings {} {
+    description {SetClassBindings --
 #
 #    Sets up the default bindings for the widget class
 #
@@ -285,7 +287,8 @@ description {SetClassBindings --
 # Returns:
 #
 #    empty string
-
+    }
+}
 Combobox instproc SetClassBindings {} {
 
     # make sure we clean up after ourselves...
@@ -312,8 +315,8 @@ Combobox instproc SetClassBindings {} {
     return ""
 }
 
-@ Component Xomti_Combobox {
-description {SetBindings --
+@ Combobox instproc SetBindings {} {
+    description {SetBindings --
 #
 #    here's where we do most of the binding foo. I think there's probably
 #    a few bindings I ought to add that I just haven't thought
@@ -331,7 +334,8 @@ description {SetBindings --
 # Returns:
 #
 #    empty string
-
+    }
+}
 Combobox instproc SetBindings {w} {
     upvar ::combobox::${w}::widgets  widgets
     upvar ::combobox::${w}::options  options
@@ -399,8 +403,8 @@ Combobox instproc SetBindings {w} {
     }
 }
 
-@ Component Xomti_Combobox {
-description {Build --
+@ Combobox instproc Build {} {
+    description {Build --
 #
 #    This does all of the work necessary to create the basic
 #    combobox. 
@@ -419,7 +423,8 @@ description {Build --
 # Returns:
 #
 #    the name of the widget
-
+    }
+}
 Combobox instproc Build {w args } {
     variable widgetOptions
 
@@ -585,8 +590,8 @@ Combobox instproc Build {w args } {
 
 }
 
-@ Component Xomti_Combobox {
-description {HandleEvent --
+@ Combobox instproc HandleEvent {} {
+    description {HandleEvent --
 #
 #    this proc handles events from the entry widget that we want
 #    handled specially (typically, to allow navigation of the list
@@ -598,7 +603,8 @@ description {HandleEvent --
 #    event   a string representing the event (not necessarily an
 #            actual event)
 #    args    additional arguments required by particular events
-
+    }
+}
 Combobox instproc HandleEvent {w event args} {
     upvar ::combobox::${w}::widgets  widgets
     upvar ::combobox::${w}::options  options
@@ -754,8 +760,8 @@ Combobox instproc HandleEvent {w event args} {
     return ""
 }
 
-@ Component Xomti_Combobox {
-description {DestroyHandler {w} --
+@ Combobox instproc DestroyHandler {} {
+    description {DestroyHandler {w} --
 # 
 #    Cleans up after a combobox widget is destroyed
 #
@@ -767,7 +773,8 @@ description {DestroyHandler {w} --
 #
 #    The namespace that was created for the widget is deleted,
 #    and the widget proc is removed.
-
+    }
+}
 Combobox instproc DestroyHandler {w} {
 
     catch {
@@ -783,8 +790,8 @@ Combobox instproc DestroyHandler {w} {
     return ""
 }
 
-@ Component Xomti_Combobox {
-description {Find
+@ Combobox instproc Find {} {
+    description {Find
 #
 #    finds something in the listbox that matches the pattern in the
 #    entry widget and selects it
@@ -802,7 +809,8 @@ description {Find
 # Returns:
 #
 #    Empty string
-
+    }
+}
 Combobox instproc Find {w {exact 0}} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
@@ -913,8 +921,8 @@ Combobox instproc Find {w {exact 0}} {
     }
 }
 
-@ Component Xomti_Combobox {
-description {Select --
+@ Combobox instproc Select {} {
+    description {Select --
 #
 #    selects an item from the list and sets the value of the combobox
 #    to that value
@@ -927,7 +935,8 @@ description {Select --
 # Returns:
 #
 #    empty string
-
+    }
+}
 Combobox instproc Select {w index} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
@@ -950,8 +959,8 @@ Combobox instproc Select {w index} {
     return ""
 }
 
-@ Component Xomti_Combobox {
-description {HandleScrollbar --
+@ Combobox instproc HandleScrollbar {} {
+    description {HandleScrollbar --
 # 
 #    causes the scrollbar of the dropdown list to appear or disappear
 #    based on the contents of the dropdown listbox
@@ -964,7 +973,8 @@ description {HandleScrollbar --
 # Returns:
 #
 #    an empty string
-
+    }
+}
 Combobox instproc HandleScrollbar {w {action "unknown"}} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
@@ -1012,8 +1022,8 @@ Combobox instproc HandleScrollbar {w {action "unknown"}} {
     return ""
 }
 
-@ Component Xomti_Combobox {
-description {ComputeGeometry --
+@ Combobox instproc ComputeGeometry {} {
+    description {ComputeGeometry --
 #
 #    computes the geometry of the dropdown list based on the size of the
 #    combobox...
@@ -1025,7 +1035,8 @@ description {ComputeGeometry --
 # Returns:
 #
 #    the desired geometry of the listbox
-
+    }
+}
 Combobox instproc ComputeGeometry {w} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
@@ -1140,8 +1151,8 @@ Combobox instproc ComputeGeometry {w} {
     return $geometry
 }
 
-@ Component Xomti_Combobox {
-description {DoInternalWidgetCommand --
+@ Combobox instproc DoInternalWidgetCommand {} {
+    description {DoInternalWidgetCommand --
 #
 #    perform an internal widget command, then mung any error results
 #    to look like it came from our megawidget. A lot of work just to
@@ -1157,7 +1168,8 @@ description {DoInternalWidgetCommand --
 # Returns:
 #
 #    The result of the subwidget command, or an error
-
+    }
+}
 Combobox instproc DoInternalWidgetCommand {w subwidget command args} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
@@ -1185,8 +1197,8 @@ Combobox instproc DoInternalWidgetCommand {w subwidget command args} {
 }
 
 
-@ Component Xomti_Combobox {
-description {WidgetProc --
+@ Combobox instproc WidgetProc {} {
+    description {WidgetProc --
 #
 #    This gets uses as the widgetproc for an combobox widget. 
 #    Notice where the widget is created and you'll see that the
@@ -1207,7 +1219,8 @@ description {WidgetProc --
 # Results:
 #
 #    Performs the requested widget command
-
+    }
+}
 Combobox instproc WidgetProc {w command args} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
@@ -1452,8 +1465,8 @@ Combobox instproc WidgetProc {w command args} {
     return $result
 }
 
-@ Component Xomti_Combobox {
-description {Configure --
+@ Combobox instproc Configure {} {
+    description {Configure --
 #
 #    Implements the "configure" widget subcommand
 #
@@ -1465,7 +1478,8 @@ description {Configure --
 # Results:
 #    
 #    Performs typcial "configure" type requests on the widget
-
+    }
+}
 Combobox instproc Configure {w args} {
     variable widgetOptions
     variable defaultEntryCursor
@@ -1789,8 +1803,8 @@ Combobox instproc Configure {w args} {
     }
 }
 
-@ Component Xomti_Combobox {
-description {UpdateVisualAttributes --
+@ Combobox instproc UpdateVisualAttributes {} {
+    description {UpdateVisualAttributes --
 #
 # sets the visual attributes (foreground, background mostly) 
 # based on the current state of the widget (normal/disabled, 
@@ -1812,7 +1826,8 @@ description {UpdateVisualAttributes --
 #
 # Returns:
 #    empty string
-
+    }
+}
 Combobox instproc UpdateVisualAttributes {w} {
 
     upvar ::combobox::${w}::widgets     widgets
@@ -1850,8 +1865,8 @@ Combobox instproc UpdateVisualAttributes {w} {
     }
 }
 
-@ Component Xomti_Combobox {
-description {SetValue --
+@ Combobox instproc SetValue {} {
+    description {SetValue --
 #
 #    sets the value of the combobox and calls the -command, 
 #    if defined
@@ -1864,7 +1879,8 @@ description {SetValue --
 # Returns
 #
 #    Empty string
-
+    }
+}
 Combobox instproc SetValue {w newValue} {
 
     upvar ::combobox::${w}::widgets     widgets
@@ -1902,8 +1918,8 @@ Combobox instproc SetValue {w newValue} {
     return ""
 }
 
-@ Component Xomti_Combobox {
-description {CallCommand --
+@ Combobox instproc CallCommand {} {
+    description {CallCommand --
 #
 #   calls the associated command, if any, appending the new
 #   value to the command to be called.
@@ -1916,7 +1932,8 @@ description {CallCommand --
 # Returns
 #
 #    empty string
-
+    }
+}
 Combobox instproc CallCommand {w newValue} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
@@ -1931,8 +1948,8 @@ Combobox instproc CallCommand {w newValue} {
 }
 
 
-@ Component Xomti_Combobox {
-description {GetBoolean --
+@ Combobox instproc GetBoolean {} {
+    description {GetBoolean --
 #
 #     returns the value of a (presumably) boolean string (ie: it should
 #     do the right thing if the string is "yes", "no", "true", 1, etc
@@ -1946,7 +1963,8 @@ description {GetBoolean --
 #
 #     a 1 or zero, or the value of errorValue if the string isn't
 #     a proper boolean value
-
+    }
+}
 Combobox instproc GetBoolean {value {errorValue 1}} {
     if {[catch {expr {([string trim $value])?1:0}} res]} {
 	return $errorValue
@@ -1955,8 +1973,8 @@ Combobox instproc GetBoolean {value {errorValue 1}} {
     }
 }
 
-@ Component Xomti_Combobox {
-description {convert --
+@ Combobox instproc convert {} {
+    description {convert --
 #
 #     public routine to convert %x, %y and %W binding substitutions.
 #     Given an x, y and or %W value relative to a given widget, this
@@ -1992,7 +2010,8 @@ description {convert --
 #     Supplying "-x 10 -y 20 -W" (in any order) will return a list of
 #     three values: the converted x and y values, and the name of 
 #     the combobox widget.
-
+    }
+}
 Combobox instproc convert {w args} {
     set result {}
     if {![winfo exists $w]} {
@@ -2042,8 +2061,8 @@ Combobox instproc convert {w args} {
     return $result
 }
 
-@ Component Xomti_Combobox {
-description {Canonize --
+@ Combobox instproc Canonize {} {
+    description {Canonize --
 #
 #    takes a (possibly abbreviated) option or command name and either 
 #    returns the canonical name or an error
@@ -2060,7 +2079,8 @@ description {Canonize --
 #    Returns either the canonical form of an option or command,
 #    or raises an error if the option or command is unknown or
 #    ambiguous.
-
+    }
+}
 Combobox instproc Canonize {w object opt} {
     variable widgetOptions
     variable columnOptions
@@ -2153,8 +2173,8 @@ Combobox instproc Canonize {w object opt} {
     }
 }
 
-@ Component IDECore {
-description {HumanizeList --
+@ Combobox instproc HumanizeList {} {
+    description {HumanizeList --
 #
 #    Returns a human-readable form of a list by separating items
 #    by columns, but separating the last two elements with "or"
@@ -2168,7 +2188,8 @@ description {HumanizeList --
 #
 #    A string which as all of the elements joined with ", " or 
 #    the word " or "
-}}
+    }
+}
 Combobox instproc HumanizeList {list} {
 
     if {[llength $list] == 1} {
@@ -2210,6 +2231,8 @@ Combobox proc probably_to_trash {} {
 }
 
 
+@ Combobox proc example {} {
+    description {
 # A simple font display utility.
 # 
 # This program uses two variations of the combobox. One, for the font
@@ -2218,7 +2241,8 @@ Combobox proc probably_to_trash {} {
 # or enter their own size
 
 # substitute your favorite method here...
-
+    }
+}
 Combobox proc example {} {
     # this lets us be reentrant...
     destroy .fontpicker .msg
