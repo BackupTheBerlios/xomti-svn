@@ -1,0 +1,301 @@
+# automatically generated from XOTclIDE
+# script require component IDEBaseGUI
+@ Component IDEInternationalizationHelper {
+description {This plug in help to define Tcl message catalogs to
+provide internationalization.
+
+See Tcl documatation for msgcat.
+
+It do following tasks.
+1. Scanning of components after mc "original" command
+2. provide gui for edit translations
+3. can save files that can be used by ::msgcat::mcload command
+
+Limitation
+1. use :: namespace as default
+2. use alwas system language see ::msgcat::mclocale}
+}
+package provide IDEInternationalizationHelper 0.74
+package require IDEBaseGUI
+Class POTHelper -superclass ::IDE::Browser
+@ ::POTHelper idemeta component IDEInternationalizationHelper
+POTHelper instproc convertPoToMsg {{fileName {}}} {
+    if {$fileName eq ""} {
+         set types {{"POT catalog" .po}}
+         set fileName [IDE::Dialog getOpenFile $types]
+    }
+    if {$fileName eq ""} return
+    set types {{"MSG Tk catalog" .msg}}
+    set outFileName [IDE::Dialog getSaveFile {} $types .msg]
+    if {$fileName eq ""} return
+
+    set if [open $fileName w]
+    set of [open $outFileName w]
+    set waitmode msgid
+    set oldmode msgstr
+    set msgidList [list]
+    set msgstrList [list]
+    while {[gets $if line]>= 0} {
+        if {[regexp {^\s*#} $line] || [string trim $line] eq ""} {
+            puts $of $line
+        } else {
+            if {[regexp "^\s+(".*")" $line _ rest]} {
+                lappend ${oldmode}List $rest
+            } else if {[regexp "^$waitmode .*" $line _ rest]} {
+                set oldmode $waitmode
+                lappend ${oldmode}List $rest
+                if {$waitmode eq msgid && [llength $msgidList]>0} {
+                    puts $of "::msgcat::mcset de $msgidList $msgstrList"
+                }
+                if {$waitmode eq "" msgid} {
+                    set waitmode msgstr
+                } else {
+                    set waitmode msgid
+                }
+            } else {
+                error "await $waitmode key word"
+            }
+        }
+    }
+    close $if
+    close $of
+}
+POTHelper instproc editSave text {
+    my instvar catalog item
+    if {$item<0 || $item>=[llength $catalog]} return
+    ::msgcat::mcset [::msgcat::mclocale] [lindex $catalog $item] $text
+}
+POTHelper instproc excludeIDE {} {
+    set idecore [concat [IDE::System getCoreComponentsAll] [IDE::System getExtraComponents]]
+    foreach index [[self]::components selectedIndex] item [[self]::components selectedItem] {
+        if {[ide::lcontain $idecore $item]} {
+            [self]::components removeSelection $index $index
+        }
+    }
+}
+POTHelper instproc firstItem {} {
+    my setItem 0
+}
+POTHelper instproc getTitle {} {
+    return "Message Catolog - I18n Helper"
+}
+POTHelper instproc initFromExisting {} {
+    my instvar catalog
+    set indicator [array startsearch ::msgcat::Msgs]
+    while {[array anymore ::msgcat::Msgs $indicator]} {
+        set elem [array nextelement ::msgcat::Msgs $indicator]
+        set lan [msgcat::mclocale]
+        if {[regexp "$lan,::,(.+)" $elem _ text]} {
+            lappend $catalog $text
+        }
+    }
+    array donesearch ::msgcat::Msgs $indicator
+    my setItem 0
+}
+POTHelper instproc lastItem {} {
+    my instvar catalog
+    my setItem [expr {[llength $catalog]-1}]
+}
+POTHelper instproc maskString text {
+    for {set x 0} {$x<[string length $text]} {incr x} {
+        set c [string index $text $x]
+        set i [scan $c %c]
+        if {$i>127} {
+            append out "\\u[format %04x $i]"
+        } else {
+            append out $c
+        }
+    }
+    string map {\" \\\"} $out
+}
+POTHelper instproc nextEmptyItem {} {
+    my instvar catalog item
+    set x $item
+    while {$x<[llength $catalog]} {
+        incr x
+        set original [lindex $catalog $x]
+        if {[msgcat::mc $original] eq $original} {
+            my setItem $x
+            return
+        }
+    }
+}
+POTHelper instproc nextItem {} {
+    my setItem [expr {[my set item]+1}]
+}
+POTHelper instproc prevEmptyItem {} {
+    my instvar catalog item
+    set x $item
+    while {$x>0} {
+        incr x -1
+        set original [lindex $catalog $x]
+        if {[msgcat::mc $original] eq $original} {
+            my setItem $x
+            return
+        }
+    }
+}
+POTHelper instproc prevItem {} {
+    my setItem [expr {[my set item]-1}]
+}
+POTHelper instproc readComponents {} {
+   [self]::components setList [IDE::IntroProxy getComponents]
+}
+POTHelper instproc readTranslation {if line o_ref t_ref} {
+    upvar o_ref original
+    upvar t_re translation
+    
+}
+POTHelper instproc resetCatalog {} {
+    my set catalog [list]
+}
+POTHelper instproc saveCatalogAsPot {{fileName {}}} {
+    if {$fileName eq ""} {
+         set types {{"POT catalog" .pot}}
+         set fileName [IDE::Dialog getSaveFile {} $types .pot]
+    }
+    if {$fileName eq ""} return
+    my instvar catalog
+    set f [open $fileName w]
+    puts $f "# POT File generated by XOTclIDE Internationalization Helper PlugIn"
+    foreach str $catalog {
+        puts $f "msgid \"$str\""
+        puts $f {msgstr ""}
+    }
+    close $f
+}
+POTHelper instproc saveMsg {{fileName {}}} {
+    if {$fileName eq ""} {
+         set types {{"MSG catalog" .msg}}
+         set fileName [IDE::Dialog getSaveFile {} $types .msg]
+    }
+    if {$fileName eq ""} return
+    my instvar catalog
+    set f [open $fileName w]
+    puts $f "# Message Catalog File generated by XOTclIDE Internationalization Helper PlugIn"
+    foreach str $catalog {
+        set translation [msgcat::mc $str]
+        if {$str ne $translation} {
+            puts $f "::msgcat::mcset de \"$str\" \"[my maskString $translation]\""
+        } else {
+            puts $f "#::msgcat::mcset de \"$str\" \"###\""
+        }
+    }
+    close $f
+}
+POTHelper instproc scanAllXdobry {} {
+    foreach com [IDE::Component getComponentNames] {
+        if {![string match xdobry::* $com]} continue
+        my scanComponent $com
+    }
+}
+POTHelper instproc scanBody body {
+    set pattern {\[mc "(.+?)"\](.*$)}
+    my instvar catalog
+    while {[regexp $pattern $body _ str body]} {
+        if {[lsearch -exact $catalog $str]<0} {
+            lappend catalog $str
+        }
+    }
+}
+POTHelper instproc scanComponent component {
+     set cobj [IDE::Component getCompObjectForNameIfExist $component]
+     if {$cobj eq ""} {
+         error "$component not found"
+     }
+     foreach pobj [$cobj getProcsGroupsObjects] {
+         foreach proc [$pobj getProcsNames] {
+             my scanBody [info body $proc]
+         }
+     }
+     foreach obj [$cobj getObjects] {
+         foreach proc [$obj info procs] {
+              my scanBody [$obj info body $proc]
+         }
+     }
+     foreach obj [$cobj getClasses] {
+         foreach proc [$obj info procs] {
+              my scanBody [$obj info body $proc]
+         }
+         foreach iproc [$obj info instprocs] {
+              my scanBody [$obj info instbody $iproc]]
+         }
+     }
+}
+POTHelper instproc scanComponents {} {
+    foreach c [[self]::components getList] {
+        my scanComponent $c
+    }
+    my setItem 0
+}
+POTHelper instproc selectAll {} {
+   [self]::components addSelection 0 end
+}
+POTHelper instproc setItem id {
+    my instvar catalog win item
+    if {$id<0 || $id>=[llength $catalog]} return
+    set item $id
+    $win.itemcount configure -text "$id from [llength $catalog]"
+    set original [lindex $catalog $id]
+    [self]::original setText $original
+    set translation [msgcat::mc $original]
+    if {$translation eq $original} {
+        [self]::translation setText ""
+    } else {
+        [self]::translation setTextControler $translation [self]
+    }
+}
+POTHelper instproc specificInit {} {
+    my instvar win
+
+    my set item 0
+    my set catalog [list]
+    
+    message $win.message -text "This tool help to generate message catalog for Tcl internatinalization. It scan sources (after \[mc \"original text\"]), help to produce translation and can genarate .msg files" -width 450
+    
+    frame $win.scan
+    frame $win.buttons
+    frame $win.trans
+    
+    IDE::ListView create [self]::components $win.scan.components -multiselect 1 -width 40
+    button $win.scan.scan -text "Scan Components" -command [list [self] scanComponents]
+    button $win.scan.reread -text "Init from existing msgcat" -command [list [self] initFromExisting]
+    button $win.scan.all -text "Select All Components" -command [list [self] selectAll]
+    button $win.scan.allTcl -text "Exclude IDE Components" -command [list [self] excludeIDE]
+
+    pack $win.scan.components -side left
+    pack $win.scan.scan $win.scan.reread $win.scan.all $win.scan.allTcl -anchor w
+
+    label $win.itemcount
+    
+    button $win.buttons.next -text "Next" -command [list [self] nextItem]
+    button $win.buttons.prev -text "Prev" -command [list [self] prevItem]
+    button $win.buttons.nextEmpty -text "Next Empty" -command [list [self] nextEmptyItem]
+    button $win.buttons.prevEmpty -text "Prev Empty" -command [list [self] prevEmptyItem]
+    button $win.buttons.first -text "Firtst" -command [list [self] firstItem]
+    button $win.buttons.last -text "Last" -command [list [self] lastItem]
+    
+    pack $win.buttons.next $win.buttons.prev $win.buttons.nextEmpty $win.buttons.prevEmpty $win.buttons.first $win.buttons.last -side left
+    
+    IDE::Text create [self]::original $win.trans.original -width 40 -height 20
+    IDE::MethodEdit create [self]::translation $win.trans.translation -width 40 -height 20
+    
+    pack $win.trans.original $win.trans.translation -side left -expand yes -fill both
+        
+    button $win.generate -text "Generate Message Catalog" -command [list [self] saveMsg]
+
+    pack $win.message -anchor w
+    pack $win.scan -anchor w
+    pack $win.buttons -anchor w
+    pack $win.itemcount -anchor w
+    pack $win.trans -fill both -expand yes
+    pack $win.generate -anchor w
+    
+    bind $win <Next> [list [self] nextItem]
+    bind $win <Prior> [list [self] prevItem]
+    my readComponents
+}
+POTHelper proc newBrowser {} {
+  return [my new [Object autoname .i18nhelper]]
+}
+
