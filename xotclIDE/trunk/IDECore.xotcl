@@ -495,14 +495,14 @@ IDE::Component instproc getRequiredFromDeep {} {
     set oreqlist [list]
     foreach req $reqlist {
         if {![ide::lcontain $oreqlist req]} {
-            if {[set scomp [IDE::Component getCompObjectForNameIfExist $req]]!=""} {
-               set sreqlist [$scomp getRequiredFromDeep]
-               foreach sreq $sreqlist {
-                   ide::lappendIfNone oreqlist $sreq
-               }
-               lappend oreqlist $req
+            if {[set scomp [IDE::Component getCompObjectForNameIfExist $req]] ne ""} {
+                set sreqlist [$scomp getRequiredFromDeep]
+                foreach sreq $sreqlist {
+                    ide::lappendIfNone oreqlist $sreq
+                }
+                lappend oreqlist $req
             } else {
-               set oreqlist [concat $oreqlist $req]
+                set oreqlist [concat $oreqlist $req]
             }
         }      
     }
@@ -1752,32 +1752,32 @@ IDE::SystemConfigMap proc asScript {} {
     return $script
 }
 IDE::SystemConfigMap proc checkRequirements compList {
-     set outCompList {}
-     set procList {}
-     set cleanList [ide::lcollect each $compList {lindex $each 0}]
+    set outCompList {}
+    set procList {}
+    set cleanList [ide::lcollect each $compList {lindex $each 0}]
 
-     foreach comp $compList {
-            set cname [lindex $comp 0]
-            if {[ide::lcontain $procList $cname]} continue
-            set cobj [IDE::Component getCompObjectForNameIfExist $cname]
-            if {$cobj!=""} {
-                set reqComps [$cobj getRequiredFromDeep]
-                foreach sreq $reqComps {
-                     if {![ide::lcontain $procList $sreq]} {
-                          set id [lsearch -exact $cleanList $sreq]
-                          if {$id>=0} {
-                              lappend outCompList [lindex $compList $id]
-                          } else {
-                              lappend outCompList $sreq
-                          }
-                          lappend procList $sreq
-                     }
+    foreach comp $compList {
+        set cname [lindex $comp 0]
+        if {[ide::lcontain $procList $cname]} continue
+        set cobj [IDE::Component getCompObjectForNameIfExist $cname]
+        if {$cobj ne ""} {
+            set reqComps [$cobj getRequiredFromDeep]
+            foreach sreq $reqComps {
+                if {![ide::lcontain $procList $sreq]} {
+                    set id [lsearch -exact $cleanList $sreq]
+                    if {$id >= 0} {
+                        lappend outCompList [lindex $compList $id]
+                    } else {
+                        lappend outCompList $sreq
+                    }
+                    lappend procList $sreq
                 }
             }
-            lappend outCompList $comp
-            lappend procList $cname
-     }
-     return $outCompList
+        }
+        lappend outCompList $comp
+        lappend procList $cname
+    }
+    return $outCompList
 }
 IDE::SystemConfigMap proc getCleanedLoadList {components {ignoreLoaded 1}} {
     my instvar dbAvailable packageAvailable
@@ -1892,20 +1892,30 @@ IDE::SystemConfigMap proc loadComponentsFromList loadList {
     }
     IDE::System signalComponentsChanged
 }
+@ IDE::SystemConfigMap proc loadFromFile {} {
+description {This method opens and reads a .cfmap file, sources it and defines IDE::SystemConfigMap object variables:
+
+  fileName         -> .cfmap file
+  configName       -> root/tail file name
+
+  preStartScript   (if defined in file)
+  startScript      (if defined in file)
+  componentsToLoad (if defined in file)
+}
+}
 IDE::SystemConfigMap proc loadFromFile {{file {}}} {
-    my instvar configName fileName
     if {$file eq ""} {
         set file [IDE::Dialog getOpenFile {{ConfigMap .cfmap}}]
     }
     if {$file eq ""} {return 0}
     source $file
-    foreach list {preStartScript startScript componentsToLoad} {
-        if {[info exists $list]} {
-            my set $list [::set $list]
+    foreach var {preStartScript startScript componentsToLoad} {
+        if {[info exists $var]} {
+            my set $var [set $var]
         }
     }
-    set fileName $file
-    set configName [file rootname [file tail $file]]
+    my set fileName $file
+    my set configName [file rootname [file tail $file]]
     return 1
 }
 IDE::SystemConfigMap proc saveAsFile {{file {}}} {

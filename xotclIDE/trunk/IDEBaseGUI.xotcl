@@ -2033,11 +2033,11 @@ IDE::NListView instproc selectItem item {
     # an application modell is available 
     my instvar notify notifyProc
     if {[info exists notify]} {
-       if {[info exists notifyProc]} {
-          $notify $notifyProc $item
-       } else {
-          $notify selectItem $item
-       }
+        if {[info exists notifyProc]} {
+            $notify $notifyProc $item
+        } else {
+            $notify selectItem $item
+        }
     }
 }
 
