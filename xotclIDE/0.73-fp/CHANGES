@@ -1,3 +1,7 @@
+r65:66 (FP) added lock checkbutton to IDE::ListView, useful for IDE::ObjectBrowser+IDE::ObjectsView+IDE::VarsView
+r60:65 (FP) indent cleaning
+r58:60 (FP) file content ordering
+r56:58 (FP) /usr/local/bin/tclsh replaced by standard /bin/sh ...
 # Version 0.73
 * Wed Feb 09 2005 Artur Trzewik
 - changing list selection mode from single to browse (patch by Fabrice Pardo)

@@ -1,3 +1,19 @@
-2005-01-26
-tags/... correspond to official releases from Artur Trzewik (http://www.xdobry.de/xotclIDE/)
-trunk    incorporates my (Fabrice Pardo) changes
+xomti/xotclIDE/README 2005-02-15
+
+tags/0.72/
+tags/0.73/  Correspond to official releases from Artur Trzewik (http://www.xdobry.de/xotclIDE/)
+	    No more, no less.
+
+0.73-fp/    Is the current Artur version with some of my enhancements.
+            I will be glad if you test it.
+	    Warning, it is a test code, given for experimental purpose,
+            without any warranty.
+
+trunk/      Incorporates my last changes.
+            Highly experimental, not to be used.
+
+trunk-0.72/ Previous experimental "trunk/"
+            To be avoided.
+
+-- 
+Fabrice_DOT_Pardo_AT_Lpn_DOT_Cnrs_DOT_fr
