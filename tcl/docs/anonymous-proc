@@ -1,0 +1,201 @@
+2005-02-27 (FP)
+
+Mon but est de pouvoir écrire
+
+    set x [proc foo {} {puts $a}]
+    $x bar
+
+Je définis
+
+    proc foo {x} {puts $a}
+    set x foo
+
+Qu'arrive-t-il lorsque j'appelle
+
+    $x bar
+
+On se retrouve dans tclCompile.c:TclCompileTokens, case TCL_TOKEN_VARIABLE:
+
+
+Ensuite, c'est TclExecuteByteCode qui exécute le code.
+
+Une fois la valeur "foo" de la variable "x" récupérée, Tcl_GetCommandFromObj est appelé
+
+Le type tclCmdNameType est testé, et tclObj.c:SetCmdNameFromAny(foo) appelé.
+
+Le retour de Tcl_GetCommandFromObj donne un (Command *)
+
+
+Il faut créer un nouveau type
+
+2005-02-28
+
+Étude des propositions antérieures
+
+TIP #187
+TUP #194
+
+Le type "tclProcBodyType" n'a pas l'air mal !
+Il sert à référencer des "body" de procédures
+
+Tcl_ProcObjCmd
+
+TclCreateProc
+
+TclNewProcBodyObj
+
+Tcl_ProcObjCmd
+
+TclCreateProc
+
+TclNewProcBodyObj
+ProcBodyDup
+
+Dans ProcBodyFree, il référence une structure "Proc"
+
+
+typedef struct Proc {
+    struct Interp *iPtr;	  /* Interpreter for which this command
+				   * is defined. */
+    int refCount;		  /* Reference count: 1 if still present
+				   * in command table plus 1 for each call
+				   * to the procedure that is currently
+				   * active. This structure can be freed
+				   * when refCount becomes zero. */
+    struct Command *cmdPtr;	  /* Points to the Command structure for
+				   * this procedure. This is used to get
+				   * the namespace in which to execute
+				   * the procedure. */
+    Tcl_Obj *bodyPtr;		  /* Points to the ByteCode object for
+				   * procedure's body command. */
+    int numArgs;		  /* Number of formal parameters. */
+    int numCompiledLocals;	  /* Count of local variables recognized by
+				   * the compiler including arguments and
+				   * temporaries. */
+    CompiledLocal *firstLocalPtr; /* Pointer to first of the procedure's
+				   * compiler-allocated local variables, or
+				   * NULL if none. The first numArgs entries
+				   * in this list describe the procedure's
+				   * formal arguments. */
+    CompiledLocal *lastLocalPtr;  /* Pointer to the last allocated local
+				   * variable or NULL if none. This has
+				   * frame index (numCompiledLocals-1). */
+} Proc;
+
+/*
+ * A Command structure exists for each command in a namespace. The
+ * Tcl_Command opaque type actually refers to these structures.
+ */
+
+typedef struct Command {
+    Tcl_HashEntry *hPtr;	/* Pointer to the hash table entry that
+				 * refers to this command. The hash table is
+				 * either a namespace's command table or an
+				 * interpreter's hidden command table. This
+				 * pointer is used to get a command's name
+				 * from its Tcl_Command handle. NULL means
+				 * that the hash table entry has been
+				 * removed already (this can happen if
+				 * deleteProc causes the command to be
+				 * deleted or recreated). */
+    Namespace *nsPtr;		/* Points to the namespace containing this
+				 * command. */
+    int refCount;		/* 1 if in command hashtable plus 1 for each
+				 * reference from a CmdName Tcl object
+				 * representing a command's name in a
+				 * ByteCode instruction sequence. This
+				 * structure can be freed when refCount
+				 * becomes zero. */
+    int cmdEpoch;		/* Incremented to invalidate any references
+				 * that point to this command when it is
+				 * renamed, deleted, hidden, or exposed. */
+    CompileProc *compileProc;	/* Procedure called to compile command. NULL
+				 * if no compile proc exists for command. */
+    Tcl_ObjCmdProc *objProc;	/* Object-based command procedure. */
+    ClientData objClientData;	/* Arbitrary value passed to object proc. */
+    Tcl_CmdProc *proc;		/* String-based command procedure. */
+    ClientData clientData;	/* Arbitrary value passed to string proc. */
+    Tcl_CmdDeleteProc *deleteProc;
+				/* Procedure invoked when deleting command
+				 * to, e.g., free all client data. */
+    ClientData deleteData;	/* Arbitrary value passed to deleteProc. */
+    int flags;			/* Miscellaneous bits of information about
+				 * command. See below for definitions. */
+    ImportRef *importRefPtr;	/* List of each imported Command created in
+				 * another namespace when this command is
+				 * imported. These imported commands
+				 * redirect invocations back to this
+				 * command. The list is used to remove all
+				 * those imported commands when deleting
+				 * this "real" command. */
+    CommandTrace *tracePtr;	/* First in list of all traces set for this
+				 * command. */
+} Command;
+
+2005-03-01
+
+#############################
+# Analyse de Tcl_ProcObjCmd #
+#############################
+
+- bricole pour analyser le "name" de la procédure
+- appelle TclCreateProc pour créer une structure "Proc"
+  (Il faudra ultérieurement appeler TclProcCleanupProc pour la détruire)
+  Analyse de TclCreateProc:
+  - alloue une structure "Proc"
+    Commentaire bizarre "Now initialize the new procedure's cmdPtr field"
+    alors que ce sera fait dans Tcl_ProcObjCmd
+- appelle Tcl_CreateCommand pour créer une structure "Command"
+  [
+   Il faudra s'en passer pour les procédures anonymes
+   Problème : quid du namespace ?
+     l'inclure dans le l'objet, ou s'en passer
+  ]
+- met à jour le champ cmdPtr
+- ne retourne aucun objet dans l'interpréteur, sauf en cas d'erreur
+
+####################################
+# Qui appelle TclProcCleanupProc ? #
+####################################
+
+- TclObjInterpProc
+  - enregistré par Tcl_CreateObjCommand dans Tcl_ProcObjCmd
+- TclProcDeleteProc
+  - enregistré par Tcl_CreateObjCommand dans Tcl_ProcObjCmd
+  - enregistré dans le tableau tclIntStubs
+
+########################################
+# Qui appelle  Tcl_GetCommandFromObj ? #
+########################################
+
+- TclEvalObjvInternal
+  - TclEvalObjvInternal (récursif)
+  - Tcl_EvalObjv
+  - Tcl_EvalEx
+  - TclExecuteByteCode
+- TclExecuteByteCode
+  - Tcl_ExprObj
+  - TclCompEvalObj
+- NamespaceOriginCmd
+- NamespaceWhichCmd
+
+
+#######################
+# Que fait "rename" ? #
+#######################
+
+- Appelle TclRenameCommand
+
+#####################
+# Points à examiner #
+#####################
+
+- Autrefois, "proc {} {} {puts foobar}" était autorisé, mais sans intérêt
+- "rename foo {}" peut conserver son sens
+- Qu'arrive-t-il avec
+    set p [proc {} {} {puts foo; rename $::p {}; puts bar
+  Il arrivera une erreur, parce que "rename" récupère une chaine genre "0x... (read-only)",
+  qui ne correcond à aucune commande. 
+- Que devient-il de l'introspection "info level 0" ?
+- Finalement, c'est la commande qui est anonyme.
+- Quels sont les conditions d'appel et quel est l'effet de Tcl_HideCommand
