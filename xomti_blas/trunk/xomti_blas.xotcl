@@ -2,6 +2,7 @@ package require xomti 0.1
 package require xomti_assume 0.1
 package require xomti_critcl 0.3
 package require xomti_memory 0.1
+package require xomti_types 0.1
 
 Class create Xomti_Blas
 
@@ -54,16 +55,20 @@ Xomti_Blas_vector_double instproc init {args} {
     next
 }
 
-Xomti_Blas_vector_double instproc c_set_at {i x} {
-    Xomti_Memory write_double [expr {[my set data] + $i * [my set word_size]}] $x
+Xomti_Blas_vector instproc compute_byte_index {i} {
+    set index [Xomti_Type_size_t new $i] ;#  -volatile]
+    $index assume_less_than [my set length] "Out of bounds"
+    $index *= [my set word_size]
+    $index += [my set data] 
+    return $index
 }
 
 Xomti_Blas_vector_double instproc c_get_at {i} {
-    Xomti_Assume size_t $i
-    if {$i < 0 || $i >= [my set length]} {
-	error "Out of bounds"
-    } 
-    return [Xomti_Memory read_double [expr {[my set data] + $i * [my set word_size]}]]
+    return [Xomti_Memory read_double [my compute_byte_index $i]]
+}
+
+Xomti_Blas_vector_double instproc c_set_at {i x} {
+    Xomti_Memory write_double [my compute_byte_index $i] $x
 }
 
 Class create Xomti_Blas_subvector_double

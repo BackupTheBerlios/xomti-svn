@@ -14,11 +14,11 @@ Xomti_Memory proc free {ptr} {
 }
 
 Xomti_Memory proc read_double {ptr} {
-    return [Xomti_Memory::_read_double_ $ptr]
+    return [Xomti_Memory::_read_double_ [$ptr get_value]]
 }
 
 Xomti_Memory proc write_double {ptr x} {
-    Xomti_Memory::_write_double_ $ptr $x
+    Xomti_Memory::_write_double_ [$ptr get_value] $x
 }
 
 Xomti_Memory proc word_size_of {type} {
@@ -36,7 +36,7 @@ Xomti_Memory proc word_size_of {type} {
 
 Xomti_Critcl_builder create Xomti_Memory::builder
 
-Xomti_Memory::builder ccode "#include <stdlib.h>"
+Xomti_Memory::builder ccode {#include <stdlib.h>}
 
 Xomti_Memory::builder cproc Xomti_Memory::_calloc_ {size_t length size_t size} void* {
     return calloc(length, size);
@@ -48,7 +48,7 @@ Xomti_Memory::builder cproc Xomti_Memory::_free_ {long ptr} void {
 
 Xomti_Memory::builder cproc Xomti_Memory::_read_double_ {size_t ptr} double {
     return *(double*)ptr;
-} 
+}
 
 Xomti_Memory::builder cproc Xomti_Memory::_write_double_ {size_t ptr double x} void {
     *(double*)ptr = x;
