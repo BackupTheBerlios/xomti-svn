@@ -1,8 +1,5 @@
-#!/bin/sh
-#-*-tcl-*-
-# the next line restarts using wish \
-exec wish "$0" -- ${1+"$@"}
-
+@ Component TkDiff {
+    description {
 ###############################################################################
 #
 # TkDiff -- A graphical front-end to diff for Unix and Windows.
@@ -54,320 +51,331 @@ exec wish "$0" -- ${1+"$@"}
 # right up front and display potential problems on stdout instead of
 # waiting until the window display.
 ###############################################################################
+    }
+}
 
+package provide TkDiff 4.0.2
 
-# get this out of the way -- we want to draw the whole user interface
-# behind the scenes, then pop up in all of its well-laid-out glory
-set screenWidth [winfo vrootwidth .]
-set screenHeight [winfo vrootheight .]
-wm withdraw .
+Class create TkDiff
+TkDiff proc initializeAfterLoad {} {
 
-# set a couple o' globals that we might need sooner than later
-set g(name) "TkDiff"
-set g(version) "4.0.2"
-set g(started) 0
+    set win [toplevel .tkdiff]
 
-# ok, I'll admit -- this is a personal preference. I suppose I ought to
-# move this into the preferences or remove it entirely. Sue me. :-)
-option add "*TearOff" false 100
-option add "*BorderWidth" 1 100
-# tkTabToWindow is a private interface that should not have been used
-# but we need it so we'll expose it as of tk8.4
-#if { $tk_version >= 8.4 } {
-   #::tk::unsupported::ExposePrivateCommand tk*
-#}
+    # get this out of the way -- we want to draw the whole user interface
+    # behind the scenes, then pop up in all of its well-laid-out glory
+    set screenWidth [winfo vrootwidth $win]
+    set screenHeight [winfo vrootheight $win]
+    wm withdraw $win
+    
+    # set a couple o' globals that we might need sooner than later
+    set g(name) "TkDiff"
+    set g(version) "4.0.2"
+    set g(started) 0
 
-# determine the windowing platform, since there are different ways to
-# do this for different versions of tcl
-if {[catch {tk windowingsystem} g(windowingSystem)]} {
-    if {"$::tcl_platform(platform)" == "windows"} {
-        set g(windowingSystem) "win32"
-    } elseif {"$::tcl_platform(platform)" == "unix"} {
-        set g(windowingSystem) "x11"
-    } elseif {"$::tcl_platform(platform)" == "macintosh"} {
-        set g(windowingSystem) "classic"
+    # ok, I'll admit -- this is a personal preference. I suppose I ought to
+    # move this into the preferences or remove it entirely. Sue me. :-)
+    option add "*TearOff" false 100
+    option add "*BorderWidth" 1 100
+    # tkTabToWindow is a private interface that should not have been used
+    # but we need it so we'll expose it as of tk8.4
+    #if { $tk_version >= 8.4 } {
+    #::tk::unsupported::ExposePrivateCommand tk*
+    #}
+    
+    # determine the windowing platform, since there are different ways to
+    # do this for different versions of tcl
+    if {[catch {tk windowingsystem} g(windowingSystem)]} {
+	if {"$::tcl_platform(platform)" == "windows"} {
+	    set g(windowingSystem) "win32"
+	} elseif {"$::tcl_platform(platform)" == "unix"} {
+	    set g(windowingSystem) "x11"
+	} elseif {"$::tcl_platform(platform)" == "macintosh"} {
+	    set g(windowingSystem) "classic"
+	} else {
+	    # this should never happen, but just to be sure...
+	    set g(windowingSystem) "x11"
+	}
+    }
+    
+    ###############################################################################
+    # determine the name of the temporary directory and the name of
+    # the rc file, both of which are dependent on the platform.
+    ###############################################################################
+    # This is overridden by the preference in .tkdiffrc except for the very first
+    # time you run
+    switch $tcl_platform(platform) {
+	windows {
+	    if {[info exists env(TEMP)]} {
+		set opts(tmpdir) [file nativename $env(TEMP)]
+	    } else {
+		set opts(tmpdir) C:/temp
+	    }
+	    set basercfile "_tkdiff.rc"
+	}
+	default {
+	    if {[info exists env(TMPDIR)]} {
+		set opts(tmpdir) $env(TMPDIR)
+	    } else {
+		set opts(tmpdir) /tmp
+	    }
+	    set basercfile ".tkdiffrc"
+	}
+    }
+    
+    ###############################################################################
+    # compute preferences file location. Note that TKDIFFRC can hold either
+    # a directory or a file, though we document it as being a file name
+    ###############################################################################
+    if {[info exists env(TKDIFFRC)]} {
+	set rcfile $env(TKDIFFRC)
+	if {[file isdirectory $rcfile]} {
+	    set rcfile [file join $rcfile $basercfile]
+	}
+	
+    } elseif {[info exists env(HOME)]} {
+	set rcfile [file join $env(HOME) $basercfile]
+	
     } else {
-        # this should never happen, but just to be sure...
-        set g(windowingSystem) "x11"
+	set rcfile [file join "/" $basercfile]
     }
-}
-
-###############################################################################
-# determine the name of the temporary directory and the name of
-# the rc file, both of which are dependent on the platform.
-###############################################################################
-# This is overridden by the preference in .tkdiffrc except for the very first
-# time you run
-switch $tcl_platform(platform) {
-windows {
-        if {[info exists env(TEMP)]} {
-            set opts(tmpdir) [file nativename $env(TEMP)]
-        } else {
-            set opts(tmpdir) C:/temp
-        }
-        set basercfile "_tkdiff.rc"
-    }
-default {
-        if {[info exists env(TMPDIR)]} {
-            set opts(tmpdir) $env(TMPDIR)
-        } else {
-            set opts(tmpdir) /tmp
-        }
-        set basercfile ".tkdiffrc"
-    }
-}
-
-###############################################################################
-# compute preferences file location. Note that TKDIFFRC can hold either
-# a directory or a file, though we document it as being a file name
-###############################################################################
-if {[info exists env(TKDIFFRC)]} {
-    set rcfile $env(TKDIFFRC)
-    if {[file isdirectory $rcfile]} {
-        set rcfile [file join $rcfile $basercfile]
-    }
-
-} elseif {[info exists env(HOME)]} {
-    set rcfile [file join $env(HOME) $basercfile]
-
-} else {
-    set rcfile [file join "/" $basercfile]
-}
-
-###############################################################################
-# Fonts.
-set sysfont [font actual system]
-#puts "system font: $sysfont"
-
-# See what the native menu font is.
-. configure \
-        -menu .native
-menu .native
-set menufont [lindex [.native configure -font] 3]
-destroy .native
-
-# Find out what the tk default is
-label .testlbl \
+    
+    ###############################################################################
+    # Fonts.
+    set sysfont [font actual system]
+    #puts "system font: $sysfont"
+    
+    # See what the native menu font is.
+    $win configure \
+        -menu $win.native
+    menu $win.native
+    set menufont [lindex [$win.native configure -font] 3]
+    destroy $win.native
+    
+    # Find out what the tk default is
+    label $win.testlbl \
         -text "LABEL"
-set labelfont [lindex [.testlbl configure -font] 3]
-destroy .testlbl
+    set labelfont [lindex [$win.testlbl configure -font] 3]
+    destroy $win.testlbl
+    
+    text $win.testtext
+    set textfont [lindex [$win.testtext configure -font] 3]
+    destroy $win.testtext
+    
+    entry $win.testent
+    set w(selcolor) [lindex [$win.testent configure -selectbackground] 4]
+    set entryfont [lindex [$win.testent configure -font] 3]
+    destroy $win.testent
+    # the above results in a nearly undistinguishable darker gray for the
+    # selected color (rh8 with tk 8.3.3-74) "#c3c3c3"
+    set w(selcolor) "#b03060"
+    
+    # Make sure they're specified in points not pixels.  AquaTk doesn't.
+    if {! [regexp -- {-} $labelfont]} {
+	regsub { (\d+)} $labelfont { -\1} labelfont
+    }
+    if {! [regexp -- {-} $menufont]} {
+	regsub { (\d+)} $menufont { -\1} menufont
+    }
+    if {! [regexp -- {-} $textfont]} {
+	regsub { (\d+)} $textfont { -\1} textfont
+    }
+    if {! [regexp -- {-} $entryfont]} {
+	regsub { (\d+)} $entryfont { -\1} entryfont
+    }
+    #puts "menufont $menufont"
+    #puts "labelfont $labelfont"
+    #puts "textfont $textfont"
+    #puts "entryfont $entryfont"
+    
+    set font [list $textfont]
+    set bold [list [concat $textfont bold]]
+    #puts "font: $font"
+    #puts "bold: $bold\n"
+    option add *Label.font $labelfont userDefault
+    option add *Button.font $labelfont userDefault
+    option add *Menu.font $menufont userDefault
+    option add *Entry.font $entryfont userDefault
+    
+    # This makes tk_dialog use our font.  The default tends to be terrible
+    # no matter what platform
+    option add *Dialog.msg.font $labelfont userDefault
+    
+    ###############################################################################
+    # more initialization...
+    ###############################################################################
+    
+    array set g {
+	ancfileset      0
+	changefile      "tkdiff-change-bars.out"
+	destroy         ""
+	ignore_event,1  0
+	ignore_event,2  0
+	ignore_hevent,1 0
+	ignore_hevent,2 0
+	initOK          0
+	mapborder       0
+	mapheight       0
+	mergefile       "tkdiff-merge.out"
+	returnValue     0
+	showmerge       0
+	started         0
+	mergefileset    0
+	tempfiles       ""
+	thumbMinHeight  10
+	thumbHeight     10
+    }
+    
+    array set finfo {
+	pth,1        ""
+	pth,2        ""
+	title        {}
+	tmp,1        0
+	tmp,2        0
+    }
+    
+    ###############################################################################
+    # These options may be changed at runtime
+    ###############################################################################
+    
+    array set opts {
+	autocenter        1
+	autoselect        0
+	colorcbs        0
+	customCode        {}
+	diffcmd        "diff"
+	ignoreblanksopt "-b"
+	ignoreblanks 0
+	editor        ""
+	geometry        "80x30"
+	showcbs        1
+	showln        1
+	showmap        1
+	showlineview 0
+	showinline1 0
+	showinline2 1
+	syncscroll        1
+	toolbarIcons 1
+	tagcbs        0
+	tagln        0
+	tagtext        1
+	tabstops    8
+    }
+    
+    if {$tcl_platform(platform) == "windows"} {
+	set opts(fancyButtons) 1
+	set opts(relief) flat
+    } else {
+	set opts(fancyButtons) 0
+	set opts(relief) raised
+    }
+    
+    # reporting options
+    array set report {
+	doSideLeft                 0
+	doLineNumbersLeft         1
+	doChangeMarkersLeft         1
+	doTextLeft                 1
+	doSideRight                 1
+	doLineNumbersRight         1
+	doChangeMarkersRight 1
+	doTextRight                 1
+	filename                 "tkdiff.out"
+    }
+    
+    
+    if {[string first "color" [winfo visual .]] >= 0} {
+	# We have color
+	# (but, let's not go crazy...)
+	
+	set colordel Tomato
+	set colorins PaleGreen
+	set colorchg DodgerBlue
+	
+	array set opts [subst {
+	    textopt    "-background white -foreground black -font $font"
+	    currtag    "-background Khaki"
+	    difftag    "-background gray"
+	    deltag     "-background $colordel -font $bold"
+	    instag     "-background $colorins -font $bold"
+	    chgtag     "-background LightSteelBlue"
+	    overlaptag "-background yellow"
+	    bytetag    "-background blue -foreground white"
+	    inlinetag  "-background $colorchg -font $bold"
+	    -          "-background $colordel -foreground $colorins"
+	    +          "-background $colorins -foreground $colordel"
+	    !          "-background $colorchg -foreground $colorchg"
+	    ?          "-background yellow -foreground yellow"
+	    mapins     "$colorins"
+	    mapdel     "$colordel"
+	    mapchg     "$colorchg"
+	}]
+	
+    } else {
+	# Assume only black and white
+	set bg "black"
+	array set opts [subst {
+	    textopt    "-background white -foreground black -font $font"
+	    currtag    "-background black -foreground white"
+	    difftag    "-background white -foreground black -font $bold"
+	    deltag     "-background black -foreground white"
+	    instag     "-background black -foreground white"
+	    chgtag     "-background black -foreground white"
+	    overlaptag "-background black -foreground white"
+	    bytetag    "-underline 1"
+	    inlinetag  "-underline 1"
+	    -          "-background black -foreground white"
+	    +          "-background black -foreground white"
+	    !          "-background black -foreground white"
+	    ?          "-background black -foreground white"
+	    mapins     "black"
+	    mapdel     "black"
+	    mapchg     "black"
+	}]
+    }
+    
+    # make sure wrapping is turned off. This might piss off a few people,
+    # but it would screw up the display to have things wrap
+    set opts(textopt) "$opts(textopt) -wrap none"
 
-text .testtext
-set textfont [lindex [.testtext configure -font] 3]
-destroy .testtext
+    ###############################################################################
+    # Source the rc file, which may override some of the defaults
+    # Any errors will be reported. Before doing so, we need to define the
+    # "define" proc, which lets the rc file have a slightly more human-friendly
+    # interface. Old-style .rc files should still load just fine for now, though
+    # it ought to be noted new .rc files won't be able to be processed by older
+    # versions of TkDiff. That shouldn't be a problem.
+    ###############################################################################
 
-entry .testent
-set w(selcolor) [lindex [.testent configure -selectbackground] 4]
-set entryfont [lindex [.testent configure -font] 3]
-destroy .testent
-# the above results in a nearly undistinguishable darker gray for the
-# selected color (rh8 with tk 8.3.3-74) "#c3c3c3"
-set w(selcolor) "#b03060"
+    if {[file exists $rcfile]} {
+	
+	if {[catch {source $rcfile} error]} {
+	    set startupError [join [list "There was an error in processing your \
+            startup file." "\n$g(name) will still run, but some of your \
+            preferences" "\nmay not be in effect." "\n\nFile: $rcfile" \
+					"\nError: $error"] " "]
+	}
+    }
+    
+    # a hack to handle older preferences files...
+    # if the user has a diffopt defined in their rc file, we'll magically
+    # convert that to diffcmd...
+    if {[info exists opts(diffopt)]} {
+	set opts(diffcmd) "diff $opts(diffopt)"
+    }
+    
+    ###############################################################################
+    # Work-around for bad font approximations,
+    # as suggested by Don Libes (libes@nist.gov).
+    ###############################################################################
+    catch {tk scaling [expr 100.0 / 72]}
 
-# Make sure they're specified in points not pixels.  AquaTk doesn't.
-if {! [regexp -- {-} $labelfont]} {
-    regsub { (\d+)} $labelfont { -\1} labelfont
+    main
 }
-if {! [regexp -- {-} $menufont]} {
-    regsub { (\d+)} $menufont { -\1} menufont
-}
-if {! [regexp -- {-} $textfont]} {
-    regsub { (\d+)} $textfont { -\1} textfont
-}
-if {! [regexp -- {-} $entryfont]} {
-    regsub { (\d+)} $entryfont { -\1} entryfont
-}
-#puts "menufont $menufont"
-#puts "labelfont $labelfont"
-#puts "textfont $textfont"
-#puts "entryfont $entryfont"
-
-set font [list $textfont]
-set bold [list [concat $textfont bold]]
-#puts "font: $font"
-#puts "bold: $bold\n"
-option add *Label.font $labelfont userDefault
-option add *Button.font $labelfont userDefault
-option add *Menu.font $menufont userDefault
-option add *Entry.font $entryfont userDefault
-
-# This makes tk_dialog use our font.  The default tends to be terrible
-# no matter what platform
-option add *Dialog.msg.font $labelfont userDefault
-
-###############################################################################
-# more initialization...
-###############################################################################
-
-array set g {
-    ancfileset      0
-    changefile      "tkdiff-change-bars.out"
-    destroy         ""
-    ignore_event,1  0
-    ignore_event,2  0
-    ignore_hevent,1 0
-    ignore_hevent,2 0
-    initOK          0
-    mapborder       0
-    mapheight       0
-    mergefile       "tkdiff-merge.out"
-    returnValue     0
-    showmerge       0
-    started         0
-    mergefileset    0
-    tempfiles       ""
-    thumbMinHeight  10
-    thumbHeight     10
-}
-
-array set finfo {
-    pth,1        ""
-    pth,2        ""
-    title        {}
-    tmp,1        0
-    tmp,2        0
-}
-
-###############################################################################
-# These options may be changed at runtime
-###############################################################################
-
-array set opts {
-    autocenter        1
-    autoselect        0
-    colorcbs        0
-    customCode        {}
-    diffcmd        "diff"
-    ignoreblanksopt "-b"
-    ignoreblanks 0
-    editor        ""
-    geometry        "80x30"
-    showcbs        1
-    showln        1
-    showmap        1
-    showlineview 0
-    showinline1 0
-    showinline2 1
-    syncscroll        1
-    toolbarIcons 1
-    tagcbs        0
-    tagln        0
-    tagtext        1
-    tabstops    8
-}
-
-if {$tcl_platform(platform) == "windows"} {
-    set opts(fancyButtons) 1
-    set opts(relief) flat
-} else {
-    set opts(fancyButtons) 0
-    set opts(relief) raised
-}
-
-# reporting options
-array set report {
-    doSideLeft                 0
-    doLineNumbersLeft         1
-    doChangeMarkersLeft         1
-    doTextLeft                 1
-    doSideRight                 1
-    doLineNumbersRight         1
-    doChangeMarkersRight 1
-    doTextRight                 1
-    filename                 "tkdiff.out"
-}
-
-
-if {[string first "color" [winfo visual .]] >= 0} {
-    # We have color
-    # (but, let's not go crazy...)
-
-    set colordel Tomato
-    set colorins PaleGreen
-    set colorchg DodgerBlue
-
-    array set opts [subst {
-        textopt    "-background white -foreground black -font $font"
-        currtag    "-background Khaki"
-        difftag    "-background gray"
-        deltag     "-background $colordel -font $bold"
-        instag     "-background $colorins -font $bold"
-        chgtag     "-background LightSteelBlue"
-        overlaptag "-background yellow"
-        bytetag    "-background blue -foreground white"
-        inlinetag  "-background $colorchg -font $bold"
-        -          "-background $colordel -foreground $colorins"
-        +          "-background $colorins -foreground $colordel"
-        !          "-background $colorchg -foreground $colorchg"
-        ?          "-background yellow -foreground yellow"
-        mapins     "$colorins"
-        mapdel     "$colordel"
-        mapchg     "$colorchg"
-    }]
-
-} else {
-    # Assume only black and white
-    set bg "black"
-    array set opts [subst {
-        textopt    "-background white -foreground black -font $font"
-        currtag    "-background black -foreground white"
-        difftag    "-background white -foreground black -font $bold"
-        deltag     "-background black -foreground white"
-        instag     "-background black -foreground white"
-        chgtag     "-background black -foreground white"
-        overlaptag "-background black -foreground white"
-        bytetag    "-underline 1"
-        inlinetag  "-underline 1"
-        -          "-background black -foreground white"
-        +          "-background black -foreground white"
-        !          "-background black -foreground white"
-        ?          "-background black -foreground white"
-        mapins     "black"
-        mapdel     "black"
-        mapchg     "black"
-    }]
-}
-
-# make sure wrapping is turned off. This might piss off a few people,
-# but it would screw up the display to have things wrap
-set opts(textopt) "$opts(textopt) -wrap none"
-
-###############################################################################
-# Source the rc file, which may override some of the defaults
-# Any errors will be reported. Before doing so, we need to define the
-# "define" proc, which lets the rc file have a slightly more human-friendly
-# interface. Old-style .rc files should still load just fine for now, though
-# it ought to be noted new .rc files won't be able to be processed by older
-# versions of TkDiff. That shouldn't be a problem.
-###############################################################################
 
 proc define {name value} {
     global opts
     set opts($name) $value
 }
-
-if {[file exists $rcfile]} {
-
-    if {[catch {source $rcfile} error]} {
-        set startupError [join [list "There was an error in processing your \
-            startup file." "\n$g(name) will still run, but some of your \
-            preferences" "\nmay not be in effect." "\n\nFile: $rcfile" \
-            "\nError: $error"] " "]
-    }
-}
-
-# a hack to handle older preferences files...
-# if the user has a diffopt defined in their rc file, we'll magically
-# convert that to diffcmd...
-if {[info exists opts(diffopt)]} {
-    set opts(diffcmd) "diff $opts(diffopt)"
-}
-
-###############################################################################
-# Work-around for bad font approximations,
-# as suggested by Don Libes (libes@nist.gov).
-###############################################################################
-catch {tk scaling [expr 100.0 / 72]}
 
 proc do-exit {{returncode {}}} {
     global g
@@ -1125,8 +1133,8 @@ proc init-files {} {
             do-error "Invalid command line!\n $argv\nSee the help for valid   \
                  command line parameters."
             do-usage
-            tkwait window .usage
-            destroy .
+            tkwait window $win.usage
+            destroy $win
             error "Fatal"
         }
     }
@@ -1141,7 +1149,7 @@ proc init-files {} {
     }
     set g(initOK) 1
 
-    wm title . "$finfo(title) - $g(name) $g(version)"
+    wm title $win "$finfo(title) - $g(name) $g(version)"
 }
 
 ###############################################################################
@@ -1163,24 +1171,24 @@ proc create-display {} {
     # the GUI code, and can be blown away (or not, if we want to
     # be able to call this routine to recreate the display...)
     catch {
-        destroy .menubar
-        destroy .toolbar
-        destroy .client
-        destroy .map
-        destroy .status
+        destroy $win.menubar
+        destroy $win.toolbar
+        destroy $win.client
+        destroy $win.map
+        destroy $win.status
     }
 
     # create the top level frames and store them in a global
     # array..
-    set w(client) .client
-    set w(menubar) .menubar
-    set w(toolbar) .toolbar
-    set w(status) .status
+    set w(client) $win.client
+    set w(menubar) $win.menubar
+    set w(toolbar) $win.toolbar
+    set w(status) $win.status
 
     # other random windows...
-    set w(preferences) .pref
-    set w(findDialog) .findDialog
-    set w(popupMenu) .popupMenu
+    set w(preferences) $win.pref
+    set w(findDialog) $win.findDialog
+    set w(popupMenu) $win.popupMenu
 
     # now, simply build all the pieces
     build-menubar
@@ -1189,23 +1197,23 @@ proc create-display {} {
     build-status
     build-popupMenu
 
-    frame .separator1 \
+    frame $win.separator1 \
             -height 2 \
             -borderwidth 2 \
             -relief groove
-    frame .separator2 \
+    frame $win.separator2 \
             -height 2 \
             -borderwidth 2 \
             -relief groove
 
     # ... and fit it all together...
-    . configure \
+    $win configure \
             -menu $w(menubar)
     pack $w(toolbar) \
             -side top \
             -fill x \
             -expand n
-    pack .separator1 \
+    pack $win.separator1 \
             -side top \
             -fill x \
             -expand n
@@ -1214,7 +1222,7 @@ proc create-display {} {
             -side top \
             -fill both \
             -expand y
-    pack .separator2 \
+    pack $win.separator2 \
             -side top \
             -fill x \
             -expand n
@@ -1236,7 +1244,7 @@ proc create-display {} {
     apply 0
 
     # Make sure temporary files get deleted
-    bind . <Destroy> {del-tmp}
+    bind $win <Destroy> {del-tmp}
 
     # other misc. bindings
     common-navigation $w(LeftText) $w(LeftInfo) $w(LeftCB) $w(RightText) \
@@ -1254,7 +1262,7 @@ proc create-display {} {
     # if the user toggles scrollbar syncing, we want to make sure
     # they sync up immediately
     trace variable opts(syncscroll) w toggleSyncScroll
-    wm deiconify .
+    wm deiconify $win.
     focus \
             -force $w(RightText)
     update idletasks
@@ -2020,8 +2028,8 @@ proc show-find {} {
 
     if {![winfo exists $w(findDialog)]} {
         toplevel $w(findDialog)
-        wm group $w(findDialog) .
-        wm transient $w(findDialog) .
+        wm group $w(findDialog) $win.
+        wm transient $w(findDialog) $win.
         wm title $w(findDialog) "$g(name) Find"
 
         if {$g(windowingSystem) == "aqua"} {
@@ -2244,11 +2252,11 @@ proc show-find {} {
 
 proc do-copy {} {
     clipboard clear \
-            -displayof .
+            -displayof $win
     # figure out which window has the selection...
     catch {
         clipboard append [selection get \
-                -displayof .]
+                -displayof $win]
     }
 }
 
@@ -3324,7 +3332,7 @@ proc map-move-thumb {y1 y2} {
 proc common-navigation {args} {
     global w
 
-    bind . <Control-f> do-find
+    bind $win. <Control-f> do-find
 
     foreach widget $args {
         # this effectively disables the widget, without having to
@@ -3500,8 +3508,8 @@ proc customize {} {
     toplevel $w(preferences)
 
     wm title $w(preferences) "$g(name) Preferences"
-    wm transient $w(preferences) .
-    wm group $w(preferences) .
+    wm transient $w(preferences) $win
+    wm group $w(preferences) $win
 
     if {$g(windowingSystem) == "aqua"} {
         setAquaDialogStyle $w(preferences)
@@ -4008,7 +4016,7 @@ proc apply {{remark 0}} {
     eval "$w(RightCB)        configure $tmpopts(textopt)"
     eval "$w(RightInfo) configure $tmpopts(textopt)"
 
-    set gridsize [wm grid .]
+    set gridsize [wm grid $win]
     set gridx [lindex $gridsize 2]
     set gridy [lindex $gridsize 3]
     set maxunitsx [expr {$screenWidth / $gridx}]
@@ -4614,21 +4622,21 @@ proc merge-create-window {} {
     global w
     global g
 
-    set top .merge
+    set top $win.merge
     set w(merge) $top
 
     catch {destroy $top}
 
     toplevel $top
-    set rx [winfo rootx .]
-    set ry [winfo rooty .]
-    set px [winfo width .]
-    set py [winfo height .]
+    set rx [winfo rootx $win]
+    set ry [winfo rooty $win]
+    set px [winfo width $win]
+    set py [winfo height $win]
     set x [expr {$rx + $px / 4}]
     set y [expr {$ry + $py / 2}]
     wm geometry $top "+${x}+$y"
 
-    wm group $top .
+    wm group $top $win
     wm title $top "$g(name) Merge Preview"
 
     frame $top.frame \
@@ -4789,7 +4797,7 @@ proc merge-read-file {} {
     global w
 
     # hack; need to find a cleaner way...
-    catch {destroy .merge}
+    catch {destroy $win.merge}
     merge-create-window
 
     set hndl [open "$finfo(pth,1)" r]
@@ -6159,7 +6167,7 @@ proc set-cursor {args} {
     global current
     global w
 
-    . configure \
+    $win configure \
             -cursor watch
     $w(LeftText) configure \
             -cursor watch
@@ -6178,7 +6186,7 @@ proc restore-cursor {args} {
     global current
     global w
 
-    . configure \
+    $win configure \
             -cursor {}
     $w(LeftText) configure \
             -cursor {}
@@ -6269,24 +6277,24 @@ proc main {} {
     global startupError
     global opts
 
-    wm withdraw .
-    wm protocol . WM_DELETE_WINDOW do-exit
-    wm title . "$g(name) $g(version)"
+    wm withdraw $win
+    wm protocol $win WM_DELETE_WINDOW do-exit
+    wm title $win "$g(name) $g(version)"
 
     if {![catch {set windowingsystem [tk windowingsystem]}]} {
         if {$windowingsystem == "x11"} {
             # All this nonsense is necessary to use an icon bitmap that's
             # not in a separate file.
-            toplevel .icw
-            if {[string first "color" [winfo visual .]] >= 0} {
-                label .icw.l -image deltaGif
+            toplevel $win.icw
+            if {[string first "color" [winfo visual $win]] >= 0} {
+                label $win.icw.l -image deltaGif
             } else {
-                label .icw.l -image delta48
+                label $win.icw.l -image delta48
             }
              
-            pack .icw.l
-            bind .icw <Button-1> "wm deiconify ."
-            wm iconwindow . .icw
+            pack $win.icw.l
+            bind $win.icw <Button-1> "wm deiconify $win"
+            wm iconwindow $win $win.icw
         }
     }
 
@@ -6327,7 +6335,7 @@ proc main {} {
     vscroll-sync [list $w(RightInfo) $w(LeftInfo)] 2 [lindex $yview 0] \
         [lindex $yview 1]
 
-    wm deiconify .
+    wm deiconify $win
     update idletasks
 
     if {[info exists startupError]} {
@@ -6371,12 +6379,12 @@ proc do-text-info {w title text} {
     catch "destroy $w"
     toplevel $w
     wm title $w "$g(name) Help - $title"
-    set x [winfo rootx .]
-    set y [winfo rooty .]
+    set x [winfo rootx $win]
+    set y [winfo rooty $win]
 
     wm geometry $w "=55x29+${x}+${y}"
-    wm group $w .
-    wm transient $w .
+    wm group $w $win
+    wm transient $w $win
 
     if {$g(windowingSystem) == "aqua"} {
         setAquaDialogStyle $w
@@ -6451,7 +6459,7 @@ proc do-text-info {w title text} {
 ###############################################################################
 proc centerWindow {w {size {}}} {
     update
-    set parent .
+    set parent $win
 
     if {[llength $size] > 0} {
         set wWidth [lindex $size 0]
@@ -6492,7 +6500,7 @@ proc newDiff {} {
 
     set waitvar {}
 
-    set w(newDiffPopup) .newDiffPopup
+    set w(newDiffPopup) $win.newDiffPopup
 
     if {[winfo exists $w(newDiffPopup)]} {
         centerWindow $w(newDiffPopup)
@@ -6500,8 +6508,8 @@ proc newDiff {} {
         catch {destroy $w(newDiffPopup)}
         toplevel $w(newDiffPopup)
 
-        wm group $w(newDiffPopup) .
-        wm transient $w(newDiffPopup) .
+        wm group $w(newDiffPopup) $win
+        wm transient $w(newDiffPopup) $win
         wm title $w(newDiffPopup) "New Diff"
 
         if {$g(windowingSystem) == "aqua"} {
@@ -6513,8 +6521,8 @@ proc newDiff {} {
 
         wm withdraw $w(newDiffPopup)
 
-        set x [winfo rootx .]
-        set y [winfo rooty .]
+        set x [winfo rootx $win]
+        set y [winfo rooty $win]
 
         set simple [frame $w(newDiffPopup).simple \
                 -borderwidth 2 \
@@ -6678,7 +6686,7 @@ proc write-report {command args} {
     global report
     global finfo
 
-    set w(reportPopup) .reportPopup
+    set w(reportPopup) $win.reportPopup
     switch $command {
     popup {
             if {![winfo exists $w(reportPopup)]} {
@@ -6721,8 +6729,8 @@ proc write-report {command args} {
 
         }
     save {
-            set leftLines [lindex [split [$w(LeftText) index end-1lines] .] 0]
-            set rightLines [lindex [split [$w(RightText) index end-1lines] .] 0]
+            set leftLines [lindex [split [$w(LeftText) index end-1lines] $win] 0]
+            set rightLines [lindex [split [$w(RightText) index end-1lines] $win] 0]
 
             # number of lines of the largest window...
             set maxlines [max $leftLines $rightLines]
@@ -6831,8 +6839,8 @@ proc write-report {command args} {
     build {
             catch {destroy $w(reportPopup)}
             toplevel $w(reportPopup)
-            wm group $w(reportPopup) .
-            wm transient $w(reportPopup) .
+            wm group $w(reportPopup) $win
+            wm transient $w(reportPopup) $win
             wm title $w(reportPopup) "$g(name) - Generate Report"
             wm protocol $w(reportPopup) WM_DELETE_WINDOW [list write-report \
                 cancel]
@@ -7014,7 +7022,7 @@ You should have received a copy of the GNU General Public License along with thi
     }
 
     set text [subst -nobackslashes -nocommands $text]
-    do-text-info .about $title $text
+    do-text-info $win.about $title $text
 }
 
 ###############################################################################
@@ -7521,7 +7529,7 @@ proc simpleEd {command args} {
     open {
             set filename [lindex $args 0]
 
-            set w .editor
+            set w $win.editor
             set count 0
             while {[winfo exists ${w}$count]} {
                 incr count 1
@@ -7532,7 +7540,7 @@ proc simpleEd {command args} {
                     -borderwidth 2 \
                     -relief sunken
             wm title $w "$filename - Simple Editor"
-            wm group $w .
+            wm group $w $win
 
             menu $w.menubar
             $w configure \
@@ -10314,9 +10322,3 @@ proc get_aqua_params  {} {
    option add *Entry.background #ffffff userDefault
    option add *Text.background white userDefault
 }
-
-###############################################################################
-
-# run the main proc
-main
-

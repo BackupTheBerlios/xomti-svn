@@ -16,7 +16,7 @@ proc ::ide::compare_names {pg1 pg2} {
 @ tclproc ide::addToValueForKey idemeta struct IDECore ide
 proc ide::addToValueForKey {arr_ref key value} {
     upvar $arr_ref arr
-    if {[info exists arr($key)]} {
+    if {[info exists arr($key)]} {e
         set lvalue $arr($key)
     } else {
         set lvalue {}

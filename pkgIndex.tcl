@@ -12,3 +12,4 @@ package ifneeded xomti_critcl 99991231.2 [list source [file join $dir xomti_crit
 package ifneeded xomti_database 99991231.1 [list source [file join $dir xomti_database/trunk/xomti_database.xotcl]]
 package ifneeded xomti_tcllib_md5 20050124.1 [list source [file join $dir xomti_tcllib_md5/tags/20050124/xomti_tcllib_md5.xotcl]]
 package ifneeded xomti_tcllib_md5 99991231.1 [list source [file join $dir xomti_tcllib_md5/trunk/xomti_tcllib_md5.xotcl]]
+package ifneeded TkDiff 4.0.2 [list source [file join $dir tkdiff/trunk/tkdiff.xotcl]]
