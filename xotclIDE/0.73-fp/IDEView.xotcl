@@ -1730,7 +1730,7 @@ IDE::Deployer instproc startScriptInvocation {} {
         append script {package require XOTcl
 namespace import xotcl::*
 }
-}
+    }
 
     append script {# we set variable progdir to script location
 set sname [info script]
@@ -1748,7 +1748,7 @@ if {$sname==""} {
     }
     set progdir [file dirname $sname]
 }
-}
+    }
     if {!$nopackages && !$onefile} {
         append script {lappend auto_path [file dirname $progdir]} \n
     }
@@ -2934,7 +2934,6 @@ IDE::MethodSelector proc getMethod {} {
     set result [[self]::classlist selectedItem]
     [self]::classlist destroy
     return $result
-
 }
 IDE::MethodSelector proc getMethodsForPattern patern {
     set mlist {}
@@ -2944,7 +2943,6 @@ IDE::MethodSelector proc getMethodsForPattern patern {
     foreach class [IDE::IntroProxy getObjects] {
         set mlist [concat $mlist [$class info procs $patern]]
     }
-
     return $mlist
 }
 Class IDE::MethodView -superclass {::IDE::ListView ::IDE::GUICommands ::IDE::FocusPerKey} -parameter {{label Methods}}
@@ -3865,23 +3863,23 @@ IDE::ObjectMethodView instproc selectItem method {
         set type Instance
         set class [lindex $method 1]
         set method [lindex $method 0]]
-} else {
-    set class [lindex $def 0]
-    set dtype [lindex $def 1]
-    set method [lindex $def 2]
-    if {$dtype=="instproc"} {
-        if {[$class info instprocs $method]!=""} {
-            set type Instance
-        } else {
-            set body "# no access to $def"
-            [my info parent]::methodedit setTextControler $body [self]
-            return
-        }
     } else {
-        set type Class
+        set class [lindex $def 0]
+        set dtype [lindex $def 1]
+        set method [lindex $def 2]
+        if {$dtype=="instproc"} {
+            if {[$class info instprocs $method]!=""} {
+                set type Instance
+            } else {
+                set body "# no access to $def"
+                [my info parent]::methodedit setTextControler $body [self]
+                return
+            }
+        } else {
+            set type Class
+        }
     }
-}
-[my info parent]::methodedit setBodyTextControler [string trimleft $class :] $type $method [self]
+    [my info parent]::methodedit setBodyTextControler [string trimleft $class :] $type $method [self]
 }
 Class IDE::ObjectsView -superclass {::IDE::ListView ::IDE::GUICommands} -parameter {{type list}}
 @ ::IDE::ObjectsView idemeta component IDEView
