@@ -1373,34 +1373,34 @@ Class create IDE::ConfigurationBrowser -superclass {::IDE::Browser ::IDE::GUICom
 @ ::IDE::ConfigurationBrowser idemeta categoriesMethods {{getMenuStruct setComponentList destroy fillMenuStruct specificInit} {downListElem upListElem selectCompVersion selectComponent delFromList addToList} {updateCompList changeViewType} {initCompList saveAsFile loadFromFile initFromSystem loadComponents}}
 @ ::IDE::ConfigurationBrowser idemeta component IDEView
 IDE::ConfigurationBrowser instproc addElemToList item {
-   [self]::confapp addItemAtTail $item
+    [self]::confapp addItemAtTail $item
 }
 IDE::ConfigurationBrowser instproc addToList {} {
-   set item [[self]::applist selectedItem]
-   if {$item eq ""} return
-   my addElemToList $item
+    set item [[self]::applist selectedItem]
+    if {$item eq ""} return
+    my addElemToList $item
 }
 IDE::ConfigurationBrowser instproc addUnmanagedPackage {} {
-   set package [IDE::IDialogEntry getValue "Specify a tcl package that can be loaded per.\n  package require\n and is not managed by xotclide.\nWarning no syntax checking are possible!"]
-   if {$package!=""} {
-       [self]::confapp addItemAtTail $package
-   }
+    set package [IDE::IDialogEntry getValue "Specify a tcl package that can be loaded per.\n  package require\n and is not managed by xotclide.\nWarning no syntax checking are possible!"]
+    if {$package ne ""} {
+        [self]::confapp addItemAtTail $package
+    }
 }
 IDE::ConfigurationBrowser instproc changeViewType type {
-  my set vtype $type
-  [self]::configedit setTextControler [IDE::SystemConfigMap getValueForType $type] [self]
+    my set vtype $type
+    [self]::configedit setTextControler [IDE::SystemConfigMap getValueForType $type] [self]
 }
 IDE::ConfigurationBrowser instproc checkRequirements {} {
-   [self]::confapp unselect
-   set res  [IDE::SystemConfigMap checkRequirements [[self]::confapp getList]]
-   my unselectComponent
-   if {$res!=""} {
-      [self]::confapp setListUnsorted $res
-   }
+    [self]::confapp unselect
+    set res  [IDE::SystemConfigMap checkRequirements [[self]::confapp getList]]
+    my unselectComponent
+    if {$res ne ""} {
+        [self]::confapp setListUnsorted $res
+    }
 }
 IDE::ConfigurationBrowser instproc delFromList {} {
     set sitem [[self]::confapp selectedItem]
-    if {$sitem!=""} {
+    if {$sitem ne ""} {
 	[self]::confapp removeItem $sitem
     }
     my unselectComponent
@@ -1413,7 +1413,7 @@ IDE::ConfigurationBrowser instproc downListElem {} {
     [self]::confapp reorderSelected 1
 }
 IDE::ConfigurationBrowser instproc editSave text {
-   IDE::SystemConfigMap setValueForType [my set vtype] $text
+    IDE::SystemConfigMap setValueForType [my set vtype] $text
 }
 IDE::ConfigurationBrowser instproc fillMenuStruct aMenuStruct {
     $aMenuStruct enablementHandler [self]
@@ -1435,83 +1435,83 @@ IDE::ConfigurationBrowser instproc getMenuStruct {} {
     return [IDE::MenuStruct [self]::ms Configuration 0]
 }
 IDE::ConfigurationBrowser instproc getTitle {} {
-  return {Configuration Map Browser}
+    return {Configuration Map Browser}
 }
 IDE::ConfigurationBrowser instproc hasComponents {} {
-   expr {[llength [[self]::confapp getList]]>0}
+    return [expr {[llength [[self]::confapp getList]] > 0}]
 }
 IDE::ConfigurationBrowser instproc initCompList {} {
-     set list [IDE::SystemConfigMap getValueForType componentsToLoad]
-     [self]::confapp setListUnsorted  [lrange $list 0 end]
+    set list [IDE::SystemConfigMap getValueForType componentsToLoad]
+    [self]::confapp setListUnsorted  [lrange $list 0 end]
 }
 IDE::ConfigurationBrowser instproc initFromSystem {} {
-     my instvar vtype
-     IDE::SystemConfigMap initFromSystem
-     my initCompList
-     my changeViewType $vtype
+    my instvar vtype
+    IDE::SystemConfigMap initFromSystem
+    my initCompList
+    my changeViewType $vtype
 }
 IDE::ConfigurationBrowser instproc loadComponents {} {
-  IDE::SystemConfigMap loadComponents
-  my initCompList
+    IDE::SystemConfigMap loadComponents
+    my initCompList
 }
 IDE::ConfigurationBrowser instproc loadFromFile {} {
-  my instvar vtype
-  IDE::SystemConfigMap loadFromFile {}
-  my initCompList
-  my changeViewType $vtype
+    my instvar vtype
+    IDE::SystemConfigMap loadFromFile {}
+    my initCompList
+    my changeViewType $vtype
 }
 IDE::ConfigurationBrowser instproc saveAsFile args {
-   my updateCompList
-   IDE::SystemConfigMap saveAsFile {}
+    my updateCompList
+    IDE::SystemConfigMap saveAsFile {}
 }
 IDE::ConfigurationBrowser instproc saveAsTclkit {} {
-   my updateCompList
-   IDE::PlugInsManager loadExtras TclKitDeployer
+    my updateCompList
+    IDE::PlugInsManager loadExtras TclKitDeployer
 }
 IDE::ConfigurationBrowser instproc saveDistribution {} {
-   my updateCompList
-   IDE::SystemConfigMap saveDistribution
+    my updateCompList
+    IDE::SystemConfigMap saveDistribution
 }
 IDE::ConfigurationBrowser instproc selectCompVersion version {
-     my instvar selectedCompItem
-     if {$version=="automatic"} {
+    my instvar selectedCompItem
+    if {$version eq "automatic"} {
         set new [lindex $selectedCompItem 0]
-     } elseif {$version=="package"} {
+    } elseif {$version eq "package"} {
         set new [list [lindex $selectedCompItem 0] package]
-     } else {
+    } else {
         set new [list [lindex $selectedCompItem 0] [lindex $version 0]]
-     }
-     [self]::confapp renameItemUnsorted $selectedCompItem $new
-     set selectedCompItem $new
+    }
+    [self]::confapp renameItemUnsorted $selectedCompItem $new
+    set selectedCompItem $new
 }
 IDE::ConfigurationBrowser instproc selectComponent compItem {
-     my instvar compVersionCash selectedCompItem
-     if {![IDE::System isDatabase]} return
-     set selectedCompItem $compItem
-     set comp [lindex $compItem 0]
+    my instvar compVersionCash selectedCompItem
+    if {![IDE::System isDatabase]} return
+    set selectedCompItem $compItem
+    set comp [lindex $compItem 0]
 
-     if {![info exists compVersionCash($comp)]} {
-         set compVersionCash($comp) [IDE::ComponentPersistence getVersionsForName $comp]
-     }
-     [self]::appversion setListUnsorted [concat automatic package $compVersionCash($comp)]
-     set version [lindex $compItem 1]
-     if {$version==""} {[self]::appversion setSelectedItem automatic 0; return}
-     if {$version=="package"} {[self]::appversion setSelectedItem package 0; return}
-     set i 0
-     foreach item $compVersionCash($comp) {
-          if {$version==[lindex $item 0]} {
-              [self]::appversion setSelectedIndex [expr {$i+2}] 0
-              return
-          }
-          incr i
-     }
+    if {![info exists compVersionCash($comp)]} {
+        set compVersionCash($comp) [IDE::ComponentPersistence getVersionsForName $comp]
+    }
+    [self]::appversion setListUnsorted [concat automatic package $compVersionCash($comp)]
+    set version [lindex $compItem 1]
+    if {$version eq ""} {[self]::appversion setSelectedItem automatic 0; return}
+    if {$version eq "package"} {[self]::appversion setSelectedItem package 0; return}
+    set i 0
+    foreach item $compVersionCash($comp) {
+        if {$version == [lindex $item 0]} {
+            [self]::appversion setSelectedIndex [expr {$i+2}] 0
+             return
+        }
+        incr i
+    }
 }
 IDE::ConfigurationBrowser instproc setComponentList {} {
     my instvar compVisibility classView
     if {!$compVisibility} {
-       [self]::applist setList [IDE::IntroProxy getComponents]   
+        [self]::applist setList [IDE::IntroProxy getComponents]   
     } else {
-      [self]::applist setList [IDE::IntroProxy getComponentsNoIDE]
+        [self]::applist setList [IDE::IntroProxy getComponentsNoIDE]
     }
 }
 IDE::ConfigurationBrowser instproc specificInit {} {
@@ -1568,21 +1568,21 @@ IDE::ConfigurationBrowser instproc specificInit {} {
     next
 }
 IDE::ConfigurationBrowser instproc unselectComponent {} {
-     my set selectedCompItem {}
-     [self]::appversion setListUnsorted {}
+    my set selectedCompItem {}
+    [self]::appversion setListUnsorted {}
 }
 IDE::ConfigurationBrowser instproc upListElem {} {
     [self]::confapp reorderSelected -1
 }
 IDE::ConfigurationBrowser instproc updateCompList {} {
-   IDE::SystemConfigMap setValueForType componentsToLoad [[self]::confapp getList]
+    IDE::SystemConfigMap setValueForType componentsToLoad [[self]::confapp getList]
 }
 IDE::ConfigurationBrowser proc hasView {} {
-    expr  {[llength [my info instances]]!=0}
+    return [expr {[llength [my info instances]] != 0}]
 }
 IDE::ConfigurationBrowser proc showBrowser {} {
     set first [lindex [my info instances] 0]
-    if {$first==""} {
+    if {$first eq ""} {
         my create confbrowser [Object autoname .browser]
     }
 }
@@ -1641,7 +1641,7 @@ IDE::Deployer instproc createSystemMenu {} {
 }
 IDE::Deployer instproc getComponentsToDeploy {} {
     set compToSave {}
-    if {![IDE::SystemConfigMap exists componentsToLoad] || [IDE::SystemConfigMap set componentsToLoad]==""} {
+    if {![IDE::SystemConfigMap exists componentsToLoad] || [IDE::SystemConfigMap set componentsToLoad] eq ""} {
         if {![IDE::ConfigurationBrowser hasView]} {
             set result [IDE::Dialog yesNo "There are currently no components in configuration map that can be deployed. Do you want to start \"Configuration Map Browser\" and specify them"]
             if {$result} {
@@ -1655,7 +1655,7 @@ IDE::Deployer instproc getComponentsToDeploy {} {
     foreach comp [IDE::SystemConfigMap set componentsToLoad] {
         set name [lindex $comp 0]
         set cobj [IDE::Component getCompObjectForNameIfExist $name]
-        if {$cobj==""} {
+        if {$cobj eq ""} {
             IDE::Dialog message "$comp is not currently loaded. You can only maka a distribution from loaded components. Operation canceled"
             cd [my set old_dir]
             return
@@ -2860,25 +2860,25 @@ IDE::MethodEdit instproc save {} {
     if {![my exists oldtext]} return
     set newtext [my getText]
     if {[IDE::System isTkNotOlderThan84]} {
-       if {[[my getTextWindow] edit modified]} {
-           my saveValue $newtext
-       }
+        if {[[my getTextWindow] edit modified]} {
+            my saveValue $newtext
+        }
     } else {
-       if {[my set oldtext]!=$newtext} {
-           my saveValue $newtext
-       }
+        if {[my set oldtext]!=$newtext} {
+            my saveValue $newtext
+        }
     }
 }
 IDE::MethodEdit instproc saveForce {} {
     if {![my exists oldtext]} return
     set newtext [my getText]
     if {[my set oldtext] ne $newtext} {
-       # !!! no handling of comments
-       [my set controler] editSave $newtext
+        # !!! no handling of comments
+        [my set controler] editSave $newtext
     }
 }
 IDE::MethodEdit instproc saveSource value {
-   [my set controler] editSave $value
+    [my set controler] editSave $value
 }
 IDE::MethodEdit instproc saveValue value {
     switch [my set vtype] {
@@ -2892,27 +2892,27 @@ IDE::MethodEdit instproc setBodyTextControler {tvclass tvtype tmethod controler}
     my set vctype $tvtype
     my set method $tmethod
     set ret {}
-     if {$tvtype=="Tcl Procs"} {
+    if {$tvtype eq "Tcl Procs"} {
         if {[Object isobject $tvclass]} {
-           set pobj [$tvclass getProcObjForNameIfExist $tmethod]
-           if {$pobj!=""} {
-	   	set ret [$pobj getBody]
-           }
+            set pobj [$tvclass getProcObjForNameIfExist $tmethod]
+            if {$pobj ne ""} {
+                set ret [$pobj getBody]
+            }
         }    
-     } else {
+    } else {
         set ret [IDE::IntroProxy getBody${tvtype}MethodIfExist $tvclass $tmethod]
-     }
-     if {$ret==""} {
-       my setTextControler "# Method $tmethod in $tvclass was probably deleted from the System" $controler
-     }
-     my setTextControler $ret $controler xotcl
+    }
+    if {$ret eq ""} {
+        my setTextControler "# Method $tmethod in $tvclass was probably deleted from the System" $controler
+    }
+    my setTextControler $ret $controler xotcl
 }
 IDE::MethodEdit instproc setTextControler {text contr {type none}} {
     my instvar win state controler oldtext
     set oldtext $text
     set controler $contr
     set state use
-    if {$type=="none" && [$contr istype IDE::MethodView]} {
+    if {$type eq "none" && [$contr istype IDE::MethodView]} {
         set type xotcl
     }
     my setTypedText $text $type

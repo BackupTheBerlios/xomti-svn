@@ -32,7 +32,7 @@ IDE::Browser instproc closeWindow {} {
 IDE::Browser instproc createSystemMenu {} {
     my instvar win
     set ms [IDE::System getMenuStruct]
-    if {[winfo toplevel $win]=="."} {
+    if {[winfo toplevel $win] eq "."} {
         set twin {}
     } else {
         set twin $win
@@ -85,10 +85,9 @@ IDE::Browser instproc initStatusBar {y {columns -1}} {
     }
 }
 IDE::Browser instproc initStatusBarWin win {
-   my instvar statusBarTextWin
-   label $win -anchor w
-   set statusBarTextWin $win
-
+    my instvar statusBarTextWin
+    label $win -anchor w
+    set statusBarTextWin $win
 }
 IDE::Browser instproc setStatusBarText text {
     if {![my exists statusBarTextWin]} return
@@ -409,10 +408,10 @@ IDE::GUICommands instproc popMenuWindow {} {
     return
 }
 IDE::GUICommands instproc upsMessage text {
-     set p [my info parent]
-     if {[Object isobject $p] && [$p istype IDE::Browser]} {
-         $p setStatusBarText $text
-     }
+    set p [my info parent]
+    if {[Object isobject $p] && [$p istype IDE::Browser]} {
+        $p setStatusBarText $text
+    }
 }
 
                               ##########
@@ -425,7 +424,7 @@ Class create IDE::Text -parameter {{height 24} {width 80}}
 @ ::IDE::Text idemeta categoriesMethods {{makeEmpty getSelection getText colorizeRange removeColorize viewPos tagRange setText appendToCursor} {colorizeTextAll tagRegExprTextAll colorizeRegExprTextAll colorizeRegExprText colorizeText tagRegExprText} {initTags init}}
 @ ::IDE::Text idemeta component IDEBaseGUI
 IDE::Text instproc appendToCursor text {
-  [my getTextWindow] insert insert $text
+    [my getTextWindow] insert insert $text
 }
 IDE::Text instproc colorizeRange {begin end} {
     my instvar win
@@ -443,7 +442,7 @@ IDE::Text instproc colorizeText {text {cur 1.0}} {
     set twin $win.text
     # add variables (count)
     set cur [$twin search -count count -- $text $cur end]
-    if {$cur!=""} {
+    if {$cur ne ""} {
        $twin tag add hlight $cur "$cur + $count char"
        return [$twin index "$cur + $count char"]
     }
@@ -453,7 +452,7 @@ IDE::Text instproc colorizeTextAll text {
     set index 1.0
     while 1 {
         set index [my colorizeText $text $index]
-        if {$index==""} break
+        if {$index eq ""} break
     }
 }
 IDE::Text instproc dropAllColorized {} {
@@ -467,7 +466,7 @@ IDE::Text instproc focus {} {
 IDE::Text instproc getSelection {} {
     my instvar win
     set range [$win.text tag ranges sel]
-    if {$range==""} return
+    if {$range eq ""} return
     return [$win.text get [lindex $range 0] [lindex $range 1]]
 }
 IDE::Text instproc getText {} {
@@ -476,7 +475,7 @@ IDE::Text instproc getText {} {
     return [string range $text 0 [expr {[string length $text] - 2}]]
 }
 IDE::Text instproc getTextWindow {} {
-   return [my set win].text
+    return [my set win].text
 }
 IDE::Text instproc init window {
     my instvar win state height width
@@ -505,7 +504,7 @@ IDE::Text instproc initTags {} {
 }
 IDE::Text instproc makeEmpty {} {
     my instvar win state
-    if {$state!="empty"} {
+    if {$state ne "empty"} {
         set state empty    
         $win.text delete 1.0 end
     }
@@ -564,7 +563,7 @@ IDE::Text instproc tagRegExprText {tag text {cur 1.0}} {
     set twin [my getTextWindow]
     # add variables (count)
     set cur [$twin search -regexp -count count -- $text $cur end]
-    if {$cur!=""} {
+    if {$cur ne ""} {
        $twin tag add $tag $cur "$cur + $count char"
        return [$twin index "$cur + $count char"]
     }
@@ -574,7 +573,7 @@ IDE::Text instproc tagRegExprTextAll {tag text} {
     set index 1.0
     while 1 {
         set index [my tagRegExprText $tag $text $index]
-        if {$index==""} break
+        if {$index eq ""} break
     }
 }
 IDE::Text instproc viewPos pos {
@@ -612,14 +611,14 @@ IDE::Editor instproc evalDisplaySelection {} {
     my instvar win
     set sel [my getSelection]
     if {$sel ne ""} {
-       my appendToCursorAndSelect [my evalString $sel]
+        my appendToCursorAndSelect [my evalString $sel]
     }
 }
 IDE::Editor instproc evalInspectSelection {} {
     my instvar win
     set sel [my getSelection]
-    if {$sel!=""} {
-       IDE::System inspectString [my evalString $sel]
+    if {$sel ne ""} {
+        IDE::System inspectString [my evalString $sel]
     }
 }
 IDE::Editor instproc evalSelection {} {
@@ -634,13 +633,13 @@ IDE::Editor instproc evalString string {
 IDE::Editor instproc evalSubstituteSelection {} {
     my instvar win
     set sel [my getSelection]
-    if {$sel!=""} {
+    if {$sel ne ""} {
        my appendToCursorAndSelect [my substituteString $sel]
     }
 }
 IDE::Editor instproc fileAppend {} {
     set file [IDE::Dialog getOpenFile {{{Tcl Files} *.tcl} {{Xotcl Files} *.xotcl} {Workspace *.wrk} {{All files} *}}]
-    if {$file==""} return
+    if {$file eq ""} return
     set fh [open $file r]
     my appendToCursor [read $fh]
     close $fh
@@ -655,7 +654,7 @@ IDE::Editor instproc fileOut {} {
         set fileName fileout.wrk
     }
     set fname [IDE::Dialog getSaveFile $fileName]
-    if {$fname==""} return
+    if {$fname eq ""} return
     set fileName $fname
     my saveFile $fileName
 }
@@ -687,11 +686,11 @@ IDE::Editor instproc getWordUnderCursor {} {
     return [$twin get {insert wordstart} {insert wordend}]
 }
 IDE::Editor instproc isValidTextSelection {} {
-    expr {[my getSelection]!=""}
+    expr {[my getSelection] ne ""}
 }
 IDE::Editor instproc openFile file {
     my instvar win fileName
-    if {$file==""} return
+    if {$file eq ""} return
     set fileName $file
     set fh [open $fileName r]
     my set state notempty
@@ -1074,7 +1073,7 @@ IDE::ListView instproc buttonPush {} {
 }
 IDE::ListView instproc dispatchWithSelected procName {
     set actual [my selectedItemFirst]
-    if {$actual!=""} {
+    if {$actual ne ""} {
         my $procName $actual
     } else {
         my upsMessage {you need to select a item for this action}
@@ -1082,7 +1081,7 @@ IDE::ListView instproc dispatchWithSelected procName {
 }
 IDE::ListView instproc dispatchWithSelectedAll procName {
     set actual [my selectedItems]
-    if {$actual!=""} {
+    if {$actual ne ""} {
         my $procName $actual
     } else {
         my upsMessage {you need to select a item for this action}
@@ -1090,7 +1089,7 @@ IDE::ListView instproc dispatchWithSelectedAll procName {
 }
 IDE::ListView instproc dispatchWithSelectedMulti procName {
     set actual [my selectedItems]
-    if {$actual!=""} {
+    if {$actual ne ""} {
         foreach item $actual {
             my $procName $item
         }
@@ -1156,7 +1155,7 @@ IDE::ListView instproc keyEvent key {
     my instvar listItems
     if {$key eq ""} return
     set sindex [lsearch -glob -regexp $listItems (?i)^$key]
-    if {$sindex>=0} {
+    if {$sindex >= 0} {
         my setSelectedIndex $sindex
     }
 }
@@ -1168,14 +1167,14 @@ IDE::ListView instproc lock_here {} {
 }
 IDE::ListView instproc markItem item {
     [self] instvar win listItems
-    if {[set cur [lsearch -exact $listItems $item]]>=0} {
-       $win.listbox itemconfigure $cur -foreground red -selectforeground red
+    if {[set cur [lsearch -exact $listItems $item]] >= 0} {
+        $win.listbox itemconfigure $cur -foreground red -selectforeground red
     }
 }
 IDE::ListView instproc markItemIndexForeGround {index {color default}} {
     my instvar win
-    if {$color=="default"} {
-         set color {}
+    if {$color eq "default"} {
+        set color {}
     }
     $win.listbox itemconfigure $index -foreground $color
 }
@@ -1207,7 +1206,7 @@ IDE::ListView instproc renameItem {item newname} {
     my instvar listItems win
     my removeItem $item
     my addItem $newname
-    if {[set cur [lsearch -exact $listItems $newname]]>=0} {
+    if {[set cur [lsearch -exact $listItems $newname]] >= 0} {
         $win.listbox selection set $cur $cur
         return $cur
     }
@@ -1216,7 +1215,7 @@ IDE::ListView instproc renameItem {item newname} {
 IDE::ListView instproc renameItemUnsorted {item newname} {
     my instvar listItems win
     set cur [lsearch -exact $listItems $item]
-    if {$cur>=0} {
+    if {$cur >= 0} {
         $win.listbox delete $cur
         $win.listbox insert $cur $newname
         $win.listbox selection set $cur $cur
@@ -1226,9 +1225,9 @@ IDE::ListView instproc renameItemUnsorted {item newname} {
 IDE::ListView instproc reorderSelected shift {
     my instvar listItems win
     set cur [$win.listbox curselection]
-    if {[llength $cur]!=1} { return 0 }
+    if {[llength $cur] != 1} {return 0}
     set len [llength $listItems]
-    if {$cur+$shift<0 || $cur+$shift>=$len} {return 0}
+    if {$cur+$shift < 0 || $cur+$shift >= $len} {return 0}
     set sitem [lindex $listItems $cur]
     set insertIndex [expr $cur+$shift]
     set listItems [linsert [lreplace $listItems $cur $cur] $insertIndex $sitem]
@@ -1244,7 +1243,7 @@ IDE::ListView instproc resetList {} {
     set selectedIndex -1
 }
 IDE::ListView instproc selectItem item {
-    # shoul be overwriten by over class
+    # should be overwriten by over class
 }
 IDE::ListView instproc selectNextItem {} {
     my instvar win
@@ -1273,14 +1272,14 @@ IDE::ListView instproc selectedIndex {} {
 IDE::ListView instproc selectedItem {} {
     # get all selected items
     my instvar win listItems
-    if {[set cur [$win.listbox curselection]]!=""} {
-        if {[llength $cur]>1} {
-          foreach id $cur {
-             lappend ret [lindex $listItems $id]
-          }
-          return $ret
+    if {[set cur [$win.listbox curselection]] ne ""} {
+        if {[llength $cur] > 1} {
+            foreach id $cur {
+                lappend ret [lindex $listItems $id]
+            }
+            return $ret
         } else {
-          return [lindex $listItems $cur]
+            return [lindex $listItems $cur]
         }
     }
     return {}
@@ -1288,7 +1287,7 @@ IDE::ListView instproc selectedItem {} {
 IDE::ListView instproc selectedItemFirst {} {
     # get all selected items
     my instvar win listItems
-    if {[set cur [$win.listbox curselection]]!=""} {
+    if {[set cur [$win.listbox curselection]] ne ""} {
         set id [lindex $cur 0]
         return [lindex $listItems $id]
     }
@@ -1297,14 +1296,14 @@ IDE::ListView instproc selectedItemFirst {} {
 IDE::ListView instproc selectedItems {} {
     # get all selected items
     my instvar win listItems
-    if {[set cur [$win.listbox curselection]]!=""} {
+    if {[set cur [$win.listbox curselection]] ne ""} {
         if {[llength $cur]>1} {
-          foreach id $cur {
-             lappend ret [lindex $listItems $id]
-          }
-          return $ret
+            foreach id $cur {
+                lappend ret [lindex $listItems $id]
+            }
+            return $ret
         } else {
-          return [list [lindex $listItems $cur]]
+            return [list [lindex $listItems $cur]]
         }
     }
     return [list]
@@ -1332,12 +1331,12 @@ IDE::ListView instproc setListUnsorted list {
 IDE::ListView instproc setSelectedIndex {cur {notify 1}} {
     my instvar win listItems
     if {$cur < [llength $listItems]} {
-      my unselect 
-      $win.listbox selection set $cur $cur
-      $win.listbox see $cur
-      if {$notify} {
-          my selectItem [lindex $listItems $cur]
-      }
+        my unselect 
+        $win.listbox selection set $cur $cur
+        $win.listbox see $cur
+        if {$notify} {
+            my selectItem [lindex $listItems $cur]
+        }
     }
 }
 IDE::ListView instproc setSelectedItem {item {notify 1}} {
@@ -1347,7 +1346,7 @@ IDE::ListView instproc setSelectedItem {item {notify 1}} {
         $win.listbox selection set $cur $cur
         $win.listbox see $cur
         if {$notify == 1} {
-           my selectItem $item
+            my selectItem $item
         }
     }
 }
@@ -1736,8 +1735,8 @@ IDE::MenuItem instproc migrateTkMenu {} {
     foreach pr [[[self] info class] info parameter] {
         set name [lindex $pr 0]
         set value [lindex $pr 1]
-        if {[my exists $name] && [my set $name]!=$value} {
-            if {$name=="command"} {
+        if {[my exists $name] && [my set $name] ne $value} {
+            if {$name eq "command"} {
                 append add " -command \[list \[self\] [my set $name]\]"
             } else {
                 append add " -$name [list [my set $name]]"
@@ -1779,15 +1778,15 @@ Class create IDE::MenuCommand -superclass ::IDE::MenuItem -parameter {{accelerat
 IDE::MenuCommand instproc createItemTkMenu {win tl_win} {
     my instvar accelerator underline name command
     set par {}
-    if {$accelerator!="" && $tl_win!=""} {
-       if {[string index $accelerator 0]=="_"} {
+    if {$accelerator ne "" && $tl_win ne ""} {
+       if {[string index $accelerator 0] eq "_"} {
            set par "-accelerator [string range $accelerator 1 end]"
        } else {
            set par "-accelerator $accelerator"
            bind $tl_win <$accelerator> $command
        }
     }
-    if {$underline!=""} {
+    if {$underline ne ""} {
         append par " -underline $underline"
     }
     eval $win add command  -label [list $name] -command [list $command] $par
@@ -1845,7 +1844,7 @@ Class create IDE::MenuStruct -superclass ::IDE::MenuItem -parameter enablementHa
 @ ::IDE::MenuStruct idemeta categoriesMethods {{addSeparator addCascadeMenu addRadioButton addCheckButton addMenuItem addCommand} migrateTkMenu}
 @ ::IDE::MenuStruct idemeta component IDEBaseGUI
 IDE::MenuStruct instproc addCascadeMenu menu {
-   my addMenuItem $menu
+    my addMenuItem $menu
 }
 IDE::MenuStruct instproc addCheckButton {name variable {command {}}} {
     my addMenuItem [IDE::MenuCheckbox new -childof [self] -name $name -command $command -variable $variable]
@@ -1865,7 +1864,7 @@ IDE::MenuStruct instproc addMenuItem menuItem {
     return $menuItem
 }
 IDE::MenuStruct instproc addRadioButton {name variable command value} {
-   my addMenuItem [IDE::MenuRadiobutton new -childof [self] -name $name -command $command -variable $variable -value $value]
+    my addMenuItem [IDE::MenuRadiobutton new -childof [self] -name $name -command $command -variable $variable -value $value]
 }
 IDE::MenuStruct instproc addSeparator {} {
     my addMenuItem [IDE::MenuSeparator new -childof [self]]
@@ -1931,12 +1930,12 @@ IDE::MenuStruct instproc checkPopDownEnablement win {
     set i 0
     set gneedstate normal
     foreach e [my enableList] {
-       set gneedstate disabled
-       if {![info exists sarr($e)]} {
+        set gneedstate disabled
+        if {![info exists sarr($e)]} {
             set sarr($e) [[my enablementHandler] $e]
-       }
-       if {$sarr($e)} {set gneedstate normal}
-       if {$gneedstate=="disabled"} break
+        }
+        if {$sarr($e)} {set gneedstate normal}
+        if {$gneedstate eq "disabled"} break
     }
     foreach m [my set menuItems] {
         if {![$m popdownMenu]} continue
@@ -1945,10 +1944,10 @@ IDE::MenuStruct instproc checkPopDownEnablement win {
             incr i
             continue
         }
-        if {[llength [$m enableList]]==0 || ($gneedstate=="disabled" 
-            && [lindex [$m enableList] 0]!="noglobal")} {
+        if {[llength [$m enableList]] == 0 || ($gneedstate eq "disabled" 
+            && [lindex [$m enableList] 0] ne "noglobal")} {
             if {![$m istype IDE::MenuSeparator]} {
-                if {[$win entrycget $i -state]!=$gneedstate} {
+                if {[$win entrycget $i -state] ne $gneedstate} {
                     $win entryconfigure $i -state $gneedstate
                 }
             }
@@ -1961,9 +1960,9 @@ IDE::MenuStruct instproc checkPopDownEnablement win {
                 set sarr($e) [[my enablementHandler] $e]
             }
             if {$sarr($e)} {set needstate normal}
-            if {$needstate=="disabled"} break
+            if {$needstate eq "disabled"} break
         }
-        if {[$win entrycget $i -state]!=$needstate} {
+        if {[$win entrycget $i -state] ne $needstate} {
             $win entryconfigure $i -state $needstate
         }
         incr i
@@ -1973,25 +1972,25 @@ IDE::MenuStruct instproc createItemTkMenu {win {tl_win {}}} {
     if {![my exists enablementHandler] && [[my info parent] exists enablementHandler]} {
       my enablementHandler [[my info parent] enablementHandler]
     }
-    if {[my enableList]==""} {
+    if {[my enableList] eq ""} {
         my enableList [[my info parent] enableList]
     }
     $win add cascade -label [my set name] -menu [my createTkMenu $win.[Object autoname cmenu] $tl_win]
 }
 IDE::MenuStruct instproc createTkMenu {win {tl_win {}}} {
-   if {![my exists menuItems]} return
-   menu $win -tearoff 0 -postcommand [list [self] menuIsMapped $win]
-   foreach m [my set menuItems] {
-       $m createItemTkMenu $win $tl_win
-   }
-   #my migrateTkMenu
-   return $win
+    if {![my exists menuItems]} return
+    menu $win -tearoff 0 -postcommand [list [self] menuIsMapped $win]
+    foreach m [my set menuItems] {
+        $m createItemTkMenu $win $tl_win
+    }
+    #my migrateTkMenu
+    return $win
 }
 IDE::MenuStruct instproc hasPopdownMenu {} {
-   foreach item [my set menuItems] {
+    foreach item [my set menuItems] {
         if {[$item popdownMenu]} {return 1}
-   }
-   return 0
+    }
+    return 0
 }
 IDE::MenuStruct instproc init {tname {uline {}}} {
     my instvar name underline antiDouble
@@ -2007,9 +2006,9 @@ IDE::MenuStruct instproc menuIsMapped win {
     my checkEnable $win
 }
 IDE::MenuStruct instproc migrateTkMenu {} {
-   foreach item [my set menuItems] {
+    foreach item [my set menuItems] {
         $item migrateTkMenu
-   }
+    }
 }
 IDE::MenuStruct instproc showPopMenu {win x y} {
     my checkPopDownEnablement $win
@@ -2023,7 +2022,7 @@ Class create IDE::NListView -superclass ::IDE::ListView -parameter {notify notif
 IDE::NListView instproc buttonDoublePush {} {
     my instvar notify doubleNotifyProc
     if {[info exists notify] && [info exists doubleNotifyProc]} {
-       $notify $doubleNotifyProc [my selectedItemFirst]
+        $notify $doubleNotifyProc [my selectedItemFirst]
     } else {
         next
     }
@@ -2128,50 +2127,49 @@ IDE::ProtocolText instproc init win {
 Class create IDE::StateButton -parameter {state states command}
 @ ::IDE::StateButton idemeta component IDEBaseGUI
 IDE::StateButton instproc changeState {} {
-   my instvar states state
-   if {[set pos [lsearch -exact $states $state]]==[llength $states]-1} {
+    my instvar states state
+    if {[set pos [lsearch -exact $states $state]] == [llength $states] - 1} {
         set newState [lindex $states 0]
-   } else {
-        set newState [lindex $states [expr $pos+1]]
-   }
-   my setState $newState
-   my notifyChange
+    } else {
+        set newState [lindex $states [expr {$pos + 1}]]
+    }
+    my setState $newState
+    my notifyChange
 }
 IDE::StateButton instproc changeStateTo {newState {notify 1}} {
-   my instvar states state
-   if {[lsearch -exact $states $newState]>=0 && $newState!=$state} {
+    my instvar states state
+    if {[lsearch -exact $states $newState] >= 0 && $newState != $state} {
         my setState $newState
         if {$notify} {
             my notifyChange
         }
-  }
+    }
 }
 IDE::StateButton instproc init window {
-   my instvar win states state
-   set win $window
-   if {![info exists state]} { 
+    my instvar win states state
+    set win $window
+    if {![info exists state]} { 
         set state [lindex $states 0]
-   }
-   button $win -text $state -command [list [self] changeState]
+    }
+    button $win -text $state -command [list [self] changeState]
 }
 IDE::StateButton instproc notifyChange {} {
-   my instvar command state
-   if {[info exists command]} {
+    my instvar command state
+    if {[info exists command]} {
         eval $command [list $state]
-   } 
-
+    } 
 }
 IDE::StateButton instproc setState newState {
-     my instvar state win
-     set state $newState
-     $win configure -text $state
+    my instvar state win
+    set state $newState
+    $win configure -text $state
 }
 IDE::StateButton instproc setStates newStates {
-     my instvar states state
-     set states $newStates
-     if {![::ide::lcontain $newStates $state]} {
-          my setState [lindex $states 0]
-     }
+    my instvar states state
+    set states $newStates
+    if {![::ide::lcontain $newStates $state]} {
+        my setState [lindex $states 0]
+    }
 }
 
                               ##########
