@@ -511,13 +511,13 @@ IDE::Debugger proc newBrowser {} {
 }
 IDE::Debugger proc startDebugging {{addInfo {}}} {
     my instvar shouldHalt
-    if {![info exists shouldHalt] || $shouldHalt==1} {
-       set inst [my new [Object autoname .debuger]]
-       if {$addInfo!=""} {
-           $inst setTitleAddition $addInfo
-       }
-       $inst startBrowsing
-       $inst destroy
+    if {![info exists shouldHalt] || $shouldHalt == 1} {
+        set inst [my new [Object autoname .debuger]]
+        if {$addInfo ne ""} {
+            $inst setTitleAddition $addInfo
+        }
+        $inst startBrowsing
+        $inst destroy
     }
 }
 

@@ -1746,9 +1746,9 @@ Object create IDE::SystemConfigMap
 @ ::IDE::SystemConfigMap idemeta component IDECore
 IDE::SystemConfigMap proc asScript {} {
     set script {}
-    append script "set preStartScript [list [my getValueForType preStartScript]]\n"
-    append script "set componentsToLoad [list [my getValueForType componentsToLoad]]\n"
-    append script "set startScript [list [my getValueForType startScript]]\n"
+    append script "[list set preStartScript [my getValueForType preStartScript]]\n"
+    append script "[list set componentsToLoad [my getValueForType componentsToLoad]]\n"
+    append script "[list set startScript [my getValueForType startScript]]\n"
     return $script
 }
 IDE::SystemConfigMap proc checkRequirements compList {
@@ -1834,9 +1834,9 @@ IDE::SystemConfigMap proc getComponentsList {{ignoreLoaded 1}} {
     return [my getCleanedLoadList $componentsToLoad $ignoreLoaded]
 }
 IDE::SystemConfigMap proc getValueForType type {
-  if {[my exists $type]} {
-     return [my set $type]
-  }
+    if {[my exists $type]} {
+        return [my set $type]
+    }
 }
 @ IDE::SystemConfigMap proc initFromSystem {} {
 description {Try to get configuration map list from actual loaded foreign components

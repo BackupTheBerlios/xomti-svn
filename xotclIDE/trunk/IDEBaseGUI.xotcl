@@ -19,18 +19,18 @@ It can buid the system menu and status info bar.
 Please overwrite method specificInit for your own GUI.}
 }
 Class create IDE::Browser
-@ ::IDE::Browser idemeta categories initialize
-@ ::IDE::Browser idemeta categoriesMethods {{specificInit buildTopLevel init initStatusBar}}
+@ ::IDE::Browser idemeta categories {initialize api not_used}
+@ ::IDE::Browser idemeta categoriesMethods {{specificInit init initStatusBar} {getTitle get_win} buildTopLevel}
 @ ::IDE::Browser idemeta component IDEBaseGUI
 IDE::Browser instproc buildTopLevel {} {
     my instvar win
-    ::toplevel $win
+    toplevel $win
 }
 IDE::Browser instproc closeWindow {} {
     my destroy
 }
 IDE::Browser instproc createSystemMenu {} {
-    my instvar win
+    set win [my get_win]
     set ms [IDE::System getMenuStruct]
     if {[winfo toplevel $win] eq "."} {
         set twin {}
@@ -43,20 +43,20 @@ IDE::Browser instproc createSystemMenu {} {
     [winfo toplevel $win] configure -menu $twin.mb
 }
 IDE::Browser instproc destroy {} {
-    my instvar win
-    if {[info exists win]} {
-       ::destroy $win
-    }
+    set win [my get_win]
+    destroy $win
     next
 }
 IDE::Browser instproc getTitle {} {
     return [namespace tail [my info class]]
 }
-IDE::Browser instproc init {window args} {
-    my instvar win
-    set win $window
+IDE::Browser instproc get_win {} {
+    return [my set win]
+}
+IDE::Browser instproc init {win args} {
+    my set win $win
     if {![winfo exists $win]} {
-        my buildTopLevel
+        toplevel $win
         wm withdraw $win
         menu $win.mb -tearoff 0
     } else {
@@ -85,24 +85,21 @@ IDE::Browser instproc initStatusBar {y {columns -1}} {
     }
 }
 IDE::Browser instproc initStatusBarWin win {
-    my instvar statusBarTextWin
     label $win -anchor w
-    set statusBarTextWin $win
+    my set statusBarTextWin $win
 }
 IDE::Browser instproc setStatusBarText text {
     if {![my exists statusBarTextWin]} return
     [my set statusBarTextWin] configure -text $text
-    
 }
 IDE::Browser instproc setTitleAddition add {
-    my instvar win
-    wm title [winfo toplevel $win] "[my getTitle] : $add"
+    wm title [winfo toplevel [my get_win]] "[my getTitle] : $add"
 }
 @ IDE::Browser instproc specificInit {} {
 description {Overwrite this method to build your own GUI}
 }
 IDE::Browser instproc specificInit {} {
-    # shoul be overwritten
+    # should be overwritten
 }
 
                               ##########

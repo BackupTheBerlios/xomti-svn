@@ -1583,7 +1583,11 @@ IDE::ConfigurationBrowser proc hasView {} {
 IDE::ConfigurationBrowser proc showBrowser {} {
     set first [lindex [my info instances] 0]
     if {$first eq ""} {
-        my create confbrowser [Object autoname .browser]
+        set win [Object autoname .browser]
+        # it creates object named "IDE::confbrowser"
+        my create confbrowser $win
+    } else {
+        raise [IDE::confbrowser get_win]
     }
 }
 
@@ -3540,7 +3544,7 @@ IDE::MethodView instproc selectionToMethod {} {
 }
 IDE::MethodView instproc spawnMethod {} {
     set text [[my info parent]::methodedit getText]
-    if {$text!=""} { 
+    if {$text ne ""} { 
        set obj [IDE::SpawnMethodEdit new -childof [self] [Object autoname .spawnedmethod]]
        ${obj}::methodedit setTextControler $text [self]
        ${obj}::methodedit ignoreNoChanges
