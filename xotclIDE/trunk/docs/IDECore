@@ -1,6 +1,10 @@
-Composant IDECore
+#####################
+# Composant IDECore #
+#####################
 
-Classe IDE
+  ##############
+  # Classe IDE #
+  ##############
 
 méthode IDE>initsystem
 
@@ -11,14 +15,15 @@ appelée par :
     IDEStarter startIDEOnly
     IDEStarter startIDEWithDB
 
-
-Classe IDE::CommentHandler
+  ##############################
+  # Classe IDE::CommentHandler #
+  ##############################
 
 superclasse de :
 
-    IDE::TclProcsDescription
-    IDE::ProcsGroup
     IDE::Component
+    IDE::ProcsGroup
+    IDE::TclProcsDescription
 
 Ne possède que les trois méthodes de gestion la variable "comment"
 Un commentaire vide est équivalent à une absence de commentaire
@@ -29,17 +34,22 @@ Un commentaire vide est équivalent à une absence de commentaire
 
 Les trois sous-classes possèdent la variable "name"
 
+Arborescence des instances
 
-Sous-Classe IDE::Component
+   (instance_of_IDE::Component)::(instance_of_IDE::ProcsGroup)::(instance_of_IDE::TclProcsDescription)
+
+  ##############################
+  # Sous-Classe IDE::Component #
+  ##############################
 
 Variables des instances
 
-    classes
     comment
-    name
-    objects
-    requiredComp
-    version
+    name           Nom du composant, correspond au nom du "package" Tcl
+    version        version du "package"
+    classes        liste des classes
+    objects        liste des objets
+    requiredComp   liste des composants requis
 
 Variables de l'objet IDE::Component
 
@@ -57,14 +67,87 @@ méthodes de l'objet "IDE::Component", catégorie "api", appelées dans de nombr
 Cette dernière méthode crée une instance de "IDE::Component" s'il n'en existe pas une de même nom.
 Dans ce cas, la version de l'instance est positionnée à 0.1
 
+  ##############################
+  # Sous-Classe IDE::ProcGroup #
+  ##############################
+
+Variables des instances
+
+    comment
+    name
+    defBody          exclusivement "namespace eval $name {...}"
+    withNamespace    booléen
+
+Variables de l'objet "IDE::ProcGroup"
+
+    _idemeta
+    __defaults       "withNamespace 0"
+
+  ########################################
+  # Sous-Classe IDE::TclProcsDescription #
+  ########################################
+
+Variables des instances
+
+    comment
+    name
+
+La variable "name" contient le nom de la procédure Tcl associée à l'instance.
+
+
+Variables de l'objet IDE::TclProcsDescription
+
+    _idemeta  (key-value)  (variable commune à tous les "xotcl::Object")
+    methodArr (key-value)  proc_name -> instance_of_IDE::TclProcsDescription
+
+##################################################
+  
+Hiérarchie
+
+    (IDE::CommentsContainer)::(instance_of_IDE::ObjectCommentsContainer)
+
+##################################################
+
+  ################################
+  # Objet IDE::CommentsContainer #
+  ################################
+
+Variables de l'objet
+
+    _idemeta
+    objComments   (key-value) 
+    objectHash    liste d'objets ???
+
+  #######################################
+  # Classe IDE::ObjectCommentsContainer #
+  #######################################
+
+Variables de l'instance
+
+    objectName         (obligatoire)
+    comment_Instance   (key-value) instproc_name->commentaire
+    comment_Class      (key-value) proc_name->commentaire
+
+Méthodes des instances
+
+    set comment [my getMethodComment Instance $method_name]
+    set comment [my getMethodComment Class $method_name]
+    if {[my hasMethodComment Instance $method_name]} ...
+    if {[my hasMethodComment Class $method_name]} ...
+    my getMethodComment Instance $method_name $comment
+    my getMethodComment Class $method_name $comment
+
+  ##########################
+  # Object IDE::IntroProxy #
+  ##########################
+
+  ##############################
+  # Objet IDE::SystemConfigMap #
+  ##############################
 
 
 
-    
 
-
-
-Classe IDE::ObjectCommentsContainer
 
 Classe IDE::Component::Tracker
 

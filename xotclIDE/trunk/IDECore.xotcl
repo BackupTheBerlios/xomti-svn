@@ -10,6 +10,7 @@ package provide IDECore 0.71
                     ########## group ide ##########
 
 namespace eval ::ide {}
+
 @ tclgroup ide idemeta comment IDECore {The are some extented list functions based
 on Smalltalk container protocol}
 
@@ -64,6 +65,11 @@ proc ide::lappendIfNone {list_ref elem} {
 }
 
 @ tclproc ide::lcollect idemeta struct IDECore ide
+@ tclproc ide::lcollect idemeta comment {The command
+    ide::lcollect v $list {...}
+is similar to
+    foreach v $list {...}
+but it returns the list of results of body evaluation}
 proc ide::lcollect {var_ref list eval_action} {
 	upvar $var_ref var
         set ret {}
@@ -921,21 +927,20 @@ IDE::Component::Tracker proc trackProc args {
                               ##########
 
 @ Class IDE::ObjectCommentsContainer {
-description {Helper class for hanlde methods comments.
-It will be used for not persistent classes}
+description {Helper class for handle methods comments.
+It will be used for non persistent classes}
 }
 Class create IDE::ObjectCommentsContainer -parameter objectName
 @ ::IDE::ObjectCommentsContainer idemeta component IDECore
 IDE::ObjectCommentsContainer instproc getMethodComment {type method} {
-    if {[my exists  comment_${type}($method)]} {
-       return [my set comment_${type}($method)]
+    if {[my exists comment_${type}($method)]} {
+        return [my set comment_${type}($method)]
     }
     return
 }
 IDE::ObjectCommentsContainer instproc hasMethodComment {type method} {
-    return [expr {[my exists  comment_${type}($method)] && 
-          [my set comment_${type}($method)]!=""}]
-
+    return [expr {[my exists comment_${type}($method)] && 
+        [my set comment_${type}($method)] ne ""}]
 }
 IDE::ObjectCommentsContainer instproc setMethodComment {type method text} {
     my set comment_${type}($method) $text
@@ -1153,7 +1158,7 @@ IDE::ProcsGroup proc unknown args {
 
 @ Class IDE::TclProcsDescription {
 description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
-This instaces has similar interface as xotcl class/objects.
+This instances has similar interface as xotcl class/objects.
 That is comments, getting body
 }
 }
@@ -1342,18 +1347,18 @@ IDE::CommentsContainer proc importMeta meta {
 IDE::CommentsContainer proc importObjectMeta meta {
     if {[llength $meta] != 3} {
         if {![string match @File* $meta]} {
-            puts stderr "meta: unexepted length of Object Meta >>$meta<<"
+            puts stderr "meta: unexpected length of Object Meta >>$meta<<"
         }
         return
     }
     set class [lindex $meta 0]
     set object [lindex $meta 1]
-    set contens [lindex $meta 2]
+    set content [lindex $meta 2]
     if {![Object isobject $object]} {
         puts stderr "meta: $object is not a Object"
         return
     }
-    $object setComment [my extractComment $contens]
+    $object setComment [my extractComment $content]
 }
 IDE::CommentsContainer proc importObjectMethodMeta {type meta} {
     if {[llength $meta] != 5} {
@@ -1362,12 +1367,12 @@ IDE::CommentsContainer proc importObjectMethodMeta {type meta} {
     }
     set object [lindex $meta 0]
     set method [lindex $meta 2]
-    set contens [lindex $meta 4]
+    set content [lindex $meta 4]
     if {![Object isobject $object]} {
         puts stderr "meta: $object is not a Object"
         return
     }
-    $object setMethodComment $type $method [my extractComment $contens]
+    $object setMethodComment $type $method [my extractComment $content]
 }
 IDE::CommentsContainer proc importProcGroupMeta meta {
     if {[llength $meta] != 6} {

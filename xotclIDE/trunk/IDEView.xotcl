@@ -1046,7 +1046,7 @@ IDE::CompView instproc createNewComponent component {
     IDE::System signalComponentsChanged
 }
 IDE::CompView instproc editSave comment {
-   my editSaveComment $comment
+    my editSaveComment $comment
 }
 IDE::CompView instproc editSaveComment comment {
    my instvar vcomponent
@@ -2861,12 +2861,12 @@ IDE::MethodEdit instproc saveSource value {
 }
 IDE::MethodEdit instproc saveValue value {
     my instvar controler vtype
-    if {$vtype=="Source"} {
-       my saveSource $value 
+    if {$vtype eq "Source"} {
+        my saveSource $value 
     } elseif {$vtype eq "Comment"} {
-       $controler editSaveComment $value
+        $controler editSaveComment $value
     } else {
-       error {unknown view type}
+        error {unknown view type}
     }
 }
 IDE::MethodEdit instproc setBodyTextControler {tvclass tvtype tmethod controler} {
@@ -4343,7 +4343,7 @@ IDE::SubObjectsView instproc fillMenuStruct ms {
     next
 }
 IDE::SubObjectsView instproc getMenuStruct {} {
-    return [IDE::MenuStruct [self]::ms Subobjects 4]
+    return [IDE::MenuStruct [self]::ms Children 4]
 }
 IDE::SubObjectsView instproc inspectObject {} {
     set actual [my selectionAsObject]

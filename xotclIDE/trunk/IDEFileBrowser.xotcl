@@ -10,9 +10,35 @@ IDE::FileBrowser newBrowser}
 package provide IDEFileBrowser 0.58
 package require IDECore
 package require IDEBaseGUI
-Class IDE::FileBrowser -superclass ::IDE::Browser 
-@ ::IDE::FileBrowser idemeta categoriesMethods {{changeToHome upDictionary changeDic selectDic changeToWorking manualCD} {getTitle destroy specificInit} {newKitArchive newFolder newZipArchive newMount} {cutFiles copyFiles deleteFiles canPaste pasteFiles}}
+
+                    ########## Classes and Objects ##########
+
+Class create IDE::DictionaryList -superclass {::IDE::ListView ::IDE::GUICommands}
+@ ::IDE::DictionaryList idemeta component IDEFileBrowser
+IDE::DictionaryList instproc buttonDoublePush {} {
+    set dic [my selectedItemFirst]
+    if {$dic!=""} {
+        [my info parent] selectDic $dic
+    }
+}
+IDE::DictionaryList instproc fillMenuStruct ms {
+     $ms addCommand2 {New Folder} [list [[self] info parent] newFolder] 
+     $ms addCommand2 {Manual cd} [list [[self] info parent] manualCD] 
+     $ms addMenuItem [IDE::MenuSeparator new -childof $ms -popdownMenu 1]
+     #$ms addCommand2 {New zip Archive} [list [[self] info parent] newZipArchive] 
+     $ms addCommand2 {New kit Archive} [list [[self] info parent] newKitArchive] 
+     $ms addMenuItem [IDE::MenuSeparator new -childof $ms -popdownMenu 1]
+     $ms addCommand2 {Refresh} [list [[self] info parent] refreshFiles] 
+}
+IDE::DictionaryList instproc getMenuStruct {} {
+    IDE::MenuStruct create [self]::ms Dictionary 0
+}
+
+                              ##########
+
+Class create IDE::FileBrowser -superclass ::IDE::Browser
 @ ::IDE::FileBrowser idemeta categories {dic-actions init-release vfs-actions file-actions}
+@ ::IDE::FileBrowser idemeta categoriesMethods {{changeToHome upDictionary changeDic selectDic changeToWorking manualCD} {getTitle destroy specificInit} {newKitArchive newFolder newZipArchive newMount} {cutFiles copyFiles deleteFiles canPaste pasteFiles}}
 @ ::IDE::FileBrowser idemeta component IDEFileBrowser
 IDE::FileBrowser instproc backHistory {} {
     my instvar history historyIndex currentDic
@@ -248,29 +274,12 @@ IDE::FileBrowser proc newBrowser {} {
         my create filebrowser .filebrowser
     }
 }
-Class IDE::DictionaryList -superclass {::IDE::ListView ::IDE::GUICommands} 
-@ ::IDE::DictionaryList idemeta component IDEFileBrowser
-IDE::DictionaryList instproc buttonDoublePush {} {
-    set dic [my selectedItemFirst]
-    if {$dic!=""} {
-        [my info parent] selectDic $dic
-    }
-}
-IDE::DictionaryList instproc fillMenuStruct ms {
-     $ms addCommand2 {New Folder} [list [[self] info parent] newFolder] 
-     $ms addCommand2 {Manual cd} [list [[self] info parent] manualCD] 
-     $ms addMenuItem [IDE::MenuSeparator new -childof $ms -popdownMenu 1]
-     #$ms addCommand2 {New zip Archive} [list [[self] info parent] newZipArchive] 
-     $ms addCommand2 {New kit Archive} [list [[self] info parent] newKitArchive] 
-     $ms addMenuItem [IDE::MenuSeparator new -childof $ms -popdownMenu 1]
-     $ms addCommand2 {Refresh} [list [[self] info parent] refreshFiles] 
-}
-IDE::DictionaryList instproc getMenuStruct {} {
-    IDE::MenuStruct create [self]::ms Dictionary 0
-}
-Class IDE::FileList -superclass {::IDE::ListView ::IDE::GUICommands} 
-@ ::IDE::FileList idemeta categoriesMethods {{pasteFiles renameFile cutFiles copyFiles canPaste} {mountKit mountZip} {getMenuStruct fillMenuStruct}}
+
+                              ##########
+
+Class create IDE::FileList -superclass {::IDE::ListView ::IDE::GUICommands}
 @ ::IDE::FileList idemeta categories {file-actions vfs-actions init-release}
+@ ::IDE::FileList idemeta categoriesMethods {{pasteFiles renameFile cutFiles copyFiles canPaste} {mountKit mountZip} {getMenuStruct fillMenuStruct}}
 @ ::IDE::FileList idemeta component IDEFileBrowser
 IDE::FileList instproc buttonDoublePush {} {
     set dic [my selectedItemFirst]
@@ -361,7 +370,10 @@ IDE::FileList instproc viewFile file {
     set w [IDE::Transcript newBrowser]
     ${w}::editor openFile [file join [[my info parent] set currentDic] $file]
 }
-Class IDE::MountList -superclass {::IDE::ListView ::IDE::GUICommands} 
+
+                              ##########
+
+Class create IDE::MountList -superclass {::IDE::ListView ::IDE::GUICommands}
 @ ::IDE::MountList idemeta component IDEFileBrowser
 IDE::MountList instproc buttonDoublePush {} {
     set item [my selectedItemFirst]

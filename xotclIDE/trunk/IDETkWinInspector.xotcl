@@ -1,9 +1,90 @@
 # automatically generated from XOTclIDE
-# script require component {IDEBaseGUI IDECore}
+# script require component {IDECore IDEBaseGUI}
 package provide IDETkWinInspector 0.61
-package require IDEBaseGUI
 package require IDECore
-Class IDE::TkWinList -superclass {::IDE::ListView ::IDE::GUICommands} 
+package require IDEBaseGUI
+
+                    ########## Classes and Objects ##########
+
+Class create IDE::TkWinConfList -superclass {::IDE::ListView ::IDE::GUICommands}
+@ ::IDE::TkWinConfList idemeta component IDETkWinInspector
+IDE::TkWinConfList instproc editSave value {
+    my instvar vconf vwindow
+    $vwindow configure $vconf $value
+}
+IDE::TkWinConfList instproc fillMenuStruct ms {
+    my requireNamespace
+    my set ignoreDefaults 0
+    $ms addCheckButton {Ignore defaults by _all} [self]::ignoreDefaults {}
+    next
+}
+IDE::TkWinConfList instproc getMenuStruct {} {
+    return [IDE::MenuStruct [self]::ms Configurations 0]
+}
+IDE::TkWinConfList instproc selectFor window {
+    my instvar vwindow
+    set vwindow $window
+    if {$window==""} {
+        my setList {}
+    } else {
+        my setListUnsorted [concat _all [lsort [ide::lcollect each [$window configure] {lindex $each 0}]]]
+        [my info parent] setStatusBarText "$window - [winfo class $window]"
+    }
+    my selectItem {}
+}
+IDE::TkWinConfList instproc selectItem conf {
+    my instvar vconf vwindow ignoreDefaults
+    set vconf $conf
+    if {$vconf==""} {
+       set text ""   
+    } elseif {$vconf=="_all"} {
+       append text "$vwindow configure"
+       foreach conf [$vwindow configure] {
+           # argvName, dbName, dbClass, defValue, and current value
+           if {[llength $conf]<=2} continue
+           if {$ignoreDefaults && [lindex $conf 3]==[lindex $conf 4]} continue
+           append text "\\\n   [lindex $conf 0] [list [lindex $conf 4]]"
+       }
+    } else {
+       set text [$vwindow cget $conf]
+    }
+    [my info parent]::valuetext setTextControler $text [self]
+}
+
+                              ##########
+
+Class create IDE::TkWinInspectorBrowser -superclass ::IDE::Browser
+@ ::IDE::TkWinInspectorBrowser idemeta component IDETkWinInspector
+IDE::TkWinInspectorBrowser instproc getTitle {} {
+    return {Tk Inspector}
+}
+IDE::TkWinInspectorBrowser instproc specificInit {} {
+    my instvar win
+    panedwindow $win.panedwindow -orient vertical
+    panedwindow $win.upperarea -orient horizontal
+    IDE::TkWinList create [self]::winlist $win.upperarea.winlist
+    IDE::TkWinConfList create [self]::conflist $win.upperarea.conflist
+    IDE::MethodEdit create [self]::valuetext $win.valuetext
+    
+    $win.upperarea add $win.upperarea.winlist $win.upperarea.conflist -width 300
+    $win.panedwindow add $win.upperarea -sticky news -height  220
+    $win.panedwindow add $win.valuetext -sticky news -height 200
+    
+    pack $win.panedwindow -fill both -expand yes
+    my initStatusBar 0 2
+    [self]::winlist selectFor .
+}
+IDE::TkWinInspectorBrowser proc newBrowser {} {
+    if {![IDE::System isTkNotOlderThan84]} {
+        IDE::Dialog error "You need at least Tcl8.4 for use Tk Inspector. Upgrade please!"
+        return
+    }
+    return [my new [Object autoname .tkinspector]]
+}
+
+                              ##########
+
+Class create IDE::TkWinList -superclass {::IDE::ListView ::IDE::GUICommands}
 @ ::IDE::TkWinList idemeta component IDETkWinInspector
 IDE::TkWinList instproc addtags {w tags} {
     foreach {d tag pos} $tags {
@@ -228,77 +309,5 @@ IDE::TkWinList instproc widgetConfigurationString {w root} {
         }
     }
     return $text
-}
-Class IDE::TkWinInspectorBrowser -superclass ::IDE::Browser 
-@ ::IDE::TkWinInspectorBrowser idemeta component IDETkWinInspector
-IDE::TkWinInspectorBrowser instproc getTitle {} {
-    return {Tk Inspector}
-}
-IDE::TkWinInspectorBrowser instproc specificInit {} {
-    my instvar win
-    panedwindow $win.panedwindow -orient vertical
-    panedwindow $win.upperarea -orient horizontal
-    IDE::TkWinList create [self]::winlist $win.upperarea.winlist
-    IDE::TkWinConfList create [self]::conflist $win.upperarea.conflist
-    IDE::MethodEdit create [self]::valuetext $win.valuetext
-    
-    $win.upperarea add $win.upperarea.winlist $win.upperarea.conflist -width 300
-    $win.panedwindow add $win.upperarea -sticky news -height  220
-    $win.panedwindow add $win.valuetext -sticky news -height 200
-    
-    pack $win.panedwindow -fill both -expand yes
-    my initStatusBar 0 2
-    [self]::winlist selectFor .
-}
-IDE::TkWinInspectorBrowser proc newBrowser {} {
-   if {![IDE::System isTkNeverThan84]} {
-       IDE::Dialog error "You need at least Tcl8.4 for use Tk Inspector. Upgrade please!"
-       return
-   }
-   return [my new [Object autoname .tkinspector]]
-}
-Class IDE::TkWinConfList -superclass {::IDE::ListView ::IDE::GUICommands} 
-@ ::IDE::TkWinConfList idemeta component IDETkWinInspector
-IDE::TkWinConfList instproc editSave value {
-    my instvar vconf vwindow
-    $vwindow configure $vconf $value
-}
-IDE::TkWinConfList instproc fillMenuStruct ms {
-    my requireNamespace
-    my set ignoreDefaults 0
-    $ms addCheckButton {Ingnore defualts by _all} [self]::ignoreDefaults {}
-    next
-}
-IDE::TkWinConfList instproc getMenuStruct {} {
-    return [IDE::MenuStruct [self]::ms Configurations 0]
-}
-IDE::TkWinConfList instproc selectFor window {
-    my instvar vwindow
-    set vwindow $window
-    if {$window==""} {
-        my setList {}
-    } else {
-        my setListUnsorted [concat _all [lsort [ide::lcollect each [$window configure] {lindex $each 0}]]]
-        [my info parent] setStatusBarText "$window - [winfo class $window]"
-    }
-    my selectItem {}
-}
-IDE::TkWinConfList instproc selectItem conf {
-    my instvar vconf vwindow ignoreDefaults
-    set vconf $conf
-    if {$vconf==""} {
-       set text ""   
-    } elseif {$vconf=="_all"} {
-       append text "$vwindow configure"
-       foreach conf [$vwindow configure] {
-           # argvName, dbName, dbClass, defValue, and current value
-           if {[llength $conf]<=2} continue
-           if {$ignoreDefaults && [lindex $conf 3]==[lindex $conf 4]} continue
-           append text "\\\n   [lindex $conf 0] [list [lindex $conf 4]]"
-       }
-    } else {
-       set text [$vwindow cget $conf]
-    }
-    [my info parent]::valuetext setTextControler $text [self]
 }
 

@@ -1,5 +1,5 @@
 # automatically generated from XOTclIDE
-# script require component {IDEView IDECore IDEBaseGUI}
+# script require component {IDECore IDEBaseGUI}
 @ Component IDETestFramework {
 description {This the framework for XP Tests
 
@@ -16,123 +16,12 @@ computing test:
 5. Use IDE::TestBrowser to run and see test results.}
 }
 package provide IDETestFramework 0.57
-package require IDEView
 package require IDECore
 package require IDEBaseGUI
-@ Class IDE::TestCase {
-description {Derive all your test from this Class
-Base functionality
 
-Testing Interface
-runAllTests
+                    ########## Classes and Objects ##########
 
-Creating Test
-overwrite methods:
-startTest
-endTest
-to make you test kontext
-
-All your test method must begin with test*
-and they are running in alphabetical order}
-}
-Class IDE::TestCase
-@ ::IDE::TestCase idemeta component IDETestFramework
-IDE::TestCase instproc assert {test {comment {}}} {
-    set rtest [uplevel [list expr $test]]
-    if {!$rtest} {
-      error "assert failed $comment: [self callingproc] \"$test\" \"[uplevel subst $test]\""
-    }
-}
-IDE::TestCase instproc endTest {} {
-  # overwritte this method to clean up state after every test run
-}
-IDE::TestCase instproc getFailedMessageForMethods method {
-   [self] instvar errorsArr
-   return $errorsArr($method)
-}
-IDE::TestCase instproc getFailedMethods {} {
-   [self] instvar errorsArr
-   return [array names errorsArr]
-}
-IDE::TestCase instproc getTestDir {} {
-    # get test dir. /tmp for unix nothing for else
-    global tcl_platform
-    if {$tcl_platform(platform)=="unix"} {
-        return /tmp
-    } else {
-        return
-    }
-}
-IDE::TestCase instproc getTestMethods {} {
-   # give sorted testmethods
-   lsort [[[self] info class] info instprocs test*]
-}
-IDE::TestCase instproc hardAssert test {
-    # This Asset can stop testing
-    set rtest [uplevel [list expr $test]]
-    if {!$rtest} {
-      [self] stopTesting  
-      error "assert failed: [self callingproc] \"$test\""
-    }
-}
-IDE::TestCase instproc init {} {
-   [self] instvar testMode
-   set testMode force
-}
-IDE::TestCase instproc resetErrors {} {
-   [self] instvar errorsArr
-   catch  {unset errorsArr}
-}
-IDE::TestCase instproc runAllTests {} {
-   [self] instvar errorsArr testMode
-   global errorInfo
-   [self] resetErrors
-   set ret 0
-   if {![[self] startTest]} {
-       IDE::Dialog error "Can not initialize [self class] test. No Test are started"
-       return 0
-   }
-   foreach m [[self] getTestMethods] {
-       #puts "TestCase [my info class] $m"
-       if {[catch {[self] $m}]} {
-            set errorsArr($m) $errorInfo
-            set ret 1
-            if {$testMode!="force"} break
-       }
-   }
-   [self] endTest
-   return $ret
-}
-IDE::TestCase instproc startTest {} {
-  # overwritte this method to init state for every test run
-  # return 1 for succesfull initialization
-  return 1
-}
-IDE::TestCase instproc stopTesting {} {
-    [self] instvar testMode
-    set testMode stop
-}
-@ IDE::TestCase proc getMethodCallFromClass {} {
-description {Helper method to generate tests}
-}
-IDE::TestCase proc getMethodCallFromClass class {
-  set ret {}
-  foreach method [$class info instprocs] {
-      append ret "   \$obj $method [$class info instargs $method]\n"
-  }
-  return $ret
-}
-@ IDE::TestCase proc getMethodCallFromObject {} {
-description {Helper method to generate tests}
-}
-IDE::TestCase proc getMethodCallFromObject object {
-  set ret {}
-  foreach method [$object info procs] {
-      append ret "   $object $method [$object info args $method]\n"
-  }
-  return $ret
-}
-Class IDE::TestBrowser -superclass ::IDE::Browser 
+Class create IDE::TestBrowser -superclass ::IDE::Browser
 @ ::IDE::TestBrowser idemeta component IDETestFramework
 IDE::TestBrowser instproc dropAllTests selected {
 }
@@ -267,5 +156,121 @@ IDE::TestBrowser proc startBrowserIfNone {} {
     if {[llength [set browsers [IDE::TestBrowser info instances]]]==0} {
        my newBrowser
    }
+}
+
+                              ##########
+
+@ Class IDE::TestCase {
+description {Derive all your test from this Class
+Base functionality
+
+Testing Interface
+runAllTests
+
+Creating Test
+overwrite methods:
+startTest
+endTest
+to make you test kontext
+
+All your test method must begin with test*
+and they are running in alphabetical order}
+}
+Class create IDE::TestCase
+@ ::IDE::TestCase idemeta component IDETestFramework
+IDE::TestCase instproc assert {test {comment {}}} {
+    set rtest [uplevel [list expr $test]]
+    if {!$rtest} {
+      error "assert failed $comment: [self callingproc] \"$test\" \"[uplevel subst $test]\""
+    }
+}
+IDE::TestCase instproc endTest {} {
+  # overwritte this method to clean up state after every test run
+}
+IDE::TestCase instproc getFailedMessageForMethods method {
+   [self] instvar errorsArr
+   return $errorsArr($method)
+}
+IDE::TestCase instproc getFailedMethods {} {
+   [self] instvar errorsArr
+   return [array names errorsArr]
+}
+IDE::TestCase instproc getTestDir {} {
+    # get test dir. /tmp for unix nothing for else
+    global tcl_platform
+    if {$tcl_platform(platform)=="unix"} {
+        return /tmp
+    } else {
+        return
+    }
+}
+IDE::TestCase instproc getTestMethods {} {
+   # give sorted testmethods
+   lsort [[[self] info class] info instprocs test*]
+}
+IDE::TestCase instproc hardAssert test {
+    # This Asset can stop testing
+    set rtest [uplevel [list expr $test]]
+    if {!$rtest} {
+      [self] stopTesting  
+      error "assert failed: [self callingproc] \"$test\""
+    }
+}
+IDE::TestCase instproc init {} {
+   [self] instvar testMode
+   set testMode force
+}
+IDE::TestCase instproc resetErrors {} {
+   [self] instvar errorsArr
+   catch  {unset errorsArr}
+}
+IDE::TestCase instproc runAllTests {} {
+   [self] instvar errorsArr testMode
+   global errorInfo
+   [self] resetErrors
+   set ret 0
+   if {![[self] startTest]} {
+       IDE::Dialog error "Can not initialize [self class] test. No Test are started"
+       return 0
+   }
+   foreach m [[self] getTestMethods] {
+       #puts "TestCase [my info class] $m"
+       if {[catch {[self] $m}]} {
+            set errorsArr($m) $errorInfo
+            set ret 1
+            if {$testMode!="force"} break
+       }
+   }
+   [self] endTest
+   return $ret
+}
+IDE::TestCase instproc startTest {} {
+  # overwritte this method to init state for every test run
+  # return 1 for succesfull initialization
+  return 1
+}
+IDE::TestCase instproc stopTesting {} {
+    [self] instvar testMode
+    set testMode stop
+}
+@ IDE::TestCase proc getMethodCallFromClass {} {
+description {Helper method to generate tests}
+}
+IDE::TestCase proc getMethodCallFromClass class {
+  set ret {}
+  foreach method [$class info instprocs] {
+      append ret "   \$obj $method [$class info instargs $method]\n"
+  }
+  return $ret
+}
+@ IDE::TestCase proc getMethodCallFromObject {} {
+description {Helper method to generate tests}
+}
+IDE::TestCase proc getMethodCallFromObject object {
+  set ret {}
+  foreach method [$object info procs] {
+      append ret "   $object $method [$object info args $method]\n"
+  }
+  return $ret
 }
 
