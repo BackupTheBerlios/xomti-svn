@@ -2875,11 +2875,11 @@ IDE::MethodEdit instproc save {} {
     if {![my exists oldtext]} return
     set newtext [my getText]
     if {[IDE::System isTkNotOlderThan84]} {
-        if {[[my getTextWindow] edit modified]} {
+        if {[[my getTextWidget] edit modified]} {
             my saveValue $newtext
         }
     } else {
-        if {[my set oldtext]!=$newtext} {
+        if {[my set oldtext] ne $newtext} {
             my saveValue $newtext
         }
     }

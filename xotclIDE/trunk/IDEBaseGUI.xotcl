@@ -417,16 +417,16 @@ IDE::GUICommands instproc upsMessage text {
 description {Fasade for tk widget text}
 }
 Class create IDE::Text -parameter {{height 24} {width 80}}
-@ ::IDE::Text idemeta categories {service search-tag initialize}
-@ ::IDE::Text idemeta categoriesMethods {{makeEmpty getSelection getText colorizeRange removeColorize viewPos tagRange setText appendToCursor} {colorizeTextAll tagRegExprTextAll colorizeRegExprTextAll colorizeRegExprText colorizeText tagRegExprText} {initTags init}}
+@ ::IDE::Text idemeta categories {service1 search-tag initialize service0 deprecated}
+@ ::IDE::Text idemeta categoriesMethods {{makeEmpty getSelection colorizeRange removeColorize viewPos tagRange setText appendToCursor getText} {colorizeTextAll tagRegExprTextAll colorizeRegExprTextAll colorizeRegExprText colorizeText tagRegExprText} {initTags init} {} getTextWindow}
 @ ::IDE::Text idemeta component IDEBaseGUI
 IDE::Text instproc appendToCursor text {
-    [my getTextWindow] insert insert $text
+    [my getTextWidget] insert insert $text
 }
 IDE::Text instproc colorizeRange {begin end} {
     my instvar win
-    set twin $win.text
-    $twin tag add hlight "1.0 + $begin char" "1.0 + $end char"
+    set tw [my getTextWidget]
+    $tw tag add hlight "1.0 + $begin char" "1.0 + $end char"
 }
 IDE::Text instproc colorizeRegExprText {text {cur 1.0}} {
     my tagRegExprText hlight $text $cur
@@ -435,13 +435,12 @@ IDE::Text instproc colorizeRegExprTextAll text {
     my tagRegExprTextAll hlight $text
 }
 IDE::Text instproc colorizeText {text {cur 1.0}} {
-    my instvar win
-    set twin $win.text
+    set tw [my getTextWidget]
     # add variables (count)
-    set cur [$twin search -count count -- $text $cur end]
+    set cur [$tw search -count count -- $text $cur end]
     if {$cur ne ""} {
-       $twin tag add hlight $cur "$cur + $count char"
-       return [$twin index "$cur + $count char"]
+       $tw tag add hlight $cur "$cur + $count char"
+       return [$tw index "$cur + $count char"]
     }
     return ""
 }
@@ -453,57 +452,58 @@ IDE::Text instproc colorizeTextAll text {
     }
 }
 IDE::Text instproc dropAllColorized {} {
-    set twin [my getTextWindow]
-    $twin tag remove hlight 1.0 end
+    set tw [my getTextWidget]
+    $tw tag remove hlight 1.0 end
 }
 IDE::Text instproc focus {} {
-    my instvar win
-    ::focus $win.text
+    focus [my getTextWidget]
 }
 IDE::Text instproc getSelection {} {
-    my instvar win
-    set range [$win.text tag ranges sel]
+    set tw [my getTextWidget]
+    set range [$tw tag ranges sel]
     if {$range eq ""} return
-    return [$win.text get [lindex $range 0] [lindex $range 1]]
+    return [$tw get [lindex $range 0] [lindex $range 1]]
 }
 IDE::Text instproc getText {} {
-    my instvar win
-    set text [$win.text get 1.0 end]
+    set text [[my getTextWidget] get 1.0 end]
     return [string range $text 0 [expr {[string length $text] - 2}]]
 }
-IDE::Text instproc getTextWindow {} {
+IDE::Text instproc getTextWidget {} {
     return [my set win].text
 }
-IDE::Text instproc init window {
-    my instvar win state height width
-    set win $window
+IDE::Text instproc getTextWindow {} {
+    puts stderr "getTextWindow is deprecated"
+    return [my getTextWindow]
+}
+IDE::Text instproc init win {
+    my set win $win
     frame $win
     scrollbar $win.scroll -command "$win.text yview" -takefocus 0
-    global tcl_platform
     set bgcolor [IDEPreferences getParameter textcolor]
+    text $win.text -yscroll "$win.scroll set" -width [my set width] -height [my set height] -font textfont
     if {$bgcolor ne ""} {
-        text $win.text -yscroll "$win.scroll set" -width $width -height $height -font textfont -background $bgcolor
-    } else {
-        text $win.text -yscroll "$win.scroll set" -width $width -height $height -font textfont
+        $win.text configure -background $bgcolor
     }
     if {[IDE::System isTkNotOlderThan84]} {
         $win.text configure -undo 1
     }
     pack $win.scroll -side right -fill y
     pack $win.text -expand yes -fill both
-    set state empty
+    my set state empty
     my initTags
     next
 }
 IDE::Text instproc initTags {} {
-    [my getTextWindow] tag configure hlight -background yellow
+    [my getTextWidget] tag configure hlight -background yellow
     next
 }
+IDE::Text instproc isEmpty {} {
+    return [expr {[my set state] eq "empty"}]
+}
 IDE::Text instproc makeEmpty {} {
-    my instvar win state
-    if {$state ne "empty"} {
-        set state empty    
-        $win.text delete 1.0 end
+    if {![my isEmpty]} {
+        my set state empty
+        [my getTextWidget] delete 1.0 end
     }
 }
 IDE::Text instproc maskUTF8 {} {
@@ -520,49 +520,47 @@ IDE::Text instproc maskUTF8 {} {
     my setText $out
 }
 IDE::Text instproc removeColorize {} {
-    set twin [my getTextWindow]
-    $twin tag remove hlight 0.0 end
+    set tw [my getTextWidget]
+    $tw tag remove hlight 0.0 end
 }
 IDE::Text instproc setColor color {
-    set win [my getTextWindow]
-    if {![winfo exists $win]} return
+    set tw [my getTextWidget]
+    if {![winfo exists $tw]} return
     if {$color eq ""} {
-        $win configure -background [list [$win.listbox configure -background] 3]
+        $tw configure -background [list [$tw.listbox configure -background] 3]
     } else {
-        $win configure -background $color
+        $tw configure -background $color
     }
 }
 IDE::Text instproc setCursorPos pos {
-    [my set win].text mark set insert "1.0 + $pos char"
-    
+    [my getTextWidget] mark set insert "1.0 + $pos char"
 }
 IDE::Text instproc setSelection {begin end} {
-    set twin [my set win].text
-    $twin tag add sel  $begin $end
-    $twin mark set insert sel.last  
+    set tw [my getTextWidget]
+    $tw tag add sel  $begin $end
+    $tw mark set insert sel.last  
 }
 IDE::Text instproc setText text {
-    my instvar win state
     my makeEmpty
-    $win.text insert 1.0 $text
-    set state notempty
+    set tw [my getTextWidget]
+    $tw insert 1.0 $text
+    my set state notempty
     if {[IDE::System isTkNotOlderThan84]} {
-        $win.text edit reset
-        $win.text edit modified 0
+        $tw edit reset
+        $tw edit modified 0
     }
 }
 IDE::Text instproc tagRange {tag begin end} {
-    my instvar win
-    set twin $win.text
-    $twin tag add $tag "1.0 + $begin char" "1.0 + $end char"
+    set tw [my getTextWidget]
+    $tw tag add $tag "1.0 + $begin char" "1.0 + $end char"
 }
 IDE::Text instproc tagRegExprText {tag text {cur 1.0}} {
-    set twin [my getTextWindow]
+    set tw [my getTextWidget]
     # add variables (count)
-    set cur [$twin search -regexp -count count -- $text $cur end]
+    set cur [$tw search -regexp -count count -- $text $cur end]
     if {$cur ne ""} {
-       $twin tag add $tag $cur "$cur + $count char"
-       return [$twin index "$cur + $count char"]
+       $tw tag add $tag $cur "$cur + $count char"
+       return [$tw index "$cur + $count char"]
     }
     return ""
 }
@@ -574,9 +572,8 @@ IDE::Text instproc tagRegExprTextAll {tag text} {
     }
 }
 IDE::Text instproc viewPos pos {
-    my instvar win
-    set twin $win.text
-    $twin see "1.0 + $pos char"
+    set tw [my getTextWidget]
+    $tw see "1.0 + $pos char"
 }
 IDE::Text proc setColor color {
     foreach c [IDE::IntroProxy getSubclassesDeep [self]] {
@@ -593,10 +590,11 @@ Class create IDE::Editor -superclass {::IDE::Text ::IDE::GUICommands} -parameter
 @ ::IDE::Editor idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {fileAppend fileIn fileOut} {browseSelection evalInspectSelection evalSelection evalDisplaySelection evalSubstituteSelection} getWordUnderCursor setTypedText}
 @ ::IDE::Editor idemeta component IDEBaseGUI
 IDE::Editor instproc appendToCursorAndSelect text {
-    set sIndex [[my getTextWindow] index insert]
+    set tw [my getTextWidget]
+    set sIndex [$tw index insert]
     my appendToCursor $text
-    [my getTextWindow] tag remove sel 1.0 end
-    [my getTextWindow] tag add sel $sIndex [[my getTextWindow] index insert]
+    $tw tag remove sel 1.0 end
+    $tw tag add sel $sIndex [$tw index insert]
 }
 IDE::Editor instproc browseSelection {} {
     set sel [my getSelection]
@@ -679,8 +677,8 @@ IDE::Editor instproc getMenuStruct {} {
     return [IDE::MenuStruct [self]::ms Edit 0]
 }
 IDE::Editor instproc getWordUnderCursor {} {
-    set twin [my getTextWindow]
-    return [$twin get {insert wordstart} {insert wordend}]
+    set tw [my getTextWidget]
+    return [$tw get {insert wordstart} {insert wordend}]
 }
 IDE::Editor instproc isValidTextSelection {} {
     expr {[my getSelection] ne ""}
@@ -712,14 +710,14 @@ IDE::Editor instproc substituteString string {
     IDE::System substituteString $string
 }
 IDE::Editor instproc switchWrap {} {
-    set twin [my getTextWindow]
+    set tw [my getTextWidget]
     my instvar wrapMode
     if {$wrapMode} {
         set value "word"
     } else {
         set value "none"
     }
-    $twin configure -wrap $value
+    $tw configure -wrap $value
     return $value
 }
 IDE::Editor proc initializeAfterLoad {} {
@@ -741,8 +739,8 @@ Class create IDE::EditorPopDown
 IDE::EditorPopDown instproc getPopdown {} {
     my instvar dropWin
     if {![my exists dropWin]} {
-        set win [my getTextWindow]
-        set dropWin $win.dropshell
+        set tw [my getTextWidget]
+        set dropWin $tw.dropshell
         menu $dropWin -bd 2 -relief raised -tearoff 0
         wm overrideredirect $dropWin 1
         scrollbar $dropWin.scroll -command "$dropWin.listbox yview" -takefocus 0
@@ -757,7 +755,7 @@ IDE::EditorPopDown instproc getPopdown {} {
 }
 IDE::EditorPopDown instproc hidePopdown {} {
     wm withdraw [my set dropWin]
-    focus [my getTextWindow]
+    focus [my getTextWidget]
 }
 IDE::EditorPopDown instproc invokePopDown {mlist pattern} {
     if {$mlist eq ""} return
@@ -768,15 +766,15 @@ IDE::EditorPopDown instproc invokePopDown {mlist pattern} {
         my appendToCursor "[string range $mlist $sindex end]"
         return
     }
-    set twin [my getTextWindow]
+    set tw [my getTextWidget]
     set popWin [my getPopdown]
     $popWin.listbox delete 0 end
     eval $popWin.listbox insert 0 $mlist
     set height [winfo reqheight $popWin.listbox]
     set width [expr {[winfo reqwidth $popWin.listbox] + [winfo reqwidth $popWin.scroll]}]
-    set bb [$twin bbox insert]
-    set x [expr {[lindex $bb 0] + [winfo rootx $twin]}]
-    set y [expr {[lindex $bb 1] + [winfo rooty $twin]}]
+    set bb [$tw bbox insert]
+    set x [expr {[lindex $bb 0] + [winfo rootx $tw]}]
+    set y [expr {[lindex $bb 1] + [winfo rooty $tw]}]
     wm geometry $popWin $width\x$height+$x+$y
     wm deiconify $popWin
     raise $popWin
@@ -2051,22 +2049,22 @@ IDE::ProtocolText instproc append text {
             if {!$inverseMatch} return
         }
     }
-    set twin [my getTextWindow]
-    set end [$twin index "end - 1 c"]
-    $twin insert end $text\n
-    set newEnd [$twin index "end - 1 l"]
+    set tw [my getTextWidget]
+    set end [$tw index "end - 1 c"]
+    $tw insert end $text\n
+    set newEnd [$tw index "end - 1 l"]
     set lines [expr [lindex [split $newEnd .] 0]-[lindex [split $end .] 0]]
     if {$odd} {
-        $twin tag add odditem $end $newEnd
+        $tw tag add odditem $end $newEnd
     }
     set odd [expr !$odd]
-    $twin see end
+    $tw see end
     incr count
     lappend itemLines $lines
     if {$itemsNumber ne ""} {
         if {[catch {expr {$itemsNumber+1}}] || $itemsNumber<=0} {
             set itemsNumber ""
-       } else {
+        } else {
             if {$count>$itemsNumber} {
                 set linesToDelete [expr $count-$itemsNumber]
                 set range [lrange $itemLines 0 [expr {$linesToDelete-1}]]
@@ -2075,7 +2073,7 @@ IDE::ProtocolText instproc append text {
                 foreach lc $range {
                     incr allLines $lc
                 }
-                $twin delete 1.0 $allLines.0
+                $tw delete 1.0 $allLines.0
                 set count $itemsNumber
             }
         }
@@ -2201,16 +2199,16 @@ IDE::FindReplace proc actionClose {} {
 IDE::FindReplace proc actionFind {} {
     my instvar cur view backwards
     set count [my findArea]
-    set twin [$view getTextWindow]
+    set tw [$view getTextWidget]
     if {$count > 0} {
         # sel tag is not visible if text havn't focus
-        $twin tag remove find 1.0 end
-        $twin tag remove sel 1.0 end
-        $twin tag add find $cur "$cur + $count char"
-        $twin tag add sel $cur "$cur + $count char"
-        $twin tag configure find -background yellow
-        $twin mark set insert "$cur + $count char"
-        $twin see insert
+        $tw tag remove find 1.0 end
+        $tw tag remove sel 1.0 end
+        $tw tag add find $cur "$cur + $count char"
+        $tw tag add sel $cur "$cur + $count char"
+        $tw tag configure find -background yellow
+        $tw mark set insert "$cur + $count char"
+        $tw see insert
         if {!$backwards} {
             set cur "$cur + $count char"
         }
@@ -2219,20 +2217,20 @@ IDE::FindReplace proc actionFind {} {
 IDE::FindReplace proc actionReplace {} {
     my instvar cur view backwards replaceText replaceAll prompt
     set count [my findArea]
-    set twin [$view getTextWindow]
-    while {$count>0} {
+    set tw [$view getTextWidget]
+    while {$count > 0} {
         set ignore 0
         if {$prompt} {
-            $twin tag remove sel 1.0 end
-            $twin tag add sel $cur "$cur + $count char"
-            $twin see $cur
-            if {[IDE::Dialog yesNo "Replace occurance $cur"]=="no"} {
+            $tw tag remove sel 1.0 end
+            $tw tag add sel $cur "$cur + $count char"
+            $tw see $cur
+            if {[IDE::Dialog yesNo "Replace occurance $cur"] eq "no"} {
                 set ignore 1
             }
         }
         if {!$ignore} {
-             $twin delete $cur "$cur + $count char"
-             $twin insert $cur $replaceText
+            $tw delete $cur "$cur + $count char"
+            $tw insert $cur $replaceText
         }
         if {!$backwards} {
 	    set cur "$cur + [string length $replaceText] char"
@@ -2361,7 +2359,7 @@ IDE::FindReplace proc findArea {{complainNoFound 1}} {
     set tag find
     #[self] halt
     #IDE::Dialog message release
-    set twin [$view getTextWindow]
+    set twin [$view getTextWidget]
     $twin tag remove $tag 0.0 end
     if {![my exists cur]} {
         my set cur 1.0

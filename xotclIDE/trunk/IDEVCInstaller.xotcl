@@ -1,5 +1,5 @@
 # automatically generated from XOTclIDE
-# script require component {IDEView IDECore IDEPersistence IDEBaseGUI}
+# script require component {IDECore IDEPersistence IDEBaseGUI}
 @ Component IDEVCInstaller {
 description {VCInstaller is the GUI-tool for installation and
 configuration of IDE with Version Controll based on
@@ -7,10 +7,65 @@ MySql relational database.
 }
 }
 package provide IDEVCInstaller 0.63
-package require IDEView
 package require IDECore
 package require IDEPersistence
 package require IDEBaseGUI
+
+                    ########## Classes and Objects ##########
+
+Class create IDE::DBMappingSchemaChange -superclass ::IDE::DBMapping
+@ ::IDE::DBMappingSchemaChange idemeta component IDEVCInstaller
+
+                              ##########
+
+Class create IDE::LabeledEntry -parameter label
+@ ::IDE::LabeledEntry idemeta component IDEVCInstaller
+IDE::LabeledEntry instproc getValue {} {
+    [self] instvar win
+    $win.entry get
+}
+IDE::LabeledEntry instproc init window {
+    [self] instvar win
+    set win $window
+    frame $win
+    ::label $win.label -text [[self] label]
+    ::entry $win.entry
+    [self] specificInit
+    [self] pack
+}
+IDE::LabeledEntry instproc pack {} {
+    [self] instvar win
+    pack $win.label $win.entry -side left
+}
+IDE::LabeledEntry instproc setValue value {
+    [self] instvar win
+    $win.entry delete 0 end
+    $win.entry insert 0 $value
+}
+IDE::LabeledEntry instproc specificInit {} {
+    next
+}
+
+                              ##########
+
+Class create IDE::FileNameEntry -superclass ::IDE::LabeledEntry -parameter label
+@ ::IDE::FileNameEntry idemeta component IDEVCInstaller
+IDE::FileNameEntry instproc fileChooser {} {
+   [self] setValue [IDE::Dialog getOpenFile]
+}
+IDE::FileNameEntry instproc pack {} {
+    [self] instvar win
+    next
+    pack $win.button -side left
+}
+IDE::FileNameEntry instproc specificInit {} {
+    [self] instvar win
+    ::button $win.button -text "..." -command [list [self] fileChooser]
+    next
+}
+
+                              ##########
+
 @ Class IDE::InstallerGUI {
 description {This class implement the installer GUI and install actions
 The actions are specified im method initRun
@@ -22,9 +77,9 @@ Elements:
 3. set preferences or variables
 4. comment}
 }
-Class IDE::InstallerGUI -superclass ::IDE::Browser 
-@ ::IDE::InstallerGUI idemeta categoriesMethods {{createSystemMenu getTitle init specificInit initRun} cleanInputGUI {checkMysqlLibLocation mysqllibInputGUI setMysqlLib} {checkInstallComponents finalGUI installComponents} {welcomeGUI checkDummy setDummy} {checkInterface setInterface selectInterfaceGUI} {setSqlParam sqlParamGUI checkSqlParam installTables}}
+Class create IDE::InstallerGUI -superclass ::IDE::Browser
 @ ::IDE::InstallerGUI idemeta categories {initialize private mysqltcl install-components welcome interface connection-params}
+@ ::IDE::InstallerGUI idemeta categoriesMethods {{createSystemMenu getTitle init specificInit initRun} cleanInputGUI {checkMysqlLibLocation mysqllibInputGUI setMysqlLib} {checkInstallComponents finalGUI installComponents} {welcomeGUI checkDummy setDummy} {checkInterface setInterface selectInterfaceGUI} {setSqlParam sqlParamGUI checkSqlParam installTables}}
 @ ::IDE::InstallerGUI idemeta component IDEVCInstaller
 IDE::InstallerGUI instproc checkDummy {} {
     return 1
@@ -317,12 +372,12 @@ IDE::InstallerGUI instproc showActualTransition args {
 }
 IDE::InstallerGUI instproc specificInit {} {
     [self] instvar win
-    if {$win=="."} {set win {}}
+    if {$win eq "."} {set win {}}
     IDE::Text [self]::info $win.info -width 50 -height 20
-    [[self]::info getTextWindow] configure -wrap word
+    [[self]::info getTextWidget] configure -wrap word
     IDE::WorkStatus [self]::status $win.status
     frame $win.inputframe
-    if {$win==".i"} {
+    if {$win eq ".i"} {
         wm protocol [winfo toplevel $win] WM_DELETE_WINDOW {}
     }
     button $win.next -text Next -command [list [self] doNext]
@@ -352,7 +407,10 @@ IDE::InstallerGUI instproc welcomeGUI {} {
 IDE::InstallerGUI proc start {} {
    my new .install
 }
-Class IDE::WorkStatus
+
+                              ##########
+
+Class create IDE::WorkStatus
 @ ::IDE::WorkStatus idemeta component IDEVCInstaller
 IDE::WorkStatus instproc init window {
    [self] instvar win
@@ -364,48 +422,4 @@ IDE::WorkStatus instproc setMessage mes {
    $win configure -text $mes
    update idletasks
 }
-Class IDE::LabeledEntry -parameter label
-@ ::IDE::LabeledEntry idemeta component IDEVCInstaller
-IDE::LabeledEntry instproc getValue {} {
-    [self] instvar win
-    $win.entry get
-}
-IDE::LabeledEntry instproc init window {
-    [self] instvar win
-    set win $window
-    frame $win
-    ::label $win.label -text [[self] label]
-    ::entry $win.entry
-    [self] specificInit
-    [self] pack
-}
-IDE::LabeledEntry instproc pack {} {
-    [self] instvar win
-    pack $win.label $win.entry -side left
-}
-IDE::LabeledEntry instproc setValue value {
-    [self] instvar win
-    $win.entry delete 0 end
-    $win.entry insert 0 $value
-}
-IDE::LabeledEntry instproc specificInit {} {
-    next
-}
-Class IDE::FileNameEntry -superclass ::IDE::LabeledEntry  -parameter label
-@ ::IDE::FileNameEntry idemeta component IDEVCInstaller
-IDE::FileNameEntry instproc fileChooser {} {
-   [self] setValue [IDE::Dialog getOpenFile]
-}
-IDE::FileNameEntry instproc pack {} {
-    [self] instvar win
-    next
-    pack $win.button -side left
-}
-IDE::FileNameEntry instproc specificInit {} {
-    [self] instvar win
-    ::button $win.button -text "..." -command [list [self] fileChooser]
-    next
-}
-Class IDE::DBMappingSchemaChange -superclass ::IDE::DBMapping 
-@ ::IDE::DBMappingSchemaChange idemeta component IDEVCInstaller
 

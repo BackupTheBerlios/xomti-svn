@@ -29,6 +29,76 @@ The sql interface is based on xdobry::sql (currently mysql, postgres, odbc)
 }
 package provide IDEPersistence 0.71
 package require IDECore
+
+                    ########## Classes and Objects ##########
+
+@ Class IDE::DBInfo {
+description {Handle comments on Version Control items
+}
+}
+Class create IDE::DBInfo
+@ ::IDE::DBInfo idemeta component IDEPersistence
+IDE::DBInfo instproc getComment {} {
+   if {![my istype IDE::DBInfo] && ![my istype IDE::CommentHandler]} {
+      [my getDescription] getComment
+   } else {
+     if {[my exists comment]} {
+         return [my set comment]
+     }
+     return 
+   }
+}
+IDE::DBInfo instproc hasComment {} {
+   if {![my istype IDE::DBInfo] && ![my istype IDE::CommentHandler]} {
+      [my getDescription] hasComment
+   } else {
+      expr {[my exists comment] && [my set comment]!=""} 
+   }
+}
+IDE::DBInfo instproc makeCommentPersistent {} {
+    my instvar comment infoid
+    set infoid [[my getConnection] insertRowAutoId Info infotext [list $comment] infoid]
+    my updateAttributes infoid
+}
+IDE::DBInfo instproc readCommentFromDB {} {
+    my instvar infoid
+    if {[info exists infoid] && $infoid!=""} {
+        my set comment [lindex [lindex [IDE::DBPersistence queryAsList "select infotext from Info where infoid=$infoid"] 0] 0]
+    }
+}
+IDE::DBInfo instproc setComment text {
+   if {![my istype IDE::DBInfo] && ![my istype IDE::CommentHandler]} {
+      [my getDescription] setComment $text
+   } else {
+    my instvar comment infoid
+    # !!! The sharing of info is not completly implemented
+    set comment $text
+    if {$text==""} {
+       if {$infoid!=""} {
+          my sqlexecute "DELETE FROM Info WHERE infoid=$infoid"
+          set infoid NULL
+          my updateAttributes infoid
+       }
+    } else {
+      if {[info exists infoid] && $infoid!=""} {
+         my sqlexecute "UPDATE Info Set text=[my maskstring $text] where infoid=$infoid"
+       } else {
+          my makeCommentPersistent
+       }
+    }
+   }
+}
+IDE::DBInfo instproc setInfoId infoid {
+    if {$infoid==""} return
+    my set infoid $infoid
+    my readCommentFromDB
+}
+IDE::DBInfo proc addInfoToDescriptor des {
+   $des addColumn {infoid int {} setInfoId}
+}
+
+                              ##########
+
 @ Class IDE::DBPersistence {
 description {base functionality for XOTcl Version Control Persistence
 
@@ -37,9 +107,9 @@ description {base functionality for XOTcl Version Control Persistence
 3. sql access
 4. database persistece for xotcl objects}
 }
-Class IDE::DBPersistence
-@ ::IDE::DBPersistence idemeta categoriesMethods {{getUserId getConnection getIdValue getTimeStampString setVersionInfo getDescriptor getVersionString getName getInsertValues setTimeStamp} {isPersistent istOwnEdition} {getRelationshipIndexes sqlexecute addRelationship copyRelationships deleteRelationship} {setMaxIdForMyName createNewEdition maskstring getValueForColumns isclosed questForChange makePersistent versionEdition updateAttributes makeTransient rereadAttributes} {increaseVersionInfo questForOwn} {updateVersion questForChangeParent}}
+Class create IDE::DBPersistence
 @ ::IDE::DBPersistence idemeta categories {accessing testing sql-accessing service private service-hooks}
+@ ::IDE::DBPersistence idemeta categoriesMethods {{getUserId getConnection getIdValue getTimeStampString setVersionInfo getDescriptor getVersionString getName getInsertValues setTimeStamp} {isPersistent istOwnEdition} {getRelationshipIndexes sqlexecute addRelationship copyRelationships deleteRelationship} {setMaxIdForMyName createNewEdition maskstring getValueForColumns isclosed questForChange makePersistent versionEdition updateAttributes makeTransient rereadAttributes} {increaseVersionInfo questForOwn} {updateVersion questForChangeParent}}
 @ ::IDE::DBPersistence idemeta component IDEPersistence
 IDE::DBPersistence instproc addRelationship {table values} {
     [my getConnection] execute "INSERT INTO $table VALUES ($values)"
@@ -329,79 +399,18 @@ IDE::DBPersistence proc queryAsReport statement {
 IDE::DBPersistence proc setConnection conn_object {
     my set connection $conn_object 
 }
-@ Class IDE::DBInfo {
-description {Handle comments on Version Control items
-}
-}
-Class IDE::DBInfo
-@ ::IDE::DBInfo idemeta component IDEPersistence
-IDE::DBInfo instproc getComment {} {
-   if {![my istype IDE::DBInfo] && ![my istype IDE::CommentHandler]} {
-      [my getDescription] getComment
-   } else {
-     if {[my exists comment]} {
-         return [my set comment]
-     }
-     return 
-   }
-}
-IDE::DBInfo instproc hasComment {} {
-   if {![my istype IDE::DBInfo] && ![my istype IDE::CommentHandler]} {
-      [my getDescription] hasComment
-   } else {
-      expr {[my exists comment] && [my set comment]!=""} 
-   }
-}
-IDE::DBInfo instproc makeCommentPersistent {} {
-    my instvar comment infoid
-    set infoid [[my getConnection] insertRowAutoId Info infotext [list $comment] infoid]
-    my updateAttributes infoid
-}
-IDE::DBInfo instproc readCommentFromDB {} {
-    my instvar infoid
-    if {[info exists infoid] && $infoid!=""} {
-        my set comment [lindex [lindex [IDE::DBPersistence queryAsList "select infotext from Info where infoid=$infoid"] 0] 0]
-    }
-}
-IDE::DBInfo instproc setComment text {
-   if {![my istype IDE::DBInfo] && ![my istype IDE::CommentHandler]} {
-      [my getDescription] setComment $text
-   } else {
-    my instvar comment infoid
-    # !!! The sharing of info is not completly implemented
-    set comment $text
-    if {$text==""} {
-       if {$infoid!=""} {
-          my sqlexecute "DELETE FROM Info WHERE infoid=$infoid"
-          set infoid NULL
-          my updateAttributes infoid
-       }
-    } else {
-      if {[info exists infoid] && $infoid!=""} {
-         my sqlexecute "UPDATE Info Set text=[my maskstring $text] where infoid=$infoid"
-       } else {
-          my makeCommentPersistent
-       }
-    }
-   }
-}
-IDE::DBInfo instproc setInfoId infoid {
-    if {$infoid==""} return
-    my set infoid $infoid
-    my readCommentFromDB
-}
-IDE::DBInfo proc addInfoToDescriptor des {
-   $des addColumn {infoid int {} setInfoId}
-}
+
+                              ##########
+
 @ Class IDE::AbstractMethodGroup {
 description {This is the abstract root class for all tcl/xotcl structure elements which
 group methods.
 For example: Xotcl Class, Xotcl Objects, Tcl Procs Group
 }
 }
-Class IDE::AbstractMethodGroup -superclass {::IDE::DBPersistence ::IDE::DBInfo} 
-@ ::IDE::AbstractMethodGroup idemeta categoriesMethods {{createFromDB loadAllMethods loadMethod} {getDescriptor setRelationshipToComponent getComponentId synchronizeMethods getComponent makeTransistent updateVersion trackingOn synchronizeWithId} {questForChangeParent rereadForAnotherVersion loadPrevious changeVersionTo}}
+Class create IDE::AbstractMethodGroup -superclass {::IDE::DBPersistence ::IDE::DBInfo}
 @ ::IDE::AbstractMethodGroup idemeta categories {method-persistence persistency version-system}
+@ ::IDE::AbstractMethodGroup idemeta categoriesMethods {{createFromDB loadAllMethods loadMethod} {getDescriptor setRelationshipToComponent getComponentId synchronizeMethods getComponent makeTransistent updateVersion trackingOn synchronizeWithId} {questForChangeParent rereadForAnotherVersion loadPrevious changeVersionTo}}
 @ ::IDE::AbstractMethodGroup idemeta component IDEPersistence
 IDE::AbstractMethodGroup instproc changeVersionTo objectId {
     set ret [my makeTransistent]
@@ -490,11 +499,40 @@ IDE::AbstractMethodGroup instproc updateVersion {} {
     }
     my setRelationshipToComponent
 }
-Class IDE::ObjectDescription -superclass ::IDE::AbstractMethodGroup 
+
+                              ##########
+
+@ Class IDE::CachedObject {
+description {See IDE::ObjectCach
+
+Used dynamic as mixin for persistent objects (derived form IDE::DBPersistence).
+
+}
+}
+Class create IDE::CachedObject
+@ ::IDE::CachedObject idemeta component IDEPersistence
+@ IDE::CachedObject instproc destroy {} {
+description {Used as mixin for persistence objects (derived from IDE::DBPersistence).
+This mixin give functionality for caching objects and also recognizing
+their destroying. The caching is needed to garant object identity
+among xotcl object and object stored in database}
+}
+IDE::CachedObject instproc destroy {} {
+     IDE::ObjectCache removeInstance [self]
+     next
+}
+IDE::CachedObject instproc makePersistent {} {
+    next
+    IDE::ObjectCache setInstance [self]
+}
+
+                              ##########
+
+Class create IDE::ObjectDescription -superclass ::IDE::AbstractMethodGroup
+@ ::IDE::ObjectDescription idemeta categories {accessing method-intro method-version mixins private version-system}
+@ ::IDE::ObjectDescription idemeta categoriesMethods {{getType getComponent getObjectName getDefBody getObject getName getClassMethod getClassMethodIfExist getMethodDescriptions} {getAdditionalInfo getAvailable loadVersionId deleteClassMethod getVersionsForName} {importAllMethods initFromDB loadNameVersionId getForAnotherVersionClassMethod registerClassMethod} {hasMethodComment setMethodComment getMethodComment moveToCategoryB proc} {initObject isTrackingOn handleMethodChange trackingOff trackingOn} {insertVersion changeVersionTo synchronizeMethods rereadForAnotherVersion}}
 @ ::IDE::ObjectDescription idemeta categoriesMethodsProcs {{getAvailable getAdditionalInfo getLoadedVersionForName getVersionsForName} {unknown getClassForType initFromDB createForObject} {loadNameVersionId loadObject importObject}}
 @ ::IDE::ObjectDescription idemeta categoriesProcs {version-info private version-system}
-@ ::IDE::ObjectDescription idemeta categoriesMethods {{getType getComponent getObjectName getDefBody getObject getName getClassMethod getClassMethodIfExist getMethodDescriptions} {getAdditionalInfo getAvailable loadVersionId deleteClassMethod getVersionsForName} {importAllMethods initFromDB loadNameVersionId getForAnotherVersionClassMethod registerClassMethod} {hasMethodComment setMethodComment getMethodComment moveToCategoryB proc} {initObject isTrackingOn handleMethodChange trackingOff trackingOn} {insertVersion changeVersionTo synchronizeMethods rereadForAnotherVersion}}
-@ ::IDE::ObjectDescription idemeta categories {accessing method-intro method-version mixins private version-system}
 @ ::IDE::ObjectDescription idemeta component IDEPersistence
 IDE::ObjectDescription instproc changeVersionTo objectId {
     next
@@ -1013,9 +1051,12 @@ IDE::ObjectDescription proc typeName {} {
 IDE::ObjectDescription proc unknown args {
     error "unknown method on [self] $args"
 }
-Class IDE::ClassDescription -superclass ::IDE::ObjectDescription 
-@ ::IDE::ClassDescription idemeta categoriesMethods {{getType getInstanceMethodIfExist getForAnotherVersionInstanceMethod getInstanceMethod} {parameter superclass moveToCategory instproc} {setSuperclassReread setParameterReread setDefBody} {importAllMethods deleteInstanceMethod registerInstanceMethod}}
+
+                              ##########
+
+Class create IDE::ClassDescription -superclass ::IDE::ObjectDescription
 @ ::IDE::ClassDescription idemeta categories {accessing mixin persistence-versions persistence}
+@ ::IDE::ClassDescription idemeta categoriesMethods {{getType getInstanceMethodIfExist getForAnotherVersionInstanceMethod getInstanceMethod} {parameter superclass moveToCategory instproc} {setSuperclassReread setParameterReread setDefBody} {importAllMethods deleteInstanceMethod registerInstanceMethod}}
 @ ::IDE::ClassDescription idemeta component IDEPersistence
 IDE::ClassDescription instproc deleteInstanceMethod method {
   set im [my getInstanceMethodObjName $method]
@@ -1169,13 +1210,16 @@ IDE::ClassDescription proc typeName {} {
 IDE::ClassDescription proc unknown args {
     error "unknown method on [self] $args"
 }
+
+                              ##########
+
 @ Class IDE::MethodDescription {
 description {Wrapper for persistent tcl/xotcl method.
 }
 }
-Class IDE::MethodDescription -superclass {::IDE::DBPersistence ::IDE::DBInfo} 
-@ ::IDE::MethodDescription idemeta categoriesMethods {{getName getCategory getDescriptor getObjectId getObjectName getObjectDescription}}
+Class create IDE::MethodDescription -superclass {::IDE::DBPersistence ::IDE::DBInfo}
 @ ::IDE::MethodDescription idemeta categories accessing
+@ ::IDE::MethodDescription idemeta categoriesMethods {{getName getCategory getDescriptor getObjectId getObjectName getObjectDescription}}
 @ ::IDE::MethodDescription idemeta component IDEPersistence
 IDE::MethodDescription instproc getCategory {} {
   return _all_categories
@@ -1281,34 +1325,42 @@ IDE::MethodDescription proc initDescriptor {} {
 IDE::MethodDescription proc unknown args {
     error "unknown method on [self] $args"
 }
-@ Class IDE::CachedObject {
-description {See IDE::ObjectCach
 
-Used dynamic as mixin for persistent objects (derived form IDE::DBPersistence).
+                              ##########
 
+Class create IDE::ClassMethodDescription -superclass ::IDE::MethodDescription
+@ ::IDE::ClassMethodDescription idemeta component IDEPersistence
+IDE::ClassMethodDescription instproc getBody {} {
+     return [IDE::IntroProxy getBodyClassMethod [my getObjectName] [my getName] ]
 }
+IDE::ClassMethodDescription instproc getCategory {} {
+  return [[my getObjectName] getCategoryForMethodB [my getName] ]
 }
-Class IDE::CachedObject
-@ ::IDE::CachedObject idemeta component IDEPersistence
-@ IDE::CachedObject instproc destroy {} {
-description {Used as mixin for persistence objects (derived from IDE::DBPersistence).
-This mixin give functionality for caching objects and also recognizing
-their destroying. The caching is needed to garant object identity
-among xotcl object and object stored in database}
+IDE::ClassMethodDescription instproc getName {} {
+    return [string range [namespace tail [self]] 1 end]
 }
-IDE::CachedObject instproc destroy {} {
-     IDE::ObjectCache removeInstance [self]
-     next
+IDE::ClassMethodDescription instproc getType {} {
+   return Class
 }
-IDE::CachedObject instproc makePersistent {} {
-    next
-    IDE::ObjectCache setInstance [self]
+IDE::ClassMethodDescription instproc setCategory category {
+   if {$category!=""} {
+     [my getObjectName] moveToCategoryB [my getName] $category
+   }
 }
-Class IDE::ComponentPersistence -superclass {::IDE::DBPersistence ::IDE::DBInfo} 
+IDE::ClassMethodDescription instproc undefine {} {
+   namespace eval :: "[my getObjectName] proc [my getName] {} {}"
+}
+IDE::ClassMethodDescription proc unknown args {
+    error "unknown method on [self] $args"
+}
+
+                              ##########
+
+Class create IDE::ComponentPersistence -superclass {::IDE::DBPersistence ::IDE::DBInfo}
+@ ::IDE::ComponentPersistence idemeta categories {accessing mixins version-object version-system private service}
+@ ::IDE::ComponentPersistence idemeta categoriesMethods {{getDescriptor setObjectsArray getObject getName} {addObject rename addClass removeClass removeObject} {registerObject loadObject installObject} {updateRequired readRequiredFromDB updateInsert initForPersistence setRequirements versionEdition updateVersion rereadForAnotherVersion synchronizeWithDB} {reorderObjectDefinition importAllObjects checkRequirementsForClass loadAllObjects} {getVersionNumber printString}}
 @ ::IDE::ComponentPersistence idemeta categoriesMethodsProcs {{getLoadedVersionForName getAvailable synchronizeComponent getAdditionalInfo getVersionsForName} {readRequiredForId loadVersionId loadNameVersionId} rekRequirementsList}
 @ ::IDE::ComponentPersistence idemeta categoriesProcs {version-actions version-loading private}
-@ ::IDE::ComponentPersistence idemeta categoriesMethods {{getDescriptor setObjectsArray getObject getName} {addObject rename addClass removeClass removeObject} {registerObject loadObject installObject} {updateRequired readRequiredFromDB updateInsert initForPersistence setRequirements versionEdition updateVersion rereadForAnotherVersion synchronizeWithDB} {reorderObjectDefinition importAllObjects checkRequirementsForClass loadAllObjects} {getVersionNumber printString}}
-@ ::IDE::ComponentPersistence idemeta categories {accessing mixins version-object version-system private service}
 @ ::IDE::ComponentPersistence idemeta component IDEPersistence
 IDE::ComponentPersistence instproc addClass obj {
     next
@@ -1893,136 +1945,9 @@ IDE::ComponentPersistence proc synchronizeCoreSystem {} {
 IDE::ComponentPersistence proc typeName {} {
     return Component
 }
-Class IDE::TclProcsDescriptionPer -superclass {::IDE::DBPersistence ::IDE::DBInfo} 
-@ ::IDE::TclProcsDescriptionPer idemeta component IDEPersistence
-IDE::TclProcsDescriptionPer instproc getCategory {} {
-}
-IDE::TclProcsDescriptionPer instproc getDescription {} {
-   return [self]
-}
-IDE::TclProcsDescriptionPer instproc getDescriptor {} {
-   return IDE::MethodDescription::descriptor
-}
-IDE::TclProcsDescriptionPer instproc getObjectDescription {} {
-   return [my info parent]
-}
-IDE::TclProcsDescriptionPer instproc getObjectName {} {
-   [my getGroupObj] getObjectName
-}
-IDE::TclProcsDescriptionPer instproc getType {} {
-    return tclproc
-}
-IDE::TclProcsDescriptionPer instproc handleScript script {
-   #[self] halt
-   if {![[my info parent] questForChange]} return
-   next
-   if {[my exists methodid]} {
-       set ret [my makeTransistent]
-       my set basedon [my set methodid]
-   } else {
-       set ret 1
-   }
-   my makePersistent
-   if {[my returnAffectedRows] && $ret!=1} {
-          IDE::Dialog message "DB Warning! Actual version control database is not consistent with client. Probably another user have changed the procedure first. The operation have no effect in version control system! Procedure was saved"
-          return
-   }
-   my updateRelationship
-}
-IDE::TclProcsDescriptionPer instproc import {} {
-   next
-   my makePersistent
-   my updateRelationship
-}
-IDE::TclProcsDescriptionPer instproc istFreshInserted {} {
-     my instvar timestamp
-     expr {$timestamp=="fresh-inserted"}
-}
-IDE::TclProcsDescriptionPer instproc loadPrevious {} {
-   my instvar basedon
-   if {![info exists basedon] || $basedon==""} {
-      IDE::Dialog message "The method has no previous version. It is initial version"
-      return
-   }
-   set odesc [my getObjectDescription]
-   $odesc loadNameVersionId [my set name] $basedon [$odesc getComponent]
-}
-IDE::TclProcsDescriptionPer instproc makeTransistent {} {
-   my deleteRelationship ObjectMethod "objectid=[[my info parent] set objectid] AND methodid=[my set methodid]"
-}
-IDE::TclProcsDescriptionPer instproc printString {} {
-   return "proc [my getName] [my getObjectName] - [my getVersionString]"
-}
-IDE::TclProcsDescriptionPer instproc printStringShort {} {
-   return "proc [my getName]"
-}
-IDE::TclProcsDescriptionPer instproc rereadForAnotherVersion methodId {
-    my instvar methodid
-    set methodid $methodId
-    my rereadAttributes {basedon versioninfo timest category userid infoid}
-    # the discriptor ignore body by reading from database
-    # !! think to get data in one sql-statement
-    set body [my getValueForColumns body]
-    namespace eval :: [lindex $body 0]
-}
-IDE::TclProcsDescriptionPer instproc setCategory dummy {
-}
-IDE::TclProcsDescriptionPer instproc synchronizeWithId id {
-    my instvar methodid
-    set methodid $id
-    my rereadAttributes {basedon versioninfo timest userid infoid}
-}
-IDE::TclProcsDescriptionPer instproc trackingOn {} {
-}
-IDE::TclProcsDescriptionPer instproc undefine {} {
-    my unload
-}
-IDE::TclProcsDescriptionPer instproc updateRelationship {} {
-   my addRelationship ObjectMethod "[[my info parent] set objectid],[my set methodid]"
-}
-IDE::TclProcsDescriptionPer proc addPersistence obj {
-    if {$::xotcl::version>=1.3} {
-        $obj mixin add [self]
-    } else {
-        $obj mixinappend [self]
-    }
-}
-IDE::TclProcsDescriptionPer proc synchronize {obj id} {
-    if {$::xotcl::version>=1.3} {
-       $obj mixin add [self]
-    } else {
-       $obj mixinappend [self]
-    }
-    $obj synchronizeWithId $id
-}
-IDE::TclProcsDescriptionPer proc unknown args {
-    error "unknown method on [self] $args"
-}
-Class IDE::InstanceMethodDescription -superclass ::IDE::MethodDescription 
-@ ::IDE::InstanceMethodDescription idemeta component IDEPersistence
-IDE::InstanceMethodDescription instproc getBody {} {
-  return [IDE::IntroProxy getBodyInstanceMethod [my getObjectName] [my getName] ]
-}
-IDE::InstanceMethodDescription instproc getCategory {} {
-  return [[my getObjectName] getCategoryForMethod [my getName] ]
-}
-IDE::InstanceMethodDescription instproc getName {} {
-    return [string range [namespace tail [self]] 2 end]
-}
-IDE::InstanceMethodDescription instproc getType {} {
-   return Instance
-}
-IDE::InstanceMethodDescription instproc setCategory category {
-   if {$category!=""} {
-     [my getObjectName] moveToCategory [my getName] $category
-   }
-}
-IDE::InstanceMethodDescription instproc undefine {} {
-   namespace eval :: "[my getObjectName] instproc [my getName] {} {}"
-}
-IDE::InstanceMethodDescription proc unknown args {
-    error "unknown method on [self] $args"
-}
+
+                              ##########
+
 @ Class IDE::DBMapping {
 description {This Object describe how the object inst variable are mapped to
 sql database
@@ -2053,9 +1978,9 @@ class::descriotor createInstaceFromWhere $class $where_expression
 
 }
 }
-Class IDE::DBMapping -parameter {table idColumn type {cached 0}}
-@ ::IDE::DBMapping idemeta categoriesMethods {{setValueForObject getValueForObject getColumns} {createInstanceFromDB createInstancesFromWhere}}
+Class create IDE::DBMapping -parameter {table idColumn type {cached 0}}
 @ ::IDE::DBMapping idemeta categories {accessing instance-creation}
+@ ::IDE::DBMapping idemeta categoriesMethods {{setValueForObject getValueForObject getColumns} {createInstanceFromDB createInstancesFromWhere}}
 @ ::IDE::DBMapping idemeta component IDEPersistence
 @ IDE::DBMapping instproc addColumn {} {
 description {Column specifikation is a list 
@@ -2225,212 +2150,81 @@ IDE::DBMapping instproc setValueForObject {object column value} {
    }
    return ""
 }
-@ Class IDE::RelationshipProxy {
-description {This class must be used to set and read relationship.
-In this implementation the client must use the proxy object
 
-It is build as aggregated sub object in source object
-the name is equal to relationship name
+                              ##########
 
-# n:m relationship named "sister" s1 to s2
+@ Class IDE::DBRelMappingNM {
+description {This class is used as description for n:m realtionship mapping
+It appera as subelemts in IDE::DBMapping stucts}
+}
+Class create IDE::DBRelMappingNM -parameter {name targetClass relationTable sourceName targetName orderIndexName}
+@ ::IDE::DBRelMappingNM idemeta component IDEPersistence
+IDE::DBRelMappingNM instproc addIndexForSourceId {pkValue index orderValue} {
+    set sql "insert into [my relationTable] ([my sourceName],[my targetName],[my orderIndexName]) values ($pkValue,$index,$orderValue)"
+    [IDE::DBPersistence getConnection] execute $sql
+}
+IDE::DBRelMappingNM instproc changeOrderIndexForSourceId {pkValue index orderValue} {
+    set sql "update [my relationTable] set [my orderIndexName]=$orderValue where [my sourceName]=$pkValue and [my targetName]=$index"
+    [IDE::DBPersistence getConnection] execute $sql
+}
+IDE::DBRelMappingNM instproc checkSchema {} {
+    set connection [IDE::DBPersistence getConnection]
+    if {[lsearch -exact [$connection getTables] [my relationTable]]>=0} return
+    set sql "CREATE TABLE [my relationTable] (
+        [my sourceName] int NOT NULL,
+        [my targetName] int NOT NULL,
+        [my  orderIndexName] float,
+        PRIMARY KEY ([my sourceName],[my targetName]) )"
+    $connection execute $sql
+}
+IDE::DBRelMappingNM instproc getIndexListForSourceId pkValue {
+    set sql "select [my targetName],[my orderIndexName] from [my relationTable] where [my sourceName]=$pkValue order by [my orderIndexName]"
+    [IDE::DBPersistence getConnection] queryList $sql
+}
+IDE::DBRelMappingNM instproc removeIndexForSourceId {pkValue index} {
+    set sql "delete from [my relationTable] where [my sourceName]=$pkValue and [my targetName]=$index"
+    [IDE::DBPersistence getConnection] execute $sql
+}
+IDE::DBRelMappingNM instproc removeSchema {} {
+    set connection [IDE::DBPersistence getConnection]
+    if {[lsearch -exact [$connection getTables] [my relationTable]]<0} return
+    set sql "DROP TABLE [my relationTable]"
+    $connection execute $sql
+}
 
-#setting
+                              ##########
 
-s1::sister setList s2
+Class create IDE::InstanceMethodDescription -superclass ::IDE::MethodDescription
+@ ::IDE::InstanceMethodDescription idemeta component IDEPersistence
+IDE::InstanceMethodDescription instproc getBody {} {
+  return [IDE::IntroProxy getBodyInstanceMethod [my getObjectName] [my getName] ]
+}
+IDE::InstanceMethodDescription instproc getCategory {} {
+  return [[my getObjectName] getCategoryForMethod [my getName] ]
+}
+IDE::InstanceMethodDescription instproc getName {} {
+    return [string range [namespace tail [self]] 2 end]
+}
+IDE::InstanceMethodDescription instproc getType {} {
+   return Instance
+}
+IDE::InstanceMethodDescription instproc setCategory category {
+   if {$category!=""} {
+     [my getObjectName] moveToCategory [my getName] $category
+   }
+}
+IDE::InstanceMethodDescription instproc undefine {} {
+   namespace eval :: "[my getObjectName] instproc [my getName] {} {}"
+}
+IDE::InstanceMethodDescription proc unknown args {
+    error "unknown method on [self] $args"
+}
 
-#updating in db
+                              ##########
 
-s1::sister updateList
-
-#reading
-
-s1::sister getList
-
-In this implementain the related object are first build by query. (also getList) in case of loading source object from DB.
-
-intern:
-
-The objects are hold in the variable "objectsList"
-
-
-}
-}
-Class IDE::RelationshipProxy -parameter relMapping
-@ ::IDE::RelationshipProxy idemeta component IDEPersistence
-IDE::RelationshipProxy instproc buildGroupList {newList oldList} {
-    set ret {}
-    for {set i 0} {$i<[llength $newList]} {incr i} {
-        set elem [lindex $newList $i]
-        set oi [lsearch -exact $oldList $elem]
-        set group {}
-        for {set x $oi} {$x<[llength $oldList] && [lindex $newList $i]==[lindex $oldList $x]} {incr x; incr i} {
-            lappend group [lindex $oldList $x]
-        }
-        incr i -1
-        lappend ret $group
-    }
-    return $ret
-}
-@ IDE::RelationshipProxy instproc checkIndexList {} {
-description {This procedure check if the objectList is consistent with DB.
-(if indexList varibale exist)
-If no the datebase is queried and all relationship objects are build.
-}
-}
-IDE::RelationshipProxy instproc checkIndexList {} {
-    my instvar objectList indexList
-    if {![my exists indexList]} {
-        set objectList {}
-        set indexList [[my relMapping] getIndexListForSourceId [[my getSourceInstance] getIdValue]]
-        set tClass [[my relMapping] targetClass]
-        set desc ${tClass}::descriptor 
-        foreach elem $indexList {
-            set tid [lindex $elem 0]
-            lappend objectList [$desc createInstanceFromDB $tClass $tid]
-        }
-    }
-}
-IDE::RelationshipProxy instproc forgetDBMapping {} {
-    my set indexList {}
-}
-IDE::RelationshipProxy instproc getList {} {
-    my checkIndexList
-    my set objectList
-}
-IDE::RelationshipProxy instproc getSourceInstance {} {
-    my info parent
-}
-IDE::RelationshipProxy instproc insertObjectAt {obj index} {
-    my instvar objectList
-    my checkIndexList
-    set objectList [linsert $objectList $index $obj]
-}
-IDE::RelationshipProxy instproc removeObject obj {
-    my instvar objectList
-    my checkIndexList
-    if {[set index [lsearch -exact $objectList $obj]]>=0} {
-        set objectList [lreplace $objectList $index $index]
-    } else {
-        error "$obj not found in the list"
-    }
-}
-IDE::RelationshipProxy instproc setList olist {
-    my checkIndexList 
-    my set objectList $olist
-}
-IDE::RelationshipProxy instproc updateList {} {
-    my instvar objectList indexList
-    # add variables (ordArr)
-    set sourceId [[my getSourceInstance] getIdValue]
-    if {$objectList==""} {
-        foreach index $indexList {
-            [my relMapping] removeIndexForSourceId $sourceId [lindex $index 0]
-        }
-        return
-    }
-    foreach obj $objectList {
-       if {![$obj isInDB]} {
-           $obj makePersistent
-       }
-       lappend newIndex [$obj getIdValue]
-    }
-    # remove loop
-    set mIndex {}
-    foreach indexPaar $indexList {
-        if {![ide::lcontain $newIndex [lindex $indexPaar 0]]} {
-            [my relMapping] removeIndexForSourceId $sourceId [lindex $indexPaar 0]
-        } else {
-            lappend mIndex $indexPaar
-        }
-    }
-    set indexList $mIndex
-    # compute orderIndex array and build cleaned old index list
-    set oldIndex {}
-    foreach indexPaar $indexList {
-        lappend oldIndex [lindex $indexPaar 0]
-        set ordArr([lindex $indexPaar 0]) [lindex $indexPaar 1]
-    }
-    # reorder elements (ignore new not inserted elements first)
-    # build new index list without new inserted elements
-    set cnewIndex {}
-    foreach i $newIndex {
-        if {[info exists ordArr($i)]} {lappend cnewIndex $i}
-    }
-    set newGroupIndex [my buildGroupList $cnewIndex $oldIndex]
-    if {[llength $newGroupIndex]>1} {
-        for {set i 0} {$i<[llength $newGroupIndex]-1} {incr i} {
-            set elem [lindex $newGroupIndex $i]
-            set nextElem [lindex $newGroupIndex [expr {$i+1}]]
-            if {$ordArr([lindex $elem end])>$ordArr([lindex $nextElem 0])} {
-                # the group have false sequence
-                if {[llength $elem]>=[llength $nextElem]} {
-                    set relList $nextElem
-                    set min $ordArr([lindex $elem end])
-                    if {$i>=[llength $newGroupIndex]-2} {
-                        set max [expr {$ordArr([lindex [lindex $newGroupIndex [expr {$i+1}]] 0])+2.0}]
-                    } else {
-                        set max $ordArr([lindex [lindex $newGroupIndex [expr {$i+2}]] 0])
-                    }
-                } else {
-                    set relList $elem
-                    set max $ordArr([lindex $nextElem 0])
-                    if {$i==0} {
-                        set min 0.0
-                    } else {
-                        set min $ordArr([lindex [lindex $newGroupIndex [expr {$i-1}]] end])
-                    }
-                }
-                set skip [expr {($max-$min)/([llength $relList]+1)}]
-                foreach uelem $relList {
-                    set min [expr {$min+$skip}]
-                    set ordArr($uelem) $min
-                    [my relMapping] changeOrderIndexForSourceId $sourceId $uelem $min
-                }
-            }
-        }
-    }
-    # insert new elements
-    for {set i 0} {$i<[llength $newIndex]} {incr i} {
-        set elem [lindex $newIndex $i]
-        if {![info exists ordArr($elem)]} {
-            # search prev element
-            if {$i==0} {
-                set min 0.0
-            } else {
-                set min $ordArr([lindex $newIndex [expr {$i-1}]])
-            }
-            # search the next element that has valid order value 
-            for {set x $i} {$x<[llength $newIndex]} {incr x} {
-                set nextid [lindex $newIndex $x]
-                if {[info exists ordArr($nextid)]} {
-		     break
-                } else {
-                     set nextid {}
-	        }
-            }
-            if {$nextid==""} {
-		if {$i==0} {
-		    set max 2.0
-		} else {
-          	    set max [expr {$ordArr([lindex $newIndex [expr {$i-1}]])+2.0}]
-                }
-            } else {
-                set max $ordArr($nextid)
-            }
-            set value [expr {($min+$max)/2}]
-            [my relMapping] addIndexForSourceId $sourceId $elem $value
-            set ordArr($elem) $value
-        }
-    }
-    # rebuild new indexList
-    set indexList {}
-    foreach elem $newIndex {
-        lappend indexList [list $elem $ordArr($elem)]
-    }
-}
-Class IDE::ProcsGroupPer -superclass ::IDE::AbstractMethodGroup 
-@ ::IDE::ProcsGroupPer idemeta categoriesMethods {{getMetadataText setMetadataText getType getMethodDescriptions} {initObject rereadDefinition rename trackingOff setDefBody moveToComponent} {removeMethodObj createProcForName importAllMethods} {trackingOn isTrackingOn} {synchronizeMethods getForAnotherVersionMethod initFromDB rereadForAnotherVersion} printString}
+Class create IDE::ProcsGroupPer -superclass ::IDE::AbstractMethodGroup
 @ ::IDE::ProcsGroupPer idemeta categories {accesssing actions methods testing persistence printing}
+@ ::IDE::ProcsGroupPer idemeta categoriesMethods {{getMetadataText setMetadataText getType getMethodDescriptions} {initObject rereadDefinition rename trackingOff setDefBody moveToComponent} {removeMethodObj createProcForName importAllMethods} {trackingOn isTrackingOn} {synchronizeMethods getForAnotherVersionMethod initFromDB rereadForAnotherVersion} printString}
 @ ::IDE::ProcsGroupPer idemeta component IDEPersistence
 IDE::ProcsGroupPer instproc createProcForName name {
    set obj [next]
@@ -2651,37 +2445,329 @@ IDE::ProcsGroupPer proc synchronize {obj id} {
 IDE::ProcsGroupPer proc typeName {} {
   return ProcsGroup
 }
-Class IDE::ClassMethodDescription -superclass ::IDE::MethodDescription 
-@ ::IDE::ClassMethodDescription idemeta component IDEPersistence
-IDE::ClassMethodDescription instproc getBody {} {
-     return [IDE::IntroProxy getBodyClassMethod [my getObjectName] [my getName] ]
+
+                              ##########
+
+@ Class IDE::RelationshipProxy {
+description {This class must be used to set and read relationship.
+In this implementation the client must use the proxy object
+
+It is build as aggregated sub object in source object
+the name is equal to relationship name
+
+# n:m relationship named "sister" s1 to s2
+
+#setting
+
+s1::sister setList s2
+
+#updating in db
+
+s1::sister updateList
+
+#reading
+
+s1::sister getList
+
+In this implementain the related object are first build by query. (also getList) in case of loading source object from DB.
+
+intern:
+
+The objects are hold in the variable "objectsList"
+
+
 }
-IDE::ClassMethodDescription instproc getCategory {} {
-  return [[my getObjectName] getCategoryForMethodB [my getName] ]
 }
-IDE::ClassMethodDescription instproc getName {} {
-    return [string range [namespace tail [self]] 1 end]
+Class create IDE::RelationshipProxy -parameter relMapping
+@ ::IDE::RelationshipProxy idemeta component IDEPersistence
+IDE::RelationshipProxy instproc buildGroupList {newList oldList} {
+    set ret {}
+    for {set i 0} {$i<[llength $newList]} {incr i} {
+        set elem [lindex $newList $i]
+        set oi [lsearch -exact $oldList $elem]
+        set group {}
+        for {set x $oi} {$x<[llength $oldList] && [lindex $newList $i]==[lindex $oldList $x]} {incr x; incr i} {
+            lappend group [lindex $oldList $x]
+        }
+        incr i -1
+        lappend ret $group
+    }
+    return $ret
 }
-IDE::ClassMethodDescription instproc getType {} {
-   return Class
+@ IDE::RelationshipProxy instproc checkIndexList {} {
+description {This procedure check if the objectList is consistent with DB.
+(if indexList varibale exist)
+If no the datebase is queried and all relationship objects are build.
 }
-IDE::ClassMethodDescription instproc setCategory category {
-   if {$category!=""} {
-     [my getObjectName] moveToCategoryB [my getName] $category
+}
+IDE::RelationshipProxy instproc checkIndexList {} {
+    my instvar objectList indexList
+    if {![my exists indexList]} {
+        set objectList {}
+        set indexList [[my relMapping] getIndexListForSourceId [[my getSourceInstance] getIdValue]]
+        set tClass [[my relMapping] targetClass]
+        set desc ${tClass}::descriptor 
+        foreach elem $indexList {
+            set tid [lindex $elem 0]
+            lappend objectList [$desc createInstanceFromDB $tClass $tid]
+        }
+    }
+}
+IDE::RelationshipProxy instproc forgetDBMapping {} {
+    my set indexList {}
+}
+IDE::RelationshipProxy instproc getList {} {
+    my checkIndexList
+    my set objectList
+}
+IDE::RelationshipProxy instproc getSourceInstance {} {
+    my info parent
+}
+IDE::RelationshipProxy instproc insertObjectAt {obj index} {
+    my instvar objectList
+    my checkIndexList
+    set objectList [linsert $objectList $index $obj]
+}
+IDE::RelationshipProxy instproc removeObject obj {
+    my instvar objectList
+    my checkIndexList
+    if {[set index [lsearch -exact $objectList $obj]]>=0} {
+        set objectList [lreplace $objectList $index $index]
+    } else {
+        error "$obj not found in the list"
+    }
+}
+IDE::RelationshipProxy instproc setList olist {
+    my checkIndexList 
+    my set objectList $olist
+}
+IDE::RelationshipProxy instproc updateList {} {
+    my instvar objectList indexList
+    # add variables (ordArr)
+    set sourceId [[my getSourceInstance] getIdValue]
+    if {$objectList==""} {
+        foreach index $indexList {
+            [my relMapping] removeIndexForSourceId $sourceId [lindex $index 0]
+        }
+        return
+    }
+    foreach obj $objectList {
+       if {![$obj isInDB]} {
+           $obj makePersistent
+       }
+       lappend newIndex [$obj getIdValue]
+    }
+    # remove loop
+    set mIndex {}
+    foreach indexPaar $indexList {
+        if {![ide::lcontain $newIndex [lindex $indexPaar 0]]} {
+            [my relMapping] removeIndexForSourceId $sourceId [lindex $indexPaar 0]
+        } else {
+            lappend mIndex $indexPaar
+        }
+    }
+    set indexList $mIndex
+    # compute orderIndex array and build cleaned old index list
+    set oldIndex {}
+    foreach indexPaar $indexList {
+        lappend oldIndex [lindex $indexPaar 0]
+        set ordArr([lindex $indexPaar 0]) [lindex $indexPaar 1]
+    }
+    # reorder elements (ignore new not inserted elements first)
+    # build new index list without new inserted elements
+    set cnewIndex {}
+    foreach i $newIndex {
+        if {[info exists ordArr($i)]} {lappend cnewIndex $i}
+    }
+    set newGroupIndex [my buildGroupList $cnewIndex $oldIndex]
+    if {[llength $newGroupIndex]>1} {
+        for {set i 0} {$i<[llength $newGroupIndex]-1} {incr i} {
+            set elem [lindex $newGroupIndex $i]
+            set nextElem [lindex $newGroupIndex [expr {$i+1}]]
+            if {$ordArr([lindex $elem end])>$ordArr([lindex $nextElem 0])} {
+                # the group have false sequence
+                if {[llength $elem]>=[llength $nextElem]} {
+                    set relList $nextElem
+                    set min $ordArr([lindex $elem end])
+                    if {$i>=[llength $newGroupIndex]-2} {
+                        set max [expr {$ordArr([lindex [lindex $newGroupIndex [expr {$i+1}]] 0])+2.0}]
+                    } else {
+                        set max $ordArr([lindex [lindex $newGroupIndex [expr {$i+2}]] 0])
+                    }
+                } else {
+                    set relList $elem
+                    set max $ordArr([lindex $nextElem 0])
+                    if {$i==0} {
+                        set min 0.0
+                    } else {
+                        set min $ordArr([lindex [lindex $newGroupIndex [expr {$i-1}]] end])
+                    }
+                }
+                set skip [expr {($max-$min)/([llength $relList]+1)}]
+                foreach uelem $relList {
+                    set min [expr {$min+$skip}]
+                    set ordArr($uelem) $min
+                    [my relMapping] changeOrderIndexForSourceId $sourceId $uelem $min
+                }
+            }
+        }
+    }
+    # insert new elements
+    for {set i 0} {$i<[llength $newIndex]} {incr i} {
+        set elem [lindex $newIndex $i]
+        if {![info exists ordArr($elem)]} {
+            # search prev element
+            if {$i==0} {
+                set min 0.0
+            } else {
+                set min $ordArr([lindex $newIndex [expr {$i-1}]])
+            }
+            # search the next element that has valid order value 
+            for {set x $i} {$x<[llength $newIndex]} {incr x} {
+                set nextid [lindex $newIndex $x]
+                if {[info exists ordArr($nextid)]} {
+		     break
+                } else {
+                     set nextid {}
+	        }
+            }
+            if {$nextid==""} {
+		if {$i==0} {
+		    set max 2.0
+		} else {
+          	    set max [expr {$ordArr([lindex $newIndex [expr {$i-1}]])+2.0}]
+                }
+            } else {
+                set max $ordArr($nextid)
+            }
+            set value [expr {($min+$max)/2}]
+            [my relMapping] addIndexForSourceId $sourceId $elem $value
+            set ordArr($elem) $value
+        }
+    }
+    # rebuild new indexList
+    set indexList {}
+    foreach elem $newIndex {
+        lappend indexList [list $elem $ordArr($elem)]
+    }
+}
+
+                              ##########
+
+Class create IDE::TclProcsDescriptionPer -superclass {::IDE::DBPersistence ::IDE::DBInfo}
+@ ::IDE::TclProcsDescriptionPer idemeta component IDEPersistence
+IDE::TclProcsDescriptionPer instproc getCategory {} {
+}
+IDE::TclProcsDescriptionPer instproc getDescription {} {
+   return [self]
+}
+IDE::TclProcsDescriptionPer instproc getDescriptor {} {
+   return IDE::MethodDescription::descriptor
+}
+IDE::TclProcsDescriptionPer instproc getObjectDescription {} {
+   return [my info parent]
+}
+IDE::TclProcsDescriptionPer instproc getObjectName {} {
+   [my getGroupObj] getObjectName
+}
+IDE::TclProcsDescriptionPer instproc getType {} {
+    return tclproc
+}
+IDE::TclProcsDescriptionPer instproc handleScript script {
+   #[self] halt
+   if {![[my info parent] questForChange]} return
+   next
+   if {[my exists methodid]} {
+       set ret [my makeTransistent]
+       my set basedon [my set methodid]
+   } else {
+       set ret 1
    }
+   my makePersistent
+   if {[my returnAffectedRows] && $ret!=1} {
+          IDE::Dialog message "DB Warning! Actual version control database is not consistent with client. Probably another user have changed the procedure first. The operation have no effect in version control system! Procedure was saved"
+          return
+   }
+   my updateRelationship
 }
-IDE::ClassMethodDescription instproc undefine {} {
-   namespace eval :: "[my getObjectName] proc [my getName] {} {}"
+IDE::TclProcsDescriptionPer instproc import {} {
+   next
+   my makePersistent
+   my updateRelationship
 }
-IDE::ClassMethodDescription proc unknown args {
+IDE::TclProcsDescriptionPer instproc istFreshInserted {} {
+     my instvar timestamp
+     expr {$timestamp=="fresh-inserted"}
+}
+IDE::TclProcsDescriptionPer instproc loadPrevious {} {
+   my instvar basedon
+   if {![info exists basedon] || $basedon==""} {
+      IDE::Dialog message "The method has no previous version. It is initial version"
+      return
+   }
+   set odesc [my getObjectDescription]
+   $odesc loadNameVersionId [my set name] $basedon [$odesc getComponent]
+}
+IDE::TclProcsDescriptionPer instproc makeTransistent {} {
+   my deleteRelationship ObjectMethod "objectid=[[my info parent] set objectid] AND methodid=[my set methodid]"
+}
+IDE::TclProcsDescriptionPer instproc printString {} {
+   return "proc [my getName] [my getObjectName] - [my getVersionString]"
+}
+IDE::TclProcsDescriptionPer instproc printStringShort {} {
+   return "proc [my getName]"
+}
+IDE::TclProcsDescriptionPer instproc rereadForAnotherVersion methodId {
+    my instvar methodid
+    set methodid $methodId
+    my rereadAttributes {basedon versioninfo timest category userid infoid}
+    # the discriptor ignore body by reading from database
+    # !! think to get data in one sql-statement
+    set body [my getValueForColumns body]
+    namespace eval :: [lindex $body 0]
+}
+IDE::TclProcsDescriptionPer instproc setCategory dummy {
+}
+IDE::TclProcsDescriptionPer instproc synchronizeWithId id {
+    my instvar methodid
+    set methodid $id
+    my rereadAttributes {basedon versioninfo timest userid infoid}
+}
+IDE::TclProcsDescriptionPer instproc trackingOn {} {
+}
+IDE::TclProcsDescriptionPer instproc undefine {} {
+    my unload
+}
+IDE::TclProcsDescriptionPer instproc updateRelationship {} {
+   my addRelationship ObjectMethod "[[my info parent] set objectid],[my set methodid]"
+}
+IDE::TclProcsDescriptionPer proc addPersistence obj {
+    if {$::xotcl::version>=1.3} {
+        $obj mixin add [self]
+    } else {
+        $obj mixinappend [self]
+    }
+}
+IDE::TclProcsDescriptionPer proc synchronize {obj id} {
+    if {$::xotcl::version>=1.3} {
+       $obj mixin add [self]
+    } else {
+       $obj mixinappend [self]
+    }
+    $obj synchronizeWithId $id
+}
+IDE::TclProcsDescriptionPer proc unknown args {
     error "unknown method on [self] $args"
 }
+
+                              ##########
+
 @ Class IDE::User {
 description {Handle owner of persistent elements as component, classes and methods.
 The class check also standard user be reading unix (platform) envirorment
 variable}
 }
-Class IDE::User -superclass ::IDE::DBPersistence 
+Class create IDE::User -superclass ::IDE::DBPersistence
 @ ::IDE::User idemeta component IDEPersistence
 IDE::User instproc getName args {
    if {[my exists longName] && [my set longName]!=""} {
@@ -2735,44 +2821,9 @@ IDE::User proc initFromDB {columns values objectid} {
 IDE::User proc unknown args {
     error "unknown method on [self] $args"
 }
-@ Class IDE::DBRelMappingNM {
-description {This class is used as description for n:m realtionship mapping
-It appera as subelemts in IDE::DBMapping stucts}
-}
-Class IDE::DBRelMappingNM -parameter {name targetClass relationTable sourceName targetName orderIndexName}
-@ ::IDE::DBRelMappingNM idemeta component IDEPersistence
-IDE::DBRelMappingNM instproc addIndexForSourceId {pkValue index orderValue} {
-    set sql "insert into [my relationTable] ([my sourceName],[my targetName],[my orderIndexName]) values ($pkValue,$index,$orderValue)"
-    [IDE::DBPersistence getConnection] execute $sql
-}
-IDE::DBRelMappingNM instproc changeOrderIndexForSourceId {pkValue index orderValue} {
-    set sql "update [my relationTable] set [my orderIndexName]=$orderValue where [my sourceName]=$pkValue and [my targetName]=$index"
-    [IDE::DBPersistence getConnection] execute $sql
-}
-IDE::DBRelMappingNM instproc checkSchema {} {
-    set connection [IDE::DBPersistence getConnection]
-    if {[lsearch -exact [$connection getTables] [my relationTable]]>=0} return
-    set sql "CREATE TABLE [my relationTable] (
-        [my sourceName] int NOT NULL,
-        [my targetName] int NOT NULL,
-        [my  orderIndexName] float,
-        PRIMARY KEY ([my sourceName],[my targetName]) )"
-    $connection execute $sql
-}
-IDE::DBRelMappingNM instproc getIndexListForSourceId pkValue {
-    set sql "select [my targetName],[my orderIndexName] from [my relationTable] where [my sourceName]=$pkValue order by [my orderIndexName]"
-    [IDE::DBPersistence getConnection] queryList $sql
-}
-IDE::DBRelMappingNM instproc removeIndexForSourceId {pkValue index} {
-    set sql "delete from [my relationTable] where [my sourceName]=$pkValue and [my targetName]=$index"
-    [IDE::DBPersistence getConnection] execute $sql
-}
-IDE::DBRelMappingNM instproc removeSchema {} {
-    set connection [IDE::DBPersistence getConnection]
-    if {[lsearch -exact [$connection getTables] [my relationTable]]<0} return
-    set sql "DROP TABLE [my relationTable]"
-    $connection execute $sql
-}
+
+                              ##########
+
 @ Object IDE::ObjectCache {
 description {This Object is used to cache all persistence object that are derived from
 IDE::CachedObject.
@@ -2781,7 +2832,7 @@ instance if it has been already loaded.
 The objects are referenced per value of DB-primarykey (id).
 }
 }
-Object IDE::ObjectCache
+Object create IDE::ObjectCache
 @ ::IDE::ObjectCache idemeta component IDEPersistence
 IDE::ObjectCache proc destroyInstancesOfClass class {
     regsub -all :: $class {} name
