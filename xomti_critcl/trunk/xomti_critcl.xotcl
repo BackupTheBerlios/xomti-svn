@@ -221,8 +221,12 @@ Xomti_Critcl_builder instproc cbuild {{load 1} {prefix {}} {silent {}}} {
     }
 
     # the init proc name takes a capitalized prefix from the package name
-    set ininame Stdin ;# in case it's called interactively
-    regexp {^\w+} [file tail [self]] ininame
+    # set ininame Stdin ;# in case it's called interactively
+    set t [string trim [self] :]
+    if {![regexp {^\w+$} $t ininame]} {
+	error "Object name \"$t\" is not good for ..._Init function name"
+    }
+    unset t
     set ininame [string totitle $ininame]
     if {$prefix != {}} {
         set ininame "${prefix}_$ininame"
