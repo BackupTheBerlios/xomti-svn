@@ -1059,6 +1059,7 @@ IDE::CompView instproc fillMenuStruct ms {
     $ms addSeparator
     $ms addCommand {Save Components} [list IDE::ComponentSaveWizard newBrowser]
     $ms addCommand {Save All} [list IDE::Component saveAllToPath]
+    $ms addCommand {Save All v2} [list IDE::Component saveAllToPath v2]
     next
 }
 IDE::CompView instproc getActualComponentObject {} {

@@ -539,6 +539,39 @@ IDE::Component instproc saveAsScript {{file {}} {nometa 0}} {
     puts $of [my asScript $nometa]
     close $of
 }
+IDE::Component instproc saveAsScript_v2 {{nometa 0}} {
+    set name [my getName]
+    set version [my getVersionNumber]
+puts " -> $name $version"
+    set xpm [Xomti_Packages_Manager::main get_package_managers $name $version]
+    if {$xpm != {}} {
+        if {[$xpm has_standard_script]} {
+            set file [$xpm get_file]
+        } else {
+            error "package $name $version has not a standard script"
+        }
+    } else {
+        set file [my standardFileName]
+    }
+    set new_script [my asScript $nometa]
+    puts stderr "$file"
+    if {[file exists $file]} {
+        set f [open $file r]
+        set old_script [read -nonewline $f]
+        close $f
+        if {[string compare $new_script $old_script] == 0} {
+            return
+        }
+    }
+    set resp [tk_dialog .ok_to_save "Saving $name" "Ok to save package\n    $name $version\nas file\n    [file tail $file]\nin\n    [file dir $file]\n?" {} 2 Yes "Change File/Dir" No]
+    if {$resp == 0} {
+        set of [open $file w]
+        puts $of [my asScript $nometa]
+        close $of   
+    } elseif {$resp == 1} {
+        tk_dialog .ok_to_save "OK" "Not yet implemented" {} 0 OK
+    }
+}
 IDE::Component instproc setVersionNumber number {
     my set version $number
 }
@@ -712,7 +745,7 @@ IDE::Component proc registerObject object {
 IDE::Component proc registerProc proc {
     # !!! the importing procedute do not use it
 }
-IDE::Component proc saveAllToPath {} {
+IDE::Component proc saveAllToPath args {
     if {[IDE::System isIgnoreIDEComponents]} {
         set apps [list]
         foreach c [IDE::IntroProxy getComponentsNoIDE] {
@@ -724,7 +757,11 @@ IDE::Component proc saveAllToPath {} {
     foreach app $apps {
         if {[$app getName]=="core"} continue
         if {[string match xotcl::* [$app getName]]} continue
-        $app saveAsScript
+        switch $args {
+            {} {$app saveAsScript}
+            v2 {$app saveAsScript_v2}
+            default {error "bad arguments \"$args\""}
+        }
     }
 }
 IDE::Component proc saveComplex {comps nometa onefile target} {
