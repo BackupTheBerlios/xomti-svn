@@ -1420,6 +1420,25 @@ Tcl_CreateCommand(interp, cmdName, proc, clientData, deleteProc)
 	nsPtr = iPtr->globalNsPtr;
 	tail = cmdName;
     }
+
+    if (*tail == '\0') {
+	cmdPtr = (Command *) ckalloc(sizeof(Command));
+	cmdPtr->hPtr = NULL;
+	cmdPtr->nsPtr = nsPtr;
+	cmdPtr->refCount = 1;
+	cmdPtr->cmdEpoch = 0;
+	cmdPtr->compileProc = (CompileProc *) NULL;
+	cmdPtr->objProc = TclInvokeStringCommand;
+	cmdPtr->objClientData = (ClientData) cmdPtr;
+	cmdPtr->proc = proc;
+	cmdPtr->clientData = clientData;
+	cmdPtr->deleteProc = deleteProc;
+	cmdPtr->deleteData = clientData;
+	cmdPtr->flags = 0;
+	cmdPtr->importRefPtr = NULL;
+	cmdPtr->tracePtr = NULL;
+	return (Tcl_Command) cmdPtr;
+    }
     
     hPtr = Tcl_CreateHashEntry(&nsPtr->cmdTable, tail, &new);
     if (!new) {

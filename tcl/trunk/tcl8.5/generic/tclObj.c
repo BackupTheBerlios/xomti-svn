@@ -130,8 +130,17 @@ static void		FreeCmdNameInternalRep _ANSI_ARGS_((
     			    Tcl_Obj *objPtr));
 static int		SetCmdNameFromAny _ANSI_ARGS_((Tcl_Interp *interp,
 			    Tcl_Obj *objPtr));
+/*
+ * Prototypes for the AnonymousCommand object type.
+ */
 
-
+static void		DupAnonymousCmdInternalRep _ANSI_ARGS_((Tcl_Obj *objPtr,
+			    Tcl_Obj *copyPtr));
+static void		FreeAnonymousCmdInternalRep _ANSI_ARGS_((
+    			    Tcl_Obj *objPtr));
+static void		UpdateStringOfAnonymousCmd _ANSI_ARGS_((Tcl_Obj *objPtr));
+static int		SetAnonymousCmdFromAny _ANSI_ARGS_((Tcl_Interp *interp,
+			    Tcl_Obj *objPtr));
 /*
  * The structures below defines the Tcl object types defined in this file by
  * means of procedures that can be invoked by generic object code. See also
@@ -210,6 +219,21 @@ static Tcl_ObjType tclCmdNameType = {
     SetCmdNameFromAny			/* setFromAnyProc */
 };
 
+/*
+ * The structure below defines the anonymous command Tcl object type by means of
+ * procedures that can be invoked by generic object code. Objects of this
+ * type cache the Command pointer. As command name Tcl objects,
+ * such objects appear as the zeroth ("command") argument in a Tcl command.
+ *
+ */
+
+static Tcl_ObjType tclAnonymousCmdType = {
+    "anonymousCmd",			/* name */
+    FreeAnonymousCmdInternalRep,	/* freeIntRepProc */
+    DupAnonymousCmdInternalRep,		/* dupIntRepProc */
+    UpdateStringOfAnonymousCmd,		/* updateStringProc */
+    SetAnonymousCmdFromAny		/* setFromAnyProc */
+};
 
 /*
  * Structure containing a cached pointer to a command that is the result
@@ -3469,4 +3493,110 @@ SetCmdNameFromAny(interp, objPtr)
     objPtr->internalRep.twoPtrValue.ptr2 = NULL;
     objPtr->typePtr = &tclCmdNameType;
     return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * FreeAnonymousCmdInternalRep --
+ *
+ *	Frees the resources associated with an anonymousCmd object's internal
+ *	representation.
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	Decrements the ref count
+ *
+ *----------------------------------------------------------------------
+ */
+
+static void
+FreeAnonymousCmdInternalRep(objPtr)
+    register Tcl_Obj *objPtr;	/* CmdName object with internal
+				 * representation to free. */
+{
+    Proc *procPtr = (Proc *) objPtr->internalRep.otherValuePtr;
+    TclProcCleanupProc(procPtr);
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * DupAnonymousInternalRep --
+ *
+ *	Initialize the internal representation of an anonymousCmd Tcl_Obj to a
+ *	copy of the internal representation of an existing cmdName object.
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *
+ *----------------------------------------------------------------------
+ */
+
+static void
+DupAnonymousCmdInternalRep(srcPtr, copyPtr)
+    Tcl_Obj *srcPtr;		/* Object with internal rep to copy. */
+    register Tcl_Obj *copyPtr;	/* Object with internal rep to set. */
+{
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * UpdateStringOfAnonymousCmd --
+ *
+ *	Update the informative string for an anonymous command object.
+ *	Note: This procedure does not free an existing old string rep
+ *	so storage will be lost if this has not already been done. 
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	The object's string is set to a valid string that results from
+ *	the boolean-to-string conversion.
+ *
+ *----------------------------------------------------------------------
+ */
+
+static void
+UpdateStringOfAnonymousCmd (objPtr)
+    register Tcl_Obj *objPtr;
+{
+    char buf[30];
+    sprintf(buf, "0x%08x (read-only)", (unsigned long) objPtr->internalRep.otherValuePtr);
+    objPtr->length = strlen(buf);
+    objPtr->bytes = ckalloc(objPtr->length + 1);    
+    strcpy(objPtr->bytes, buf);
+}
+
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * SetAnonymousCmdFromAny --
+ *
+ *	returns an erro.
+ *
+ * Results:
+ *	The conversion never succeeds and TCL_ERROR is returned.
+ *
+ * Side effects:
+ *
+ *----------------------------------------------------------------------
+ */
+
+static int
+SetAnonymousCmdFromAny(interp, objPtr)
+    Tcl_Interp *interp;		/* Used for error reporting if not NULL. */
+    register Tcl_Obj *objPtr;	/* The object to convert. */
+{
+    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                           "Cannot construct an anonymousCmd object from a string",
+                           (char *) NULL);
+    return TCL_ERROR;
 }

@@ -211,6 +211,9 @@ Tcl_ProcObjCmd(dummy, interp, objc, objv)
     }
 
  done:
+    if (procPtr->cmdPtr->hPtr == NULL) {
+	
+    }
     return TCL_OK;
 }
 
