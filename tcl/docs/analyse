@@ -1,0 +1,359 @@
+2005-03-05
+
+Déroulement de
+
+proc fa {a} {puts $a; puts $a}
+
+tclMain.c:Tcl_Main
+  La chaine commandPtr est passée à
+  tclHistory.c:Tcl_RecordAndEvalObj pour une évaluation globale.
+    Après un petit passage dans "history add ...", c'est
+    tclBasic.c:Tcl_EvalObjEx de "history add ..." qui est appelé.
+      La chaine contient une référence. On incrémente à 2.
+      Le champ varFramePtr est sauvegardé et mis à NULL parce qu'on est en évaluation globale.
+      Dans ce cadre, c'est
+      tclExecute.c:TclCompEvalObj qui est appelé.
+        On est dans un niveau supplémentaire de l'interpréteur, numLevels est incrémenté
+        On vérifie que l'interpréteur existe bien (TclInterpReady)
+        Comme varFramePtr est NULL, la variable locale namespacePtr est positionné comme namespace global      
+        La chaine n'est pas encore du type tclByteCode. On la convertit par
+        tclCompile.c:SetByteCodeFromAny qui appelle simplement
+          tclCompile.c:TclSetByteCodeFromAny sans demander d'invoquer une procédure aposteriori
+            On récupère explicitement le contenu de la chaine.
+            On appelle
+            tclCompile.c:TclInitCompileEnv
+              tclLiteral.c:TclInitLiteralTable
+            Maintenant l'environnement de compilation CompileEnv alloué sur la pile est initialisé
+            tclCompile.c:TclCompileScript va compiler la chaine dans l'environnement
+              Une structure TclParse est allouée sur la pile
+              tclParse.c:Tcl_ParseCommand est appelé avec nested = 1
+                tclParse.c:TclParseInit
+                tclParse.c:TclParseTokens
+                ... plusieurs fois ...
+                tclParse.c:Tcl_ParseBraces {puts ...} est appelé
+              La structure Tcl_Parse est prête
+                8 tokens de type 2 (TCL_TOKEN_SIMPLE_WORD) ou 4 et de numComponents 1 ou 0
+                  2 proc 1
+                  4 proc 0
+                  2 fb   1
+                  4 fb   0
+                  2 a    1
+                  4 a    0
+                  2 {puts $a; puts "$a"} 1 
+                  4 {puts $a; puts "$a"} 0 
+              tclCompile.c:EnterCmdStartData
+              tclNamesp.c:Tcl_FindCommand recherche la commande "proc"
+                dans le namespace de l'interpréteur
+                tclNamesp.c:TclGetNamespaceForQualName recherche la commande "proc"               bricole beaucoup pour trouver le namespace correct
+                tclHash.c:Tcl_FindHashEntry
+                appelé pour deux tables
+                le pointeur trouvé est converti en "Command *"
+                et retourné comme "Tcl_Command"
+              tclLiteral.c:TclRegisterNewLiteral enregistre la chaine "proc"
+                comme elle n'est pas déjà enregistrée, on crée un nouvel objet,
+                de refCount = 1, sans type, seulement avec la chaine "proc"
+                tclLiteral.c:TclLookupLiteralEntry
+                   seulement du debug
+                alloue sur le tas un LiteralEntry
+		tclLiteral.c:AddLocalLiteralEntry
+                  tclLiteral.c:TclAddLiteralObj
+                    incrémente le refCount de l'objet
+              tclObj.c:TclSetCmdNameObj va convertir en tclCmdNameType l'objet "proc"
+                l'objet a refcount == 2
+                On incrémente le refcount de la structure Command. Il vaut 2
+                On alloue une structure ResolvedCmdName dont cmdPtr pointe sur la structure Command
+                TclFreeIntRep appelé sur l'objet
+                internalRep.twoPtrValue.ptr1 est positionné sur ResolvedCmdName
+              tclCompile.h:TclEmitPush remplit l'environnement avec l'index du literal
+              Les trois chaines tokens suivantes sont enregistrées par
+              tclLiteral.c:TclRegisterNewLiteral
+              et leur index (1, 2 et 3) est émis dans l'environnement par
+              tclCompile.h:TclEmitPush
+              tclCompile.h:TclEmitInstInt1 émet dans l'environnement de compilation INST_INVOKE_STK1 4
+              tclCompile.c:EnterCmdExtentData bricole un peu l'environnement de compilation CompileEnv
+              tclParse.c:Tcl_FreeParse libère ... rien du tout
+            tclCompile.h:TclEmitOpcode émet INST_DONE
+            tclCompile.c:TclInitByteCodeObj
+              tclCompile.d:GetCmdLocEncodingSize calcule la taille des locals. Il en faut 4
+              alloue une ByteCode augmenté de son contenu
+              tclPreserve.c:TclHandlePreserve incrémente le refCount du handle de l'interpréteur
+              copie des 11 octets de code compilé de l'environnement vers la zone contenu du ByteCode
+              copie les 4 objets
+                - "proc" de type cmdName
+                - "fb", "a", "puts..." sans type
+              tclCompile.c:EncodeCmdLocMap
+                .h:TclStoreInt1AtPtr  0    code offset for each command as a sequence of deltas
+                .h:TclStoreInt1AtPtr 10    code length for each command
+                .h:TclStoreInt1AtPtr  0    source offset for each command as a sequence of deltas
+                .h:TclStoreInt1AtPtr 30    source length for each command
+              le champ internalRep.otherValuePtr de l'objet est positionné sur le ByteCode et son type comme tclByteCodeType.
+            tclCompile.c:TclFreeCompileEnv
+              libère ... rien
+        ....
+        Le refCount du ByteCode est incrémenté et passe à 2
+        tclExecute.c:TclExecuteByteCode
+          affreuse boucle avec goto
+          switch (*pc):
+          - INST_PUSH1 tclExecute.c:TclExecuteByteCode "proc"
+          - INST_PUSH1 tclExecute.c:TclExecuteByteCode "f"
+          - INST_PUSH1 tclExecute.c:TclExecuteByteCode "a"
+          - INST_PUSH1 tclExecute.c:TclExecuteByteCode "puts ..."
+          - INST_INVOKE_STK1
+          objc = 4
+          tclObj.c:Tcl_GetCommandFromObj cmdName "proc"
+            déjà du type tclCmdName
+            récupération du ResolvedName
+            récupération du Tcl_Command
+          tclResult.c:Tcl_ResetResult
+            tclResult.c:ResetResultObj
+          tclBasic.c:TclEvalObjvInternal
+            tclBasic.c:TclInterpReady
+            tclObj.c:Tcl_GetCommandFromObj cmdName "proc"
+              ENCORE !!! pas rentable
+            récupération du savedVarFramePtr pour l'interpréteur
+            incrémentation du refCount de Command, passe à 3
+            varFramePtr de l'interpréteur resauvegardé
+            appel de la procédure de la commande :
+            tclProc.c:TclObjInterpProc
+              récupération de la chaine "f"
+              TclGetNamespaceForQualName
+                beaucoup de bricolage avec les namespaces
+              TclCreateProc f a {puts ...}
+                {puts ...} n'est pas du type tclProcBodyType
+                il est partagé (refCount vaut 3), on en fait un nouvel objet StringObj
+                On alloue un Proc
+                On récupère la liste de arguments "a"
+                on n'est pas précompilé, les champs numArgs et numCompiledLocals sont positionnés au nombre d'arguments : 1
+                chaque argument est analysé comme {argument default}
+                on n'est pas précompilé, on alloue un CompiledLocal
+                On libère des trucs
+              tclBasic.c:Tcl_CreateObjCommand f TclObjInterpProc _Proc TclProcDeleteProc
+                On crée une HashEntry dans cmdTable du namespace
+                On invalide la liste des commandes exportées
+                On alloue une structure Command et on la remplit
+                tclNamesp.c:TclResetShadowedCmdRefs
+                  bricolage sur les commandes occultées par la nouvelle définition
+                retourne le pointeur sur Command comme Tcl_Command
+              Le champ cmdPtr de la Proc est positionné sur le Tcl_Command
+              Bricolage pour optimiser les bodies vides.
+            le varFramePtr est restauré
+            tclBasic.c:TclCleanupCommand
+              le refCount de la Command passe à 2
+          - POP_OBJECT chaine "puts $a; puts $a" et TclDecrRefCount
+          - POP_OBJECT chaine "a" et TclDecrRefCount
+          - POP_OBJECT localVarName "f" et TclDecrRefCount
+          TclDecrRefCount cmdName "proc"
+          - INST_DONE
+          tclResult.c:Tcl_SetObjResult
+            décrémente le refCount de *objResultPtr
+            réattribue objResultPtr
+            incrémente le refCount de l'objet retourné
+          abnormalReturn: !!!
+          - POP_OBJECT chaine "" et TclDecrRefCount
+        décrémente le refCount du Code "proc f a ..."
+        décrémente le numLevels de l'interpréteur (passe à 0)
+      récupère la sauvegarde de varFramePtr
+      décrémente le refCount de l'objet bytecode "proc f a ..." (passe à 1)
+    (fin de Tcl_RecordAndEvalObj)
+  tclObj.c:Tcl_DecrRefCount du bytecode "proc f a ..." (passe à 0)
+    tclObj.c:TclFreeObj
+      tclCompile.c:FreeByteCodeInternalRep
+        décrémente le refCount du Code (passe à 0)
+        tclCompile.c:TclCleanupByteCode
+          tclLiteral.c:TclReleaseLiteral "proc"
+            désalloue un Entry
+            TclDecrRefCount refCount de l'objet passe à 1
+            Tcl_DecrRefCount refCount de l'objet passe à 0
+              tclObj.c:Tcl_FreeObj
+                On a TclObjDeletePending donc:
+                TclPushObjToDelete -> tclCkalloc.c:Tcl_DbCkfree
+          tclLiteral.c:TclReleaseLiteral "f" (type localVarName)
+            Tcl_DecrRefCount refCount de l'objet passe à 2
+          tclLiteral.c:TclReleaseLiteral "a" (sans type)
+            désalloue un Entry
+            TclDecrRefCount refCount de l'objet passe à 
+            Tcl_DecrRefCount refCount de l'objet passe à 
+          tclLiteral.c:TclReleaseLiteral "puts $a; puts $a" (sans type)
+            TclDecrRefCount refCount de l'objet passe à 1
+            Tcl_DecrRefCount refCount de l'objet passe à 0
+          tclPreserve.c:TclHandleRelease
+            le refCount passe à 14
+          Désalloue le Code
+          fin de TclCleanupByteCode
+        met typePtr et internalRep à NULL [PAS TRES UTILE]
+      Désalloue l'ex bytecode "proc f a ..."
+      Désalloue un objet "" de la pile
+      Désalloue un autre objet "" de la pile
+      Désalloue un autre objet "" de la pile
+    fin de TclFreeObj
+  Création d'un nouvel objet, de refCount 1 (future commande)
+  Affichage de l'objet résultat
+  tclMain.c:Prompt
+  tclIO.c:Tcl_GetsObj
+    ...
+    [entrée de "f 12"]
+  la commande contient maintenant "f 12", refCount vaut 1 et le type est string
+  tclParse.c:TclObjCommandComplete
+    tclObj.c:Tcl_GetStringFromObj
+    tclParse.c:CommandComplete
+      Crée une structure Tcl_Parse sur la pile
+      tclParse.c:Tcl_ParseCommand
+        tclParse.c:TclParseInit
+        tclParse.c:ParseComment
+        tclParse.c:ParseToken
+        tclParse.c:ParseToken
+      Tcl_FreeParse
+        ne fait rien
+  Tcl_RecordAndEvalObj "f 12", refCount vaut 1 et le type est string
+    Fabrique la liste {history add {f 12}}
+    tclBasic.c:Tcl_EvalObjEx
+      ...
+    Tcl_DecrRefCount
+      tclObj.c:TclFreeObj "history add {f 12}" type bytecode
+    tclBasic.c:Tcl_EvalObjEx "f 12" (type string)
+      Tcl_IncrRefCount (passe à 2)
+      sauvegarde varFramePtr et comme on est en GLOBAL, le met à NULL
+      tclExecute.c:TclCompEvalObj 
+        namespacePtr = iPtr->globalNsPtr
+        "f 12" n'est pas du type "bytecode"
+        tclCompile.c:SetByteCodeFromAny
+          tclCompile.c:TclSetByteCodeFromAny
+            tclCompile.c:TclInitCompileEnv
+            tclCompile.c:TclCompileScript
+              Crée une structure Tcl_Parse sur la pile
+              Tcl_ResetResult
+              Tcl_ParseCommand
+              tclCompile.c:EnterCmdStartData
+              Tcl_FindCommand "f"
+                Tcl_GetCurrentNamespace
+                TclGetNamespaceForQualName
+                Tcl_FindHashEntry
+                Tcl_GetHashValue
+                le pointeur de Command est récupéré et renvoyé comme Tcl_Command
+              tclCompile.h:TclRegisterNewLiteral "f"
+                tclLiteral.c:TclRegisterLiteral
+              tclObj.c:TclSetCmdNameObj
+                Incrémente le refCount de la structure Command
+                Alloue une structure ResolvedCmdName
+                Transforme l'objet "f" en cmdName pointant sur le ResolvedCmdName
+              tclCompile.h:TclEmitPush de l'index (0) du Literal "f"
+              tclCompile.h:TclRegisterNewLiteral "12"
+                ...
+              tclCompile.h:TclEmitPush de l'index (1) du Literal "11"
+              tclEmitInstInt1 INST_INVOKE_STK1 2 (nombre d'index de Literals)
+              tclCompile.c:EnterCmdExtentData
+              Tcl_FreeParse
+                ne fait rien ici
+            TclEmitOpcode INST_DONE
+            tclCompile.c:TclInitByteCodeObj
+              Alloue un ByteCode augmenté
+              TclHandlePreserve
+              EncodeCmdLocMap
+              TclFreeIntRep
+              convertit en "bytecode"
+            tclCompile.c:TclFreeCompileEnv
+              ne fait rien ici
+          retour de tclCompile.c:SetByteCodeFromAny
+        Récupération du ByteCode pointé par le "bytecode"  
+        Incrémentation dy refCount du ByteCode (passe à 2)       
+        tclExecute.c:TclExecuteByteCode
+        - INST_PUSH1 "f" (type "cmdName")
+        - INST PUSH1 "12" (type "int", comment le sait-il ? Literal ?)
+        - INST_INVOKE_STK1 -> 2
+        tclObj.c:Tcl_GetCommandFromObj "f"
+          C'est un cmdName
+          Récupère la structure ResolvedCmdName pointée par l'objet
+          Récupère la structure Command pointée par la structure ResolvedCmdName
+        Tcl_ResetResult
+        tclBasic.c:TclEvalObjvInternal 
+          Sauvegarde varFramePtr
+          tclObj.c:Tcl_GetCommandFromObj "f" ENCORE !
+          Reprend varFramePtr
+          Sauvegarde varFramePtr
+          tclProc.c:TclObjInterpProc
+            tclObj.c:Tcl_GetStringFromObj
+              récupère la chaine "f"
+            tclProc.c:TclProcCompileProc
+              le body "puts $a; puts $a" n'est pas du type "bytecode" 
+              tclNamesp.c:Tcl_PushCallFrame
+              tclCompile.c:SetByteCodeFromAny
+                tclCompile.c:TclSetByteCodeFromAny
+                  Tcl_GetStringFromObj
+                    récupère "puts $a; puts $a"
+                  TclInitCompileEnv
+                  TclCompileScript
+                  TclEmitOpcode INST_DONE
+                  TclInitByteCodeObj
+                  TclFreeCompileEnv
+              tclNamesp.c:Tcl_PopCallFrame
+            Tcl_PushCallFrame
+            TclInitCompiledLocals
+            TclClearVarUndefined "12"
+            Tcl_IncrRefCount "12"
+            tclExecute.c:TclCompEvalObj  "puts $a..." type "bytecode"
+              Récupère le ByteCode du "bytecode" "puts $a..."
+              Incrémente le recCount du ByteCode (passe à 2)
+              tclExecute.c:TclExecuteByteCode ByteCode
+                - INST_PUSH1 "puts" de type "cmdName"
+                - INST_LOAD_SCALAR1, opnd = 0, var = "a", TclIsVarDirectReadable, récupère "15" de type "int"
+                - INST_INVOKE_STK1 -> 2
+                Tcl_GetCommandFromObj
+                Tcl_ResetResult
+                TclEvalObjvInternal
+                  Tcl_GetCommandFromObj ENCORE
+                  Tcl_PutsObjCmd
+                  Tcl_GetObjResult
+                POP_OBJECT "12"
+                TclDecrRefCount "12"
+                TclDecrRefCount "puts"
+                - INST_POP "" (résultat de puts)
+                TclDecrRefCount ""
+
+
+              TclCompEvalObj
+                ...
+                TclExecuteByteCode
+                  ...
+                  TclEvalObjvInternal
+                    ...
+                    TclObjInterpProc
+                      ...
+                      TclCompEvalObj
+                        ...
+                        TclExecuteByteCode
+                          switch (*pc):
+                          - INST_PUSH1 tclExecute.c:TclExecuteByteCode "variable"
+                          - INST_PUSH1 tclExecute.c:TclExecuteByteCode "history"
+                          - INST_INVOKE_STK1
+                          renvoit bricole de l'objet calculé
+                          - INST_POP
+                          - INST_START_CMD
+                          - INST_PUSH1 tclExecute.c:TclExecuteByteCode "string"
+                          - INST_PUSH1 tclExecute.c:TclExecuteByteCode "trim"
+                          - INST_LOAD_SCALAR1 
+                          ...
+                        ...
+                      ...
+                    ...
+                  ...
+                ...
+              ...
+            ...
+            TclCleanupCommand
+          ...
+          - NEXT_INST_V
+          - POP_OBJECT (chaine "proc f a ..."} et décrémente refCount
+          - POP_OBJECT (chaine "add") et décrémente refCount
+          décrémente refCount de l'objet commande "history"
+          - INST_DONE
+          abnormal_return:
+      décrémente refCount du biteCode "history add {proc ...|"
+      varFramePtr est remis à sa valeur de sauvegarde
+      le refCount du byteCode "history add ..." est ramené à 1
+    le refCount du byteCode est ramené à 0
+    tclBasic.c:Tcl_EvalObjEx "proc f a ..."
+      Le refCount de la chaine "proc f a ..." est incrémenté et passe à 2.
+      Le varFramePtr de l'interpréteur est sauvegardé et mis à la valeur globale
+      tclExecute.c:TclCompEvalObj
+        L'objet chaine est converti en byteCode:
+        tclCompile.c:SetByteCodeFromAny
