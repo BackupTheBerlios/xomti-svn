@@ -45,3 +45,4 @@ package ifneeded xdobry::pgsql 0.73 [list source [file join $dir xdobry_pgsql.xo
 package ifneeded xdobry::sql 0.73 [list source [file join $dir xdobry_sql.xotcl]]
 package ifneeded xdobry::sqlDebug 0.35 [list source [file join $dir xdobry_sqlDebug.xotcl]]
 package ifneeded xdobry::sqlite 0.61 [list source [file join $dir xdobry_sqlite.xotcl]]
+package ifneeded xomti_packages_manager 0.1 [list source [file join $dir xomti_packages_manager.xotcl]]

@@ -25,5 +25,4 @@ package require IDEEditor
 package require IDEDebug
 package require IDEErrorReporter
 
-
-
+package require xomti_packages_manager
