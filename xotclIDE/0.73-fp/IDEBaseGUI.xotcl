@@ -992,9 +992,9 @@ IDE::FontChooser proc getFont {{font {}}} {
     }
     return $ret
 }
-Class IDE::ListView -parameter {{multiselect 0} label {height 10} width}
-@ ::IDE::ListView idemeta categories {service test-service}
-@ ::IDE::ListView idemeta categoriesMethods {{selectedItem setSelectedItem reorderSelected unselect renameItem removeItemAt addItemAt setList addItem markItem removeItem} isValidSelection}
+Class IDE::ListView -parameter {{multiselect 0} label {height 10} width lock_on}
+@ ::IDE::ListView idemeta categories {service test-service locker}
+@ ::IDE::ListView idemeta categoriesMethods {{selectedItem setSelectedItem reorderSelected unselect renameItem removeItemAt addItemAt setList addItem markItem removeItem} isValidSelection {unlock has_lock lock_here}}
 @ ::IDE::ListView idemeta component IDEBaseGUI
 IDE::ListView instproc addItem item {
     # add Item and sort
@@ -1024,6 +1024,7 @@ IDE::ListView instproc addSelection {first last} {
 }
 IDE::ListView instproc buttonDoublePush {} {
     my instvar win selectedIndex listItems
+    if {[my has_lock]} {my unlock}
     set currsel [lindex [$win.listbox curselection] 0]
     if {$currsel!=""} {
         my selectItem [lindex $listItems $currsel]
@@ -1031,6 +1032,7 @@ IDE::ListView instproc buttonDoublePush {} {
 }
 IDE::ListView instproc buttonPush {} {
     my instvar win selectedIndex listItems
+    if {[my has_lock]} {my unlock}
     set currsel [lindex [$win.listbox curselection] 0]
     if {$currsel!="" && $currsel!=$selectedIndex} {
         set selectedIndex $currsel
@@ -1070,8 +1072,12 @@ IDE::ListView instproc getFocusWin {} {
 IDE::ListView instproc getList {} {
     my set listItems
 }
+IDE::ListView instproc has_lock {} {
+    return [expr {[info exist [self]::lock] && [set [self]::lock]}]
+}
 IDE::ListView instproc init window {
-    my instvar win selectedIndex multiselect label height
+    my instvar win selectedIndex multiselect label height lock_on
+    my requireNamespace
     set win $window
     my set listItems {}
     ::frame $win
@@ -1080,9 +1086,15 @@ IDE::ListView instproc init window {
     } else {
         set selmode browse
     }
+    frame $win.lablo
+    pack $win.lablo -fill x
     if {[info exists label]} {
         ::label $win.label -text $label
-        pack $win.label -anchor w
+        pack $win.label -anchor w -in $win.lablo -side left
+    }
+    if {[info exists lock_on]} {
+        checkbutton $win.lock -text lock -variable [self]::lock -command "[self] lock_here"
+        pack $win.lock -anchor e -in $win.lablo -side right
     }
     ::scrollbar $win.scroll -command "$win.listbox yview" -takefocus 0
     set bgcolor [IDEPreferences getParameter listcolor]
@@ -1111,6 +1123,12 @@ IDE::ListView instproc keyEvent key {
     set sindex [lsearch -glob -regexp $listItems (?i)^$key]
     if {$sindex>=0} {
         my setSelectedIndex $sindex
+    }
+}
+IDE::ListView instproc lock_here {} {
+    my instvar selectedIndex listItems
+    if {[my has_lock]} {
+        my set lock_on [lindex $listItems $selectedIndex]
     }
 }
 IDE::ListView instproc markItem item {
@@ -1296,6 +1314,12 @@ IDE::ListView instproc setSelectedItem {item {notify 1}} {
         if {$notify==1} {
             my selectItem $item
         }
+    }
+}
+IDE::ListView instproc unlock {} {
+    if {[info exists [self]::lock]} {
+        set [self]::lock 0
+        my set lock_on {}
     }
 }
 IDE::ListView instproc unselect {} {

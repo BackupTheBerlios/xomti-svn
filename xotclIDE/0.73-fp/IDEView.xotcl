@@ -1875,7 +1875,7 @@ description {The parent object must understand the messages
 [my info parent] setVarValue $value [self]
 [my info parent] setStatusBarText $message}
 }
-Class IDE::VarsView -superclass {::IDE::ListView ::IDE::GUICommands} -parameter {{label {Object Vars}}}
+Class IDE::VarsView -superclass {::IDE::ListView ::IDE::GUICommands} -parameter {{label {Object Vars}} {lock_on {}}}
 @ ::IDE::VarsView idemeta categories {initialize user-actions}
 @ ::IDE::VarsView idemeta categoriesMethods {{getMenuStruct fillMenuStruct} {inspectAsObjectsList inspectAsObject unsetVariable}}
 @ ::IDE::VarsView idemeta component IDEView
@@ -1980,11 +1980,20 @@ IDE::VarsView instproc searchReferences actual {
     IDE::MethodBrowser searchTextClass $actual $sclass
 }
 IDE::VarsView instproc selectFor object {
-    my instvar vobject
+    my instvar win vobject selectedIndex listItems lock_on
     set vobject $object
     my setList [$object info vars]
-    my selectItem {}
-}
+    if {[my has_lock]} {
+        my selectItem $lock_on
+        set idx [lsearch -exact $listItems $lock_on]
+        if {$idx >= 0} {
+            $win.listbox selection set $idx
+        }
+        return 1
+    } else {
+        my selectItem {}
+        return 0
+    }}
 IDE::VarsView instproc selectItem var {
     my instvar vobject vtype vvariable
     if {$var==""} return
@@ -3595,9 +3604,10 @@ IDE::ObjectBrowser instproc setViewObject object {
     set vobject $object
     [self]::methodedit set context $object
     my setTitleAddition "$object ([$object info class])"
-    [self]::varsview selectFor $object
+    set locked [[self]::varsview selectFor $object]
     [self]::subobjectsview selectFor $object
     [self]::methodview selectFor $object
+    return $locked
 }
 IDE::ObjectBrowser instproc specificInit {} {
     my instvar win type
@@ -3887,8 +3897,8 @@ IDE::ObjectsView instproc selectItem object {
     my instvar type
     if {$type=="list"} {
         if {[Object isobject $object]} {
-            [my info parent] setViewObject $object
-            if {[Object isobject [my info parent]::methodedit]} {
+            set locked [[my info parent] setViewObject $object]
+            if {!$locked && [Object isobject [my info parent]::methodedit]} {
                 [my info parent]::methodedit setTextControler [$object printString] [self]
             }
         } else {
