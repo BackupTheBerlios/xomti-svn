@@ -1,5 +1,5 @@
 # automatically generated from XOTclIDE
-# script require component {IDETclParser IDECore IDEView IDEBaseGUI}
+# script require component {IDECore IDEBaseGUI IDEView IDETclParser}
 @ Component IDEEditor {
 description {Xotcl Text Editing
 
@@ -11,31 +11,10 @@ In the future place for such things as
 3. delegation to syntax checker in IDETclParser component}
 }
 package provide IDEEditor 0.73
-package require IDETclParser
 package require IDECore
-package require IDEView
 package require IDEBaseGUI
-@ Class PrsSyntaxHightlight {
-description {This Class is special tcl parser context that can be used
-for syntax hightlight into IDE::Text (View for parsed method).
-How tokens will be handled is specified in syntaxHightlight method (PrsElem)}
-}
-Class PrsSyntaxHightlight -superclass ::PrsContext  -parameter text
-@ ::PrsSyntaxHightlight idemeta component IDEEditor
-PrsSyntaxHightlight instproc checkObjectSelfCall {command notifier} {
-    my hightlightElement [$command getElem 0] xotcl
-}
-PrsSyntaxHightlight instproc checkTclCommand {name command notifier} {
-    if {[next]} {
-        my hightlightElement [$command getElem 0] tclproc
-    }
-}
-PrsSyntaxHightlight instproc hightlightElement {prsElem tag {shiftLeft 0} {shiftRight 0}} {
-    [my text] tagRange $tag [expr {[$prsElem begin]+$shiftLeft}] [expr {[$prsElem end]+1+$shiftRight}]
-}
-PrsSyntaxHightlight instproc visit prsElem {
-    [my parser] catchParseErrors {$prsElem syntaxHightlight [self]}
-}
+package require IDEView
+package require IDETclParser
 @ Class IDE::TclModeEdit {
 description {Tcl Mode
 
@@ -539,5 +518,26 @@ IDE::TclModeEdit instproc uncommentRegion {} {
 }
 IDE::TclModeEdit instproc xotclLint text {
     
+}
+@ Class PrsSyntaxHightlight {
+description {This Class is special tcl parser context that can be used
+for syntax hightlight into IDE::Text (View for parsed method).
+How tokens will be handled is specified in syntaxHightlight method (PrsElem)}
+}
+Class PrsSyntaxHightlight -superclass ::PrsContext  -parameter text
+@ ::PrsSyntaxHightlight idemeta component IDEEditor
+PrsSyntaxHightlight instproc checkObjectSelfCall {command notifier} {
+    my hightlightElement [$command getElem 0] xotcl
+}
+PrsSyntaxHightlight instproc checkTclCommand {name command notifier} {
+    if {[next]} {
+        my hightlightElement [$command getElem 0] tclproc
+    }
+}
+PrsSyntaxHightlight instproc hightlightElement {prsElem tag {shiftLeft 0} {shiftRight 0}} {
+    [my text] tagRange $tag [expr {[$prsElem begin]+$shiftLeft}] [expr {[$prsElem end]+1+$shiftRight}]
+}
+PrsSyntaxHightlight instproc visit prsElem {
+    [my parser] catchParseErrors {$prsElem syntaxHightlight [self]}
 }
 

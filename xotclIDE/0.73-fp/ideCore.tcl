@@ -142,7 +142,7 @@ Object instproc metadataBody {meta} {
 Object instproc metadataAsScript {} {
     ::set script {}
     my instvar _idemeta
-    foreach meta [array names _idemeta] {
+    foreach meta [lsort [array names _idemeta]] {
         if {[ide::lcontain {categoriesMethodsProcs  categoriesProcs categoriesMethods categories} $meta] && $_idemeta($meta)==""} continue
 	::append script [my metadataDefBody $meta]
     }
