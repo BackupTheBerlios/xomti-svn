@@ -126,7 +126,7 @@ proc ide::lselect {var_ref list test} {
 
                     ########## Classes and Objects ##########
 
-Class IDE
+Class create IDE
 @ ::IDE idemeta component IDECore
 IDE proc initSystem {} {
     set core {Object Class Object::CopyHandler Class::Parameter @ ::xotcl::NoInit ::xotcl ::xotcl::rcs xotcl::Class xotcl::NoInit xotcl::Object xotcl::rcs IDEMetadataAnalyzer xotcl::Class::Parameter xotcl::Object::CopyHandler}
@@ -147,13 +147,13 @@ IDE proc initSystem {} {
 
                               ##########
 
-@ Class IDE::CommentHandler {
+@ Class create IDE::CommentHandler {
 description {Designed to use as mixin.
 It has no requirements
 It add functionality for hanlding comments.
 }
 }
-Class IDE::CommentHandler
+Class create IDE::CommentHandler
 @ ::IDE::CommentHandler idemeta component IDECore
 IDE::CommentHandler instproc getComment {} {
     if {[my exists comment]} {
@@ -169,16 +169,16 @@ IDE::CommentHandler instproc setComment text {
 
                               ##########
 
-@ Class IDE::Component {
+@ Class create IDE::Component {
 description {IDE::Component is base class for handling components.
 Components are currently sets or Xotcl classes and objects
 that can be loaded and saved as tcl packages}
 }
-Class IDE::Component -superclass ::IDE::CommentHandler -parameter name
-@ ::IDE::Component idemeta categories {tcl-procs service private accessing}
-@ ::IDE::Component idemeta categoriesMethods {{basicRemoveProcsGroup getProcsGroupWithName removeProcsGroup createTclProcsGroup basicCreateTclProcsGroup addProcsGroup getProcsGroups getProcsGroupsObjects} {isPersistent saveAsScript unload asScript getVersionNumber addRequiredCompList computeRequirements rename copyClassOrObject getVisibleClasses} {addObject basicAddObject basicRemoveObject addClass init destroy getObjectDefineList rekBuildDefList} {removeClass getCommentBody setVersionNumber removeObject standardFileNameBase standardFileName getRequiredFrom getClassesHierarchy getName getObjects getClasses getHierarchyFrom getRequiredFor getRequiredFromDeep}}
-@ ::IDE::Component idemeta categoriesMethodsProcs {{registerObject registerInstproc registerProc loadCompFromFile} {loadPackageIfNone loadPackage initFromInterpreter initPackageTracking importCompsFromFile} {saveComplex getObjectBody saveAllToPath} {getCompObjectForNameIfExist getComponentNames getAllComponents getCompObjectForName}}
+Class create IDE::Component -superclass ::IDE::CommentHandler -parameter name
 @ ::IDE::Component idemeta categoriesProcs {private importing-loading recreation api}
+@ ::IDE::Component idemeta categoriesMethodsProcs {{registerObject registerInstproc registerProc loadCompFromFile} {loadPackageIfNone loadPackage initFromInterpreter initPackageTracking importCompsFromFile} {saveComplex getObjectBody saveAllToPath} {getCompObjectForNameIfExist getComponentNames getAllComponents getCompObjectForName}}
+@ ::IDE::Component idemeta categoriesMethods {{basicRemoveProcsGroup getProcsGroupWithName removeProcsGroup createTclProcsGroup basicCreateTclProcsGroup addProcsGroup getProcsGroups getProcsGroupsObjects} {isPersistent saveAsScript unload asScript getVersionNumber addRequiredCompList computeRequirements rename copyClassOrObject getVisibleClasses} {addObject basicAddObject basicRemoveObject addClass init destroy getObjectDefineList rekBuildDefList} {removeClass getCommentBody setVersionNumber removeObject standardFileNameBase standardFileName getRequiredFrom getClassesHierarchy getName getObjects getClasses getHierarchyFrom getRequiredFor getRequiredFromDeep}}
+@ ::IDE::Component idemeta categories {tcl-procs service private accessing}
 @ ::IDE::Component idemeta component IDECore
 IDE::Component instproc addClass class {
    # use $object moveToComponent name for right initialisation
@@ -825,7 +825,7 @@ IDE::Component proc saveComplex {comps nometa onefile target} {
 
                               ##########
 
-@ Class IDE::Component::Tracker {
+@ Class create IDE::Component::Tracker {
 description {Helper class for tracking new classes
 by package loading
 
@@ -837,7 +837,7 @@ So all methods belong to package where the object were defined.
 
 }
 }
-Class IDE::Component::Tracker
+Class create IDE::Component::Tracker
 @ ::IDE::Component::Tracker idemeta component IDECore
 IDE::Component::Tracker instproc create {cls args} {
     next
@@ -919,11 +919,11 @@ IDE::Component::Tracker proc trackProc args {
 
                               ##########
 
-@ Class IDE::ObjectCommentsContainer {
+@ Class create IDE::ObjectCommentsContainer {
 description {Helper class for hanlde methods comments.
 It will be used for not persistent classes}
 }
-Class IDE::ObjectCommentsContainer -parameter objectName
+Class create IDE::ObjectCommentsContainer -parameter objectName
 @ ::IDE::ObjectCommentsContainer idemeta component IDECore
 IDE::ObjectCommentsContainer instproc getMethodComment {type method} {
     if {[my exists  comment_${type}($method)]} {
@@ -942,7 +942,7 @@ IDE::ObjectCommentsContainer instproc setMethodComment {type method text} {
 
                               ##########
 
-@ Class IDE::ProcsGroup {
+@ Class create IDE::ProcsGroup {
 description {This Class wrap the interface to normal tcl procedures.
 It enable to use / reuse old tcl code in xotclIDE programming
 
@@ -957,9 +957,9 @@ namespace eval myNameSpace {
 }
 }
 }
-Class IDE::ProcsGroup -superclass ::IDE::CommentHandler -parameter {name {withNamespace 0}}
-@ ::IDE::ProcsGroup idemeta categories {testing accessing methods actions initialize}
+Class create IDE::ProcsGroup -superclass ::IDE::CommentHandler -parameter {name {withNamespace 0}}
 @ ::IDE::ProcsGroup idemeta categoriesMethods {isPersistent {getDescription getComponent getBody getObjectName getComponentName getDefBody setDefBody} {removeMethodObj createProcForName setMethodComment hasMethodComment getProcsObjects getProcsNames getMethodComment deleteMethod getProcObjForName getProcObjForNameIfExist} {rename unload handleDefinitionScript moveToComponent handleScript} init}
+@ ::IDE::ProcsGroup idemeta categories {testing accessing methods actions initialize}
 @ ::IDE::ProcsGroup idemeta component IDECore
 IDE::ProcsGroup instproc createProcForName name {
     #[self] halt
@@ -1150,15 +1150,15 @@ IDE::ProcsGroup proc unknown args {
 
                               ##########
 
-@ Class IDE::TclProcsDescription {
+@ Class create IDE::TclProcsDescription {
 description {Using for handle (structure) normal tcl procs in component context of XOTclIDE.
 This instaces has similar interface as xotcl class/objects.
 That is comments, getting body
 }
 }
-Class IDE::TclProcsDescription -superclass ::IDE::CommentHandler -parameter name
-@ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
+Class create IDE::TclProcsDescription -superclass ::IDE::CommentHandler -parameter name
 @ ::IDE::TclProcsDescription idemeta categoriesMethods {isPersistent init {getGroupObj getMetaBody getName getBody} {handleScript unload}}
+@ ::IDE::TclProcsDescription idemeta categories {testing initialize accessing actions}
 @ ::IDE::TclProcsDescription idemeta component IDECore
 IDE::TclProcsDescription instproc getBody {} {
     # ??? Vielleicht durch IntroProxy
@@ -1243,7 +1243,7 @@ IDE::TclProcsDescription proc unregisterMethod method {
 
                               ##########
 
-@ Object IDE::CommentsContainer {
+@ Object create IDE::CommentsContainer {
 description {Hanlde objects comments and is parent object for methods comments
 (class IDE::ObjectsCommentsContainer)
 
@@ -1252,9 +1252,9 @@ all @ meta are delegating to method importMeta
 the method "parseAndCleanMeta" try to initilize loaded Objects with
 comment after loading}
 }
-Object IDE::CommentsContainer
-@ ::IDE::CommentsContainer idemeta categoriesMethodsProcs {{parseAndCleanMeta importMeta importComponentMeta importObjectMethodMeta importProcGroupMeta importProcMeta importObjectMeta} {destroyObject getObjectContainer objectMethodGetComment getObjectContainerWithCreate objectSetComment objectMethodSetComment objectMethodHasComment objectGetComment objectHasComment} {makeTclGroupsFromMeta getGroupForMethod cleanTclProcComments searchCommentForMethod searchCommentForGroup} extractComment}
+Object create IDE::CommentsContainer
 @ ::IDE::CommentsContainer idemeta categoriesProcs {parse-import comments-mirrow tclproc-handling private}
+@ ::IDE::CommentsContainer idemeta categoriesMethodsProcs {{parseAndCleanMeta importMeta importComponentMeta importObjectMethodMeta importProcGroupMeta importProcMeta importObjectMeta} {destroyObject getObjectContainer objectMethodGetComment getObjectContainerWithCreate objectSetComment objectMethodSetComment objectMethodHasComment objectGetComment objectHasComment} {makeTclGroupsFromMeta getGroupForMethod cleanTclProcComments searchCommentForMethod searchCommentForGroup} extractComment}
 @ ::IDE::CommentsContainer idemeta component IDECore
 IDE::CommentsContainer proc cleanTclProcComments {} {
     if {[my exists proc_groupcomment]} {[self] unset proc_groupcomment}
@@ -1458,19 +1458,19 @@ IDE::CommentsContainer proc searchCommentForMethod method {
 
                               ##########
 
-@ Object IDE::IntroProxy {
+@ Object create IDE::IntroProxy {
 description {Fasade for xotcl introspection.}
 }
-Object IDE::IntroProxy
-@ ::IDE::IntroProxy idemeta categoriesMethodsProcs {{getInstanceMethods getClassMethods getCategoriesForClass getCategoriesForObject getBodyTclMethod} {getClassesForComponent getObjectsForComponent getComponents getProcsGroupsForComponent getComponentsNoIDE getClasses getObjects} {getBodyMetadata getBodyInstanceMethodIfExist getBodyClassMethodIfExist getObjDef getBodyInstanceSearchMethod getProcBody getBodyInstanceMethod getBodyClassMethod} {stripNamespace asDescriptionList getBaseObjDef} {getObjectMethodCommentBody getObjectCommentBody}}
+Object create IDE::IntroProxy
 @ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
+@ ::IDE::IntroProxy idemeta categoriesMethodsProcs {{getInstanceMethods getClassMethods getCategoriesForClass getCategoriesForObject getBodyTclMethod} {getClassesForComponent getObjectsForComponent getComponents getProcsGroupsForComponent getComponentsNoIDE getClasses getObjects} {getBodyMetadata getBodyInstanceMethodIfExist getBodyClassMethodIfExist getObjDef getBodyInstanceSearchMethod getProcBody getBodyInstanceMethod getBodyClassMethod} {stripNamespace asDescriptionList getBaseObjDef} {getObjectMethodCommentBody getObjectCommentBody}}
 @ ::IDE::IntroProxy idemeta component IDECore
 IDE::IntroProxy proc asDescriptionList comment {
    return "description [list $comment]"
 }
 IDE::IntroProxy proc getBaseObjDef name {
     set cname [my stripNamespace [$name info class]]
-    return "$cname [string trimleft $name :]"
+    return "$cname create [string trimleft $name :]"
 }
 IDE::IntroProxy proc getBodyClassMethod {obj p} {
     set arguments {}
@@ -1741,7 +1741,7 @@ IDE::IntroProxy proc stripNamespace name {
 
                               ##########
 
-Object IDE::SystemConfigMap
+Object create IDE::SystemConfigMap
 @ ::IDE::SystemConfigMap idemeta component IDECore
 IDE::SystemConfigMap proc asScript {} {
     set script {}

@@ -21,7 +21,7 @@ package provide IDETclParser 0.70
 
                     ########## Classes and Objects ##########
 
-Class MixPrsList -parameter list
+Class create MixPrsList -parameter list
 @ ::MixPrsList idemeta component IDETclParser
 MixPrsList instproc addElem elem {
     my lappend list $elem
@@ -40,7 +40,7 @@ MixPrsList instproc visit visitor {
 
                               ##########
 
-Class PrsElement -parameter {begin end}
+Class create PrsElement -parameter {begin end}
 @ ::PrsElement idemeta component IDETclParser
 PrsElement instproc basicEvalContents {} {
     set parser [my getParser]
@@ -102,7 +102,7 @@ PrsElement instproc visit visitor {
 
                               ##########
 
-Class PrsCommand -superclass {::PrsElement ::MixPrsList}
+Class create PrsCommand -superclass {::PrsElement ::MixPrsList}
 @ ::PrsCommand idemeta component IDETclParser
 PrsCommand instproc argsCount {} {
     expr {[llength [my list]]-1}
@@ -116,7 +116,7 @@ PrsCommand instproc syntaxHighlight context {
 
                               ##########
 
-Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList}
+Class create PrsCommandSubst -superclass {::PrsElement ::MixPrsList}
 @ ::PrsCommandSubst idemeta component IDETclParser
 PrsCommandSubst instproc evalContents {} {
     my basicEvalContents
@@ -124,7 +124,7 @@ PrsCommandSubst instproc evalContents {} {
 
                               ##########
 
-Class PrsComment -superclass ::PrsElement
+Class create PrsComment -superclass ::PrsElement
 @ ::PrsComment idemeta component IDETclParser
 PrsComment instproc syntaxHighlight context {
     $context highlightElement [self] comment
@@ -132,7 +132,7 @@ PrsComment instproc syntaxHighlight context {
 
                               ##########
 
-@ Class PrsContext {
+@ Class create PrsContext {
 description {The class has very important rolle by parsing xotcl/tcl sources.
 	In this methods are coded the meaning (syntax) of all build-in tcl functions
 	as loops and conditional.
@@ -141,9 +141,9 @@ description {The class has very important rolle by parsing xotcl/tcl sources.
 	1. where the code ist (xotcl method, tcl proc)
 	2. know variables}
 }
-Class PrsContext -parameter {{variables {}} parser errors warnings}
-@ ::PrsContext idemeta categories {private checking-command interface check-variables complex-command}
+Class create PrsContext -parameter {{variables {}} parser errors warnings}
 @ ::PrsContext idemeta categoriesMethods {{addError visit checkProcArgsCount checkObjectMethodArgsCount} {checkObjectCall checkDirectObjectCall checkCommand checkTclCommand checkObjectSelfCall} {hasErrors parseAndVisit parseAndCheck parse} {checkVariableFrom addVariableFromList addVariableFrom checkVariable} {check_set check_instvar check_for check_foreach check_regexp check_switch check_incr check_append check_catch check_lappend check_unset check_global check_while check_gets check_array check_keylset check_upvar check_if}}
+@ ::PrsContext idemeta categories {private checking-command interface check-variables complex-command}
 @ ::PrsContext idemeta component IDETclParser
 PrsContext instproc addError {text elem} {
     my lappend errors [list [$elem begin] [$elem end] $text]
@@ -841,12 +841,12 @@ PrsContext proc initializeAfterLoad {} {
 
                               ##########
 
-Class PrsLiteral -superclass ::PrsElement
+Class create PrsLiteral -superclass ::PrsElement
 @ ::PrsLiteral idemeta component IDETclParser
 
                               ##########
 
-Class PrsNoSubst -superclass {::PrsElement ::MixPrsList}
+Class create PrsNoSubst -superclass {::PrsElement ::MixPrsList}
 @ ::PrsNoSubst idemeta component IDETclParser
 PrsNoSubst instproc evalContents {} {
     my basicEvalContents
@@ -868,7 +868,7 @@ PrsNoSubst instproc substituteContents {} {
 
                               ##########
 
-Class PrsQuoted -superclass {::PrsElement ::MixPrsList} -parameter {{hasQuote 0}}
+Class create PrsQuoted -superclass {::PrsElement ::MixPrsList} -parameter {{hasQuote 0}}
 @ ::PrsQuoted idemeta component IDETclParser
 PrsQuoted instproc substituteContents {} {
     my basicSubstituteContents
@@ -881,7 +881,7 @@ PrsQuoted instproc syntaxHighlight context {
 
                               ##########
 
-Class PrsVariable -superclass ::PrsElement
+Class create PrsVariable -superclass ::PrsElement
 @ ::PrsVariable idemeta component IDETclParser
 PrsVariable instproc checkSyntax {context notifier} {
     set name [my prsString]
@@ -901,11 +901,11 @@ PrsVariable instproc visit visitor {
 
                               ##########
 
-@ Class ReadStringStream {
+@ Class create ReadStringStream {
 description {This class wrap a string to use it as a stream.
 	Additional you can set the last position (end of stream)}
 }
-Class ReadStringStream -parameter {string pos lastpos}
+Class create ReadStringStream -parameter {string pos lastpos}
 @ ::ReadStringStream idemeta component IDETclParser
 ReadStringStream instproc addPos add {
     my incr pos $add
@@ -937,7 +937,7 @@ ReadStringStream instproc nextChar {} {
 
                               ##########
 
-@ Class TclParser {
+@ Class create TclParser {
 description {This class can parse tcl code from stream parameter
 	that consists ReadStringStream object or compatible and produce parse tree.
 
@@ -958,9 +958,9 @@ description {This class can parse tcl code from stream parameter
 	}
     }
 }
-Class TclParser -parameter {stream root}
-@ ::TclParser idemeta categories {stream-delegation list-elems prs-structure prs-errors initialize}
+Class create TclParser -parameter {stream root}
 @ ::TclParser idemeta categoriesMethods {{getChar skipCharacters skipSeparators skipBlanks skipUpToCharacters searchCloseBrace searchCloseQuote getCharWithMasking skipToWordEnd skipUpTo} {getNoSubst getCommandSubst getQuoted getBeginingVariable getCharKeySequence getBeginingCommandSubst getCharSequence getVariable} {getList getComment substituteTo extractListTo parseScriptTo getCommandOrComment getCommand getArrayKey} {hasParseErrors parseError catchParseErrors} init}
+@ ::TclParser idemeta categories {stream-delegation list-elems prs-structure prs-errors initialize}
 @ ::TclParser idemeta component IDETclParser
 TclParser instproc catchParseErrors eval {
     if {[[self class] isDevelMode]} {
