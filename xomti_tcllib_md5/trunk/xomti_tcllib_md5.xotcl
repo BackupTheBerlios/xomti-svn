@@ -1,10 +1,10 @@
 # automatically generated from XOTclIDE
-package provide fidev_tcllib_md5 20050124.1
+package provide xomti_tcllib_md5 99991231.1
 @ Object Tcllib_md5pure {
 description blabla
 }
 Object Tcllib_md5pure
-@ ::Tcllib_md5pure idemeta component fidev_tcllib_md5
+@ ::Tcllib_md5pure idemeta component xomti_tcllib_md5
 Tcllib_md5pure proc byte0 i {expr {0xff & $i}}
 Tcllib_md5pure proc byte1 i {expr {(0xff00 & $i) >> 8}}
 Tcllib_md5pure proc byte2 i {expr {(0xff0000 & $i) >> 16}}

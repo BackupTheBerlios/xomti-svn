@@ -1,13 +1,135 @@
 # automatically generated from XOTclIDE
 package provide xomti_critcl 99991231.2
 
+                    ########## group default ##########
+
+
+
 @ tclproc ::loadvfs idemeta struct xomti_critcl default
 proc ::loadvfs dir {
   load {} vfs
   source [file join $dir vfsUtils.tcl]
   source [file join $dir vfslib.tcl]
 }
-Class Xomti_Crixotcl_builder
+
+                    ########## Classes and Objects ##########
+
+Class create Xomti_Crixotcl
+@ ::Xomti_Crixotcl idemeta component xomti_critcl
+Xomti_Crixotcl proc test {} {
+    catch {destroy .test}
+    toplevel .test
+    set t [text .test.t -height 10]
+    pack $t
+
+    Xomti_Crixotcl_builder create mama
+    mama option_set keepsrc 1
+    mama option_set force 1  
+
+    mama cproc sqr {double x} double {return x*x;}
+    set x [sqr 2]
+    $t insert end "sqr 2 -> $x\n"
+
+    mama ccommand sqr_c {data interp objc objv} {
+        double x;
+        /* La liste de commande doit contenir la commande + un argument, donc objc == 2 */
+        if (objc != 2) {
+            /* Si ne n'est pas le cas, on renvoit un message d'erreur contenant 1 (le premier)
+               argument de la liste de commande "argv" - donc le nom de la commande -,
+               suivi de "nombre"
+            */
+	    Tcl_WrongNumArgs(interp, 1, objv, "nombre");
+	    return TCL_ERROR;
+        }
+    
+        /* objv[1] est l'argument 1 de la commande ;
+           il doit pouvoir être convertible en "double",
+           sinon il y a erreur.
+           Le message d'erreur est généré automatiquement par "Tcl_GetDoubleFromObj"
+        */
+        if (Tcl_GetDoubleFromObj(interp, objv[1], &x) != TCL_OK) {
+    	    return TCL_ERROR;
+        }
+
+        /* Pour finir, si l'on arrive ici (donc sans erreur) l'objet retourné par la commande
+           sera un objet "double"
+        */
+        Tcl_SetObjResult(interp, Tcl_NewDoubleObj(x*x));
+
+        /* et ne pas oublier de retourner "TCL_OK" */
+        return TCL_OK;
+    }
+    $t insert end "sqr_c 3 -> [sqr_c 3]\n"
+
+    mama cdata hi "hi there!"
+    $t insert end [hi]\n
+    
+    Xomti_Crixotcl_builder create cricon
+    cricon cheaders "-I/home/p10admin/prog/Tcl/ "
+    cricon ccode "#include <tcl.h>\n#include <math.h>"
+    namespace eval ::concon {}
+    cricon cdefines {
+        NULL
+        TRUE
+        FALSE
+        TCL_OK
+        TCL_ERROR
+        M_PI
+    } ::concon
+    cricon cbuild
+    foreach v [info vars ::concon::*] {
+        $t insert end [list $v [set $v]]\n
+    }
+    
+    set c [canvas .test.c]
+    pack $c
+    $c create line {0 200 50 50 100 100}
+    Xomti_Crixotcl_builder create tkt
+    tkt tk
+    tkt option_set keepsrc 1
+    set tcl_prefix [file normalize /home/p10admin/prog/Tcl/distrib/tcl8.4.1]
+    set tk_prefix [file normalize /home/p10admin/prog/Tcl/distrib/tk8.4.1]
+    tkt cheaders -I$tk_prefix/generic -I$tk_prefix -I$tcl_prefix/generic -I$tcl_prefix
+    #
+    # platform specific declarations #
+    switch $::tcl_platform(platform) {
+        unix {
+            switch $::tcl_platform(os) {
+                Darwin {
+                    set xinclude /usr/X11R6/include
+                    set xlib /usr/X11R6/lib
+                }
+                default {
+                    set xinclude /usr/X11R6/lib
+                    set xlib $xinclude
+                }
+            }
+            tkt cheaders -I$xinclude
+            tkt clibraries -L$xlib -lX11
+        }
+        windows {
+            tkt cheaders -DWIN32 -I$tk_prefix/win -I$tk_prefix/xlib
+        }
+        default {
+            puts stderr "tkspline hasn't been ported to $::tcl_platform(platform)"
+            exit 1
+        }
+    }
+    tkt ccode {
+        #define Tkspline_Init ns_Tkspline_Init
+        #include "/home/fab/A/xomti/Y/config.h"
+        #include "/home/fab/A/xomti/Y/tkspline.c"
+    }
+    tkt cinit {
+        Tk_CreateSmoothMethod(ip, &splineSmoothMethod);
+    }
+    tkt cbuild
+    $c create line {0 200 00 50 100 100} -smooth spline
+}
+
+                              ##########
+
+Class create Xomti_Crixotcl_builder
 @ ::Xomti_Crixotcl_builder idemeta categories {public private_cbuild info private}
 @ ::Xomti_Crixotcl_builder idemeta categoriesMethods {{cproc ccommand check cheaders cdata tk clibraries ccode cinit cdefines} {cbuild cbuild_emit_code setup_tk_stubs cbuild_compile code_ext_get code_init_get} {get_cache_dir get_compile_string get_hdrdir get_platform get_sharedlibext} {init emulate_file_normalize file_normalize}}
 @ ::Xomti_Crixotcl_builder idemeta component xomti_critcl
@@ -655,7 +777,10 @@ Xomti_Crixotcl_builder proc md5_hex msg {
     binary scan $s H* md
     return $md
 }
-Class Xomti_Crixotcl_code_and_digest
+
+                              ##########
+
+Class create Xomti_Crixotcl_code_and_digest
 @ ::Xomti_Crixotcl_code_and_digest idemeta component xomti_critcl
 Xomti_Crixotcl_code_and_digest instproc code_get {} {
     return [my set code]
@@ -666,7 +791,10 @@ Xomti_Crixotcl_code_and_digest instproc compute_digest {} {
 Xomti_Crixotcl_code_and_digest instproc digest_get {} {
     return [my set digest]
 }
-Class Xomti_Crixotcl_ccode -superclass ::Xomti_Crixotcl_code_and_digest 
+
+                              ##########
+
+Class create Xomti_Crixotcl_ccode -superclass ::Xomti_Crixotcl_code_and_digest
 @ ::Xomti_Crixotcl_ccode idemeta component xomti_critcl
 Xomti_Crixotcl_ccode instproc init {text with_lines} {
     my set code ""
@@ -676,20 +804,19 @@ Xomti_Crixotcl_ccode instproc init {text with_lines} {
     my append code "$text\n"
     my compute_digest
 }
-Class Xomti_Crixotcl_proc -superclass ::Xomti_Crixotcl_code_and_digest 
+
+                              ##########
+
+Class create Xomti_Crixotcl_proc -superclass ::Xomti_Crixotcl_code_and_digest
 @ ::Xomti_Crixotcl_proc idemeta component xomti_critcl
 Xomti_Crixotcl_proc instproc define_proc {name args} {
 
     set ns [namespace qualifiers $name]
+    if {$ns == "::"} {
+        set ns ""
+    }
     set tail_name [namespace tail $name]
     my set name $tail_name
-
-    ## called from ccommand or cproc
-    #set ns [uplevel 2 namespace current]
-    #if {$ns == "::"} {
-    #} else {
-    #    append ns ::
-    #}
 
     set ::auto_index(${ns}::$tail_name) [list [[my info parent] info parent] cbuild]
 
@@ -711,7 +838,10 @@ Xomti_Crixotcl_proc instproc name_get {} {
 Xomti_Crixotcl_proc instproc option_get key {
     return [[[my info parent] info parent] set options($key)]
 }
-Class Xomti_Crixotcl_ccommand -superclass ::Xomti_Crixotcl_proc 
+
+                              ##########
+
+Class create Xomti_Crixotcl_ccommand -superclass ::Xomti_Crixotcl_proc
 @ ::Xomti_Crixotcl_ccommand idemeta component xomti_critcl
 Xomti_Crixotcl_ccommand instproc init {name anames args} {
     my instvar v_clientdata v_delproc
@@ -752,7 +882,19 @@ puts stderr "A REFAIRE"
     }
     my compute_digest
 }
-Class Xomti_Crixotcl_cproc -superclass ::Xomti_Crixotcl_proc 
+
+                              ##########
+
+Class create Xomti_Crixotcl_code_fragment -superclass ::Xomti_Crixotcl_code_and_digest
+@ ::Xomti_Crixotcl_code_fragment idemeta component xomti_critcl
+Xomti_Crixotcl_code_fragment instproc init {} {
+    my set code {}
+    my compute_digest
+}
+
+                              ##########
+
+Class create Xomti_Crixotcl_cproc -superclass ::Xomti_Crixotcl_proc
 @ ::Xomti_Crixotcl_cproc idemeta component xomti_critcl
 Xomti_Crixotcl_cproc instproc init {name arg_defs return_type body} {
     set tail_name [my define_proc $name $arg_defs $return_type $body]
@@ -880,7 +1022,10 @@ Xomti_Crixotcl_cproc instproc init {name arg_defs return_type body} {
 
     my compute_digest
 }
-Class Xomti_Crixotcl_martyr
+
+                              ##########
+
+Class create Xomti_Crixotcl_martyr
 @ ::Xomti_Crixotcl_martyr idemeta component xomti_critcl
 Xomti_Crixotcl_martyr instproc check_for_compiler {} {
     # check that we can indeed run a compiler
@@ -1118,13 +1263,10 @@ Xomti_Crixotcl_martyr proc test {} {
     }
     puts [plus 1 2]
 }
-Class Xomti_Crixotcl_code_fragment -superclass ::Xomti_Crixotcl_code_and_digest 
-@ ::Xomti_Crixotcl_code_fragment idemeta component xomti_critcl
-Xomti_Crixotcl_code_fragment instproc init {} {
-    my set code {}
-    my compute_digest
-}
-Class Xomti_Crixotcl_param
+
+                              ##########
+
+Class create Xomti_Crixotcl_param
 @ ::Xomti_Crixotcl_param idemeta component xomti_critcl
 Xomti_Crixotcl_param instproc end {} {
     my unset param
@@ -1161,117 +1303,5 @@ Xomti_Crixotcl_param instproc param_set list {
     } else {
         return [my param_get]
     }
-}
-Class Xomti_Crixotcl
-@ ::Xomti_Crixotcl idemeta component xomti_critcl
-Xomti_Crixotcl proc test {} {
-    catch {destroy .test}
-    toplevel .test
-    set t [text .test.t -height 10]
-    pack $t
-
-    Xomti_Crixotcl_builder create mama
-    mama option_set keepsrc 1
-    mama option_set force 1  
-
-    mama cproc sqr {double x} double {return x*x;}
-    set x [sqr 2]
-    $t insert end "sqr 2 -> $x\n"
-
-    mama ccommand sqr_c {data interp objc objv} {
-        double x;
-        /* La liste de commande doit contenir la commande + un argument, donc objc == 2 */
-        if (objc != 2) {
-            /* Si ne n'est pas le cas, on renvoit un message d'erreur contenant 1 (le premier)
-               argument de la liste de commande "argv" - donc le nom de la commande -,
-               suivi de "nombre"
-            */
-	    Tcl_WrongNumArgs(interp, 1, objv, "nombre");
-	    return TCL_ERROR;
-        }
-    
-        /* objv[1] est l'argument 1 de la commande ;
-           il doit pouvoir être convertible en "double",
-           sinon il y a erreur.
-           Le message d'erreur est généré automatiquement par "Tcl_GetDoubleFromObj"
-        */
-        if (Tcl_GetDoubleFromObj(interp, objv[1], &x) != TCL_OK) {
-    	    return TCL_ERROR;
-        }
-
-        /* Pour finir, si l'on arrive ici (donc sans erreur) l'objet retourné par la commande
-           sera un objet "double"
-        */
-        Tcl_SetObjResult(interp, Tcl_NewDoubleObj(x*x));
-
-        /* et ne pas oublier de retourner "TCL_OK" */
-        return TCL_OK;
-    }
-    $t insert end "sqr_c 3 -> [sqr_c 3]\n"
-
-    mama cdata hi "hi there!"
-    $t insert end [hi]\n
-    
-    Xomti_Crixotcl_builder create cricon
-    cricon cheaders "-I/home/p10admin/prog/Tcl/ "
-    cricon ccode "#include <tcl.h>\n#include <math.h>"
-    namespace eval ::concon {}
-    cricon cdefines {
-        NULL
-        TRUE
-        FALSE
-        TCL_OK
-        TCL_ERROR
-        M_PI
-    } ::concon
-    cricon cbuild
-    foreach v [info vars ::concon::*] {
-        $t insert end [list $v [set $v]]\n
-    }
-    
-    set c [canvas .test.c]
-    pack $c
-    $c create line {0 200 50 50 100 100}
-    Xomti_Crixotcl_builder create tkt
-    tkt tk
-    tkt option_set keepsrc 1
-    set tcl_prefix [file normalize /home/p10admin/prog/Tcl/distrib/tcl8.4.1]
-    set tk_prefix [file normalize /home/p10admin/prog/Tcl/distrib/tk8.4.1]
-    tkt cheaders -I$tk_prefix/generic -I$tk_prefix -I$tcl_prefix/generic -I$tcl_prefix
-    #
-    # platform specific declarations #
-    switch $::tcl_platform(platform) {
-        unix {
-            switch $::tcl_platform(os) {
-                Darwin {
-                    set xinclude /usr/X11R6/include
-                    set xlib /usr/X11R6/lib
-                }
-                default {
-                    set xinclude /usr/X11R6/lib
-                    set xlib $xinclude
-                }
-            }
-            tkt cheaders -I$xinclude
-            tkt clibraries -L$xlib -lX11
-        }
-        windows {
-            tkt cheaders -DWIN32 -I$tk_prefix/win -I$tk_prefix/xlib
-        }
-        default {
-            puts stderr "tkspline hasn't been ported to $::tcl_platform(platform)"
-            exit 1
-        }
-    }
-    tkt ccode {
-        #define Tkspline_Init ns_Tkspline_Init
-        #include "/home/fab/A/xomti/Y/config.h"
-        #include "/home/fab/A/xomti/Y/tkspline.c"
-    }
-    tkt cinit {
-        Tk_CreateSmoothMethod(ip, &splineSmoothMethod);
-    }
-    tkt cbuild
-    $c create line {0 200 00 50 100 100} -smooth spline
 }
 

@@ -8,8 +8,7 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded fidev_critcl 20050124.2 [list source [file join $dir fidev_critcl/tags/20050124/fidev_critcl.xotcl]]
-package ifneeded fidev_database 20050124.1 [list source [file join $dir fidev_database/tags/20050124/fidev_database.xotcl]]
-package ifneeded fidev_gpib_low_level 20040124 [list source [file join $dir fidev_gpib_low_level/tags/20050124/fidev_gpib_low_level.xotcl]]
-package ifneeded fidev_ni488 20050124.1 [list source [file join $dir fidev_ni488/tags/20050124/fidev_ni488.xotcl]]
-package ifneeded fidev_tcllib_md5 20050124.1 [list source [file join $dir fidev_tcllib_md5/tags/20050124/fidev_tcllib_md5.xotcl]]
+package ifneeded xomti_critcl 99991231.2 [list source [file join $dir xomti_critcl/trunk/xomti_critcl.xotcl]]
+package ifneeded xomti_database 99991231.1 [list source [file join $dir xomti_database/trunk/xomti_database.xotcl]]
+package ifneeded xomti_tcllib_md5 20050124.1 [list source [file join $dir xomti_tcllib_md5/tags/20050124/xomti_tcllib_md5.xotcl]]
+package ifneeded xomti_tcllib_md5 99991231.1 [list source [file join $dir xomti_tcllib_md5/trunk/xomti_tcllib_md5.xotcl]]
