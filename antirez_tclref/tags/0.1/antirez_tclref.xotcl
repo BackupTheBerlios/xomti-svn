@@ -1,0 +1,17 @@
+package require xomti 0.1
+package require xomti_critcl 0.3
+
+
+Xomti_Critcl_builder create antirez_tclref
+antirez_tclref cheaders -I[Xomti_Critcl get_prefix tcl]/generic
+
+antirez_tclref ccode "#include \"[file normalize [file join [file dirname [info script]] tclref-0.1/references.c]]\"\n"
+
+antirez_tclref option_set keepsrc 1
+antirez_tclref option_set force 0
+lassign [antirez_tclref cbuild] lib init
+# workaround xomti_critcl 0.3
+unload $lib
+load $lib References
+
+package provide antirez_tclref 0.1

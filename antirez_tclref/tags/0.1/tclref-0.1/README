@@ -1,0 +1,49 @@
+This is a TclRef snapshoot intented for Tcl hackers.
+
+It's basically a translation in C (with some fix and minor changes
+in the design) of the ideas at http://mini.net/tcl/9549
+
+The main design idea is that in Tcl references should not be
+implicit (like pointers), but containers able to hold objects,
+that are automatically reclaimed when they are no longer referenced.
+
+The low-level API contains the following commands
+
+[ref someValue]
+	Returns a reference that holds someValue
+
+[getbyref refValue]
+	Returns the value contained in the reference refValue
+
+[setref refValue newValue]
+	Set the reference contained object to newValue
+
+[isref refValue]
+	Returns a boolean value. True if refValue is a valid existing
+	reference, false otherwise.
+
+[collect]
+	Force a GC run.
+
+[emtpyref refValue]
+	Set the object contained in the refValue reference to the empty
+	string and returns the previously contained object.
+
+[setfinalizer refValue commandName]
+	Set the unary command commandName as a command that will be
+	called just before the refValue reference is to be collected.
+	commandName is called with the reference value as only argument.
+
+The extension also implements C-like structures that works with references,
+just to provide an abstraction layer and an usage example. This structures
+allows to create user-defined data structures in Tcl, but actually
+the API is not stable. Probably they will be replaced with something of
+more similar to http://mini.net/tcl/11085 (Alists for Tcl), but revisited
+to use references instead of values.
+
+You can find usage examples in the following two files:
+
+ - refex.tcl (Data structures examples)
+ - lambda.tcl (Example of anonymous functions with GC using TclRef)
+
+Salvatore Sanfilippo.
