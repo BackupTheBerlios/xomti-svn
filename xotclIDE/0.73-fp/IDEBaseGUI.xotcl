@@ -82,9 +82,9 @@ IDE::Browser instproc initStatusBar {y {columns -1}} {
     }
 }
 IDE::Browser instproc initStatusBarWin win {
-   my instvar statusBarTextWin
-   label $win -anchor w
-   set statusBarTextWin $win
+    my instvar statusBarTextWin
+    label $win -anchor w
+    set statusBarTextWin $win
 
 }
 IDE::Browser instproc setStatusBarText text {
@@ -100,7 +100,7 @@ IDE::Browser instproc setTitleAddition add {
 description {Overwrite this method to build your own GUI}
 }
 IDE::Browser instproc specificInit {} {
-    # shoul be overwritten
+    # should be overwritten
 }
 @ Class IDE::DialogHelper {
 description {Handle waiting for GUI events by using vwait command
@@ -348,7 +348,7 @@ you can specify parametr atHead to add menue at first position}
 Class IDE::GUICommands -parameter {{atHead 0}}
 @ ::IDE::GUICommands idemeta component IDEBaseGUI
 IDE::GUICommands instproc fillMenuStruct ms {
-     next
+    next
 }
 IDE::GUICommands instproc getMenuStruct {} {
     set ms [IDE::MenuStruct create [self]::ms [namespace tail [self class]]]
@@ -466,7 +466,7 @@ IDE::Text instproc getText {} {
     return [string range $text 0 [expr {[string length $text] - 2}]]
 }
 IDE::Text instproc getTextWindow {} {
-   return [my set win].text
+    return [my set win].text
 }
 IDE::Text instproc init window {
     my instvar win state height width
@@ -848,7 +848,7 @@ also Find/Replace dialog will be closed}
 Class IDE::FindReplaceDestroyHelper
 @ ::IDE::FindReplaceDestroyHelper idemeta component IDEBaseGUI
 IDE::FindReplaceDestroyHelper instproc destroy {} {
-     IDE::FindReplace destroySignalFromView [my info parent]
+    IDE::FindReplace destroySignalFromView [my info parent]
 }
 @ Class IDE::FocusPerKey {
 description {To used only whith GUI Klasses as Subklass by Multiheritage
@@ -1402,12 +1402,12 @@ IDE::IDialogEntry instproc postOk {} {
     next
 }
 IDE::IDialogEntry proc getValue {mes {text {}}} {
-  set entry [my new -volatile [list -message $mes] [list -entry $text]]
-  set ret {}
-  if {[$entry prompt]=="ok"} {
-      set ret [$entry entry]
-  }
-  return $ret
+    set entry [my new -volatile [list -message $mes] [list -entry $text]]
+    set ret {}
+    if {[$entry prompt]=="ok"} {
+        set ret [$entry entry]
+    }
+    return $ret
 }
 IDE::IDialogEntry proc getValueWithCancel {mes {text {}}} {
     set entry [my new -volatile [list -message $mes] [list -entry $text]]
@@ -1541,7 +1541,7 @@ IDE::IDialogListChooser instproc getvalue {} {
 IDE::IDialogListChooser instproc init {} {
     my instvar win listin listout
     if {![info exists listin]} {
-       error {no listin parameter}
+        error {no listin parameter}
     }
     next
 
