@@ -28,7 +28,7 @@ Object IDEPreferences
 @ ::IDEPreferences idemeta categoriesProcs {constans windows db-prefs}
 @ ::IDEPreferences idemeta component IDEStart
 IDEPreferences proc getDBLoginParameters args {
-   my getParameter connection
+    my getParameter connection
 }
 IDEPreferences proc getParameter key {
     if {[my exists preferences($key)]} {
@@ -93,7 +93,7 @@ IDEPreferences proc setDefaultPreferences {} {
     }
 }
 IDEPreferences proc setParameter {key param} {
-   my set preferences($key) $param
+    my set preferences($key) $param
 }
 IDEPreferences proc windowsLoadPrefs {} {
     if {![catch {package require registry}]} {
@@ -107,7 +107,7 @@ IDEPreferences proc windowsLoadPrefs {} {
     }
 }
 IDEPreferences proc windowsRegKey {} {
-   return {HKEY_CURRENT_USER\Software\xotclide}
+    return {HKEY_CURRENT_USER\Software\xotclide}
 }
 IDEPreferences proc windowsRegistryKey {} {
     return HKEY_CURRENT_USER\Software\xotclide
@@ -161,7 +161,7 @@ IDEStarter proc argumentsDescription {} {
     }
 }
 IDEStarter proc closeWaitDialog {} {
-    ::destroy .wait   
+    ::destroy .wait
 }
 IDEStarter proc coreComponents {} {
     return {
@@ -177,16 +177,16 @@ IDEStarter proc coreComponents {} {
         IDEErrorReporter}
 }
 IDEStarter proc dumpCompId id {
-   my loadPreferences
-   my establishDBConnection
-   puts [my getComponentBody $id]
-   exit
+    my loadPreferences
+    my establishDBConnection
+    puts [my getComponentBody $id]
+    exit
 }
 IDEStarter proc dumpConfId id {
-   my loadPreferences
-   my establishDBConnection
-   puts [my getConfigMapBodyDeep $id]
-   exit
+    my loadPreferences
+    my establishDBConnection
+    puts [my getConfigMapBodyDeep $id]
+    exit
 }
 IDEStarter proc establishDBConnection {} {
     my instvar sqlhandle
@@ -207,14 +207,14 @@ IDEStarter proc getComponentBody componentid {
     set body {}
     set objects [$sqlhandle queryList "SELECT Object.objectid,Object.defbody,Object.metadata,Object.name FROM ComponentObject,Object where componentid=$componentid and ComponentObject.objectid=Object.objectid order by ComponentObject.deforder"]
     foreach row $objects {
-	set id [lindex $row 0]
-	set defbody [lindex $row 1]
+        set id [lindex $row 0]
+        set defbody [lindex $row 1]
         set metadata [lindex $row 2]
         set objName [lindex $row 3]
         # defbody eval return the object name
         append body $defbody
         if {$metadata!=""} {
-           append body $metadata
+            append body $metadata
         }
         append body [my getObjectBody $id $objName]
     }
@@ -256,7 +256,7 @@ IDEStarter proc getObjectBody {objectid objName} {
         set name [lindex $row 3]
         append body [lindex $row 0]
         if {$type=="Class" && $name=="initializeAfterLoad"} {
-	    lappend initializeList $objName
+            lappend initializeList $objName
         }
     }
     return $body
@@ -283,45 +283,45 @@ IDEStarter proc initializeAfterLoad {} {
     my set isDevelopingMode 1
 }
 IDEStarter proc invokeMenu {} {
-   global xotclidedir
+    global xotclidedir
    ::destroy .startmenu
-   switch [my set idestart] {
-      1 {
-          package require IDECore
-          package require IDEBaseGUI
-          package require IDEView
-          package require IDETclParser
-          package require IDEEditor
-          package require IDEDebug
-          package require IDEErrorReporter
-          my startIDEOnly
-      }
-      2 {
-          package require IDECore
-          package require IDEBaseGUI
-          package require IDEView
-          package require IDETclParser
-          package require IDEEditor
-          package require IDEDebug
-          package require IDEErrorReporter
-          
-          package require xdobry::sql
-          package require IDEPersistence
-          package require IDEPersistenceGUI
-          package require IDEPersistenceAdd
-          my startIDEWithDB
-      }
-      3 {
-          package require xdobry::sql
-          my startIDEFromDB
-      }
-      4 {
-        package require IDEVCInstaller
-        package require xdobry::sql
+    switch [my set idestart] {
+        1 {
+            package require IDECore
+            package require IDEBaseGUI
+            package require IDEView
+            package require IDETclParser
+            package require IDEEditor
+            package require IDEDebug
+            package require IDEErrorReporter
+            my startIDEOnly
+        }
+        2 {
+            package require IDECore
+            package require IDEBaseGUI
+            package require IDEView
+            package require IDETclParser
+            package require IDEEditor
+            package require IDEDebug
+            package require IDEErrorReporter
 
-        IDE::InstallerGUI installer .
-      }
-   }
+            package require xdobry::sql
+            package require IDEPersistence
+            package require IDEPersistenceGUI
+            package require IDEPersistenceAdd
+            my startIDEWithDB
+        }
+        3 {
+            package require xdobry::sql
+            my startIDEFromDB
+        }
+        4 {
+            package require IDEVCInstaller
+            package require xdobry::sql
+
+            IDE::InstallerGUI installer .
+        }
+    }
 }
 IDEStarter proc isDevelopingMode {} {
     if {[my exists isDevelopingMode]} {
@@ -340,9 +340,9 @@ IDEStarter proc loadComponent {name {componentid newest}} {
     set objects [$sqlhandle queryList "SELECT Object.objectid,Object.defbody,Object.metadata,Object.name FROM ComponentObject,Object where componentid=$componentid and ComponentObject.objectid=Object.objectid order by ComponentObject.deforder"]
     puts "loading component $componentid $name"
     foreach row $objects {
-	set id [lindex $row 0]
+        set id [lindex $row 0]
         #puts "loading object $id"
-	set defbody [lindex $row 1]
+        set defbody [lindex $row 1]
         set metadata [lindex $row 2]
         set objName [lindex $row 3]
         # defbody eval return the object name
@@ -360,9 +360,9 @@ IDEStarter proc loadComponent {name {componentid newest}} {
     package provide $name 1
     foreach imethod $initializeList {
         if {[catch {$imethod initializeAfterLoad}]} {
-           global errorInfo
-           puts "Error by calling $imethod initializeAfterLoad $errorInfo" 
-	}
+            global errorInfo
+            puts "Error by calling $imethod initializeAfterLoad $errorInfo"
+        }
     }
 }
 IDEStarter proc loadComponentFromAny name {
@@ -389,7 +389,7 @@ IDEStarter proc loadConfigMap {} {
     namespace eval :: "source $configmap"
     global preStartScript startScript componentsToLoad
     if {![info exists componentsToLoad]} {
-        error "ill configuration map file" 
+        error "ill configuration map file"
         return 0
     }
     if {[info exists preStartScript] && $preStartScript!={}} {
@@ -457,20 +457,20 @@ IDEStarter proc loadObject {objectid objName compName} {
         set name [lindex $row 3]
         eval [lindex $row 0]
         if {$type=="Class" && $name=="initializeAfterLoad"} {
-	    lappend initializeList $objName
+            lappend initializeList $objName
         }
         if {[my isDevelopingMode]} {
-	    if {$type=="tclproc"} {
-		set tclmethodArr($name) [list $compName $objName]
-	    }
-	    if {$category!=""} {
-		if {$type=="Class"} {
-		    $objName moveToCategoryB $name $category
-		} elseif {$type=="Instance"} {
-		    $objName moveToCategory $name $category
-		}
-	    }
-	}
+            if {$type=="tclproc"} {
+                set tclmethodArr($name) [list $compName $objName]
+            }
+            if {$category!=""} {
+                if {$type=="Class"} {
+                    $objName moveToCategoryB $name $category
+                } elseif {$type=="Instance"} {
+                    $objName moveToCategory $name $category
+                }
+            }
+        }
     }
 }
 IDEStarter proc loadPreferences {} {
@@ -530,7 +530,7 @@ IDEStarter proc preloadComponents args {
 }
 IDEStarter proc setWaitDialog {} {
     toplevel .wait
-    label .wait.label -text "Wait. XOTclIDE is loading ..." 
+    label .wait.label -text "Wait. XOTclIDE is loading ..."
     set x [expr [winfo screenwidth .wait]/2 - 150]
     set y [expr [winfo screenheight .wait]/2 - 100]
     wm geom .wait +$x+$y
@@ -539,52 +539,52 @@ IDEStarter proc setWaitDialog {} {
     update idletasks
 }
 IDEStarter proc showHelpAndExit {} {
-   puts "Following command line parameter are supported:"
-   foreach desc [my argumentsDescription] {
-       puts "[lindex $desc 0] : [lindex $desc 1]"
-   }
-   exit
+    puts "Following command line parameter are supported:"
+    foreach desc [my argumentsDescription] {
+        puts "[lindex $desc 0] : [lindex $desc 1]"
+    }
+    exit
 }
 IDEStarter proc startConfId id {
-   my instvar sqlhandle
-   my loadPreferences
-   my establishDBConnection
-   set scripts [lindex [$sqlhandle queryList "SELECT prescript,postscript FROM Configmap WHERE configmapid=$id"] 0]
-   my set loaded 1
-   namespace eval :: [lindex $scripts 0]
-   namespace eval :: [my getConfigMapBodyDeep $id]
-   $sqlhandle destroy
-   namespace eval :: [lindex $scripts 1]
+    my instvar sqlhandle
+    my loadPreferences
+    my establishDBConnection
+    set scripts [lindex [$sqlhandle queryList "SELECT prescript,postscript FROM Configmap WHERE configmapid=$id"] 0]
+    my set loaded 1
+    namespace eval :: [lindex $scripts 0]
+    namespace eval :: [my getConfigMapBodyDeep $id]
+    $sqlhandle destroy
+    namespace eval :: [lindex $scripts 1]
 }
 IDEStarter proc startFromMenu {{tclkitMessage 0}} {
-   my requireNamespace
-   wm withdraw .
-   set win [toplevel .startmenu]
-   my set idestart 1
-   my set withdebugger 0
-   if {$tclkitMessage} {
-       message $win.message -text "This is the tclkit wrapped XOTclIDE. The wrapped version do not contain all components and futures of XOTclIDE. To get full documentation check http://www.xdobry.de/xotclIDE. This wrapper contain sqlite database that is suitable for installing and running version control. There are another adapter for mysql, postgres, win odbc not contained in this wrapper.\nHave fun and report bugs" -width 350 
-       pack $win.message -fill x -expand yes
-   }
-   wm protocol .startmenu WM_DELETE_WINDOW exit
-   radiobutton $win.startnormal -text {Start simple IDE (without Version Control)} -variable [self]::idestart -value 1
-   radiobutton $win.startwithvc -text {Start IDE with Version Control} -variable [self]::idestart -value 2
-   radiobutton $win.startfromvc -text {Start IDE load all from Version Control} -variable [self]::idestart -value 3
-   radiobutton $win.startinstallvc -text {Install Version Control Database (relational database)} -variable [self]::idestart -value 4
-   checkbutton $win.loadExtDebugger -text {Load ATK Debugger require patched Tcl} -variable [self]::withdebugger
-   button $win.sbutton -text OK -command [list [self] invokeMenu]
-   pack $win.startnormal $win.startwithvc $win.startfromvc $win.startinstallvc $win.loadExtDebugger $win.sbutton -anchor w
+    my requireNamespace
+    wm withdraw .
+    set win [toplevel .startmenu]
+    my set idestart 1
+    my set withdebugger 0
+    if {$tclkitMessage} {
+        message $win.message -text "This is the tclkit wrapped XOTclIDE. The wrapped version do not contain all components and futures of XOTclIDE. To get full documentation check http://www.xdobry.de/xotclIDE. This wrapper contain sqlite database that is suitable for installing and running version control. There are another adapter for mysql, postgres, win odbc not contained in this wrapper.\nHave fun and report bugs" -width 350
+        pack $win.message -fill x -expand yes
+    }
+    wm protocol .startmenu WM_DELETE_WINDOW exit
+    radiobutton $win.startnormal -text {Start simple IDE (without Version Control)} -variable [self]::idestart -value 1
+    radiobutton $win.startwithvc -text {Start IDE with Version Control} -variable [self]::idestart -value 2
+    radiobutton $win.startfromvc -text {Start IDE load all from Version Control} -variable [self]::idestart -value 3
+    radiobutton $win.startinstallvc -text {Install Version Control Database (relational database)} -variable [self]::idestart -value 4
+    checkbutton $win.loadExtDebugger -text {Load ATK Debugger require patched Tcl} -variable [self]::withdebugger
+    button $win.sbutton -text OK -command [list [self] invokeMenu]
+    pack $win.startnormal $win.startwithvc $win.startfromvc $win.startinstallvc $win.loadExtDebugger $win.sbutton -anchor w
 }
 IDEStarter proc startIDEFromApp {} {
     IDE initSystem
     IDE::Component initFromInterpreter
     IDE::CommentsContainer parseAndCleanMeta
     IDE::CommentsContainer makeTclGroupsFromMeta
-    
+
     IDE::CompBrowser newBrowser
 }
 @ IDEStarter proc startIDEFromDB {} {
-description {Start Up System with Database loaded from Database (selfdevelop mode)}
+    description {Start Up System with Database loaded from Database (selfdevelop mode)}
 }
 IDEStarter proc startIDEFromDB {} {
     my setWaitDialog
@@ -650,7 +650,7 @@ IDEStarter proc startLoader {} {
     }
 }
 IDEStarter proc startUpIDE {} {
-    my closeWaitDialog 
+    my closeWaitDialog
     IDE::CompBrowser newBrowser
     IDE::Transcript buildMain
 }

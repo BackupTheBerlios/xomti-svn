@@ -10,7 +10,7 @@ namespace eval ::ide {}
 @ tclgroup ide idemeta comment IDECore {The are some extented list functions based
 on Smalltalk container protocol}
 @ tclproc ::ide::compare_names idemeta struct IDECore ide
-proc ::ide::compare_names {pg1 pg2} {
+proc ide::compare_names {pg1 pg2} {
     return [string compare [$pg1 name] [$pg2 name]]
 }
 @ tclproc ide::addToValueForKey idemeta struct IDECore ide
@@ -47,81 +47,81 @@ proc ide::addToValueForKeyIfNone {arr_ref key value} {
 }
 @ tclproc ide::lappendIfNone idemeta struct IDECore ide
 proc ide::lappendIfNone {list_ref elem} {
-	upvar $list_ref list
-	if {![lcontain $list $elem]} {
-	    lappend list $elem
-	    return 1
-	}
-	return 0
+    upvar $list_ref list
+    if {![lcontain $list $elem]} {
+        lappend list $elem
+        return 1
+    }
+    return 0
 }
 @ tclproc ide::lcollect idemeta struct IDECore ide
 proc ide::lcollect {var_ref list eval_action} {
-	upvar $var_ref var
-        set ret {}
-        foreach a $list {
-            set var $a
-            lappend ret [uplevel $eval_action]
-	}
-        return $ret
+    upvar $var_ref var
+    set ret {}
+    foreach a $list {
+        set var $a
+        lappend ret [uplevel $eval_action]
+    }
+    return $ret
 }
 @ tclproc ide::lcontain idemeta struct IDECore ide
 proc ide::lcontain {list elem} {
-	return [expr [lsearch -exact $list $elem]>=0]
+    return [expr [lsearch -exact $list $elem]>=0]
 }
 @ tclproc ide::ldetect idemeta struct IDECore ide
 proc ide::ldetect {var_ref list test} {
-	upvar $var_ref var
-        foreach a $list {
-            set var $a
-            set rtest [uplevel [list expr $test]]
-	    if $rtest {
-                return $a
-            }
+    upvar $var_ref var
+    foreach a $list {
+        set var $a
+        set rtest [uplevel [list expr $test]]
+        if $rtest {
+            return $a
         }
-        return
+    }
+    return
 }
 @ tclproc ide::lremove idemeta struct IDECore ide
 proc ide::lremove {list_ref elem} {
     upvar $list_ref list
     if {[set index [lsearch -exact $list $elem]]>=0} {
-	    set list [lreplace $list $index $index]
-	    return 1
+        set list [lreplace $list $index $index]
+        return 1
     }
     return 0
 }
 @ tclproc ide::lremoveAll idemeta struct IDECore ide
 proc ide::lremoveAll {list_ref listr} {
-	upvar $list_ref list
-        foreach elem $listr {
-            lremove list $elem
-        }
+    upvar $list_ref list
+    foreach elem $listr {
+        lremove list $elem
+    }
 }
 @ tclproc ide::lselect idemeta struct IDECore ide
 proc ide::lselect {var_ref list test} {
-	upvar $var_ref var
-        set ret {}
-        foreach a $list {
-            set var $a
-            set rtest [uplevel [list expr $test]]
-	    if $rtest {
-                lappend ret $var
-            }
+    upvar $var_ref var
+    set ret {}
+    foreach a $list {
+        set var $a
+        set rtest [uplevel [list expr $test]]
+        if $rtest {
+            lappend ret $var
         }
-        return $ret
+    }
+    return $ret
 }
 Class IDE
 @ ::IDE idemeta component IDECore
 IDE proc initSystem {} {
     set core {Object Class Object::CopyHandler Class::Parameter @ ::xotcl::NoInit ::xotcl ::xotcl::rcs xotcl::Class xotcl::NoInit xotcl::Object xotcl::rcs IDEMetadataAnalyzer xotcl::Class::Parameter xotcl::Object::CopyHandler}
-    
+
     foreach obj $core {
-       if {[Object isobject $obj]} {
-           $obj setMetadata component core
-       }
+        if {[Object isobject $obj]} {
+            $obj setMetadata component core
+        }
     }
-    if {[Object isobject ErrorReporter]} { 
-       ErrorReporter set version [IDE::System getVersion]
-       ErrorReporter set appName XOTclIDE
+    if {[Object isobject ErrorReporter]} {
+        ErrorReporter set version [IDE::System getVersion]
+        ErrorReporter set appName XOTclIDE
     }
     IDE::PlugInsManager readPlugInsList
     eval font create textfont [IDEPreferences getParameter textfont]
@@ -158,10 +158,10 @@ Class IDE::Component -superclass ::IDE::CommentHandler  -parameter name
 @ ::IDE::Component idemeta categoriesProcs {private importing-loading recreation api}
 @ ::IDE::Component idemeta component IDECore
 IDE::Component instproc addClass class {
-   # use $object moveToComponent name for right initialisation
-   # this is private only
-   my instvar classes
-   ::ide::lappendIfNone classes [string trimleft $class :]
+    # use $object moveToComponent name for right initialisation
+    # this is private only
+    my instvar classes
+    ::ide::lappendIfNone classes [string trimleft $class :]
 }
 IDE::Component instproc addObject object {
     # use $object moveToComponent name for right initialisation
@@ -179,7 +179,7 @@ IDE::Component instproc addRequiredCompList comps {
         if {![ide::lcontain $requiredComp $comp]} {
             set compObj [IDE::Component getCompObjectForNameIfExist $comp]
             if {$compObj==""} {
-                
+
             } else {
                 if {[ide::lcontain [$compObj getRequiredFromDeep] [my getName]]} {
                     IDE::Dialog error "Refuse to add requirment \"$comp\" to component \"[my getName]\" in reason of circular requirements. Please check class inhariance. This one could not be loaded later"
@@ -205,17 +205,17 @@ IDE::Component instproc asScript {{nometa 0} {norequire 0}} {
     if {!$norequire} {
         append script "package provide [my getName] [my getVersionNumber]\n"
         foreach reqComp $requiredComp {
-              append script "package require $reqComp\n"
+            append script "package require $reqComp\n"
         }
     }
     foreach pgobj [my getProcsGroupsObjects] {
         append script [$pgobj getBody $nometa]
     }
     foreach object $defList {
-         append script [IDE::Component getObjectBody $object $nometa]
-         if {[$object info procs initializeAfterLoad]!=""} {
-                append initscript "$object initializeAfterLoad\n"
-         }
+        append script [IDE::Component getObjectBody $object $nometa]
+        if {[$object info procs initializeAfterLoad]!=""} {
+            append initscript "$object initializeAfterLoad\n"
+        }
     }
     append script $initscript
     return $script
@@ -227,11 +227,11 @@ IDE::Component instproc basicAddObject object {
     # it is userd internal for loading object directly from VC (Data Base)
     my instvar classes objects
     if {[Object isclass $object]} {
-       ::ide::lappendIfNone classes [string trimleft $object :]
+        ::ide::lappendIfNone classes [string trimleft $object :]
     } elseif {[Object isobject $object]} {
-       ::ide::lappendIfNone objects [string trimleft $object :]
+        ::ide::lappendIfNone objects [string trimleft $object :]
     } else {
-          error "$object is not Xotcl Object"
+        error "$object is not Xotcl Object"
     }
 }
 @ IDE::Component instproc basicCreateTclProcsGroup {} {
@@ -261,7 +261,7 @@ IDE::Component instproc basicRemoveProcsGroup group {
 IDE::Component instproc computeRequirements {} {
     my set requiredComp {}
     # use the side effects of method below
-    my getObjectDefineList    
+    my getObjectDefineList
 }
 IDE::Component instproc copyClassOrObject {object newname {compName {}}} {
     set defscript [IDE::IntroProxy getObjDef $object]
@@ -335,9 +335,9 @@ IDE::Component instproc getHierarchyFrom classes {
         if {[ide::lcontain $used $c]} continue
         set uc {}
         foreach sc [lsort -unique [$c getDeepChildren]] {
- 	    if {[ide::lcontain $classes $sc] && ![ide::lcontain $used $sc]} {
-      	        lappend uc $sc
-       	        lappend used $sc
+             if {[ide::lcontain $classes $sc] && ![ide::lcontain $used $sc]} {
+                      lappend uc $sc
+                       lappend used $sc
             }
         }
         if {$uc!=""} {
@@ -398,14 +398,14 @@ IDE::Component instproc getProcsGroupsObjects {} {
     return [lsort -command ide::compare_names $ret]
 }
 IDE::Component instproc getRequiredFor {} {
-     set name [my getName]
-     set requiredFor [list]
-     foreach cobj [IDE::Component getAllComponents] {
-          if {[ide::lcontain [$cobj getRequiredFrom] $name]} {
-              lappend requiredFor [$cobj getName]
-          }
-     }
-     return $requiredFor
+    set name [my getName]
+    set requiredFor [list]
+    foreach cobj [IDE::Component getAllComponents] {
+        if {[ide::lcontain [$cobj getRequiredFrom] $name]} {
+            lappend requiredFor [$cobj getName]
+        }
+    }
+    return $requiredFor
 }
 IDE::Component instproc getRequiredFrom {} {
     my set requiredComp
@@ -417,15 +417,15 @@ IDE::Component instproc getRequiredFromDeep {} {
     foreach req $reqlist {
         if {![ide::lcontain $oreqlist req]} {
             if {[set scomp [IDE::Component getCompObjectForNameIfExist $req]]!=""} {
-               set sreqlist [$scomp getRequiredFromDeep]
-               foreach sreq $sreqlist {
-                   ide::lappendIfNone oreqlist $sreq
-               }
-               lappend oreqlist $req
+                set sreqlist [$scomp getRequiredFromDeep]
+                foreach sreq $sreqlist {
+                    ide::lappendIfNone oreqlist $sreq
+                }
+                lappend oreqlist $req
             } else {
-               set oreqlist [concat $oreqlist $req]
+                set oreqlist [concat $oreqlist $req]
             }
-        }      
+        }
     }
     return $oreqlist
 }
@@ -443,10 +443,10 @@ IDE::Component instproc getVisibleClasses {} {
         set ret [concat $ret [$class info heritage]]
     }
     foreach compName [my getRequiredFor] {
-          set cobj [[self class] getCompObjectForNameIfExist $compName]
-          if {$cobj!=""} {
-               set ret [concat $ret [$cobj getVisibleClasses]]
-          }
+        set cobj [[self class] getCompObjectForNameIfExist $compName]
+        if {$cobj!=""} {
+            set ret [concat $ret [$cobj getVisibleClasses]]
+        }
     }
     set ret [ide::lcollect each $ret {string trimleft $each :}]
     return [lsort -unique $ret]
@@ -462,7 +462,7 @@ IDE::Component instproc importTclProc procName {
     } else {
        set pgroup [ide::ldetect each [my getProcsGroupsObjects] {[$each withNamespace] && [$each name]==$parent}]
        if {$pgroup==""} {
-          set pgroup [my createTclProcsGroup $parent 1]
+           set pgroup [my createTclProcsGroup $parent 1]
        }
     }
     set procobj [$pgroup createProcForName $procName]
@@ -474,11 +474,11 @@ IDE::Component instproc init args {
     my set objects {}
 }
 IDE::Component instproc isPersistent {} {
-     return 0
+    return 0
 }
 IDE::Component instproc rekBuildDefList {object objectList} {
     # return the list of classes and objects of this component required
-    # to define class (or object) plus class 
+    # to define class (or object) plus class
     # classList contains already definined classes
     my instvar requiredComp
     if {$object=="" || $object=="::Object" || $object=="::" || $object=="xotcl"} return
@@ -495,22 +495,22 @@ IDE::Component instproc rekBuildDefList {object objectList} {
     # search for parent object
     set parent [$object info parent]
     if {$parent!="::"} {
-       set reqObject [my rekBuildDefList [string trimleft $parent :] $objectList]
+        set reqObject [my rekBuildDefList [string trimleft $parent :] $objectList]
     } else {
-       set reqObject [list]
+        set reqObject [list]
     }
     set cl [concat $objectList $reqObject]
     # search if based on own metaclass
     if {[Object isclass $object] && [Object ismetaclass [$object info class]]} {
         set reqObject  [concat $reqObject [my rekBuildDefList [string trimleft [$object info class]] $objectList] ]
-    } 
+    }
     # search for superclasses
     if {[Object isclass $object]} {
-       foreach sclass [lsort [$object info superclass]] {
-           if {$sclass=="::Object"} continue
-           set sclass [string trimleft $sclass :]
-           set reqObject [concat $reqObject [my rekBuildDefList $sclass $cl] ]
-       }
+        foreach sclass [lsort [$object info superclass]] {
+            if {$sclass=="::Object"} continue
+            set sclass [string trimleft $sclass :]
+            set reqObject [concat $reqObject [my rekBuildDefList $sclass $cl] ]
+        }
     }
     return [concat $reqObject $object]
 }
@@ -526,7 +526,7 @@ IDE::Component instproc removeProcsGroup group {
 IDE::Component instproc rename newname {
     IDE::Component unset components([my name])
     foreach obj [concat [my getClasses] [my getObjects]] {
-       $obj setMetadata component $newname
+        $obj setMetadata component $newname
     }
     my name $newname
     IDE::Component set components([my name]) [self]
@@ -586,7 +586,7 @@ IDE::Component proc getCompObjectForName component {
 IDE::Component proc getCompObjectForNameIfExist component {
     if {[my exists components($component)]} {
         return [my set components($component)]
-    } 
+    }
     return {}
 }
 IDE::Component proc getComponentNames {} {
@@ -596,30 +596,30 @@ IDE::Component proc getObjectBody {object {nometa 0}} {
     if {!$nometa} {
         append script [IDE::IntroProxy getObjectCommentBody $object]
     }
-     append script [IDE::IntroProxy getObjDef $object]
+    append script [IDE::IntroProxy getObjDef $object]
     if {!$nometa} {
         append script [$object metadataAsScript]
     }
     if {[Object isclass $object]} {
-          set parameters [list]
-          foreach par [$object info parameter] {
-                lappend parameters [lindex $par 0]
-          }
-          foreach method [lsort [$object info instprocs]] {
-               if {[ide::lcontain $parameters $method]} continue
-               if {!$nometa} {
-                   append script [IDE::IntroProxy getObjectMethodCommentBody $object Instance $method]
-               }
-               append script [IDE::IntroProxy getBodyInstanceMethod $object $method]
-          }
-     }
-     foreach method [lsort [$object info procs]] {
-          if {!$nometa} {
-              append script [IDE::IntroProxy getObjectMethodCommentBody $object Class $method]
-          }
-          append script [IDE::IntroProxy getBodyClassMethod $object $method]
-     }
-     return $script
+        set parameters [list]
+        foreach par [$object info parameter] {
+            lappend parameters [lindex $par 0]
+        }
+        foreach method [lsort [$object info instprocs]] {
+            if {[ide::lcontain $parameters $method]} continue
+            if {!$nometa} {
+                append script [IDE::IntroProxy getObjectMethodCommentBody $object Instance $method]
+            }
+            append script [IDE::IntroProxy getBodyInstanceMethod $object $method]
+        }
+    }
+    foreach method [lsort [$object info procs]] {
+        if {!$nometa} {
+            append script [IDE::IntroProxy getObjectMethodCommentBody $object Class $method]
+        }
+        append script [IDE::IntroProxy getBodyClassMethod $object $method]
+    }
+    return $script
 }
 IDE::Component proc importCompsFromFile file {
     set actualDir [pwd]
@@ -651,15 +651,15 @@ IDE::Component proc initFromInterpreter {} {
     }
 }
 IDE::Component proc initPackageTracking {} {
-   my instvar packagingInited
-   if {![info exists packagingInited]} {
-       set xp [my getCompObjectForName xotcl::package]
-       package require xotcl::package
-       $xp addObject package
-       $xp addObject package::tracker
-       $xp addClass package::tracker::M
-   }
-   set packagingInited 1
+    my instvar packagingInited
+    if {![info exists packagingInited]} {
+        set xp [my getCompObjectForName xotcl::package]
+        package require xotcl::package
+        $xp addObject package
+        $xp addObject package::tracker
+        $xp addClass package::tracker::M
+    }
+    set packagingInited 1
 }
 IDE::Component proc loadCompFromFile file {
     namespace eval :: source [list $file]
@@ -673,12 +673,12 @@ IDE::Component proc loadPackage package {
     [self]::Tracker importProc
 }
 IDE::Component proc loadPackageIfNone package {
-   set cobj [my getCompObjectForNameIfExist $package]
-   if {$cobj==""} {
-      my loadPackage $package
-   } else {
-      IDE::Transcript warning "package $package is already loaded"
-   }
+    set cobj [my getCompObjectForNameIfExist $package]
+    if {$cobj==""} {
+        my loadPackage $package
+    } else {
+        IDE::Transcript warning "package $package is already loaded"
+    }
 }
 @ IDE::Component proc orderComponents {} {
 description {This predure orded the component list that the required componets
@@ -692,7 +692,7 @@ IDE::Component proc orderComponents comps {
         if {[ide::lcontain $outList $name]} continue
         foreach rcomp [$cobj getRequiredFromDeep] {
             if {[ide::lcontain $comps $rcomp]} {
-                ide::lappendIfNone outList $rcomp 
+                ide::lappendIfNone outList $rcomp
             }
         }
         lappend outList $name
@@ -705,7 +705,7 @@ IDE::Component proc registerInstproc object {
 IDE::Component proc registerObject object {
     set component [package set component]
     if {$component=="."} {
-       set component [file rootname [file tail [info script]]]
+        set component [file rootname [file tail [info script]]]
     }
     $object moveToComponent $component
 }
@@ -797,16 +797,16 @@ IDE::Component::Tracker proc importProc args {
     unset methodsArr
 }
 IDE::Component::Tracker proc setOff {} {
-   if {[my exists trackedClasses]} {
-       foreach class [my set trackedClasses] {
-           $class mixin {}
-       }
-   }
-   my set trackedClasses {}
-   namespace eval :: {
-       rename proc {}
-       rename procOld proc
-   }
+    if {[my exists trackedClasses]} {
+        foreach class [my set trackedClasses] {
+            $class mixin {}
+        }
+    }
+    my set trackedClasses {}
+    namespace eval :: {
+        rename proc {}
+        rename procOld proc
+    }
 }
 IDE::Component::Tracker proc setOn {} {
     my trackClass Class
@@ -829,7 +829,7 @@ IDE::Component::Tracker proc trackClass class {
 IDE::Component::Tracker proc trackProc args {
     set component [package set component]
     if {$component=="."} {
-       set component [file rootname [file tail [info script]]]
+        set component [file rootname [file tail [info script]]]
     }
     set name [lindex $args 0]
     my set methodsArr($name) $component
@@ -842,14 +842,13 @@ Class IDE::ObjectCommentsContainer -parameter objectName
 @ ::IDE::ObjectCommentsContainer idemeta component IDECore
 IDE::ObjectCommentsContainer instproc getMethodComment {type method} {
     if {[my exists  comment_${type}($method)]} {
-       return [my set comment_${type}($method)]
+        return [my set comment_${type}($method)]
     }
     return
 }
 IDE::ObjectCommentsContainer instproc hasMethodComment {type method} {
-    return [expr {[my exists  comment_${type}($method)] && 
-          [my set comment_${type}($method)]!=""}]
-
+    return [expr {[my exists  comment_${type}($method)] &&
+                  [my set comment_${type}($method)]!=""}]
 }
 IDE::ObjectCommentsContainer instproc setMethodComment {type method text} {
     my set comment_${type}($method) $text
@@ -864,8 +863,8 @@ name is the name of namespace or procs group (no namespace)
 
 namespace eval myNameSpace {
    namespace export ... ... ...
-    
-   varible myVariable 
+
+   varible myVariable
 }
 }
 }
@@ -883,26 +882,26 @@ IDE::ProcsGroup instproc deleteMethod method {
     my removeMethodObj $pobj
 }
 IDE::ProcsGroup instproc getBody {{nometa 0}} {
-   set script "[my getDefBody]\n"
-   if {!$nometa && [my hasComment]} {
-       append script "@ tclgroup [my getObjectName] idemeta comment [list [[my getComponent] getName]] [list [my getComment]]\n"
-   }
-   foreach obj [lsort -command ide::compare_names [my getProcsObjects]] {
-       if {!$nometa} {
-           append script [$obj getMetaBody]
-       }
-       append script [$obj getBody]
-   }
-   return $script
+    set script "[my getDefBody]\n"
+    if {!$nometa && [my hasComment]} {
+        append script "@ tclgroup [my getObjectName] idemeta comment [list [[my getComponent] getName]] [list [my getComment]]\n"
+    }
+    foreach obj [lsort -command ide::compare_names [my getProcsObjects]] {
+        if {!$nometa} {
+            append script [$obj getMetaBody]
+        }
+        append script [$obj getBody]
+    }
+    return $script
 }
 IDE::ProcsGroup instproc getComponent {} {
-   my info parent
+    my info parent
 }
 IDE::ProcsGroup instproc getComponentName {} {
-   [my getComponent] getName
+    [my getComponent] getName
 }
 IDE::ProcsGroup instproc getDefBody {} {
-   my set defBody
+    my set defBody
 }
 IDE::ProcsGroup instproc getDescription {} {
     return [self]
@@ -911,7 +910,7 @@ IDE::ProcsGroup instproc getMethodComment {type method} {
     [my getProcObjForNameIfExist $method] getComment
 }
 IDE::ProcsGroup instproc getObjectName {} {
-   my name
+    my name
 }
 IDE::ProcsGroup instproc getProcObjForName name {
     set pobj [my getProcObjForNameIfExist $name]
@@ -935,7 +934,7 @@ IDE::ProcsGroup instproc getProcsNames {} {
             lappend ret [$sub getName]
         }
     }
-    return $ret    
+    return $ret
 }
 IDE::ProcsGroup instproc getProcsObjects {} {
     ide::lselect each [my info children] {[$each istype IDE::TclProcsDescription]}
@@ -953,7 +952,7 @@ IDE::ProcsGroup instproc handleDefinitionScript skript {
         return
     }
     namespace eval :: $skript
-    my setDefBody $skript    
+    my setDefBody $skript
 }
 IDE::ProcsGroup instproc handleScript skript {
     if {[llength $skript]!=4 || [lindex $skript 0]!="proc"} {
@@ -1000,7 +999,7 @@ IDE::ProcsGroup instproc init {} {
     }
 }
 IDE::ProcsGroup instproc isPersistent {} {
-    return 0  
+    return 0
 }
 IDE::ProcsGroup instproc moveToComponent component {
     set cobj [IDE::Component getCompObjectForNameIfExist $component]
@@ -1088,7 +1087,7 @@ IDE::TclProcsDescription instproc getName {} {
     my name
 }
 IDE::TclProcsDescription instproc handleScript script {
-    # Warning! no check for syntax at this level 
+    # Warning! no check for syntax at this level
     # see handleScript in IDE::ProcsGroup
     # TODO namespace handling
     namespace eval :: $script
@@ -1100,15 +1099,15 @@ IDE::TclProcsDescription instproc init {} {
     [self class] registerMethod [my name] [self]
 }
 IDE::TclProcsDescription instproc isPersistent {} {
-    return 0  
+    return 0
 }
 IDE::TclProcsDescription instproc unload {} {
     # TODO namespace proc handling
     if {[info procs [my getName]]!=""} {
-	rename [my getName] {}
+        rename [my getName] {}
         [self class] unregisterMethod [my getName]
     } else {
-	puts stderr "no proc [my getName] in interpreter"
+        puts stderr "no proc [my getName] in interpreter"
     }
 }
 IDE::TclProcsDescription proc getAllMethodsFromNamespace namespace {
@@ -1139,7 +1138,7 @@ IDE::TclProcsDescription proc getMethodFor method {
     return
 }
 IDE::TclProcsDescription proc registerMethod {method wrapper} {
-   my set methodArr($method) $wrapper
+    my set methodArr($method) $wrapper
 }
 IDE::TclProcsDescription proc unknown args {
     error "unknown method on [self] $args"
@@ -1171,21 +1170,21 @@ IDE::CommentsContainer proc destroyObject object {
     if {[my exists objComments($object)]} {
          my unset objComments($object)
     }
-    set oc [my getObjectContainer $object] 
+    set oc [my getObjectContainer $object]
     if {$oc!=""} {
-       $oc destroy
-       my unset objectHash($object)
+        $oc destroy
+        my unset objectHash($object)
     }
 }
 IDE::CommentsContainer proc extractComment meta {
-   if {[llength $meta]%2==0 && [llength $meta]>0} {
-       array set metaArr $meta
-       # add variables (metaArr)
-       if {[info exists metaArr(description)]} {
-           return $metaArr(description)
-       }
-   }
-   return 
+    if {[llength $meta]%2==0 && [llength $meta]>0} {
+        array set metaArr $meta
+        # add variables (metaArr)
+        if {[info exists metaArr(description)]} {
+            return $metaArr(description)
+        }
+    }
+    return
 }
 IDE::CommentsContainer proc getGroupForMethod method {
     if {[my exists proc_method($method)]} {
@@ -1193,84 +1192,84 @@ IDE::CommentsContainer proc getGroupForMethod method {
     }
     return
 }
-IDE::CommentsContainer proc getObjectContainer object {    
+IDE::CommentsContainer proc getObjectContainer object {
     if {[my exists objectHash($object)]} {
-         return [my set objectHash($object)]
+        return [my set objectHash($object)]
     }
     return
 }
-IDE::CommentsContainer proc getObjectContainerWithCreate object {    
+IDE::CommentsContainer proc getObjectContainerWithCreate object {
     set c [my getObjectContainer $object]
     if {$c==""} {
-       set c [IDE::ObjectCommentsContainer new -childof [self] -objectName $object]
-       my set objectHash($object) $c
+        set c [IDE::ObjectCommentsContainer new -childof [self] -objectName $object]
+        my set objectHash($object) $c
     }
     return $c
 }
 IDE::CommentsContainer proc importComponentMeta meta {
     if {[llength $meta]!=3} {
-       puts stderr "meta: unexepted length of Component Meta >>$meta<<"
-       return
+        puts stderr "meta: unexepted length of Component Meta >>$meta<<"
+        return
     }
     set component [lindex $meta 1]
     set contens [lindex $meta 2]
     set cobj [IDE::Component getCompObjectForNameIfExist $component]
     if {$cobj==""} {
-       puts stderr "meta: $component is not a Component"
-       return
+        puts stderr "meta: $component is not a Component"
+        return
     }
     $cobj setComment [my extractComment $contens]
 }
 IDE::CommentsContainer proc importMeta meta {
-   set first [lindex $meta 0]
-   set second [lindex $meta 1]
-   if {$first=="Component"} {
-      my importComponentMeta $meta
-   } elseif {$first=="tclproc"} {
-      my importProcMeta $meta
-   } elseif {$first=="tclgroup"} {
-      my importProcGroupMeta $meta
-   } else {
-       switch $second {
-          proc {
-             my importObjectMethodMeta Class $meta
-          }
-          instproc {
-             my importObjectMethodMeta Instance $meta
-          }
-          default {
-             my importObjectMeta $meta
-          }
-       }
-   }
+    set first [lindex $meta 0]
+    set second [lindex $meta 1]
+    if {$first=="Component"} {
+        my importComponentMeta $meta
+    } elseif {$first=="tclproc"} {
+        my importProcMeta $meta
+    } elseif {$first=="tclgroup"} {
+        my importProcGroupMeta $meta
+    } else {
+        switch $second {
+            proc {
+                my importObjectMethodMeta Class $meta
+            }
+            instproc {
+                my importObjectMethodMeta Instance $meta
+            }
+            default {
+                my importObjectMeta $meta
+            }
+        }
+    }
 }
 IDE::CommentsContainer proc importObjectMeta meta {
     if {[llength $meta]!=3} {
-       if {![string match @File* $meta]} {
-           puts stderr "meta: unexepted length of Object Meta >>$meta<<"
-       }
-       return
+        if {![string match @File* $meta]} {
+            puts stderr "meta: unexepted length of Object Meta >>$meta<<"
+        }
+        return
     }
     set class [lindex $meta 0]
     set object [lindex $meta 1]
     set contens [lindex $meta 2]
     if {![Object isobject $object]} {
-       puts stderr "meta: $object is not a Object"
-       return
+        puts stderr "meta: $object is not a Object"
+        return
     }
     $object setComment [my extractComment $contens]
 }
 IDE::CommentsContainer proc importObjectMethodMeta {type meta} {
     if {[llength $meta]!=5} {
-       puts stderr "unexepted length of Method Meta >>$meta<<"
-       return
+        puts stderr "unexepted length of Method Meta >>$meta<<"
+        return
     }
     set object [lindex $meta 0]
     set method [lindex $meta 2]
     set contens [lindex $meta 4]
     if {![Object isobject $object]} {
-       puts stderr "meta: $object is not a Object"
-       return
+        puts stderr "meta: $object is not a Object"
+        return
     }
     $object setMethodComment $type $method [my extractComment $contens]
 }
@@ -1318,7 +1317,7 @@ IDE::CommentsContainer proc makeTclGroupsFromMeta {} {
 IDE::CommentsContainer proc objectGetComment object {
     my instvar objComments
     if {[info exists objComments($object)]} {
-         return $objComments($object)
+        return $objComments($object)
     }
 }
 IDE::CommentsContainer proc objectHasComment object {
@@ -1343,11 +1342,11 @@ IDE::CommentsContainer proc objectSetComment {object comment} {
     my set objComments($object) $comment
 }
 IDE::CommentsContainer proc parseAndCleanMeta {} {
-   if {![@ exists metaList] || [@ set metaList]==""} return
-   foreach meta [@ set metaList] {
-      my importMeta $meta
-   }
-   @ set metaList {}
+    if {![@ exists metaList] || [@ set metaList]==""} return
+    foreach meta [@ set metaList] {
+        my importMeta $meta
+    }
+    @ set metaList {}
 }
 IDE::CommentsContainer proc searchCommentForGroup gobj {
     my instvar proc_groupcomment
@@ -1369,7 +1368,7 @@ Object IDE::IntroProxy
 @ ::IDE::IntroProxy idemeta categoriesProcs {methods object-system get-body private comments}
 @ ::IDE::IntroProxy idemeta component IDECore
 IDE::IntroProxy proc asDescriptionList comment {
-   return "description [list $comment]"
+    return "description [list $comment]"
 }
 IDE::IntroProxy proc getBaseObjDef name {
     set cname [my stripNamespace [$name info class]]
@@ -1429,7 +1428,7 @@ IDE::IntroProxy proc getBodyInstanceMethod {class p} {
             # add variables (val)
             lappend arguments [list $arg $val]
         } else {
-            lappend arguments $arg 
+            lappend arguments $arg
         }
     }
     if {$::xotcl::version>=1.3} {
@@ -1471,7 +1470,7 @@ IDE::IntroProxy proc getBodyInstanceSearchMethod {object ip} {
             # add variables (val)
             lappend arguments [list $arg $val]
         } else {
-            lappend arguments $arg 
+            lappend arguments $arg
         }
     }
     return "proc $p [list $arguments] \{[info body $p]\}\n"
@@ -1486,7 +1485,7 @@ IDE::IntroProxy proc getBodyTclMethod method {
             # add variables (val)
             lappend arguments [list $arg $val]
         } else {
-            lappend arguments $arg 
+            lappend arguments $arg
         }
     }
     return "proc [list $method] [list $arguments] \{[info body $method]\}\n"
@@ -1511,8 +1510,8 @@ IDE::IntroProxy proc getClasses {} {
     if {[IDE::System isIgnoreIDEComponents]} {
         set ret {}
         foreach comp [my getComponentsNoIDE] {
-           set cobj [IDE::Component  getCompObjectForNameIfExist $comp]
-           set ret [concat $ret [$cobj getClasses]]
+            set cobj [IDE::Component  getCompObjectForNameIfExist $comp]
+            set ret [concat $ret [$cobj getClasses]]
         }
     } else {
         set ret [Class info instances]
@@ -1530,14 +1529,14 @@ IDE::IntroProxy proc getComponents {} {
     return [IDE::Component getComponentNames]
 }
 IDE::IntroProxy proc getComponentsNoIDE {} {
-   set ideComps [concat [IDE::System getCoreComponents] [IDE::System getExtraComponents]]
-   set ret {}
-   foreach comp [IDE::Component getComponentNames] {
-       if {![ide::lcontain $ideComps $comp]} {
-           lappend ret $comp
-       }
-   }
-   return $ret
+    set ideComps [concat [IDE::System getCoreComponents] [IDE::System getExtraComponents]]
+    set ret {}
+    foreach comp [IDE::Component getComponentNames] {
+        if {![ide::lcontain $ideComps $comp]} {
+            lappend ret $comp
+        }
+    }
+    return $ret
 }
 IDE::IntroProxy proc getInstanceMethods {class categories} {
     set methods {}
@@ -1553,7 +1552,7 @@ IDE::IntroProxy proc getObjDef name {
         if {$sl != "" && $sl != "::Object" && $sl!="::xotcl::Object"} {
             append script " -superclass [list $sl] "
         }
-        set pr [$name info parameter]         
+        set pr [$name info parameter]
         if {$pr != ""} {
             append script " -parameter [list $pr]\n"
         } else {
@@ -1586,8 +1585,8 @@ IDE::IntroProxy proc getObjects {} {
     if {[IDE::System isIgnoreIDEComponents]} {
         set ret {}
         foreach comp [my getComponentsNoIDE] {
-           set cobj [IDE::Component  getCompObjectForNameIfExist $comp]
-           set ret [concat $ret [$cobj getObjects]]
+            set cobj [IDE::Component  getCompObjectForNameIfExist $comp]
+            set ret [concat $ret [$cobj getObjects]]
         }
         return $ret
     } else {
@@ -1602,13 +1601,13 @@ IDE::IntroProxy proc getProcBody p {
      set arguments {}
      foreach arg [::info args $p] {
          if {[::info default $p $arg val]} {
-            # add variables (val)
-            lappend arguments [list $arg $val]
+             # add variables (val)
+             lappend arguments [list $arg $val]
          } else {
-            lappend arguments $arg 
+             lappend arguments $arg
          }
      }
-     return "proc [list $p] [list $arguments] \{[::info body $p]\}\n" 
+    return "proc [list $p] [list $arguments] \{[::info body $p]\}\n"
 }
 IDE::IntroProxy proc getProcsGroupsForComponent component {
     set appObj [IDE::Component getCompObjectForName $component]
@@ -1656,72 +1655,72 @@ IDE::SystemConfigMap proc checkRequirements compList {
      set cleanList [ide::lcollect each $compList {lindex $each 0}]
 
      foreach comp $compList {
-            set cname [lindex $comp 0]
-            if {[ide::lcontain $procList $cname]} continue
-            set cobj [IDE::Component getCompObjectForNameIfExist $cname]
-            if {$cobj!=""} {
-                set reqComps [$cobj getRequiredFromDeep]
-                foreach sreq $reqComps {
-                     if {![ide::lcontain $procList $sreq]} {
-                          set id [lsearch -exact $cleanList $sreq]
-                          if {$id>=0} {
-                              lappend outCompList [lindex $compList $id]
-                          } else {
-                              lappend outCompList $sreq
-                          }
-                          lappend procList $sreq
+         set cname [lindex $comp 0]
+         if {[ide::lcontain $procList $cname]} continue
+         set cobj [IDE::Component getCompObjectForNameIfExist $cname]
+         if {$cobj!=""} {
+             set reqComps [$cobj getRequiredFromDeep]
+             foreach sreq $reqComps {
+                 if {![ide::lcontain $procList $sreq]} {
+                     set id [lsearch -exact $cleanList $sreq]
+                     if {$id>=0} {
+                         lappend outCompList [lindex $compList $id]
+                     } else {
+                         lappend outCompList $sreq
                      }
-                }
-            }
-            lappend outCompList $comp
-            lappend procList $cname
+                     lappend procList $sreq
+                 }
+             }
+         }
+         lappend outCompList $comp
+         lappend procList $cname
      }
-     return $outCompList
+    return $outCompList
 }
 IDE::SystemConfigMap proc getCleanedLoadList {components {ignoreLoaded 1}} {
     my instvar dbAvailable packageAvailable
-    # dbAvailable will be puffered 
+    # dbAvailable will be puffered
     if {[Object isobject IDE::ComponentPersistence]} {
-         my set dbAvailable [IDE::ComponentPersistence getAvailable]
+        my set dbAvailable [IDE::ComponentPersistence getAvailable]
     } else {
-         my set dbAvailable {}
+        my set dbAvailable {}
     }
     set cloaded [IDE::Component getComponentNames]
     set loadList {}
     set tclpackages [package names]
     foreach comp $components {
-       if {$ignoreLoaded && [IDE::Component getCompObjectForNameIfExist [lindex $comp 0]]!=""} continue
+        if {$ignoreLoaded && [IDE::Component getCompObjectForNameIfExist [lindex $comp 0]]!=""} continue
        if {[llength $comp]==1} {
            if {[ide::lcontain $dbAvailable $comp]} {
                set versionList [IDE::ComponentPersistence getVersionsForName $comp]
-              lappend loadList [list $comp [lindex [lindex $versionList 0] 0]]
+               lappend loadList [list $comp [lindex [lindex $versionList 0] 0]]
            } elseif {[ide::lcontain $tclpackages $comp]} {
-              lappend loadList [list $comp package]
+               lappend loadList [list $comp package]
            } elseif {![ide::lcontain $cloaded $comp]} {
-             IDE::Dialog message "Component $comp can not be found in Database or as tcl package. Operation canceled"
-              return
+               IDE::Dialog message "Component $comp can not be found in Database or as tcl package. Operation canceled"
+               return
            }
        } else {
            set name [lindex $comp 0]; set type [lindex $comp 1]
            if {$type=="package"} {
-                if {![ide::lcontain $tclpackages $name]} {
-                     IDE::Dialog message "Component $comp can not be found as tcl package. Operation canceled"
-                }
-                lappend loadList $comp
+               if {![ide::lcontain $tclpackages $name]} {
+                   IDE::Dialog message "Component $comp can not be found as tcl package. Operation canceled"
+               }
+               lappend loadList $comp
            } else {
-                set versionList [IDE::ComponentPersistence getVersionsForName $name]
-                if {[llength $versionList]==0} {
-                     IDE::Dialog message "Component $comp can not be found in Database. Operation canceled"
-                }
-                if {$type=="newest"} {
+               set versionList [IDE::ComponentPersistence getVersionsForName $name]
+               if {[llength $versionList]==0} {
+                   IDE::Dialog message "Component $comp can not be found in Database. Operation canceled"
+               }
+               if {$type=="newest"} {
                    lappend loadList [list $name [lindex [lindex $versionList end] 0]]
-                } else {
+               } else {
                    set versionList [ide::lcollect each $versionList {lindex $each 0}]
                    if {![ide::lcontain $versionList $type]} {
-                     IDE::Dialog message "Component $comp Version $type can not be found in Database. Operation canceled"
+                       IDE::Dialog message "Component $comp Version $type can not be found in Database. Operation canceled"
                    }
                    lappend loadList [list $name $type]
-                }
+               }
            }
        }
     }
@@ -1733,33 +1732,33 @@ IDE::SystemConfigMap proc getComponentsList {{ignoreLoaded 1}} {
     return [my getCleanedLoadList $componentsToLoad $ignoreLoaded]
 }
 IDE::SystemConfigMap proc getValueForType type {
-  if {[my exists $type]} {
-     return [my set $type]
-  }
+    if {[my exists $type]} {
+        return [my set $type]
+    }
 }
 @ IDE::SystemConfigMap proc initFromSystem {} {
 description {Try to get configuration map list from actual loaded foreign components
 }
 }
 IDE::SystemConfigMap proc initFromSystem {} {
-     my instvar componentsToLoad
-     set coreComps [IDE::System getCoreComponentsAll]
-     set comps {}
-     foreach comp [IDE::Component getComponentNames] {
-          if {![ide::lcontain $coreComps $comp]} {
-               set cobj [IDE::Component getCompObjectForNameIfExist $comp]
-               if {[$cobj isPersistent]} {
-                   append comps "{$comp [$cobj getIdValue]}\n"
-               } else {
-                   append comps "{$comp package}\n"
-               }
-          }
-     }
-     set componentsToLoad $comps
+    my instvar componentsToLoad
+    set coreComps [IDE::System getCoreComponentsAll]
+    set comps {}
+    foreach comp [IDE::Component getComponentNames] {
+        if {![ide::lcontain $coreComps $comp]} {
+            set cobj [IDE::Component getCompObjectForNameIfExist $comp]
+            if {[$cobj isPersistent]} {
+                append comps "{$comp [$cobj getIdValue]}\n"
+            } else {
+                append comps "{$comp package}\n"
+            }
+        }
+    }
+    set componentsToLoad $comps
 }
 IDE::SystemConfigMap proc loadComponentFromAny component {
     if {[IDE::Component getCompObjectForNameIfExist $component]!=""} {
-       return 1
+        return 1
     }
     set loadList [my getCleanedLoadList $component]
     my loadComponentsFromList $loadList
@@ -1768,8 +1767,8 @@ IDE::SystemConfigMap proc loadComponentFromAny component {
 IDE::SystemConfigMap proc loadComponents {} {
     my instvar componentsToLoad
     if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "Nothing to load. Create components list first or load a configuration map file"
-         return
+        IDE::Dialog message "Nothing to load. Create components list first or load a configuration map file"
+        return
     }
     set loadList [my getCleanedLoadList $componentsToLoad]
     my loadComponentsFromList $loadList
@@ -1777,30 +1776,30 @@ IDE::SystemConfigMap proc loadComponents {} {
 IDE::SystemConfigMap proc loadComponentsFromList loadList {
     if {$loadList==""} return
     foreach item $loadList {
-         set name [lindex $item 0]; set type [lindex $item 1]
-         if {$type=="package"} {
-             IDE::Component loadPackageIfNone $name
-         } else {
-             if {[Object isobject IDE::ComponentPersistence]} {
-                 IDE::ComponentPersistence loadNameVersionId $name $type {}
-             } else {
-                 IDE::Component loadPackageIfNone $name
-             }
-         }
+        set name [lindex $item 0]; set type [lindex $item 1]
+        if {$type=="package"} {
+            IDE::Component loadPackageIfNone $name
+        } else {
+            if {[Object isobject IDE::ComponentPersistence]} {
+                IDE::ComponentPersistence loadNameVersionId $name $type {}
+            } else {
+                IDE::Component loadPackageIfNone $name
+            }
+        }
     }
     IDE::System signalComponentsChanged
 }
 IDE::SystemConfigMap proc loadFromFile {{file {}}} {
     my instvar configName fileName
     if {$file==""} {
-      set file [IDE::Dialog getOpenFile {{ConfigMap .cfmap}}]
+        set file [IDE::Dialog getOpenFile {{ConfigMap .cfmap}}]
     }
     if {$file==""} {return 0}
     source $file
     foreach list {preStartScript startScript componentsToLoad} {
-         if {[info exists $list]} {
-              my set $list [::set $list]
-         }
+        if {[info exists $list]} {
+            my set $list [::set $list]
+        }
     }
     set fileName $file
     set configName [file rootname [file tail $file]]
@@ -1809,10 +1808,10 @@ IDE::SystemConfigMap proc loadFromFile {{file {}}} {
 IDE::SystemConfigMap proc saveAsFile {{file {}}} {
     my instvar fileName configName
     if {![my exists fileName]} {
-       my set fileName newconfig.cfmap
+        my set fileName newconfig.cfmap
     }
     if {$file==""} {
-      set file [IDE::Dialog getSaveFile $fileName]
+        set file [IDE::Dialog getSaveFile $fileName]
     }
     if {$file==""} return
     set of [open $file w]
@@ -1824,15 +1823,15 @@ IDE::SystemConfigMap proc saveAsFile {{file {}}} {
 IDE::SystemConfigMap proc saveConfigMapComponents {} {
     my instvar componentsToLoad
     if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "Nothing to save. Create components list first or load a configuration map file"
-         return
+        IDE::Dialog message "Nothing to save. Create components list first or load a configuration map file"
+        return
     }
     set saveList {}
     foreach comp $componentsToLoad {
         set compName [lindex $comp 0]
         if {[IDE::Component getCompObjectForNameIfExist $compName]==""} {
-             IDE::Dialog message "Component $compName can not be saved bacause it is not loaded into interpreter"
-             return
+            IDE::Dialog message "Component $compName can not be saved bacause it is not loaded into interpreter"
+            return
         }
         lappend saveList $compName
     }
@@ -1843,8 +1842,8 @@ IDE::SystemConfigMap proc saveConfigMapComponents {} {
 IDE::SystemConfigMap proc saveDistribution {{dir {}}} {
     my instvar componentsToLoad
     if {![info exists componentsToLoad] || $componentsToLoad==""} {
-         IDE::Dialog message "The distribution must have at least on component"
-         return
+        IDE::Dialog message "The distribution must have at least on component"
+        return
     }
     foreach comp $componentsToLoad {
         set name [lindex $comp 0]
@@ -1873,7 +1872,7 @@ IDE::SystemConfigMap proc startScripts {} {
         set run 1
     }
     if {!$run} {
-         IDE::Dialog message "There are no configuration map scripts to run"
+        IDE::Dialog message "There are no configuration map scripts to run"
     }
 }
 

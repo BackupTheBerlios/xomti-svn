@@ -20,43 +20,43 @@ The Checking funktionality is programed in Class PrsContext
 package provide IDETclParser 0.70
 Class MixPrsList -parameter list
 @ ::MixPrsList idemeta component IDETclParser
-MixPrsList instproc addElem elem {
-   my lappend list $elem
+MixPrsList instproc addElem elem  {
+    my lappend list $elem
 }
 MixPrsList instproc getElem index {
-   lindex [my list] $index
+    lindex [my list] $index
 }
 MixPrsList instproc visit visitor {
-   next
-   if {[my exists list]} {
-       foreach elem [my list] {
-           $elem visit $visitor
-       }
-   }
+    next
+    if {[my exists list]} {
+        foreach elem [my list] {
+            $elem visit $visitor
+        }
+    }
 }
 Class PrsElement -parameter {begin end}
 @ ::PrsElement idemeta component IDETclParser
 PrsElement instproc basicEvalContents {} {
-   set parser [my getParser]
-   set stream [$parser stream]
-   set opos [$stream pos]
-   set olastpos [$stream lastpos]
-   $stream pos [my begin]
-   $stream lastpos [my end]
-   $parser parseScriptTo [self]
-   $stream pos $opos
-   $stream lastpos $olastpos
+    set parser [my getParser]
+    set stream [$parser stream]
+    set opos [$stream pos]
+    set olastpos [$stream lastpos]
+    $stream pos [my begin]
+    $stream lastpos [my end]
+    $parser parseScriptTo [self]
+    $stream pos $opos
+    $stream lastpos $olastpos
 }
 PrsElement instproc basicSubstituteContents {} {
-   set parser [my getParser]
-   set stream [$parser stream]
-   set opos [$stream pos]
-   set olastpos [$stream lastpos]
-   $stream pos [my begin]
-   $stream lastpos [my end]
-   $parser substituteTo [self]
-   $stream pos $opos
-   $stream lastpos $olastpos
+    set parser [my getParser]
+    set stream [$parser stream]
+    set opos [$stream pos]
+    set olastpos [$stream lastpos]
+    $stream pos [my begin]
+    $stream lastpos [my end]
+    $parser substituteTo [self]
+    $stream pos $opos
+    $stream lastpos $olastpos
 }
 PrsElement instproc checkAsList {context notifier} {
     next
@@ -70,11 +70,11 @@ PrsElement instproc extractList {} {
     next
 }
 PrsElement instproc getParser {} {
-   set i [self]
-   while {[Object isobject $i] && [$i info class]!="::TclParser"} {
-       set i [$i info parent]
-   }
-   return $i
+    set i [self]
+    while {[Object isobject $i] && [$i info class]!="::TclParser"} {
+        set i [$i info parent]
+    }
+    return $i
 }
 PrsElement instproc printString {} {
     if {[my exists begin] && [my exists end]} {
@@ -90,13 +90,13 @@ PrsElement instproc substituteContents {} {
 PrsElement instproc syntaxHightlight context {
 }
 PrsElement instproc visit visitor {
-   $visitor visit [self]
-   next
+    $visitor visit [self]
+    next
 }
-Class PrsCommand -superclass {::PrsElement ::MixPrsList} 
+Class PrsCommand -superclass {::PrsElement ::MixPrsList}
 @ ::PrsCommand idemeta component IDETclParser
 PrsCommand instproc argsCount {} {
-   expr {[llength [my list]]-1}
+    expr {[llength [my list]]-1}
 }
 PrsCommand instproc checkSyntax {context notifier} {
     $context checkCommand [self] $notifier
@@ -104,12 +104,12 @@ PrsCommand instproc checkSyntax {context notifier} {
 PrsCommand instproc syntaxHightlight context {
     $context checkCommand [self] $context
 }
-Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList} 
+Class PrsCommandSubst -superclass {::PrsElement ::MixPrsList}
 @ ::PrsCommandSubst idemeta component IDETclParser
 PrsCommandSubst instproc evalContents {} {
     my basicEvalContents
 }
-Class PrsComment -superclass ::PrsElement 
+Class PrsComment -superclass ::PrsElement
 @ ::PrsComment idemeta component IDETclParser
 PrsComment instproc syntaxHightlight context {
     $context hightlightElement [self] comment
@@ -159,7 +159,7 @@ PrsContext instproc checkCommand {command notifier} {
     set first [lindex [$command list] 0]
     if {[$first info class]=="::PrsLiteral"} {
         set name [$first prsString]
-        
+
         if {$name=="my"} {
             my checkObjectSelfCall $command $notifier
         } elseif {[Object isobject $name]} {
@@ -170,12 +170,12 @@ PrsContext instproc checkCommand {command notifier} {
             my checkTclCommand $name $command $notifier
         } elseif {[info procs $name]!=""} {
             my checkProcArgsCount $command $name $notifier
-        } elseif {[my set isTclproc] && 
-                  [set base [namespace qualifiers [my set name]]]!="" && 
+        } elseif {[my set isTclproc] &&
+                  [set base [namespace qualifiers [my set name]]]!="" &&
                   [info procs [set oname [namespace eval $base [list namespace which -command $name]]]]!=""} {
             my checkProcArgsCount $command $oname $notifier
         } else {
-           $notifier addError "unknown proc $name" $command
+            $notifier addError "unknown proc $name" $command
         }
     } elseif {[$first info class]=="::PrsCommandSubst" &&
               [$first prsString]=="self"} {
@@ -196,30 +196,30 @@ PrsContext instproc checkDirectObjectCall {cobject command notifier} {
     set object $oldObject
 }
 PrsContext instproc checkObjectCall {command notifier} {
-  # enter the body hier
+    # enter the body hier
 }
 PrsContext instproc checkObjectMethodArgsCount {object type method command notifier} {
-     set argList [$object info ${type}args $method]
-     if {[llength $argList]==1 && $argList=="args"} return
-     set commandCount [expr {[$command argsCount]-1}]
-     set min [lsearch -exact $argList args]
-     if {$min!=-1} {
-         set max -1
-     } else {
-         set max [llength $argList]
-         set min $max
-         set x 0
-         foreach arg $argList {
-             if {[$object info ${type}default $method $arg var]} {
+    set argList [$object info ${type}args $method]
+    if {[llength $argList]==1 && $argList=="args"} return
+    set commandCount [expr {[$command argsCount]-1}]
+    set min [lsearch -exact $argList args]
+    if {$min!=-1} {
+        set max -1
+    } else {
+        set max [llength $argList]
+        set min $max
+        set x 0
+        foreach arg $argList {
+            if {[$object info ${type}default $method $arg var]} {
                 set min $x
                 break
-             }
-             incr x
-         }
-     }
-     if {$commandCount<$min || ($max!=-1 && $commandCount>$max)} {
-         $notifier addError "await ($min,$max) arguments" $command
-     }
+            }
+            incr x
+        }
+    }
+    if {$commandCount<$min || ($max!=-1 && $commandCount>$max)} {
+        $notifier addError "await ($min,$max) arguments" $command
+    }
 }
 PrsContext instproc checkObjectSelfCall {command notifier} {
     my instvar object isInstproc
@@ -279,27 +279,27 @@ PrsContext instproc checkObjectSelfCall {command notifier} {
     }
 }
 PrsContext instproc checkProcArgsCount {command procName notifier} {
-     set commandCount [$command argsCount]
-     set argList [info args $procName]
-     if {[llength $argList]==1 && $argList=="args"} return
-     set min [lsearch -exact $argList args]
-     if {$min!=-1} {
-         set max -1
-     } else {
-         set max [llength $argList]
-         set min $max
-         set x 0
-         foreach arg $argList {
-             if {[info default $procName $arg var]} {
+    set commandCount [$command argsCount]
+    set argList [info args $procName]
+    if {[llength $argList]==1 && $argList=="args"} return
+    set min [lsearch -exact $argList args]
+    if {$min!=-1} {
+        set max -1
+    } else {
+        set max [llength $argList]
+        set min $max
+        set x 0
+        foreach arg $argList {
+            if {[info default $procName $arg var]} {
                 set min $x
                 break
-             }
-             incr x
-         }
-     }
-     if {$commandCount<$min || ($max!=-1 && $commandCount>$max)} {
-         $notifier addError "await ($min,$max) arguments" $command
-     }
+            }
+            incr x
+        }
+    }
+    if {$commandCount<$min || ($max!=-1 && $commandCount>$max)} {
+        $notifier addError "await ($min,$max) arguments" $command
+    }
 }
 PrsContext instproc checkTclCommand {name command notifier} {
     set desc [[self class] getCommandDescription $name]
@@ -339,7 +339,7 @@ PrsContext instproc checkTclCommand {name command notifier} {
     return 1
 }
 PrsContext instproc checkVariable variable {
-   expr {[lsearch -exact [my variables] $variable]>=0 || [info exists $variable]}
+    expr {[lsearch -exact [my variables] $variable]>=0 || [info exists $variable]}
 }
 PrsContext instproc checkVariableFrom {prsObject notifier} {
     if {[$prsObject info class]=="::PrsLiteral"} {
@@ -364,17 +364,17 @@ PrsContext instproc check_catch {count command notifier} {
     [$command getElem 1] evalContents
 }
 PrsContext instproc check_for {count command notifier} {
-     [$command getElem 1] evalContents
-     [$command getElem 2] substituteContents
-     [$command getElem 3] evalContents
-     [$command getElem 4] evalContents
+    [$command getElem 1] evalContents
+    [$command getElem 2] substituteContents
+    [$command getElem 3] evalContents
+    [$command getElem 4] evalContents
 }
 PrsContext instproc check_foreach {count command notifier} {
     for {set x 1} {$x<$count} {incr x 2} {
         my addVariableFromList [$command getElem $x]
         [$command getElem [expr {$x+1}]] checkAsList [self] $notifier
     }
-    [$command getElem $x] evalContents 
+    [$command getElem $x] evalContents
 }
 PrsContext instproc check_gets {count command notifier} {
     if {$count==2} {
@@ -413,15 +413,15 @@ PrsContext instproc check_instvar {count command notifier} {
 }
 PrsContext instproc check_keylset {count command notifier} {
     keylset {
-       # falls man tclx benutzt
-       my addVariableFrom [$command getElem 1]
+        # falls man tclx benutzt
+        my addVariableFrom [$command getElem 1]
     }
 }
 PrsContext instproc check_lappend {count command notifier} {
     my addVariableFrom [$command getElem 1]
 }
 PrsContext instproc check_regexp {count command notifier} {
-    # ignore switches / options 
+    # ignore switches / options
     for {set x 1} {$x<$count} {incr x} {
         set elem [$command getElem $x]
         if {[$elem info class]!="PrsLiteral" || [$elem prsString]=="--"} {
@@ -438,7 +438,7 @@ PrsContext instproc check_set {count command notifier} {
         my addVariableFrom [$command getElem 1]
     } else {
         my checkVariableFrom [$command getElem 1] $notifier
-    } 
+    }
 }
 PrsContext instproc check_switch {count command notifier} {
     set last [$command getElem end]
@@ -490,12 +490,12 @@ PrsContext instproc hasErrors {} {
     expr {[my exists errors] && [llength [my set errors]]>0}
 }
 @ PrsContext instproc parse {} {
-description {This Method parse a text and build a parse tree
-It return 1 on success}
+    description {This Method parse a text and build a parse tree
+        It return 1 on success}
 }
 PrsContext instproc parse script {
     # !!! no base list consistency check
-    my instvar object 
+    my instvar object
     if {![info complete $script]} {
         my lappend errors [list 0 0 "Methodbody is not proper tcl list"]
         return 0
@@ -554,18 +554,18 @@ PrsContext instproc parse script {
     set parser [TclParser new -childof [self] -stream $obj]
     my parser $parser
     if {[$parser catchParseErrors {
+        $parser getList $parser
+        $parser getList $parser
+        $parser getList $parser
+        if {![my set isTclproc]} {
             $parser getList $parser
+        }
+        if {$hasNonPosArgs} {
             $parser getList $parser
-            $parser getList $parser
-            if {![my set isTclproc]} {
-                $parser getList $parser
-            }
-            if {$hasNonPosArgs} {
-                $parser getList $parser
-            }
-            set root [$parser getList $parser]
-            $parser root $root
-            $root evalContents}]} {
+        }
+        set root [$parser getList $parser]
+        $parser root $root
+        $root evalContents}]} {
         return 1
     } else {
         my lappend errors [list 0 1 [$parser set parseErrors]]
@@ -584,7 +584,7 @@ PrsContext instproc parseAndVisit script {
 }
 PrsContext instproc visit obj {
     if {![[my parser] catchParseErrors {$obj checkSyntax [self] [self]}]} {
-	set lerror [lindex [[my parser] set parseErrors] end]
+        set lerror [lindex [[my parser] set parseErrors] end]
         my lappend errors [list [$obj begin] [lindex $lerror 0] [lindex $lerror end]]
     }
 }
@@ -691,127 +691,127 @@ PrsContext proc initializeAfterLoad {} {
             {type 1 1}
             {volumes 0 0}
             {writable 1 1} }
-      string {
-        {bytelength 1 1}
-        {compare 2 4}
-        {equal 2 4}
-        {first 2 3}
-        {index 2 2}
-        {is 2 4}
-        {last 2 3}
-        {length 1 1}
-        {map 2 3}
-        {match 2 3}
-        {range 3 3}
-        {repeat 2 2}
-        {replace 3 4}
-        {totitle 1 3}
-        {tolower 1 3}
-        {toupper 1 3}
-        {trim 1 2}
-        {trimleft 1 2}
-        {trimright 1 2}
-        {wordend 2 2}
-        {wordstart 2 2} }
-     array {
-        {anymore 2 2}
-        {donesearch 2 2}
-        {exists 1 1}
-        {get 1 2}
-        {names 1 2}
-        {nextelement 2 2}
-        {set 2 2}
-        {size 1 1}
-        {startsearch 1 1}
-        {unset 1 2} }
-     binary {
-         {format 2 -1}
-         {scan 3 -1} }
-     encoding {
-         {convertfrom 1 2}
-         {convertto 1 2}
-         {names 0 0}
-         {system 0 1} }
-     info {
-        {args 1 1}
-        {body 1 1}
-        {cmdcount 0 0}
-        {commands 0 1}
-        {complete 1 1}
-        {default 3 3}
-        {exists 1 1}
-        {globals 0 1}
-        {hostname 0 0}
-        {level 0 1}
-        {library 0 0}
-        {loaded 0 1}
-        {locals 0 1}
-        {nameofexecutable 0 0}
-        {patchlevel 0 0}
-        {procs 0 1}
-        {script 0 0}
-        {sharedlibextension 0 0}
-        {tclversion 0 0}
-        {vars 0 1} }
-    interp {
-        {alias 2 -1}
-        {aliases 0 1}
-        {create 0 -1}
-        {delete 1 -1}
-        {eval 2 -1}
-        {exists 1 1}
-        {expose 2 -1}
-        {hide 2 -1}
-        {hidden 1 1}
-        {invokehidden -2 1}
-        {issafe 0 1}
-        {marktrusted 1 1}
-        {share 3 3}
-        {slaves 0 1}
-        {target 2 2}
-        {transfer 3 3} }
-     memory {
-         {info 0 0}
-         {trace 1 1}
-         {validate 1 1}
-         {trace_on_at_malloc 1 1}
-         {break_on_malloc 1 1}
-         {display 1 1} }
-     namespace {
-        {children 0 2}
-        {code 1 1}
-        {current 0 0}
-        {delete 1 -1}
-        {eval 2 -1}
-        {exists 1 1}
-        {export 1 -1}
-        {forget 1 -1}
-        {import 1 -1}
-        {inscope 2 -1}
-        {origin 1 1}
-        {parent 0 1}
-        {qualifiers 1 1}
-        {tail 1 1}
-        {which 2 -1} }
-    package {
-        {forget 1 -1}
-        {ifneeded 2 -1}
-        {names 0 0}
-        {present 1 -1}
-        {provide 1 2}
-        {require 1 3}
-        {unknown 0 1}
-        {vcompare 2 2}
-        {versions 1 1}
-        {vsatisfies 1 1} }
-    trace {
-        {variable 3 3}
-        {vdelete 3 3}
-        {vinfo 1 1} }
-    clock {
-        {format 1 5}
-        {seconds 0 0}
-        {scan 1 5} }
+        string {
+            {bytelength 1 1}
+            {compare 2 4}
+            {equal 2 4}
+            {first 2 3}
+            {index 2 2}
+            {is 2 4}
+            {last 2 3}
+            {length 1 1}
+            {map 2 3}
+            {match 2 3}
+            {range 3 3}
+            {repeat 2 2}
+            {replace 3 4}
+            {totitle 1 3}
+            {tolower 1 3}
+            {toupper 1 3}
+            {trim 1 2}
+            {trimleft 1 2}
+            {trimright 1 2}
+            {wordend 2 2}
+            {wordstart 2 2} }
+        array {
+            {anymore 2 2}
+            {donesearch 2 2}
+            {exists 1 1}
+            {get 1 2}
+            {names 1 2}
+            {nextelement 2 2}
+            {set 2 2}
+            {size 1 1}
+            {startsearch 1 1}
+            {unset 1 2} }
+        binary {
+            {format 2 -1}
+            {scan 3 -1} }
+        encoding {
+            {convertfrom 1 2}
+            {convertto 1 2}
+            {names 0 0}
+            {system 0 1} }
+        info {
+            {args 1 1}
+            {body 1 1}
+            {cmdcount 0 0}
+            {commands 0 1}
+            {complete 1 1}
+            {default 3 3}
+            {exists 1 1}
+            {globals 0 1}
+            {hostname 0 0}
+            {level 0 1}
+            {library 0 0}
+            {loaded 0 1}
+            {locals 0 1}
+            {nameofexecutable 0 0}
+            {patchlevel 0 0}
+            {procs 0 1}
+            {script 0 0}
+            {sharedlibextension 0 0}
+            {tclversion 0 0}
+            {vars 0 1} }
+        interp {
+            {alias 2 -1}
+            {aliases 0 1}
+            {create 0 -1}
+            {delete 1 -1}
+            {eval 2 -1}
+            {exists 1 1}
+            {expose 2 -1}
+            {hide 2 -1}
+            {hidden 1 1}
+            {invokehidden -2 1}
+            {issafe 0 1}
+            {marktrusted 1 1}
+            {share 3 3}
+            {slaves 0 1}
+            {target 2 2}
+            {transfer 3 3} }
+        memory {
+            {info 0 0}
+            {trace 1 1}
+            {validate 1 1}
+            {trace_on_at_malloc 1 1}
+            {break_on_malloc 1 1}
+            {display 1 1} }
+        namespace {
+            {children 0 2}
+            {code 1 1}
+            {current 0 0}
+            {delete 1 -1}
+            {eval 2 -1}
+            {exists 1 1}
+            {export 1 -1}
+            {forget 1 -1}
+            {import 1 -1}
+            {inscope 2 -1}
+            {origin 1 1}
+            {parent 0 1}
+            {qualifiers 1 1}
+            {tail 1 1}
+            {which 2 -1} }
+        package {
+            {forget 1 -1}
+            {ifneeded 2 -1}
+            {names 0 0}
+            {present 1 -1}
+            {provide 1 2}
+            {require 1 3}
+            {unknown 0 1}
+            {vcompare 2 2}
+            {versions 1 1}
+            {vsatisfies 1 1} }
+        trace {
+            {variable 3 3}
+            {vdelete 3 3}
+            {vinfo 1 1} }
+        clock {
+            {format 1 5}
+            {seconds 0 0}
+            {scan 1 5} }
     }
     foreach {command desc} $subCommands {
         my lappend subcommands $command
@@ -820,38 +820,38 @@ PrsContext proc initializeAfterLoad {} {
         }
     }
 }
-Class PrsLiteral -superclass ::PrsElement 
+Class PrsLiteral -superclass ::PrsElement
 @ ::PrsLiteral idemeta component IDETclParser
-Class PrsNoSubst -superclass {::PrsElement ::MixPrsList} 
+Class PrsNoSubst -superclass {::PrsElement ::MixPrsList}
 @ ::PrsNoSubst idemeta component IDETclParser
 PrsNoSubst instproc evalContents {} {
-   my basicEvalContents
+    my basicEvalContents
 }
 PrsNoSubst instproc extractList {} {
-   set parser [my getParser]
-   set stream [$parser stream]
-   set opos [$stream pos]
-   set olastpos [$stream lastpos]
-   $stream pos [my begin]
-   $stream lastpos [my end]
-   $parser extractListTo [self]
-   $stream pos $opos
-   $stream lastpos $olastpos
+    set parser [my getParser]
+    set stream [$parser stream]
+    set opos [$stream pos]
+    set olastpos [$stream lastpos]
+    $stream pos [my begin]
+    $stream lastpos [my end]
+    $parser extractListTo [self]
+    $stream pos $opos
+    $stream lastpos $olastpos
 }
 PrsNoSubst instproc substituteContents {} {
-   my basicSubstituteContents
+    my basicSubstituteContents
 }
 Class PrsQuoted -superclass {::PrsElement ::MixPrsList}  -parameter {{hasQuote 0}}
 @ ::PrsQuoted idemeta component IDETclParser
 PrsQuoted instproc substituteContents {} {
-   my basicSubstituteContents
+    my basicSubstituteContents
 }
 PrsQuoted instproc syntaxHightlight context {
     if {[my hasQuote]} {
         $context hightlightElement [self] quoted
     }
 }
-Class PrsVariable -superclass ::PrsElement 
+Class PrsVariable -superclass ::PrsElement
 @ ::PrsVariable idemeta component IDETclParser
 PrsVariable instproc checkSyntax {context notifier} {
     set name [my prsString]
@@ -863,14 +863,14 @@ PrsVariable instproc syntaxHightlight context {
     $context hightlightElement [self] variable -1
 }
 PrsVariable instproc visit visitor {
-   next 
-   if {[my exists key]} {
-           [my set key] visit $visitor
-   }
+    next
+    if {[my exists key]} {
+        [my set key] visit $visitor
+    }
 }
 @ Class ReadStringStream {
-description {This class wrap a string to use it as a stream.
-Additional you can set the last position (end of stream)}
+    description {This class wrap a string to use it as a stream.
+        Additional you can set the last position (end of stream)}
 }
 Class ReadStringStream -parameter {string pos lastpos}
 @ ::ReadStringStream idemeta component IDETclParser
@@ -878,28 +878,28 @@ ReadStringStream instproc addPos add {
     my incr pos $add
 }
 ReadStringStream instproc atEnd {} {
-   expr {[my pos]>[my lastpos]}
+    expr {[my pos]>[my lastpos]}
 }
 ReadStringStream instproc copyFromTo {from to} {
-   string range [my string] $from $to
+    string range [my string] $from $to
 }
 ReadStringStream instproc getChar {} {
-   my instvar pos string
-   #[self] halt
-   string index $string $pos
+    my instvar pos string
+    #[self] halt
+    string index $string $pos
 }
 ReadStringStream instproc init {} {
-   my pos 0
-   my lastpos [expr {[my length]-1}]
+    my pos 0
+    my lastpos [expr {[my length]-1}]
 }
 ReadStringStream instproc length {} {
-   string length [my string]
+    string length [my string]
 }
 ReadStringStream instproc nextChar {} {
-   my instvar pos string
-   set ret [string index $string $pos]
-   incr pos
-   return $ret
+    my instvar pos string
+    set ret [string index $string $pos]
+    incr pos
+    return $ret
 }
 @ Class TclParser {
 description {This class can parse tcl code from stream parameter
@@ -928,8 +928,8 @@ Class TclParser -parameter {stream root}
 @ ::TclParser idemeta component IDETclParser
 TclParser instproc catchParseErrors eval {
     if {[[self class] isDevelMode]} {
-       uplevel $eval
-       return 1
+        uplevel $eval
+        return 1
     }
     set ret [catch {uplevel $eval} errinfo]
     if {$ret==0} {
@@ -954,17 +954,17 @@ TclParser instproc getArrayKey parent {
     $stream addPos 1
     set char [$stream getChar]
     my set terminalChar )
-    switch -- $char {
-        \[ {
-           set key [my getBeginingCommandSubst $parent]
+        switch -- $char {
+            \[ {
+                set key [my getBeginingCommandSubst $parent]
+            }
+            \$ {
+                set key [my getBeginingVariable $parent]
+            }
+            default {
+                set key [my getCharKeySequence $parent]
+            }
         }
-        \$ {
-           set key [my getBeginingVariable $parent]
-        }
-        default {
-	   set key [my getCharKeySequence $parent]
-        }
-    }
     my set terminalChar {}
     if {[$stream atEnd] || [$stream getChar] ne ")"} {
         my parseError "Can not parse array key"
@@ -1011,7 +1011,7 @@ TclParser instproc getBeginingVariable parent {
     set variable [my getVariable $parent]
     set char [$stream getChar]
     if {[my isEndList]} {
-        return $variable  
+        return $variable
     } else {
         # ther are another characters after variable parse it as char sequence
         # $a.ew $a[set b] $a(e)ewr
@@ -1031,7 +1031,7 @@ TclParser instproc getCharKeySequence parent {
     if {[my isEndList]} {
         set charseq [PrsLiteral new -childof $parent -begin $begin]
         $charseq end [expr {[$stream pos]-1}]
-        return $charseq       
+        return $charseq
     } else {
         set quote [PrsQuoted new -childof $parent -begin $begin]
         while {![my isEndList]} {
@@ -1049,7 +1049,7 @@ TclParser instproc getCharKeySequence parent {
         $quote end [expr {[$stream pos]-1}]
         return $quote
     }
- 
+
 }
 @ TclParser instproc getCharSequence {} {
 description {This procedure parse string that not begin with special tcl
@@ -1067,7 +1067,7 @@ TclParser instproc getCharSequence parent {
     if {[my isEndList]} {
         set charseq [PrsLiteral new -childof $parent -begin $begin]
         $charseq end [expr {[$stream pos]-1}]
-        return $charseq       
+        return $charseq
     } else {
         set quote [PrsQuoted new -childof $parent -begin $begin]
         while {![my isEndList]} {
@@ -1085,16 +1085,16 @@ TclParser instproc getCharSequence parent {
         $quote end [expr {[$stream pos]-1}]
         return $quote
     }
- 
+
 }
 TclParser instproc getCharWithMasking {} {
-   my instvar stream
-   set c [$stream getChar]
-   while {$c eq "\\" && ![$stream atEnd]} {
-       $stream addPos 2
-       set c [$stream getChar]
-   }
-   return $c
+    my instvar stream
+    set c [$stream getChar]
+    while {$c eq "\\" && ![$stream atEnd]} {
+        $stream addPos 2
+        set c [$stream getChar]
+    }
+    return $c
 }
 TclParser instproc getCommand parent {
     my instvar stream
@@ -1137,26 +1137,26 @@ TclParser instproc getComment parent {
     PrsComment new -childof $parent -begin $begin -end [expr {[$stream pos]-1}]
 }
 TclParser instproc getList parent {
-   my instvar stream
-   my skipCharacters "\t "
-   set char [$stream getChar]
-   switch -- $char {
-       \[ {
-           return [my getBeginingCommandSubst $parent]
-       }
-       \{ {
-           return [my getNoSubst $parent]
-       }
-       \" {
-           return [my getQuoted $parent]
-       }
-       \$ {
-           return [my getBeginingVariable $parent]
-       }
-       default {
-	   return [my getCharSequence $parent]
-       }
-   }
+    my instvar stream
+    my skipCharacters "\t "
+    set char [$stream getChar]
+    switch -- $char {
+        \[ {
+            return [my getBeginingCommandSubst $parent]
+        }
+        \{ {
+            return [my getNoSubst $parent]
+        }
+        \" {
+            return [my getQuoted $parent]
+        }
+        \$ {
+            return [my getBeginingVariable $parent]
+        }
+        default {
+            return [my getCharSequence $parent]
+        }
+    }
 }
 TclParser instproc getNoSubst parent {
     my instvar stream
@@ -1195,7 +1195,7 @@ TclParser instproc getVariable parent {
         $variable end [expr {[$stream pos]-1}]
         my getArrayKey $variable
     }
-    return $variable  
+    return $variable
 }
 TclParser instproc hasParseErrors {} {
     expr {[my exists parseErrors] && [llength [my set parseErrors]]>0}
@@ -1226,36 +1226,36 @@ TclParser instproc parseScriptTo parent {
     }
 }
 TclParser instproc searchCloseBrace {obrace cbrace} {
-   my instvar stream
-   set open 0
-   # search closing parenthesis until and of stream
-   while {![$stream atEnd]} {
-      set c [my getCharWithMasking]
-      if {$c eq $obrace} {
-         incr open
-      } elseif {$c eq $cbrace} {
-         incr open -1
-         if {$open==0} {
-             return 1
-         }
-      }
-      $stream addPos 1
-   }
-   my parseError "Parse Error: can not find closing $cbrace"
+    my instvar stream
+    set open 0
+    # search closing parenthesis until and of stream
+    while {![$stream atEnd]} {
+        set c [my getCharWithMasking]
+        if {$c eq $obrace} {
+            incr open
+        } elseif {$c eq $cbrace} {
+            incr open -1
+            if {$open==0} {
+                return 1
+            }
+        }
+        $stream addPos 1
+    }
+    my parseError "Parse Error: can not find closing $cbrace"
 }
 TclParser instproc searchCloseQuote {} {
-   my instvar stream
-   while {![$stream atEnd]} {
-      set c [my getCharWithMasking]
-      if {$c eq "\""} {
-          return 1
-      }
-      if {$c eq "\["} {
-          my searchCloseBrace \[ \]
-      }
-      $stream addPos 1
-   }
-   my parseError "Parse Error: can not find closing \""
+    my instvar stream
+    while {![$stream atEnd]} {
+        set c [my getCharWithMasking]
+        if {$c eq "\""} {
+            return 1
+        }
+        if {$c eq "\["} {
+            my searchCloseBrace \[ \]
+        }
+        $stream addPos 1
+    }
+    my parseError "Parse Error: can not find closing \""
 }
 TclParser instproc skipBlanks {} {
     my instvar stream

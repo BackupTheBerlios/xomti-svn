@@ -42,7 +42,7 @@ IDE::Browser instproc createSystemMenu {} {
 IDE::Browser instproc destroy {} {
     my instvar win
     if {[info exists win]} {
-       ::destroy $win
+        ::destroy $win
     }
     next
 }
@@ -61,7 +61,7 @@ IDE::Browser instproc init {window args} {
     }
     wm protocol [winfo toplevel $win] WM_DELETE_WINDOW [list [self] closeWindow]
     wm title [winfo toplevel $win] [my getTitle]
-    
+
     my specificInit
     my createSystemMenu
 
@@ -90,7 +90,7 @@ IDE::Browser instproc initStatusBarWin win {
 IDE::Browser instproc setStatusBarText text {
     if {![my exists statusBarTextWin]} return
     [my set statusBarTextWin] configure -text $text
-    
+
 }
 IDE::Browser instproc setTitleAddition add {
     my instvar win
@@ -169,7 +169,7 @@ IDE::DialogHelper instproc getResult {} {
 IDE::DialogHelper instproc makeModelessDialog {} {
     my instvar oldFocus oldGrab win grabStatus
     if {![my exists result]} {
-       my set result {}
+        my set result {}
     }
     set oldFocus [focus]
     set oldGrab [::grab current $win]
@@ -194,17 +194,17 @@ IDE::DialogHelper instproc signalFree {} {
 description {using vwait tcl command}
 }
 IDE::DialogHelper instproc suspendUntilSignal {} {
-     my makeModelessDialog
-     global dialogSemaphore
-     set dialogSemaphore 0
-     vwait dialogSemaphore
-     my cleanUpAfterSignal
+    my makeModelessDialog
+    global dialogSemaphore
+    set dialogSemaphore 0
+    vwait dialogSemaphore
+    my cleanUpAfterSignal
 }
 IDE::DialogHelper proc create args {
-  error "Class [self] is abstract"
+    error "Class [self] is abstract"
 }
 @ Class IDE::Dialog {
-description {Class methods are fasade to tk_message}
+    description {Class methods are fasade to tk_message}
 }
 Class IDE::Dialog -superclass ::IDE::DialogHelper  -parameter {{title Dialog} message {type ok}}
 @ ::IDE::Dialog idemeta component IDEBaseGUI
@@ -232,10 +232,10 @@ IDE::Dialog instproc init {} {
             button $win.buttons.cancel -text Cancel -command [list [self] actionCancel] -underline 0
             pack $win.buttons.ok $win.buttons.cancel -side left  -padx 10 -pady 5
             set cancelscript "
-               $win.buttons.cancel configure -state active -relief sunken
-               update idletasks
-               after 100
-               [self] actionCancel"
+                $win.buttons.cancel configure -state active -relief sunken
+                update idletasks
+                after 100
+                [self] actionCancel"
             bind $win <Escape> $cancelscript
             bind $win <Alt-c> $cancelscript
         }
@@ -244,7 +244,7 @@ IDE::Dialog instproc init {} {
         }
     }
     if {[info exists message]} {
-	pack $win.msg -side top -fill x
+        pack $win.msg -side top -fill x
     }
     pack $win.buttons -side bottom -fill both
 
@@ -360,24 +360,24 @@ IDE::GUICommands instproc init args {
     if {$ms!=""} { [self] fillMenuStruct $ms }
     if {$ms!="" && ![$ms isEmpty]} {
         if {[winfo toplevel $win]=="."} {
-                set mainmenu .mb
+            set mainmenu .mb
         } else {
-                set mainmenu [winfo toplevel $win].mb
+            set mainmenu [winfo toplevel $win].mb
         }
         set menuwin $mainmenu.[Object autoname menu]
         $ms createTkMenu $menuwin [winfo toplevel $win]
         if {$atHead} {
-          if {[$ms set underline]!=""} {
-             $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
-          } else {
-             $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin
-          }
+            if {[$ms set underline]!=""} {
+                $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
+            } else {
+                $mainmenu insert 0 cascade -label [$ms set name] -menu $menuwin
+            }
         } else {
-          if {[$ms set underline]!=""} {
-             $mainmenu add cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
-          } else {
-             $mainmenu add cascade -label [$ms set name] -menu $menuwin
-          }
+            if {[$ms set underline]!=""} {
+                $mainmenu add cascade -label [$ms set name] -menu $menuwin -underline [$ms set underline]
+            } else {
+                $mainmenu add cascade -label [$ms set name] -menu $menuwin
+            }
         }
         # The menu struct is needed to compute enablement
         # $ms destroy
@@ -390,7 +390,7 @@ IDE::GUICommands instproc init args {
     next
 }
 @ IDE::GUICommands instproc menuInsertions {} {
-description {This method let you specify the additional menus entry point 
+description {This method let you specify the additional menus entry point
 for overwritting or mixins objects/classes
 it can be in the middle of menu structure
 call this from fillMenuStruct}
@@ -402,10 +402,10 @@ IDE::GUICommands instproc popMenuWindow {} {
     return
 }
 IDE::GUICommands instproc upsMessage text {
-     set p [my info parent]
-     if {[Object isobject $p] && [$p istype IDE::Browser]} {
-         $p setStatusBarText $text
-     }
+    set p [my info parent]
+    if {[Object isobject $p] && [$p istype IDE::Browser]} {
+        $p setStatusBarText $text
+    }
 }
 @ Class IDE::Text {
 description {Fasade for tk widget text}
@@ -415,7 +415,7 @@ Class IDE::Text -parameter {{height 24} {width 80}}
 @ ::IDE::Text idemeta categoriesMethods {{makeEmpty getText colorizeRange removeColorize viewPos tagRange setText appendToCursor getSelection} {colorizeTextAll tagRegExprTextAll colorizeRegExprTextAll colorizeRegExprText colorizeText tagRegExprText} {initTags init}}
 @ ::IDE::Text idemeta component IDEBaseGUI
 IDE::Text instproc appendToCursor text {
-  [my getTextWindow] insert insert $text
+    [my getTextWindow] insert insert $text
 }
 IDE::Text instproc colorizeRange {begin end} {
     my instvar win
@@ -434,8 +434,8 @@ IDE::Text instproc colorizeText {text {cur 1.0}} {
     # add variables (count)
     set cur [$twin search -count count -- $text $cur end]
     if {$cur!=""} {
-       $twin tag add hlight $cur "$cur + $count char"
-       return [$twin index "$cur + $count char"]
+        $twin tag add hlight $cur "$cur + $count char"
+        return [$twin index "$cur + $count char"]
     }
     return ""
 }
@@ -495,7 +495,7 @@ IDE::Text instproc initTags {} {
 IDE::Text instproc makeEmpty {} {
     my instvar win state
     if {$state!="empty"} {
-        set state empty    
+        set state empty
         $win.text delete 1.0 end
     }
 }
@@ -527,12 +527,12 @@ IDE::Text instproc setColor color {
 }
 IDE::Text instproc setCursorPos pos {
     [my set win].text mark set insert "1.0 + $pos char"
-    
+
 }
 IDE::Text instproc setSelection {begin end} {
     set twin [my set win].text
     $twin tag add sel  $begin $end
-    $twin mark set insert sel.last  
+    $twin mark set insert sel.last
 }
 IDE::Text instproc setText text {
     my instvar win state
@@ -554,8 +554,8 @@ IDE::Text instproc tagRegExprText {tag text {cur 1.0}} {
     # add variables (count)
     set cur [$twin search -regexp -count count -- $text $cur end]
     if {$cur!=""} {
-       $twin tag add $tag $cur "$cur + $count char"
-       return [$twin index "$cur + $count char"]
+        $twin tag add $tag $cur "$cur + $count char"
+        return [$twin index "$cur + $count char"]
     }
     return ""
 }
@@ -598,14 +598,14 @@ IDE::Editor instproc evalDisplaySelection {} {
     my instvar win
     set sel [my getSelection]
     if {$sel!=""} {
-       my appendToCursorAndSelect [my evalString $sel]
+        my appendToCursorAndSelect [my evalString $sel]
     }
 }
 IDE::Editor instproc evalInspectSelection {} {
     my instvar win
     set sel [my getSelection]
     if {$sel!=""} {
-       IDE::System inspectString [my evalString $sel]
+        IDE::System inspectString [my evalString $sel]
     }
 }
 IDE::Editor instproc evalSelection {} {
@@ -621,7 +621,7 @@ IDE::Editor instproc evalSubstituteSelection {} {
     my instvar win
     set sel [my getSelection]
     if {$sel!=""} {
-       my appendToCursorAndSelect [my substituteString $sel]
+        my appendToCursorAndSelect [my substituteString $sel]
     }
 }
 IDE::Editor instproc fileAppend {} {
@@ -715,7 +715,7 @@ IDE::Editor instproc switchWrap {} {
 IDE::Editor proc initializeAfterLoad {} {
   #
   # Tk Setting for Text widget
-  # 
+  #
   bind Text <Control-v> {}
   event add <<Paste>> <Control-v>
 }
@@ -747,32 +747,32 @@ IDE::EditorPopDown instproc hidePopdown {} {
    focus [my getTextWindow]
 }
 IDE::EditorPopDown instproc invokePopDown {mlist pattern} {
-   if {$mlist==""} return
-   my instvar compPattern
-   set compPattern $pattern
-   if {[llength $mlist]==1} {
-       set sindex [expr {[string length $compPattern] + [string first [string range $compPattern 0 end-1] $mlist] -1}]
-       my appendToCursor "[string range $mlist $sindex end]"
-       return
-   }
-   set twin [my getTextWindow]
-   set popWin [my getPopdown]
-   $popWin.listbox delete 0 end
-   eval $popWin.listbox insert 0 $mlist
-   set height [winfo reqheight $popWin.listbox]
-   set width [expr {[winfo reqwidth $popWin.listbox]+[winfo reqwidth $popWin.scroll]}]
-   set bb [$twin bbox insert]
-   set x [expr {[lindex $bb 0]+[winfo rootx $twin]}]
-   set y [expr {[lindex $bb 1]+[winfo rooty $twin]}]
-   wm geometry $popWin $width\x$height+$x+$y
-   wm deiconify $popWin
-   raise $popWin
-   ::focus $popWin.listbox
+    if {$mlist==""} return
+    my instvar compPattern
+    set compPattern $pattern
+    if {[llength $mlist]==1} {
+        set sindex [expr {[string length $compPattern] + [string first [string range $compPattern 0 end-1] $mlist] -1}]
+        my appendToCursor "[string range $mlist $sindex end]"
+        return
+    }
+    set twin [my getTextWindow]
+    set popWin [my getPopdown]
+    $popWin.listbox delete 0 end
+    eval $popWin.listbox insert 0 $mlist
+    set height [winfo reqheight $popWin.listbox]
+    set width [expr {[winfo reqwidth $popWin.listbox]+[winfo reqwidth $popWin.scroll]}]
+    set bb [$twin bbox insert]
+    set x [expr {[lindex $bb 0]+[winfo rootx $twin]}]
+    set y [expr {[lindex $bb 1]+[winfo rooty $twin]}]
+    wm geometry $popWin $width\x$height+$x+$y
+    wm deiconify $popWin
+    raise $popWin
+    ::focus $popWin.listbox
 }
 IDE::EditorPopDown instproc isPopdownVisible {} {
     my instvar dropWin
     if {![my exists dropWin]} {
-         return [wm ismapped $dropWin]
+        return [wm ismapped $dropWin]
     }
     return 0
 }
@@ -867,26 +867,26 @@ IDE::FocusPerKey instproc getFocusWin {} {
    next
 }
 IDE::FocusPerKey instproc init args {
-   next
-   my instvar win focusKey nextFocus prevFocus
-   if {[info exists focusKey]} {
-      bind [winfo toplevel $win] <$focusKey> [list [self] getFocus]
-   }
-   if {[info exists nextFocus]} {
-      bind [my getFocusWin] <Tab> "focus $nextFocus; break"
-   }
-   if {[info exists prevFocus]} {
-      bind [my getFocusWin] <<PrevWindow>> "focus $prevFocus; break"
-   }
+    next
+    my instvar win focusKey nextFocus prevFocus
+    if {[info exists focusKey]} {
+        bind [winfo toplevel $win] <$focusKey> [list [self] getFocus]
+    }
+    if {[info exists nextFocus]} {
+        bind [my getFocusWin] <Tab> "focus $nextFocus; break"
+    }
+    if {[info exists prevFocus]} {
+        bind [my getFocusWin] <<PrevWindow>> "focus $prevFocus; break"
+    }
 }
 Class IDE::FontChooser -superclass ::IDE::Dialog  -parameter {{font {}} {type okcancel} {title {Font Chooser}}}
 @ ::IDE::FontChooser idemeta component IDEBaseGUI
 IDE::FontChooser instproc changeFamiliesVisibility {} {
     my instvar onlytk
     if {$onlytk} {
-       [self]::fontfamily setList [list Courier Times Helvetica] 
+        [self]::fontfamily setList [list Courier Times Helvetica]
     } else {
-       [self]::fontfamily setList [font families] 
+        [self]::fontfamily setList [font families]
     }
 }
 IDE::FontChooser instproc changeOption type {
@@ -904,18 +904,18 @@ IDE::FontChooser instproc extractFontParameters {} {
     eval font configure fontchooser [array get fontArrgs]
     foreach k [array names fontArrgs] {
         switch -exact -- $k {
-           -weight {
-               set weight $fontArrgs($k)
-           }
-           -family {
-               set fontFamily $fontArrgs($k)
-           }
-           -size {
-               set fontSize $fontArrgs($k)
-           }
-           -slant {
-               set slant $fontArrgs($k)
-           }
+            -weight {
+                set weight $fontArrgs($k)
+            }
+            -family {
+                set fontFamily $fontArrgs($k)
+            }
+            -size {
+                set fontSize $fontArrgs($k)
+            }
+            -slant {
+                set slant $fontArrgs($k)
+            }
         }
     }
 }
@@ -935,17 +935,17 @@ IDE::FontChooser instproc init {} {
     label $win.f.lsize -text "Size:"
     spinbox $win.f.size -from -30 -to 30 -increment 1 -command [list [self] changeSize] -validate focusout  -validatecommand [list [self] validateSize %s] -invalidcommand [list [self] invalidSize]
     $win.f.size set $fontSize
-    
+
     checkbutton $win.f.bold -text "Bold" -variable [self]::weight -onvalue bold -offvalue normal -command [list [self] changeOption weight]
     checkbutton $win.f.italian -text "Italian" -variable [self]::slant -onvalue italic -offvalue roman -command [list [self] changeOption slant]
     checkbutton $win.f.onlytk -text "Only Tk system fonts"  -variable [self]::onlytk  -command [list [self] changeFamiliesVisibility]
-    
-    
+
+
     labelframe $win.f.preview -text "Preview" -height 80 -width 300
     label $win.f.preview.text -text {AaBbCc123 \{([?} -font fontchooser
     pack $win.f.preview.text -fill x -expand yes
     pack propagate $win.f.preview 0
-    
+
     grid $win.f.lfamily -column 0 -row 0 -sticky w
     grid $win.f.fontfamily -column 0 -row 1 -sticky news -rowspan 4
     grid $win.f.lsize -column 1 -row 0 -sticky w
@@ -956,7 +956,7 @@ IDE::FontChooser instproc init {} {
     grid $win.f.preview -column 0 -row 5 -columnspan 2 -sticky news
     grid rowconfigure $win.f 4 -weight 1
     grid columnconfigure $win.f 0 -weight 1
-    
+
     pack $win.f -fill both -expand yes -before $win.buttons
     my initView
     wm deiconify $win
@@ -985,12 +985,12 @@ IDE::FontChooser instproc validateSize value {
    return $ret
 }
 IDE::FontChooser proc getFont {{font {}}} {
-  set entry [my new -volatile [list -font $font]]
-  set ret {}
-  if {[$entry prompt]=="ok"} {
+    set entry [my new -volatile [list -font $font]]
+    set ret {}
+    if {[$entry prompt]=="ok"} {
         set ret [$entry font]
-  }
-  return $ret
+    }
+    return $ret
 }
 Class IDE::ListView -parameter {{multiselect 0} label {height 10} width}
 @ ::IDE::ListView idemeta categories {service test-service}
@@ -1012,7 +1012,7 @@ IDE::ListView instproc addItemAt {item pos} {
     my set selectedIndex -1
 }
 IDE::ListView instproc addItemAtTail item {
-    # add Item 
+    # add Item
     my instvar win listItems
     if {![ide::lappendIfNone listItems $item]} return
     $win.listbox insert end $item
@@ -1026,7 +1026,7 @@ IDE::ListView instproc buttonDoublePush {} {
     my instvar win selectedIndex listItems
     set currsel [lindex [$win.listbox curselection] 0]
     if {$currsel!=""} {
-         my selectItem [lindex $listItems $currsel]
+        my selectItem [lindex $listItems $currsel]
     }
 }
 IDE::ListView instproc buttonPush {} {
@@ -1116,7 +1116,7 @@ IDE::ListView instproc keyEvent key {
 IDE::ListView instproc markItem item {
     [self] instvar win listItems
     if {[set cur [lsearch -exact $listItems $item]]>=0} {
-       $win.listbox itemconfigure $cur -foreground red -selectforeground red
+        $win.listbox itemconfigure $cur -foreground red -selectforeground red
     }
 }
 IDE::ListView instproc markItemIndexForeGround {index {color default}} {
@@ -1185,7 +1185,7 @@ IDE::ListView instproc reorderSelected shift {
     return 1
 }
 IDE::ListView instproc resetList {} {
-    my instvar win listItems selectedIndex 
+    my instvar win listItems selectedIndex
     $win.listbox delete 0 end
     set listItems {}
     set selectedIndex -1
@@ -1222,12 +1222,12 @@ IDE::ListView instproc selectedItem {} {
     my instvar win listItems
     if {[set cur [$win.listbox curselection]]!=""} {
         if {[llength $cur]>1} {
-          foreach id $cur {
-             lappend ret [lindex $listItems $id]
-          }
-          return $ret
+            foreach id $cur {
+                lappend ret [lindex $listItems $id]
+            }
+            return $ret
         } else {
-          return [lindex $listItems $cur]
+            return [lindex $listItems $cur]
         }
     }
     return {}
@@ -1246,12 +1246,12 @@ IDE::ListView instproc selectedItems {} {
     my instvar win listItems
     if {[set cur [$win.listbox curselection]]!=""} {
         if {[llength $cur]>1} {
-          foreach id $cur {
-             lappend ret [lindex $listItems $id]
-          }
-          return $ret
+            foreach id $cur {
+                lappend ret [lindex $listItems $id]
+            }
+            return $ret
         } else {
-          return [list [lindex $listItems $cur]]
+            return [list [lindex $listItems $cur]]
         }
     }
     return [list]
@@ -1279,22 +1279,22 @@ IDE::ListView instproc setListUnsorted list {
 IDE::ListView instproc setSelectedIndex {cur {notify 1}} {
     my instvar win listItems
     if {$cur<[llength $listItems]} {
-      my unselect 
-      $win.listbox selection set $cur $cur
-      $win.listbox see $cur
-      if {$notify} {
-          my selectItem [lindex $listItems $cur]
-      }
+        my unselect
+        $win.listbox selection set $cur $cur
+        $win.listbox see $cur
+        if {$notify} {
+            my selectItem [lindex $listItems $cur]
+        }
     }
 }
 IDE::ListView instproc setSelectedItem {item {notify 1}} {
     my instvar win listItems
     if {[set cur [lsearch -exact $listItems $item]]>=0} {
-        my unselect 
+        my unselect
         $win.listbox selection set $cur $cur
         $win.listbox see $cur
         if {$notify==1} {
-           my selectItem $item
+            my selectItem $item
         }
     }
 }
@@ -1318,12 +1318,12 @@ description {Simple Hierarch List Browser.}
 Class IDE::HListView -superclass ::IDE::ListView  -parameter {{multiselect 0} label}
 @ ::IDE::HListView idemeta component IDEBaseGUI
 IDE::HListView instproc rekListInit {hlist deep} {
-   my instvar listItems
-   #[self] halt
-   lappend listItems "$deep[lindex $hlist 0]"
-   foreach subtree [lrange $hlist 1 end] {
-       my rekListInit $subtree "$deep  "
-   }
+    my instvar listItems
+    #[self] halt
+    lappend listItems "$deep[lindex $hlist 0]"
+    foreach subtree [lrange $hlist 1 end] {
+        my rekListInit $subtree "$deep  "
+    }
 }
 IDE::HListView instproc removeItem item {
     set index 0
@@ -1342,16 +1342,16 @@ IDE::HListView instproc selectedItemFirst {} {
     string trimleft [next]
 }
 IDE::HListView instproc setHList hl {
-   my instvar hlist listItems
-   set hlist $hl
-   set listItems {}
-   foreach tree $hlist {
-      my rekListInit $tree ""
-   }
-   my setList $listItems
+    my instvar hlist listItems
+    set hlist $hl
+    set listItems {}
+    foreach tree $hlist {
+        my rekListInit $tree ""
+    }
+    my setList $listItems
 }
 IDE::HListView instproc setList list {
-    my instvar win listItems selectedIndex 
+    my instvar win listItems selectedIndex
     $win.listbox delete 0 end
     set listItems $list
     set selectedIndex -1
@@ -1366,7 +1366,7 @@ IDE::IDialogEntry instproc init {} {
     if {![info exists entry]} {
         set entry {}
     } else {
-        $win.entry insert 0 $entry 
+        $win.entry insert 0 $entry
     }
     pack $win.entry -fill both -expand yes -before $win.buttons -padx 10 -pady 5
     focus $win.entry
@@ -1381,19 +1381,19 @@ IDE::IDialogEntry proc getValue {mes {text {}}} {
   set entry [my new -volatile [list -message $mes] [list -entry $text]]
   set ret {}
   if {[$entry prompt]=="ok"} {
-        set ret [$entry entry]
+      set ret [$entry entry]
   }
   return $ret
 }
 IDE::IDialogEntry proc getValueWithCancel {mes {text {}}} {
-  set entry [my new -volatile [list -message $mes] [list -entry $text]]
-  set ret {}
-  if {[$entry prompt]=="ok"} {
+    set entry [my new -volatile [list -message $mes] [list -entry $text]]
+    set ret {}
+    if {[$entry prompt]=="ok"} {
         set ret [$entry entry]
-  } else {
+    } else {
         return _cancel
-  }
-  return $ret
+    }
+    return $ret
 }
 Class IDE::IDialogList -superclass ::IDE::Dialog  -parameter {list {selectedItem {}} {type okcancel}}
 @ ::IDE::IDialogList idemeta component IDEBaseGUI
@@ -1409,17 +1409,16 @@ IDE::IDialogList instproc init {} {
     ::label $win.pattern -textvariable [self]::selectPattern
     bind $win.lframe.listbox <Double-Button-1> [list [self] actionOk]
     bind $win.lframe.listbox <Key> [list [self] keyEvent %K %A]
- 
+
     pack $win.lframe.scroll -side right -fill y
     pack $win.lframe.listbox -expand yes -fill both
- 
+
     pack $win.pattern -fill x -expand yes -before $win.buttons
     pack $win.lframe -fill both -expand yes -before $win.buttons
     if {![info exists list]} {
         set list {}
     } else {
         eval $win.lframe.listbox insert 0 $list
-        
     }
     if {$selectedItem!=""} {
         my setSelectedItem $selectedItem
@@ -1448,7 +1447,7 @@ IDE::IDialogList instproc keyEvent {key keyCode} {
         $win.lframe.listbox selection clear 0 end
         $win.lframe.listbox selection set $sindex $sindex
         $win.lframe.listbox see $sindex
-    }   
+    }
 }
 IDE::IDialogList instproc postOk {} {
     my instvar win selectedItem list
@@ -1477,35 +1476,35 @@ Class IDE::IDialogListChooser -superclass ::IDE::Dialog  -parameter {listin list
 IDE::IDialogListChooser instproc addToList {} {
     set sitem [[self]::listin selectedItem]
     if {$sitem!=""} {
-	[self]::listout addItem $sitem
+        [self]::listout addItem $sitem
     }
 }
 IDE::IDialogListChooser instproc createBaseSubwidgets {} {
-   my instvar win
-   frame $win.lframe
-   IDE::ListView [self]::listin $win.lframe.listin
-   IDE::ListView [self]::listout $win.lframe.listout
-   button $win.lframe.delfromlist -text del -command [list [self] delFromList]
+    my instvar win
+    frame $win.lframe
+    IDE::ListView [self]::listin $win.lframe.listin
+    IDE::ListView [self]::listout $win.lframe.listout
+    button $win.lframe.delfromlist -text del -command [list [self] delFromList]
 }
 IDE::IDialogListChooser instproc createGUI {} {
     my instvar win
 
     my createBaseSubwidgets
-     
+
     button $win.lframe.addtolist -text >> -command [list [self] addToList]
 
     pack $win.lframe.listin -side left -expand yes -fill both
     pack $win.lframe.listout -side right -expand yes -fill both
     pack $win.lframe.addtolist -anchor s
     pack $win.lframe.delfromlist -anchor n
- 
+
     pack $win.lframe -fill both -expand yes -before $win.buttons
 
 }
 IDE::IDialogListChooser instproc delFromList {} {
     set sitem [[self]::listout selectedItem]
     if {$sitem!=""} {
-	[self]::listout removeItem $sitem
+        [self]::listout removeItem $sitem
     }
 }
 IDE::IDialogListChooser instproc getvalue {} {
@@ -1521,15 +1520,15 @@ IDE::IDialogListChooser instproc init {} {
        error {no listin parameter}
     }
     next
-    
+
     my createGUI
- 
+
     if {![info exists listout]} {
         set listout {}
     }
     [self]::listout setList $listout
     [self]::listin setList $listin
- 
+
     wm deiconify $win
 }
 IDE::IDialogListChooser instproc postOk {} {
@@ -1553,10 +1552,10 @@ IDE::IDialogListEntry instproc init {} {
     ::scrollbar $win.lframe.scroll -command "$win.lframe.listbox yview"
     ::listbox $win.lframe.listbox -yscroll "$win.lframe.scroll set"   -exportselection no
     bind $win.lframe.listbox <Double-Button-1> [list [self] actionOk]
- 
+
     pack $win.lframe.scroll -side right -fill y
     pack $win.lframe.listbox -expand yes -fill both
- 
+
     if {![info exists list]} {
         set list {}
     } else {
@@ -1566,12 +1565,12 @@ IDE::IDialogListEntry instproc init {} {
     if {![info exists entry]} {
         set entry {}
     } else {
-        $win.entry insert 0 $entry 
+        $win.entry insert 0 $entry
     }
 
     pack $win.lframe -fill both -expand yes -before $win.buttons
     pack $win.entry -fill both -expand yes -before $win.buttons -padx 10 -pady 5
- 
+
     wm deiconify $win
 
 }
@@ -1588,33 +1587,33 @@ Class IDE::IDialogListOrderChooser -superclass ::IDE::IDialogListChooser  -param
 IDE::IDialogListOrderChooser instproc addToList {} {
     set sitem [[self]::listin selectedItem]
     if {$sitem!=""} {
-	[self]::listout addItemAtTail $sitem
+        [self]::listout addItemAtTail $sitem
     }
 }
 IDE::IDialogListOrderChooser instproc createGUI {} {
     my instvar win
-    
+
     my createBaseSubwidgets
 
     button $win.lframe.addtolist -text << -command [list [self] addToList]
     button $win.lframe.upitem -text up -command [list [self] upItem]
     button $win.lframe.downitem -text down -command [list [self] downItem]
-     
+
     pack $win.lframe.listout -side left -expand yes -fill both
     pack $win.lframe.listin -side right -expand yes -fill both
     pack $win.lframe.addtolist -anchor s -fill x
     pack $win.lframe.delfromlist -anchor n -fill x
     pack $win.lframe.upitem -anchor n -fill x
     pack $win.lframe.downitem -anchor n -fill x
- 
+
     pack $win.lframe -fill both -expand yes -before $win.buttons
 
 }
 IDE::IDialogListOrderChooser instproc downItem {} {
-   [self]::listout reorderSelected 1 
+   [self]::listout reorderSelected 1
 }
 IDE::IDialogListOrderChooser instproc upItem {} {
-   [self]::listout reorderSelected -1 
+   [self]::listout reorderSelected -1
 }
 @ Class IDE::IDialogWithCheck {
 description {Prompter with additional check box
@@ -1669,20 +1668,20 @@ IDE::MenuCheckbox instproc createItemTkMenu {win tl_win} {
     my instvar accelerator name command variable underline
     set par {}
     if {$accelerator!="" && $tl_win!=""} {
-       if {[string index $accelerator 0]=="_"} {
-           set par "-accelerator [string range $accelerator 1 end]"
-       } else {
-           set par "-accelerator $accelerator"
-       }
+        if {[string index $accelerator 0]=="_"} {
+            set par "-accelerator [string range $accelerator 1 end]"
+        } else {
+            set par "-accelerator $accelerator"
+        }
     }
     if {$underline!=""} {
         append par " -underline $underline"
     }
     eval $win add checkbutton -label [list $name] -command [list $command] -variable $variable $par
     if {$accelerator!="" && $tl_win!=""} {
-       if {[string index $accelerator 0]!="_"} {
-           bind $tl_win <$accelerator> [list $win invoke $name]
-       }
+        if {[string index $accelerator 0]!="_"} {
+            bind $tl_win <$accelerator> [list $win invoke $name]
+        }
     }
 }
 Class IDE::MenuCommand -superclass ::IDE::MenuItem  -parameter {{accelerator {}} {underline {}} name command}
@@ -1691,12 +1690,12 @@ IDE::MenuCommand instproc createItemTkMenu {win tl_win} {
     my instvar accelerator underline name command
     set par {}
     if {$accelerator!="" && $tl_win!=""} {
-       if {[string index $accelerator 0]=="_"} {
-           set par "-accelerator [string range $accelerator 1 end]"
-       } else {
-           set par "-accelerator $accelerator"
-           bind $tl_win <$accelerator> $command
-       }
+        if {[string index $accelerator 0]=="_"} {
+            set par "-accelerator [string range $accelerator 1 end]"
+        } else {
+            set par "-accelerator $accelerator"
+            bind $tl_win <$accelerator> $command
+        }
     }
     if {$underline!=""} {
         append par " -underline $underline"
@@ -1709,26 +1708,26 @@ IDE::MenuRadiobutton instproc createItemTkMenu {win tl_win} {
     my instvar name command value variable underline accelerator
     set par {}
     if {$accelerator!="" && $tl_win!=""} {
-       if {[string index $accelerator 0]=="_"} {
-           set par "-accelerator [string range $accelerator 1 end]"
-       } else {
-           set par "-accelerator $accelerator"
-       }
+        if {[string index $accelerator 0]=="_"} {
+            set par "-accelerator [string range $accelerator 1 end]"
+        } else {
+            set par "-accelerator $accelerator"
+        }
     }
     if {$underline!=""} {
         append par " -underline $underline"
     }
     eval $win add radiobutton  -label [list $name] -command [list $command] -variable $variable -value $value $par
     if {$accelerator!="" && $tl_win!=""} {
-       if {[string index $accelerator 0]!="_"} {
-           bind $tl_win <$accelerator> [list $win invoke $name]
-       }
+        if {[string index $accelerator 0]!="_"} {
+            bind $tl_win <$accelerator> [list $win invoke $name]
+        }
     }
 }
-Class IDE::MenuSeparator -superclass ::IDE::MenuItem 
+Class IDE::MenuSeparator -superclass ::IDE::MenuItem
 @ ::IDE::MenuSeparator idemeta component IDEBaseGUI
 IDE::MenuSeparator instproc createItemTkMenu {win tl_win} {
-   $win add separator
+    $win add separator
 }
 @ Class IDE::MenuStruct {
 description {This Class represent normall und popdown menus.
@@ -1747,7 +1746,7 @@ Class IDE::MenuStruct -superclass ::IDE::MenuItem  -parameter enablementHandler
 @ ::IDE::MenuStruct idemeta categoriesMethods {{addSeparator addCascadeMenu addRadioButton addCheckButton addMenuItem addCommand} migrateTkMenu}
 @ ::IDE::MenuStruct idemeta component IDEBaseGUI
 IDE::MenuStruct instproc addCascadeMenu menu {
-   my addMenuItem $menu
+    my addMenuItem $menu
 }
 IDE::MenuStruct instproc addCheckButton {name variable {command {}}} {
     my addMenuItem [IDE::MenuCheckbox new -childof [self] -name $name -command $command -variable $variable]
@@ -1767,7 +1766,7 @@ IDE::MenuStruct instproc addMenuItem menuItem {
     return $menuItem
 }
 IDE::MenuStruct instproc addRadioButton {name variable command value} {
-   my addMenuItem [IDE::MenuRadiobutton new -childof [self] -name $name -command $command -variable $variable -value $value]
+    my addMenuItem [IDE::MenuRadiobutton new -childof [self] -name $name -command $command -variable $variable -value $value]
 }
 IDE::MenuStruct instproc addSeparator {} {
     my addMenuItem [IDE::MenuSeparator new -childof [self]]
@@ -1776,25 +1775,25 @@ IDE::MenuStruct instproc buildItemPopDownMenu {win {tl_win {}}} {
     $win add cascade -label [my set name] -menu [my buildPopDownMenu $win.[Object autoname cmenu] $tl_win]
 }
 IDE::MenuStruct instproc buildPopDownMenu {win twin} {
-   if {![my exists menuItems]} return
-   menu $win -tearoff 0
-   foreach m [my set menuItems] {
-       if {![my popdownMenu] && ![$m popdownMenu]} continue
-       $m buildItemPopDownMenu $win $twin
-   }
-   return $win
+    if {![my exists menuItems]} return
+    menu $win -tearoff 0
+    foreach m [my set menuItems] {
+        if {![my popdownMenu] && ![$m popdownMenu]} continue
+        $m buildItemPopDownMenu $win $twin
+    }
+    return $win
 }
 IDE::MenuStruct instproc checkEnable win {
     set i 0
     # check the main parent enablement
     set gneedstate normal
     foreach e [my enableList] {
-       set gneedstate disabled
-       if {![info exists sarr($e)]} {
+        set gneedstate disabled
+        if {![info exists sarr($e)]} {
             set sarr($e) [[my enablementHandler] $e]
-       }
-       if {$sarr($e)} {set gneedstate normal}
-       if {$gneedstate=="disabled"} break
+        }
+        if {$sarr($e)} {set gneedstate normal}
+        if {$gneedstate=="disabled"} break
     }
     foreach m [my set menuItems] {
         if {[$m istype IDE::MenuStruct]} {
@@ -1802,8 +1801,8 @@ IDE::MenuStruct instproc checkEnable win {
             incr i
             continue
         }
-        if {[llength [$m enableList]]==0 || ($gneedstate=="disabled" 
-            && [lindex [$m enableList] 0]!="noglobal")} {
+        if {[llength [$m enableList]]==0 || ($gneedstate=="disabled"
+                                             && [lindex [$m enableList] 0]!="noglobal")} {
             if {![$m istype IDE::MenuSeparator]} {
                 if {[$win entrycget $i -state]!=$gneedstate} {
                     $win entryconfigure $i -state $gneedstate
@@ -1812,7 +1811,7 @@ IDE::MenuStruct instproc checkEnable win {
             incr i
             continue
         }
-	set needstate normal
+        set needstate normal
         foreach e [$m enableList] {
             if {$e=="noglobal"} continue
             set needstate disabled
@@ -1847,7 +1846,7 @@ IDE::MenuStruct instproc checkPopDownEnablement win {
             incr i
             continue
         }
-        if {[llength [$m enableList]]==0 || ($gneedstate=="disabled" 
+        if {[llength [$m enableList]]==0 || ($gneedstate=="disabled"
             && [lindex [$m enableList] 0]!="noglobal")} {
             if {![$m istype IDE::MenuSeparator]} {
                 if {[$win entrycget $i -state]!=$gneedstate} {
@@ -1873,7 +1872,7 @@ IDE::MenuStruct instproc checkPopDownEnablement win {
 }
 IDE::MenuStruct instproc createItemTkMenu {win {tl_win {}}} {
     if {![my exists enablementHandler] && [[my info parent] exists enablementHandler]} {
-      my enablementHandler [[my info parent] enablementHandler]
+        my enablementHandler [[my info parent] enablementHandler]
     }
     if {[my enableList]==""} {
         my enableList [[my info parent] enableList]
@@ -1881,19 +1880,19 @@ IDE::MenuStruct instproc createItemTkMenu {win {tl_win {}}} {
     $win add cascade -label [my set name] -menu [my createTkMenu $win.[Object autoname cmenu] $tl_win]
 }
 IDE::MenuStruct instproc createTkMenu {win {tl_win {}}} {
-   if {![my exists menuItems]} return
-   menu $win -tearoff 0 -postcommand [list [self] menuIsMapped $win]
-   foreach m [my set menuItems] {
-       $m createItemTkMenu $win $tl_win
-   }
-   #my migrateTkMenu
-   return $win
+    if {![my exists menuItems]} return
+    menu $win -tearoff 0 -postcommand [list [self] menuIsMapped $win]
+    foreach m [my set menuItems] {
+        $m createItemTkMenu $win $tl_win
+    }
+    #my migrateTkMenu
+    return $win
 }
 IDE::MenuStruct instproc hasPopdownMenu {} {
-   foreach item [my set menuItems] {
+    foreach item [my set menuItems] {
         if {[$item popdownMenu]} {return 1}
-   }
-   return 0
+    }
+    return 0
 }
 IDE::MenuStruct instproc init {tname {uline {}}} {
     my instvar name underline antiDouble
@@ -1909,9 +1908,9 @@ IDE::MenuStruct instproc menuIsMapped win {
     my checkEnable $win
 }
 IDE::MenuStruct instproc migrateTkMenu {} {
-   foreach item [my set menuItems] {
+    foreach item [my set menuItems] {
         $item migrateTkMenu
-   }
+    }
 }
 IDE::MenuStruct instproc showPopMenu {win x y} {
     my checkPopDownEnablement $win
@@ -1922,7 +1921,7 @@ Class IDE::NListView -superclass ::IDE::ListView  -parameter {notify notifyProc 
 IDE::NListView instproc buttonDoublePush {} {
     my instvar notify doubleNotifyProc
     if {[info exists notify] && [info exists doubleNotifyProc]} {
-       $notify $doubleNotifyProc [my selectedItemFirst]
+        $notify $doubleNotifyProc [my selectedItemFirst]
     } else {
         next
     }
@@ -1930,27 +1929,27 @@ IDE::NListView instproc buttonDoublePush {} {
 IDE::NListView instproc selectItem item {
     # !! I am not very happy about this
     # this should be changed in the future than
-    # an application modell is available 
+    # an application modell is available
     my instvar notify notifyProc
     if {[info exists notify]} {
-       if {[info exists notifyProc]} {
-          $notify $notifyProc $item
-       } else {
-          $notify selectItem $item
-       }
+        if {[info exists notifyProc]} {
+            $notify $notifyProc $item
+        } else {
+            $notify selectItem $item
+        }
     }
 }
-Class IDE::ProtocolText -superclass ::IDE::Editor 
+Class IDE::ProtocolText -superclass ::IDE::Editor
 @ ::IDE::ProtocolText idemeta component IDEBaseGUI
 IDE::ProtocolText instproc append text {
     my instvar odd itemsNumber regexpr inverseMatch count protocolOn itemLines itemsNumber
     if {!$protocolOn} return
     if {$regexpr!=""} {
-         if {[regexp -- $regexpr $text]} {
-             if {$inverseMatch} return
-         } else {
-             if {!$inverseMatch} return
-         }
+        if {[regexp -- $regexpr $text]} {
+            if {$inverseMatch} return
+        } else {
+            if {!$inverseMatch} return
+        }
     }
     set twin [my getTextWindow]
     set end [$twin index "end - 1 c"]
@@ -1958,115 +1957,115 @@ IDE::ProtocolText instproc append text {
     set newEnd [$twin index "end - 1 l"]
     set lines [expr [lindex [split $newEnd .] 0]-[lindex [split $end .] 0]]
     if {$odd} {
-       $twin tag add odditem $end $newEnd
+        $twin tag add odditem $end $newEnd
     }
     set odd [expr !$odd]
     $twin see end
     incr count
     lappend itemLines $lines
     if {$itemsNumber!=""} {
-       if {[catch {expr {$itemsNumber+1}}] || $itemsNumber<=0} {
-           set itemsNumber ""
-       } else {
-          if {$count>$itemsNumber} {
-              set linesToDelete [expr $count-$itemsNumber]
-              set range [lrange $itemLines 0 [expr {$linesToDelete-1}]]
-              set itemLines [lrange $itemLines $linesToDelete end]
-              set allLines 1
-              foreach lc $range {
-                  incr allLines $lc
-              }
-              $twin delete 1.0 $allLines.0
-              set count $itemsNumber
-          }
-       }
+        if {[catch {expr {$itemsNumber+1}}] || $itemsNumber<=0} {
+            set itemsNumber ""
+        } else {
+            if {$count>$itemsNumber} {
+                set linesToDelete [expr $count-$itemsNumber]
+                set range [lrange $itemLines 0 [expr {$linesToDelete-1}]]
+                set itemLines [lrange $itemLines $linesToDelete end]
+                set allLines 1
+                foreach lc $range {
+                    incr allLines $lc
+                }
+                $twin delete 1.0 $allLines.0
+                set count $itemsNumber
+            }
+        }
     }
 }
 IDE::ProtocolText instproc clearProtocol {} {
-   my instvar odd protokolOn count itemLines state
-   set odd 0
-   set count 0
-   set itemLines {}   
-   set state full
-   my makeEmpty
+    my instvar odd protokolOn count itemLines state
+    set odd 0
+    set count 0
+    set itemLines {}
+    set state full
+    my makeEmpty
 }
 IDE::ProtocolText instproc init win {
-   next
-   my instvar odd protocolOn count itemLines
-   $win.text tag configure odditem -background cornsilk3
+    next
+    my instvar odd protocolOn count itemLines
+    $win.text tag configure odditem -background cornsilk3
 
-   frame $win.wbox
-   button $win.wbox.clear -text Clear -command [list [self] clearProtocol]
-   checkbutton $win.wbox.protocolon -text "Protocol on" -variable [self]::protocolOn
-   entry $win.wbox.eitems -width 5 -textvariable [self]::itemsNumber
-   entry $win.wbox.regexpr -width 20 -textvariable [self]::regexpr
-   checkbutton $win.wbox.reinverse -text "inverse match" -variable [self]::inverseMatch
-   label $win.wbox.lregexpr -text "Regular expresion match"
-   label $win.wbox.litems -text "Number of items to hold"
+    frame $win.wbox
+    button $win.wbox.clear -text Clear -command [list [self] clearProtocol]
+    checkbutton $win.wbox.protocolon -text "Protocol on" -variable [self]::protocolOn
+    entry $win.wbox.eitems -width 5 -textvariable [self]::itemsNumber
+    entry $win.wbox.regexpr -width 20 -textvariable [self]::regexpr
+    checkbutton $win.wbox.reinverse -text "inverse match" -variable [self]::inverseMatch
+    label $win.wbox.lregexpr -text "Regular expresion match"
+    label $win.wbox.litems -text "Number of items to hold"
 
-   grid $win.wbox.clear -row 0 -column 0 -sticky ew 
-   grid $win.wbox.protocolon -row 1 -column 0 -padx 4 -pady 4
-   grid $win.wbox.eitems -row 0 -column 1 -sticky e  -padx 4
-   grid $win.wbox.regexpr -row 1 -column 1  -padx 4
-   grid $win.wbox.litems -row 0 -column 2 -columnspan 2 -sticky w 
-   grid $win.wbox.lregexpr -row 1 -column 2 -sticky w
-   grid $win.wbox.reinverse -row 1 -column 3
+    grid $win.wbox.clear -row 0 -column 0 -sticky ew
+    grid $win.wbox.protocolon -row 1 -column 0 -padx 4 -pady 4
+    grid $win.wbox.eitems -row 0 -column 1 -sticky e  -padx 4
+    grid $win.wbox.regexpr -row 1 -column 1  -padx 4
+    grid $win.wbox.litems -row 0 -column 2 -columnspan 2 -sticky w
+    grid $win.wbox.lregexpr -row 1 -column 2 -sticky w
+    grid $win.wbox.reinverse -row 1 -column 3
 
-   pack $win.wbox -side bottom -before $win.scroll -anchor w
-   set odd 0
-   set protocolOn 1
-   set count 0
-   set itemLines {}
+    pack $win.wbox -side bottom -before $win.scroll -anchor w
+    set odd 0
+    set protocolOn 1
+    set count 0
+    set itemLines {}
 }
 Class IDE::StateButton -parameter {state states command}
 @ ::IDE::StateButton idemeta component IDEBaseGUI
 IDE::StateButton instproc changeState {} {
-   my instvar states state
-   if {[set pos [lsearch -exact $states $state]]==[llength $states]-1} {
+    my instvar states state
+    if {[set pos [lsearch -exact $states $state]]==[llength $states]-1} {
         set newState [lindex $states 0]
-   } else {
+    } else {
         set newState [lindex $states [expr $pos+1]]
-   }
-   my setState $newState
-   my notifyChange
+    }
+    my setState $newState
+    my notifyChange
 }
 IDE::StateButton instproc changeStateTo {newState {notify 1}} {
-   my instvar states state
-   if {[lsearch -exact $states $newState]>=0 && $newState!=$state} {
+    my instvar states state
+    if {[lsearch -exact $states $newState]>=0 && $newState!=$state} {
         my setState $newState
         if {$notify} {
             my notifyChange
         }
-  }
+    }
 }
 IDE::StateButton instproc init window {
-   my instvar win states state
-   set win $window
-   if {![info exists state]} { 
+    my instvar win states state
+    set win $window
+    if {![info exists state]} {
         set state [lindex $states 0]
-   }
-   button $win -text $state -command [list [self] changeState]
+    }
+    button $win -text $state -command [list [self] changeState]
 }
 IDE::StateButton instproc notifyChange {} {
-   my instvar command state
-   if {[info exists command]} {
+    my instvar command state
+    if {[info exists command]} {
         eval $command [list $state]
-   } 
+    }
 
 }
 IDE::StateButton instproc setState newState {
-     my instvar state win
-     set state $newState
-     $win configure -text $state
+    my instvar state win
+    set state $newState
+    $win configure -text $state
 }
 IDE::StateButton instproc setStates newStates {
-     my instvar states state
-     set states $newStates
-     if {![::ide::lcontain $newStates $state]} {
-          my setState [lindex $states 0]
-     }
+    my instvar states state
+    set states $newStates
+    if {![::ide::lcontain $newStates $state]} {
+        my setState [lindex $states 0]
+    }
 }
-Class IDE::StateButtonActivity -superclass ::IDE::StateButton 
+Class IDE::StateButtonActivity -superclass ::IDE::StateButton
 @ ::IDE::StateButtonActivity idemeta component IDEBaseGUI
 IDE::StateButtonActivity instproc init window {
     next
@@ -2074,12 +2073,12 @@ IDE::StateButtonActivity instproc init window {
     set unactiveColor [$win cget -bg]
 }
 IDE::StateButtonActivity instproc setActivity bool {
-     my instvar state win unactiveColor
-     if {$bool} {
+    my instvar state win unactiveColor
+    if {$bool} {
         $win configure -bg blue
-     } else {
+    } else {
         $win configure -bg $unactiveColor
-     }
+    }
 }
 Object IDE::FindReplace
 @ ::IDE::FindReplace idemeta component IDEBaseGUI
@@ -2096,17 +2095,17 @@ IDE::FindReplace proc actionFind {} {
     set count [my findArea]
     set twin [$view getTextWindow]
     if {$count>0} {
-       # sel tag is not visible if text havn't focus
-       $twin tag remove find 1.0 end
-       $twin tag remove sel 1.0 end
-       $twin tag add find $cur "$cur + $count char"
-       $twin tag add sel $cur "$cur + $count char"
-       $twin tag configure find -background yellow
-       $twin mark set insert "$cur + $count char"
-       $twin see insert
-       if {!$backwards} {
-           set cur "$cur + $count char"
-       }
+        # sel tag is not visible if text havn't focus
+        $twin tag remove find 1.0 end
+        $twin tag remove sel 1.0 end
+        $twin tag add find $cur "$cur + $count char"
+        $twin tag add sel $cur "$cur + $count char"
+        $twin tag configure find -background yellow
+        $twin mark set insert "$cur + $count char"
+        $twin see insert
+        if {!$backwards} {
+            set cur "$cur + $count char"
+        }
     }
 }
 IDE::FindReplace proc actionReplace {} {
@@ -2114,27 +2113,27 @@ IDE::FindReplace proc actionReplace {} {
     set count [my findArea]
     set twin [$view getTextWindow]
     while {$count>0} {
-       set ignore 0
-       if {$prompt} {
-          $twin tag remove sel 1.0 end
-          $twin tag add sel $cur "$cur + $count char"
-          $twin see $cur
-          if {[IDE::Dialog yesNo "Replace occurance $cur"]=="no"} {
-              set ignore 1
-          }
-       }
-       if {!$ignore} {
-          $twin delete $cur "$cur + $count char"
-          $twin insert $cur $replaceText
-       }
-       if {!$backwards} {
-	   set cur "$cur + [string length $replaceText] char"
-       }
-       if {$replaceAll} {
-           set count [my findArea 0]
-       } else {
-           break
-       }
+        set ignore 0
+        if {$prompt} {
+            $twin tag remove sel 1.0 end
+            $twin tag add sel $cur "$cur + $count char"
+            $twin see $cur
+            if {[IDE::Dialog yesNo "Replace occurance $cur"]=="no"} {
+                set ignore 1
+            }
+        }
+        if {!$ignore} {
+            $twin delete $cur "$cur + $count char"
+            $twin insert $cur $replaceText
+        }
+        if {!$backwards} {
+            set cur "$cur + [string length $replaceText] char"
+        }
+        if {$replaceAll} {
+            set count [my findArea 0]
+        } else {
+            break
+        }
     }
 }
 IDE::FindReplace proc actionSetDefaults {} {
@@ -2155,71 +2154,71 @@ IDE::FindReplace proc bindToView tview {
     set sel [$view getSelection]
     set firstRun 1
     if {$sel!=""} {
-       if {[string length $sel]>30} {
-           set selectedText 1
-       } else {
-           set findText $sel
-           set selectedText 0
-       }
+        if {[string length $sel]>30} {
+            set selectedText 1
+        } else {
+            set findText $sel
+            set selectedText 0
+        }
     } else {
-       set selectedText 0
+        set selectedText 0
     }
 }
 IDE::FindReplace proc buildWindow twin {
-   my instvar win prompt
-   set win $twin
-   toplevel $win -class Dialog
-   wm withdraw $win
-   wm title $win "Find/Replace Dialog"
-   wm iconname $win Dialog
+    my instvar win prompt
+    set win $twin
+    toplevel $win -class Dialog
+    wm withdraw $win
+    wm title $win "Find/Replace Dialog"
+    wm iconname $win Dialog
 
-   frame $win.buttons -relief sunken -border 2
+    frame $win.buttons -relief sunken -border 2
 
-   frame $win.main
-   frame $win.main.options
+    frame $win.main
+    frame $win.main.options
 
-   label $win.main.tfind -text Find
-   label $win.main.tsearch -text Replace
-   entry $win.main.find -textvariable [self]::findText
-   entry $win.main.search -textvariable [self]::replaceText
-   checkbutton $win.main.regexpr -variable [self]::regularExpresion -text "Regular Expresion"
-   button $win.main.options.clear -text Clear -command [list [self] actionClear] -relief groove -pady 1
-   button $win.main.options.setdefaults -text "Set Defaults" -command [list [self] actionSetDefaults] -relief groove -pady 1
-   checkbutton $win.main.options.casesensitive -variable [self]::caseSensitive -text "Case Insensitive"
-   checkbutton $win.main.options.fromcursor -variable [self]::fromCursor -text "From Cursor"
-   checkbutton $win.main.options.backwards -variable [self]::backwards -text Backwards
-   checkbutton $win.main.options.selectedtext -variable [self]::selectedText -text "Selected Text"
-   checkbutton $win.main.options.replaceall -variable [self]::replaceAll -text "Replace All"
-   checkbutton $win.main.options.prompt -variable [self]::prompt -text "Prompt on Replace"
+    label $win.main.tfind -text Find
+    label $win.main.tsearch -text Replace
+    entry $win.main.find -textvariable [self]::findText
+    entry $win.main.search -textvariable [self]::replaceText
+    checkbutton $win.main.regexpr -variable [self]::regularExpresion -text "Regular Expresion"
+    button $win.main.options.clear -text Clear -command [list [self] actionClear] -relief groove -pady 1
+    button $win.main.options.setdefaults -text "Set Defaults" -command [list [self] actionSetDefaults] -relief groove -pady 1
+    checkbutton $win.main.options.casesensitive -variable [self]::caseSensitive -text "Case Insensitive"
+    checkbutton $win.main.options.fromcursor -variable [self]::fromCursor -text "From Cursor"
+    checkbutton $win.main.options.backwards -variable [self]::backwards -text Backwards
+    checkbutton $win.main.options.selectedtext -variable [self]::selectedText -text "Selected Text"
+    checkbutton $win.main.options.replaceall -variable [self]::replaceAll -text "Replace All"
+    checkbutton $win.main.options.prompt -variable [self]::prompt -text "Prompt on Replace"
 
-   grid $win.main.tfind -row 0 -column 0 -sticky e
-   grid $win.main.tsearch -row 2 -column 0 -sticky e
-   grid $win.main.find -row 0 -column 1 -sticky ew
-   grid $win.main.search -row 2 -column 1 -sticky ew
-   grid $win.main.regexpr -row 1 -column 1 -sticky w
+    grid $win.main.tfind -row 0 -column 0 -sticky e
+    grid $win.main.tsearch -row 2 -column 0 -sticky e
+    grid $win.main.find -row 0 -column 1 -sticky ew
+    grid $win.main.search -row 2 -column 1 -sticky ew
+    grid $win.main.regexpr -row 1 -column 1 -sticky w
 
-   grid $win.main.options.clear -row 0 -column 0 -pady 2
-   grid $win.main.options.setdefaults -row 0 -column 1 -sticky w -pady 2
-   grid $win.main.options.casesensitive -row 1 -column 0  -sticky w
-   grid $win.main.options.backwards -row 3 -column 0 -sticky w
-   grid $win.main.options.fromcursor -row 2 -column 0 -sticky w
-   grid $win.main.options.selectedtext -row 1 -column 1 -sticky w
-   grid $win.main.options.prompt -row 3 -column 1 -sticky w
-   grid $win.main.options.replaceall -row 2 -column 1 -sticky w
-   
-   grid $win.main.options -row 3 -column 0 -columnspan 2 -sticky news -pady 4 -ipadx 0
-   grid columnconfigure $win.main 1 -weight 1
-   
+    grid $win.main.options.clear -row 0 -column 0 -pady 2
+    grid $win.main.options.setdefaults -row 0 -column 1 -sticky w -pady 2
+    grid $win.main.options.casesensitive -row 1 -column 0  -sticky w
+    grid $win.main.options.backwards -row 3 -column 0 -sticky w
+    grid $win.main.options.fromcursor -row 2 -column 0 -sticky w
+    grid $win.main.options.selectedtext -row 1 -column 1 -sticky w
+    grid $win.main.options.prompt -row 3 -column 1 -sticky w
+    grid $win.main.options.replaceall -row 2 -column 1 -sticky w
 
-   button $win.buttons.find -text Find -command [list [self] actionFind] -default active -underline 0
-   button $win.buttons.replace -text Replace -command [list [self] actionReplace] -underline 0
-   button $win.buttons.close -text Close -command [list [self] actionClose] -underline 0
-   pack $win.buttons.find $win.buttons.replace $win.buttons.close -side left  -padx 10 -pady 5
+    grid $win.main.options -row 3 -column 0 -columnspan 2 -sticky news -pady 4 -ipadx 0
+    grid columnconfigure $win.main 1 -weight 1
 
-   pack $win.main -side top -fill both -expand yes -padx 10 -pady 5
-   pack $win.buttons -side bottom -fill both
-   
-   set cancelscript "
+
+    button $win.buttons.find -text Find -command [list [self] actionFind] -default active -underline 0
+    button $win.buttons.replace -text Replace -command [list [self] actionReplace] -underline 0
+    button $win.buttons.close -text Close -command [list [self] actionClose] -underline 0
+    pack $win.buttons.find $win.buttons.replace $win.buttons.close -side left  -padx 10 -pady 5
+
+    pack $win.main -side top -fill both -expand yes -padx 10 -pady 5
+    pack $win.buttons -side bottom -fill both
+
+    set cancelscript "
          $win.buttons.close configure -state active
          update idletasks
          after 100
@@ -2244,7 +2243,7 @@ IDE::FindReplace proc buildWindow twin {
     bind $win <Alt-r> $replacescript
 }
 IDE::FindReplace proc destroySignalFromView tview {
-    my instvar view 
+    my instvar view
     if {$tview!=$view} return
     set view {}
     my hideWindow
@@ -2271,12 +2270,12 @@ IDE::FindReplace proc findArea {{complainNoFound 1}} {
             set stopIndex end
         }
     } elseif {$firstRun} {
-	set stopIndex end
+        set stopIndex end
     }
     if {$regularExpresion} {
         set match -regexp
     } else {
-	set match -exact
+        set match -exact
     }
     if {$caseSensitive} {
         set icase -nocase
@@ -2285,14 +2284,14 @@ IDE::FindReplace proc findArea {{complainNoFound 1}} {
         set icase $match
     }
     if {$backwards} {
-	set direction -backward
+        set direction -backward
         if {$firstRun} {
-           set t $cur
-	   set cur $stopIndex
-	   set stopIndex $t
+            set t $cur
+            set cur $stopIndex
+            set stopIndex $t
         }
     } else {
-	set direction -forward
+        set direction -forward
     }
     set cur [$twin search -count search_count $direction $match $icase -- $findText $cur $stopIndex]
     set firstRun 0
@@ -2301,7 +2300,7 @@ IDE::FindReplace proc findArea {{complainNoFound 1}} {
             IDE::Dialog message "Text \"$findText\" not found!"
         }
         set cur 1.0
-	set stopIndex end
+        set stopIndex end
         set firstRun 1
         return 0
     }
@@ -2312,14 +2311,14 @@ IDE::FindReplace proc hideWindow {} {
     wm withdraw $win
 }
 IDE::FindReplace proc showWindow {} {
-  my instvar win view prompt
-  if {![info exists win] || ![winfo exists $win]} {
-      my buildWindow .findreplace
-      set prompt 1
-  }
-  wm group $win [winfo toplevel [$view set win]]
-  wm deiconify $win
-  focus $win.main.find
+    my instvar win view prompt
+    if {![info exists win] || ![winfo exists $win]} {
+        my buildWindow .findreplace
+        set prompt 1
+    }
+    wm group $win [winfo toplevel [$view set win]]
+    wm deiconify $win
+    focus $win.main.find
 }
 IDE::Editor initializeAfterLoad
 
