@@ -1,3 +1,8 @@
+@ Component Xomti_Combobox {
+    description {
+XOTcl porting of Bryan Oakley pure Tcl code
+
+Original pure Tcl:
 # Copyright (c) 1998-2003, Bryan Oakley
 # All Rights Reservered
 #
@@ -26,25 +31,29 @@
 # code patches.
 #
 # ... and many others over the years.
-
-package require Tk 8.0
-package provide combobox 2.3
-
-namespace eval ::combobox {
-
-    # this is the public interface
-    namespace export combobox
-
-    # these contain references to available options
-    variable widgetOptions
-
-    # these contain references to available commands and subcommands
-    variable widgetCommands
-    variable scanCommands
-    variable listCommands
+    }
 }
 
-# ::combobox::combobox --
+package require Tk 8.4
+package provide xomti_combobox 2.3
+
+@ Class Combobox {
+    description {
+
+    # these contain references to available options
+    # variable widgetOptions
+
+    # these contain references to available commands and subcommands
+    # variable widgetCommands
+    # variable scanCommands
+    # variable listCommands
+    }
+}
+
+Class create Combobox
+
+@ Combobox instproc combobox {
+    description {combobox --
 #
 #     This is the command that gets exported. It creates a new
 #     combobox widget.
@@ -61,30 +70,29 @@ namespace eval ::combobox {
 # Returns:
 #
 #     The name of the newly create widget
-
-proc ::combobox::combobox {w args} {
-    variable widgetOptions
-    variable widgetCommands
-    variable scanCommands
-    variable listCommands
+    }
+}
+Combobox instproc combobox {w args} {
+    instvar widgetOptions widgetCommands scanCommands listCommands
 
     # perform a one time initialization
     if {![info exists widgetOptions]} {
-	Init
+	my Init
     }
 
     # build it...
-    eval Build $w $args
+    eval [self] Build $w $args
 
     # set some bindings...
-    SetBindings $w
+    my SetBindings $w
 
     # and we are done!
     return $w
 }
 
 
-# ::combobox::Init --
+@  {
+description {Init --
 #
 #     Initialize the namespace variables. This should only be called
 #     once, immediately prior to creating the first instance of the
@@ -103,12 +111,8 @@ proc ::combobox::combobox {w args} {
 # 
 #     empty string
 
-proc ::combobox::Init {} {
-    variable widgetOptions
-    variable widgetCommands
-    variable scanCommands
-    variable listCommands
-    variable defaultEntryCursor
+Combobox intproc Init {} {
+    instvar widgetOptions widgetCommands scanCommands listCommands defaultEntryCursor
 
     array set widgetOptions [list \
 	    -background          {background          Background} \
@@ -258,10 +262,11 @@ proc ::combobox::Init {} {
     }
 
     # set class bindings
-    SetClassBindings
+    my SetClassBindings
 }
 
-# ::combobox::SetClassBindings --
+@ Component Xomti_Combobox {
+description {SetClassBindings --
 #
 #    Sets up the default bindings for the widget class
 #
@@ -281,7 +286,7 @@ proc ::combobox::Init {} {
 #
 #    empty string
 
-proc ::combobox::SetClassBindings {} {
+Combobox instproc SetClassBindings {} {
 
     # make sure we clean up after ourselves...
     bind Combobox <Destroy> [list ::combobox::DestroyHandler %W]
@@ -307,7 +312,8 @@ proc ::combobox::SetClassBindings {} {
     return ""
 }
 
-# ::combobox::SetBindings --
+@ Component Xomti_Combobox {
+description {SetBindings --
 #
 #    here's where we do most of the binding foo. I think there's probably
 #    a few bindings I ought to add that I just haven't thought
@@ -326,7 +332,7 @@ proc ::combobox::SetClassBindings {} {
 #
 #    empty string
 
-proc ::combobox::SetBindings {w} {
+Combobox instproc SetBindings {w} {
     upvar ::combobox::${w}::widgets  widgets
     upvar ::combobox::${w}::options  options
 
@@ -393,7 +399,8 @@ proc ::combobox::SetBindings {w} {
     }
 }
 
-# ::combobox::Build --
+@ Component Xomti_Combobox {
+description {Build --
 #
 #    This does all of the work necessary to create the basic
 #    combobox. 
@@ -413,7 +420,7 @@ proc ::combobox::SetBindings {w} {
 #
 #    the name of the widget
 
-proc ::combobox::Build {w args } {
+Combobox instproc Build {w args } {
     variable widgetOptions
 
     if {[winfo exists $w]} {
@@ -578,7 +585,8 @@ proc ::combobox::Build {w args } {
 
 }
 
-# ::combobox::HandleEvent --
+@ Component Xomti_Combobox {
+description {HandleEvent --
 #
 #    this proc handles events from the entry widget that we want
 #    handled specially (typically, to allow navigation of the list
@@ -591,7 +599,7 @@ proc ::combobox::Build {w args } {
 #            actual event)
 #    args    additional arguments required by particular events
 
-proc ::combobox::HandleEvent {w event args} {
+Combobox instproc HandleEvent {w event args} {
     upvar ::combobox::${w}::widgets  widgets
     upvar ::combobox::${w}::options  options
     upvar ::combobox::${w}::oldValue oldValue
@@ -746,7 +754,8 @@ proc ::combobox::HandleEvent {w event args} {
     return ""
 }
 
-# ::combobox::DestroyHandler {w} --
+@ Component Xomti_Combobox {
+description {DestroyHandler {w} --
 # 
 #    Cleans up after a combobox widget is destroyed
 #
@@ -759,7 +768,7 @@ proc ::combobox::HandleEvent {w event args} {
 #    The namespace that was created for the widget is deleted,
 #    and the widget proc is removed.
 
-proc ::combobox::DestroyHandler {w} {
+Combobox instproc DestroyHandler {w} {
 
     catch {
 	# if the widget actually being destroyed is of class Combobox,
@@ -774,7 +783,8 @@ proc ::combobox::DestroyHandler {w} {
     return ""
 }
 
-# ::combobox::Find
+@ Component Xomti_Combobox {
+description {Find
 #
 #    finds something in the listbox that matches the pattern in the
 #    entry widget and selects it
@@ -793,7 +803,7 @@ proc ::combobox::DestroyHandler {w} {
 #
 #    Empty string
 
-proc ::combobox::Find {w {exact 0}} {
+Combobox instproc Find {w {exact 0}} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
 
@@ -903,7 +913,8 @@ proc ::combobox::Find {w {exact 0}} {
     }
 }
 
-# ::combobox::Select --
+@ Component Xomti_Combobox {
+description {Select --
 #
 #    selects an item from the list and sets the value of the combobox
 #    to that value
@@ -917,7 +928,7 @@ proc ::combobox::Find {w {exact 0}} {
 #
 #    empty string
 
-proc ::combobox::Select {w index} {
+Combobox instproc Select {w index} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
 
@@ -939,7 +950,8 @@ proc ::combobox::Select {w index} {
     return ""
 }
 
-# ::combobox::HandleScrollbar --
+@ Component Xomti_Combobox {
+description {HandleScrollbar --
 # 
 #    causes the scrollbar of the dropdown list to appear or disappear
 #    based on the contents of the dropdown listbox
@@ -953,7 +965,7 @@ proc ::combobox::Select {w index} {
 #
 #    an empty string
 
-proc ::combobox::HandleScrollbar {w {action "unknown"}} {
+Combobox instproc HandleScrollbar {w {action "unknown"}} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
 
@@ -1000,7 +1012,8 @@ proc ::combobox::HandleScrollbar {w {action "unknown"}} {
     return ""
 }
 
-# ::combobox::ComputeGeometry --
+@ Component Xomti_Combobox {
+description {ComputeGeometry --
 #
 #    computes the geometry of the dropdown list based on the size of the
 #    combobox...
@@ -1013,7 +1026,7 @@ proc ::combobox::HandleScrollbar {w {action "unknown"}} {
 #
 #    the desired geometry of the listbox
 
-proc ::combobox::ComputeGeometry {w} {
+Combobox instproc ComputeGeometry {w} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
     
@@ -1127,7 +1140,8 @@ proc ::combobox::ComputeGeometry {w} {
     return $geometry
 }
 
-# ::combobox::DoInternalWidgetCommand --
+@ Component Xomti_Combobox {
+description {DoInternalWidgetCommand --
 #
 #    perform an internal widget command, then mung any error results
 #    to look like it came from our megawidget. A lot of work just to
@@ -1144,7 +1158,7 @@ proc ::combobox::ComputeGeometry {w} {
 #
 #    The result of the subwidget command, or an error
 
-proc ::combobox::DoInternalWidgetCommand {w subwidget command args} {
+Combobox instproc DoInternalWidgetCommand {w subwidget command args} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
 
@@ -1171,7 +1185,8 @@ proc ::combobox::DoInternalWidgetCommand {w subwidget command args} {
 }
 
 
-# ::combobox::WidgetProc --
+@ Component Xomti_Combobox {
+description {WidgetProc --
 #
 #    This gets uses as the widgetproc for an combobox widget. 
 #    Notice where the widget is created and you'll see that the
@@ -1193,7 +1208,7 @@ proc ::combobox::DoInternalWidgetCommand {w subwidget command args} {
 #
 #    Performs the requested widget command
 
-proc ::combobox::WidgetProc {w command args} {
+Combobox instproc WidgetProc {w command args} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
     upvar ::combobox::${w}::oldFocus oldFocus
@@ -1437,7 +1452,8 @@ proc ::combobox::WidgetProc {w command args} {
     return $result
 }
 
-# ::combobox::Configure --
+@ Component Xomti_Combobox {
+description {Configure --
 #
 #    Implements the "configure" widget subcommand
 #
@@ -1450,7 +1466,7 @@ proc ::combobox::WidgetProc {w command args} {
 #    
 #    Performs typcial "configure" type requests on the widget
 
-proc ::combobox::Configure {w args} {
+Combobox instproc Configure {w args} {
     variable widgetOptions
     variable defaultEntryCursor
 
@@ -1773,7 +1789,8 @@ proc ::combobox::Configure {w args} {
     }
 }
 
-# ::combobox::UpdateVisualAttributes --
+@ Component Xomti_Combobox {
+description {UpdateVisualAttributes --
 #
 # sets the visual attributes (foreground, background mostly) 
 # based on the current state of the widget (normal/disabled, 
@@ -1796,7 +1813,7 @@ proc ::combobox::Configure {w args} {
 # Returns:
 #    empty string
 
-proc ::combobox::UpdateVisualAttributes {w} {
+Combobox instproc UpdateVisualAttributes {w} {
 
     upvar ::combobox::${w}::widgets     widgets
     upvar ::combobox::${w}::options     options
@@ -1833,7 +1850,8 @@ proc ::combobox::UpdateVisualAttributes {w} {
     }
 }
 
-# ::combobox::SetValue --
+@ Component Xomti_Combobox {
+description {SetValue --
 #
 #    sets the value of the combobox and calls the -command, 
 #    if defined
@@ -1847,7 +1865,7 @@ proc ::combobox::UpdateVisualAttributes {w} {
 #
 #    Empty string
 
-proc ::combobox::SetValue {w newValue} {
+Combobox instproc SetValue {w newValue} {
 
     upvar ::combobox::${w}::widgets     widgets
     upvar ::combobox::${w}::options     options
@@ -1884,7 +1902,8 @@ proc ::combobox::SetValue {w newValue} {
     return ""
 }
 
-# ::combobox::CallCommand --
+@ Component Xomti_Combobox {
+description {CallCommand --
 #
 #   calls the associated command, if any, appending the new
 #   value to the command to be called.
@@ -1898,7 +1917,7 @@ proc ::combobox::SetValue {w newValue} {
 #
 #    empty string
 
-proc ::combobox::CallCommand {w newValue} {
+Combobox instproc CallCommand {w newValue} {
     upvar ::combobox::${w}::widgets widgets
     upvar ::combobox::${w}::options options
     
@@ -1912,7 +1931,8 @@ proc ::combobox::CallCommand {w newValue} {
 }
 
 
-# ::combobox::GetBoolean --
+@ Component Xomti_Combobox {
+description {GetBoolean --
 #
 #     returns the value of a (presumably) boolean string (ie: it should
 #     do the right thing if the string is "yes", "no", "true", 1, etc
@@ -1927,7 +1947,7 @@ proc ::combobox::CallCommand {w newValue} {
 #     a 1 or zero, or the value of errorValue if the string isn't
 #     a proper boolean value
 
-proc ::combobox::GetBoolean {value {errorValue 1}} {
+Combobox instproc GetBoolean {value {errorValue 1}} {
     if {[catch {expr {([string trim $value])?1:0}} res]} {
 	return $errorValue
     } else {
@@ -1935,7 +1955,8 @@ proc ::combobox::GetBoolean {value {errorValue 1}} {
     }
 }
 
-# ::combobox::convert --
+@ Component Xomti_Combobox {
+description {convert --
 #
 #     public routine to convert %x, %y and %W binding substitutions.
 #     Given an x, y and or %W value relative to a given widget, this
@@ -1972,7 +1993,7 @@ proc ::combobox::GetBoolean {value {errorValue 1}} {
 #     three values: the converted x and y values, and the name of 
 #     the combobox widget.
 
-proc ::combobox::convert {w args} {
+Combobox instproc convert {w args} {
     set result {}
     if {![winfo exists $w]} {
 	error "window \"$w\" doesn't exist"
@@ -2021,7 +2042,8 @@ proc ::combobox::convert {w args} {
     return $result
 }
 
-# ::combobox::Canonize --
+@ Component Xomti_Combobox {
+description {Canonize --
 #
 #    takes a (possibly abbreviated) option or command name and either 
 #    returns the canonical name or an error
@@ -2039,7 +2061,7 @@ proc ::combobox::convert {w args} {
 #    or raises an error if the option or command is unknown or
 #    ambiguous.
 
-proc ::combobox::Canonize {w object opt} {
+Combobox instproc Canonize {w object opt} {
     variable widgetOptions
     variable columnOptions
     variable widgetCommands
@@ -2131,7 +2153,8 @@ proc ::combobox::Canonize {w object opt} {
     }
 }
 
-# ::combobox::HumanizeList --
+@ Component IDECore {
+description {HumanizeList --
 #
 #    Returns a human-readable form of a list by separating items
 #    by columns, but separating the last two elements with "or"
@@ -2145,8 +2168,8 @@ proc ::combobox::Canonize {w object opt} {
 #
 #    A string which as all of the elements joined with ", " or 
 #    the word " or "
-
-proc ::combobox::HumanizeList {list} {
+}}
+Combobox instproc HumanizeList {list} {
 
     if {[llength $list] == 1} {
 	return [lindex $list 0]
@@ -2160,6 +2183,7 @@ proc ::combobox::HumanizeList {list} {
     }
 }
 
+Combobox proc probably_to_trash {} {
 # This is some backwards-compatibility code to handle TIP 44
 # (http://purl.org/tcl/tip/44.html). For all private tk commands
 # used by this widget, we'll make duplicates of the procs in the
@@ -2169,20 +2193,178 @@ proc ::combobox::HumanizeList {list} {
 # shouldn't even be using the private commands. Then again, maybe the
 # private commands really should be public. Oh well; it works so it
 # must be OK...
-foreach command {TabToWindow CancelRepeat ListboxUpDown} {
-    if {[llength [info commands ::combobox::tk$command]] == 1} break;
-
-    set tmp [info commands tk$command]
-    set proc ::combobox::tk$command
-    if {[llength [info commands tk$command]] == 1} {
-        set command [namespace which [lindex $tmp 0]]
-        proc $proc {args} "uplevel $command \$args"
-    } else {
-        if {[llength [info commands ::tk::$command]] == 1} {
-            proc $proc {args} "uplevel ::tk::$command \$args"
-        }
+    foreach command {TabToWindow CancelRepeat ListboxUpDown} {
+	if {[llength [info commands ::combobox::tk$command]] == 1} break;
+	
+	set tmp [info commands tk$command]
+	set proc ::combobox::tk$command
+	if {[llength [info commands tk$command]] == 1} {
+	    set command [namespace which [lindex $tmp 0]]
+	    proc $proc {args} "uplevel $command \$args"
+	} else {
+	    if {[llength [info commands ::tk::$command]] == 1} {
+		proc $proc {args} "uplevel ::tk::$command \$args"
+	    }
+	}
     }
 }
 
-# end of combobox.tcl
 
+# A simple font display utility.
+# 
+# This program uses two variations of the combobox. One, for the font
+# family, is non-editable (ie: the user can only pick from the list). 
+# The other, for font size, is editable. The user can pick from the list 
+# or enter their own size
+
+# substitute your favorite method here...
+
+Combobox proc example {} {
+    # this lets us be reentrant...
+    destroy .fontpicker .msg
+
+    # default values
+    set ::size       12
+    set ::family     [lindex [lsort [font families]] 0]
+    set ::slant      roman
+    set ::weight     normal
+    set ::overstrike 0
+    set ::underline  0
+
+    wm title . "Combobox Example"
+
+    # the main two areas: a frame to hold the font picker widgets
+    # and a label to display a sample from the font
+    set fp [frame .fontpicker]
+    set msg [label .msg -borderwidth 2 -relief groove -width 30 -height 4]
+
+    pack $fp -side top -fill x
+    pack $msg -side top -fill both -expand y -pady 2
+
+    $msg configure -text [join [list \
+	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+	    "abcdefghijklmnopqrstuvwxyz" \
+	    "0123456789~`!@#$%^&*()_-+=" \
+	    "{}[]:;\"'<>,.?/"] "\n"]
+
+    # this will set the font of the message according to our defaults
+    changeFont $msg
+
+    # font family...
+    label $fp.famLabel -text "Font Family:"
+    combobox $fp.famCombo \
+	    -borderwidth 1 \
+	    -textvariable family \
+	    -editable false \
+	    -highlightthickness 1 \
+	    -command [list changeFont $msg]
+
+
+    grid $fp.famLabel -row 0 -column 0 -sticky e
+    grid $fp.famCombo -row 0 -column 1 -sticky ew
+    grid columnconfigure $fp 1 -weight 1
+
+    # we'll do these one at a time so we can find the widest one and
+    # set the width of the combobox accordingly (hmmm... wonder if this
+    # sort of thing should be done by the combobox itself...?)
+    set widest 0
+    foreach family [lsort [font families]] {
+	if {[set length [string length $family]] > $widest} {
+	    set widest $length
+	}
+	$fp.famCombo list insert end $family
+    }
+    $fp.famCombo configure -width $widest
+
+    # the font size. We know we are puting a fairly small, finite
+    # number of items in this combobox, so we'll set its maxheight
+    # to zero so it will grow to fit the number of items
+    label $fp.sizeLabel -text "Font Size:"
+    combobox $fp.sizeCombo \
+	    -borderwidth 1 \
+	    -highlightthickness 1 \
+	    -maxheight 0 \
+	    -width 3 \
+	    -textvariable size \
+	    -editable true \
+	    -command [list changeFont $msg]
+
+    grid $fp.sizeLabel -row 0 -column 2 -sticky e -padx 2
+    grid $fp.sizeCombo -row 0 -column 3 -sticky new 
+    grid columnconfigure $fp 3 -weight 1
+    eval $fp.sizeCombo list insert end [list 8 9 10 12 14 16 18 20 24 28 32 36]
+
+    # a dummy frame to give a little spacing...
+    frame $fp.dummy -width 5
+    grid $fp.dummy -row 0 -column 4 
+
+    # bold
+    set bold "bold"
+    checkbutton $fp.bold -variable weight -indicatoron false \
+	    -onvalue bold -offvalue normal \
+	    -text "B" -width 2 -height 1 \
+	    -font {-weight bold -family Times -size 12} \
+	    -highlightthickness 1 -padx 0 -pady 0 -borderwidth 1 \
+	    -command [list changeFont $msg]
+    grid $fp.bold -row 0 -column 5 -sticky nsew
+
+    # underline
+    checkbutton $fp.underline -variable underline -indicatoron false \
+	    -onvalue 1 -offvalue 0 \
+	    -text "U" -width 2 -height 1 \
+	    -font {-underline 1 -family Times -size 12} \
+	    -highlightthickness 1 -padx 0 -pady 0 -borderwidth 1 \
+	    -command [list changeFont $msg]
+    grid $fp.underline -row 0 -column 6 -sticky nsew
+
+    # italic
+    checkbutton $fp.italic -variable slant -indicatoron false \
+	    -onvalue italic -offvalue roman \
+	    -text "I" -width 2 -height 1 \
+	    -font {-slant italic -family Times -size 12} \
+	    -highlightthickness 1 -padx 0 -pady 0 -borderwidth 1 \
+	    -command [list changeFont $msg]
+    grid $fp.italic -row 0 -column 7 -sticky nsew
+
+    # overstrike
+    checkbutton $fp.overstrike -variable overstrike -indicatoron false \
+	    -onvalue 1 -offvalue 0 \
+	    -text "O" -width 2 -height 1 \
+	    -font {-overstrike 1 -family Times -size 12} \
+	    -highlightthickness 1 -padx 0 -pady 0 -borderwidth 1 \
+	    -command [list changeFont $msg]
+    grid $fp.overstrike -row 0 -column 8 -sticky nsew
+
+    # this gives us relatively square buttons that fill the frame
+    # in the Y direction
+    bind $fp <Configure> {
+	grid columnconfigure %W 5 -minsize %h
+	grid columnconfigure %W 6 -minsize %h
+	grid columnconfigure %W 7 -minsize %h
+	grid columnconfigure %W 8 -minsize %h
+    }
+    # put focus on the first widget
+    catch {focus $fp.famCombo}
+
+    return ""
+}
+
+# this proc changes the font. It is called by various methods, so
+# the only parameter we are guaranteed is the first one since
+# we supply it ourselves...
+Combobox proc changeFont {w args} {
+    foreach foo [list family size weight underline slant overstrike] {
+	if {[set ::$foo] == ""} {
+	    return
+	}
+    }
+    set ::fontspec [list \
+	    -family     $::family \
+	    -size       $::size \
+	    -weight     $::weight \
+	    -underline  $::underline \
+	    -slant      $::slant \
+	    -overstrike $::overstrike \
+    ]
+    $w configure -font $::fontspec
+}
