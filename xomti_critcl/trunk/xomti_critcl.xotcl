@@ -1,5 +1,6 @@
 # automatically generated from XOTclIDE
 package provide xomti_critcl 99991231.2
+package require xomti_tcllib_md5 20050124
 
                     ########## group default ##########
 
@@ -674,7 +675,6 @@ Xomti_Crixotcl_builder instproc hdrs_get {} {
     return [[self]::hdrs param_get]
 }
 Xomti_Crixotcl_builder instproc init {} {
-    package require xomti_tcllib_md5 20050124
 
     # my set hdrdir [file join [file dirname [info script]] critcl_c]
     puts stderr "hdrdir a revoir"
@@ -814,11 +814,13 @@ Xomti_Crixotcl_proc instproc define_proc {name args} {
     set ns [namespace qualifiers $name]
     if {$ns == "::"} {
         set ns ""
+    } else {
+        set ns ${ns}::
     }
     set tail_name [namespace tail $name]
     my set name $tail_name
 
-    set ::auto_index(${ns}::$tail_name) [list [[my info parent] info parent] cbuild]
+    set ::auto_index(${ns}$tail_name) [list [[my info parent] info parent] cbuild]
 
     my emit "#define ns_$tail_name \"${ns}::$tail_name\"\n"
     if {[my option_get lines]} {
