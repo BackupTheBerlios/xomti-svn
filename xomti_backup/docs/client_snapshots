@@ -1,0 +1,81 @@
+2005-05-10 (FP)
+
+The backup client should be able to construct snapshot of each of his filesystems.
+The snapshot is build in Xomti_Backup_Client_Snapshot databases.
+It can discard some files or directories of the filesystem, e.g. temporary or super-secret files.
+
+##############################################
+# Xomti_Backup_Client_Snapshot-0.2 databases #
+##############################################
+
+There are 5 tables: links, dirs, files, dircontents, and inodes.
+
+All these tables are key/value btree Berkeley DB.
+  links, dirs, and files are unique key tables.
+  dircontents and inodes are dup keys table.
+
+  #########
+  # links #
+  #########
+
+key   = full path string
+          ex: "/usr/src/kernel-headers-2.6.10-1-686/include/linux/umem.h"
+value = 4-elements list {mtime inode type link}
+        mtime = modification time (decimal string, as given by Tcl command "file mtime ...")
+        inode = inode of this link (decimal string, in order to detect hard links)
+        type  = type of linked file
+                  file, dir, unknown
+        link  = string of linked file
+
+  ########
+  # dirs #
+  ########
+
+key   = full path string
+           ex: "/usr/share/locale"
+value = 5-elements list {mtime inode owner group perms}
+        mtime = modification time (decimal string, as given by Tcl command "file mtime ...")
+        inode = inode of this dir (decimal string)
+        owner = owner (ascii string)
+        group = group (ascii string)
+        perms = permission (octal string)
+
+  #########
+  # files #
+  #########
+
+key   = 2 or 3-elements list {md5sum snaptime} of {md5sum snaptime #order}
+        md5sum   = md5sum of file content (lowercase 32 characters hexadecimal string)
+        snaptime = time of snapshot (seconds since the epoch)
+        #order   = #1, #2, etc. (eventually constructed in order to have unique key)
+value = 8-elements list {size mtime inode root tail owner group perms}
+        size  = file size on bytes (decimal string)
+        mtime = modification time (decimal string, as given by Tcl command "file mtime ...")
+        inode = inode of this file (decimal string, in order to detect hard links)
+        root  = full path of directory
+        tail  = name of file in his directory
+        owner = owner (ascii string)
+        group = group (ascii string)
+        perms = permission (octal string)
+        
+  ###############
+  # dircontents #
+  ###############
+
+key   = full path string
+           ex: "/usr/share/locale"
+        This is a dup key, identical to "dirs" database key
+value = 2-elements list {type ref}
+        type = type of file (file, dir, or link)
+        ref  = depends on "type" value
+               dir  -> full path string, "dirs" database key
+               file -> {md5sum snaptime [#order]}, "files" database key
+               link -> full path string, "links" database key
+
+  ##########
+  # inodes #
+  ##########
+
+key   = inode (decimal string). Multiple key is sign of hard links.
+value = as for "dircontents" table
+

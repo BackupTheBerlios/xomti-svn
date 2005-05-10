@@ -1,0 +1,67 @@
+2005-05-10 (FP) ajout de berkdb
+
+    cd $P
+    export M=`hostname`
+
+    # récupération des fichiers tar.gz
+  # export http_proxy=//...proxy...:8080
+    tclsh genkit85 A 
+
+    # compilation d'un tclsh
+    tclsh genkit85 B tcl
+
+    # compilation des bibliothèques
+    sh genkit85 B
+
+    # rajout de berkdb
+    cp -p ~/Z/db-4.3.28.NC.tar.gz tars85/
+    sh genkit85 A db-4.3.28.NC
+    sh genkit85 B db-4.3.28.NC
+    cd $P/build/$M/db-4.3.28.NC
+    ../../../src/db-4.3.28.NC/dist/configure \
+      --prefix=$P/noarch \
+      --exec-prefix=$P/install/$M \
+      --enable-tcl \
+      --with-tcl=$P/build/$M/tcl
+    make
+    make install
+    
+    # création de result85-$M.tar.gz
+    sh genkit85 C
+
+    # création de dummy-$M
+    sh genkit85 D
+
+    # récupération de tars85/runtime.kit et création de tclkit-$M
+    # rm tars85/runtime.kit
+    sh genkit85 E
+    
+    # enrichissement de tclkit-$M
+    cd tars85
+    cp -p runtime.kit runtime+db.kit
+    sdx unwrap runtime+db.kit
+    mkdir runtime+db.vfs/lib/db-4.3.28.NC/
+    emacs runtime+db.vfs/lib/db-4.3.28.NC/pkgIndex.tcl # Db_tcl 4.3 libdb_tcl-4.3
+    sdx wrap runtime+db.kit
+    cd ..
+    ./dummy-$M
+      file copy -force install/$env(M)/kitsh tclkit-$env($M)+db
+      file attributes tclkit-$env($M)+db -permissions +x
+      set db [vfs::mk4::Mount tars85/runtime+db.kit tars85/runtime+db.kit -readonly]
+      vfs::attributes tars85/runtime+db.kit -state translucent
+      file copy install/$env(M)/lib/itcl3.3/libitcl3.3.so tars85/runtime+db.kit/lib/itcl3.3/libitcl3.3.so
+      file copy install/$env(M)/lib/libtk8.5.so tars85/runtime+db.kit/lib/tk8.5/libtk8.5.so
+      file copy install/$env(M)/lib/libdb-4.3.so tars85/runtime+db.kit/lib/db-4.3.28.NC/libdb-4.3.so
+      file copy install/$env(M)/lib/libdb_tcl-4.3.so tars85/runtime+db.kit/lib/db-4.3.28.NC/libdb_tcl-4.3.so
+      set fd [open tclkit-$env(M)+db a]
+      mk::file save $db $fd
+      close $fd
+      vfs::unmount tars85/runtime+db.kit
+      exit
+
+
+vérif
+
+    ./tclkit-$M+db
+      package require Db_tcl 4.3
+      berkdb version
