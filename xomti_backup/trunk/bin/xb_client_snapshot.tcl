@@ -5,16 +5,14 @@ exec tclsh8.5 "$0" ${1+"$@"}
 set DF LINUX
 # set DF SOLARIS
 
-# tclsh8.4 "file ..." is too slow
-
 #	set GLOB(excludeRegexpDirAbsolu) [list {/export/home/Free$} {/export/home/[^/]+/C$} {/\.netscape/cache} {^/BB$} {^/local/Y}]
 	set GLOB(excludeRegexpDirAbsolu) {}
 set GLOB(excludeRegexpDirRelatif) [list {^tmp$} {^Poubelle$} {^Z$} {^Z_} {^TT_DB$}]
 # {^\.}
 # {^Y$}
 
-package require Tcl 8.4 ;# Pour les entiers "wide"
-package require alladin_md5 1.0
+package require Tcl 8.4 ;# For "wide integers", but tclsh8.4 "file ..." is too slow
+package require xomti_alladin_md5 1.0
 package require Db_tcl 4.3
 
 namespace eval ::xomti::backup {}
@@ -135,9 +133,9 @@ proc ::xomti::backup::explore {dir dev &GLOB} {
                 }
                 # incr ne marche pas avec un incrément "wide"
                 set GLOB(size) [expr {$GLOB(size) + $attrib(size)}]
-                set err [catch {alladin_md5::file $f} md5sum]
+                set err [catch {::xomti::alladin_md5::file $f} md5sum]
                 if {$err} {
-                    ::xomti::backup::traiteErreur $GLOB(fileErrors) "alladin_md5 $f : $md5sum"
+                    ::xomti::backup::traiteErreur $GLOB(fileErrors) "xomti::alladin_md5 $f : $md5sum"
                     continue
                 }
                 set instant [clock seconds]
