@@ -307,7 +307,11 @@ Xomti_Critcl_builder instproc cbuild_compile {cache_dir base libfile ininame} {
 
     if {[my option_get combine] == ""} {
         if {![regexp { -g } $cmdline]} {
-            append cmdline " -O2 -DNDEBUG -Wl,-s"
+	    if {$::tcl_platform(os) eq "SunOS"} {
+		append cmdline " -G -z defs -lc"
+	    } else {
+		append cmdline " -O2 -DNDEBUG -Wl,-s"
+	    }
         }
     } else {
         if {$::tcl_platform(os) eq "OSF1"} {
@@ -323,7 +327,7 @@ Xomti_Critcl_builder instproc cbuild_compile {cache_dir base libfile ininame} {
         }
     }
 
-    if {$::tcl_platform(os) == "Darwin"} {
+    if {$::tcl_platform(os) eq "Darwin"} {
         regsub { -shared } $cmdline { -dynamiclib -fno-common } cmdline
         regsub { -Wl,-s} $cmdline {} cmdline
     } elseif {$::tcl_platform(os) eq "OSF1"} {
@@ -736,10 +740,14 @@ Xomti_Critcl_builder instproc init {} {
     set root [Xomti_Critcl get_xomti_critcl_c_code_dir]
     my set hdrdirs [list [file join $root tcl[info patchlevel] generic] [file join $root tk[info patchlevel] generic]]
 
-    my set compile_string {gcc -shared -DUSE_TCL_STUBS}
+    if {$::tcl_platform(os) eq "SunOS"} {
+	my set compile_string {cc -KPIC -DUSE_TCL_STUBS}
+    } else {
+	my set compile_string {gcc -shared -DUSE_TCL_STUBS}
+	# this should be deferred until after we know if we are cross compiling
+	if {$::tcl_platform(platform) ne "windows"} { lappend compile "-fPIC" }
+    }
 
-    # this should be deferred until after we know if we are cross compiling
-    if {$::tcl_platform(platform) != "windows"} { lappend compile "-fPIC" }
 
     my defines_reset
 
