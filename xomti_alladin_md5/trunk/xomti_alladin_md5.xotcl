@@ -9,7 +9,14 @@ Object create Xomti_Alladin_md5
 
 Xomti_Critcl_builder create Xomti_Alladin_md5::builder
 
-Xomti_Alladin_md5::builder ccode {
+
+if {$tcl_platform(byteOrder) eq "littleEndian"} {
+    set the_code "#define ARCH_IS_BIG_ENDIAN 0\n"
+} else {
+    set the_code ""
+}
+
+append the_code {
 /*
   Copyright (C) 1999 Aladdin Enterprises.  All rights reserved.
 
@@ -400,6 +407,8 @@ md5_finish(md5_state_t *pms, md5_byte_t digest[16])
 static Tcl_HashTable hashTable;
 
 }
+
+Xomti_Alladin_md5::builder ccode $the_code
 
 Xomti_Alladin_md5::builder cinit {
     /* Il serait plus efficace mais plus compliqué d'utiliser TCL_ONE_WORD_KEYS */
